@@ -225,15 +225,13 @@ public class SubnauticaManualDL : MonoBehaviour
         while (!configLoaded)
             yield return null;
 
-        string extractPath = Path.Combine(Application.persistentDataPath, "SubnauticaBepInExTemp");
+        string extractPath = Path.Combine(Application.persistentDataPath, "BepInExTemp");
 
         yield return downloader.DownloadAndExtract(bepInEx, Application.persistentDataPath, extractPath);
 
-        string bepInExTarget = subnauticaPath;
-        MoveDirectory(extractPath, bepInExTarget);
+        MoveDirectory(extractPath, subnauticaPath);
 
-        if (Directory.Exists(extractPath))
-            Directory.Delete(extractPath, true);
+        SafeDeleteDirectory(extractPath);
     }
 
     IEnumerator InstallAPMod()
