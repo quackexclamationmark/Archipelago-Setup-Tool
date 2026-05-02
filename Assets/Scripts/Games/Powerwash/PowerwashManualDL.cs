@@ -247,7 +247,6 @@ public class PowerwashManualDL : MonoBehaviour
         LaunchPowerwash();
 
         yield return WaitForConfigFiles();
-        yield return new WaitForSeconds(3f);
 
         ClosePowerwash();
 
@@ -278,15 +277,12 @@ public class PowerwashManualDL : MonoBehaviour
     {
         string cfg = Path.Combine(powerwashPath, "BepInEx", "config", "BepInEx.cfg");
 
+        float timeout = 30f;
         float timer = 0f;
-        float timeout = 60f;
 
         while (timer < timeout)
         {
-            bool cfgOk = File.Exists(cfg);
-            bool pluginsOk = Directory.Exists(Path.Combine(powerwashPath, "BepInEx", "plugins"));
-
-            if (cfgOk && pluginsOk)
+            if (File.Exists(cfg))
                 yield break;
 
             timer += 1f;
@@ -298,30 +294,16 @@ public class PowerwashManualDL : MonoBehaviour
     {
         string localPath = Path.Combine(Application.persistentDataPath, apworld.fileName);
 
-        yield return downloader.DownloadToFolder(apworld, Application.persistentDataPath);
-
-        float timeout = 15f;
-        float timer = 0f;
-
-        while (!File.Exists(localPath) && timer < timeout)
-        {
-            timer += 0.5f;
-            yield return new WaitForSeconds(0.5f);
-        }
-
-        if (!File.Exists(localPath))
-        {
-            ShowInfo("APWorld download failed.");
-            yield break;
-        }
+        downloader.DownloadToFolder(apworld, Application.persistentDataPath);
+        yield return new WaitForSeconds(2f);
 
         string targetFolder = null;
 
         string[] possiblePaths =
         {
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Archipelago", "custom_worlds"),
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds")
-    };
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Archipelago", "custom_worlds"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds")
+        };
 
         foreach (string path in possiblePaths)
         {
@@ -358,22 +340,21 @@ public class PowerwashManualDL : MonoBehaviour
 
         string target = Path.Combine(targetFolder, apworld.fileName);
 
-        bool failed = false;
-
         try
         {
-            File.Copy(localPath, target, true);
+            if (File.Exists(target))
+            {
+                File.SetAttributes(target, FileAttributes.Normal);
+                File.Delete(target);
+            }
+
+            if (File.Exists(localPath))
+                File.Copy(localPath, target, true);
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("APWorld install failed: " + e.Message);
-            failed = true;
-        }
-
-        if (failed)
-        {
             ShowInfo("Failed to install APWorld.");
-            yield break;
         }
     }
 
