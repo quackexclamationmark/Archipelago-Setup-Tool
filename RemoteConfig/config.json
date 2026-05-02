@@ -1,26 +1,14 @@
 {
-    "gamePaths": {
-        "subnautica": {
-            "steam": "Steam/steamapps/common/Subnautica",
-            "epic": "Epic Games/Subnautica"
-        },
-        "repo": {
-            "steam": "Steam/steamapps/common/REPO"
-        }
-    },
-    "archipelagoPath": "C:/ProgramData/Archipelago",
-    "downloadMirrors": [
-        "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/download/",
-        "https://ghproxy.com/https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/download/"
-    ],
-    "features": {
-        "autoUpdate": true,
-        "checkUpdatesOnStart": true,
-        "experimentalMods": false
-    },
-    "urls": {
-        "githubRepo": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool",
-        "discord": "https://discord.gg/...",
-        "documentation": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/blob/main/Docs/README.md"
-    }
+    "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.2/Archipelago_192.zip",
+    "subnauticaBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+    
+    "repoAP": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.0/ArchipelagoREPOv0.4.0.zip",
+    "repoMenuLib": "https://thunderstore.io/package/download/nickklmao/MenuLib/2.5.1/",
+    "repoRepoLib": "https://thunderstore.io/package/download/Zehs/REPOLib/3.0.4/",
+    "repoBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+    "repoApworld": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.0/repo.apworld",
+    
+    "powerwashAP": "https://github.com/SWCreeperKing/PowerwashSimAP/releases/download/v0.5.14/SW_CreeperKing.ArchipelagoMod.zip",
+    "powerwashBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v6.0.0-pre.1/BepInEx_UnityIL2CPP_x64_6.0.0-pre.1.zip",
+    "powerwashApworld": "https://github.com/SWCreeperKing/PowerwashSimAP/releases/download/v0.5.14/powerwashsimulator.apworld"
 }
