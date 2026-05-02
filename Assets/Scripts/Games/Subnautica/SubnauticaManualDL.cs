@@ -246,10 +246,22 @@ public class SubnauticaManualDL : MonoBehaviour
         string pluginsPath = Path.Combine(subnauticaPath, "BepInEx", "plugins");
         Directory.CreateDirectory(pluginsPath);
 
-        MoveDirectory(extractPath, pluginsPath);
+        string archipelagoPath = Path.Combine(extractPath, "BepInEx", "plugins", "Archipelago");
 
-        if (Directory.Exists(extractPath))
-            Directory.Delete(extractPath, true);
+        if (!Directory.Exists(archipelagoPath))
+        {
+            UnityEngine.Debug.LogError("Archipelago folder not found in zip");
+            yield break;
+        }
+
+        string targetPath = Path.Combine(pluginsPath, "Archipelago");
+
+        if (Directory.Exists(targetPath))
+            Directory.Delete(targetPath, true);
+
+        CopyDirectory(archipelagoPath, targetPath);
+
+        SafeDeleteDirectory(extractPath);
     }
 
     IEnumerator WaitForConfigFiles()
@@ -356,6 +368,20 @@ public class SubnauticaManualDL : MonoBehaviour
 
         if (File.Exists(path))
             UnityEngine.Debug.LogError("FAILED TO DELETE: " + path);
+    }
+
+    void CopyDirectory(string source, string target)
+    {
+        Directory.CreateDirectory(target);
+
+        foreach (string dir in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
+            Directory.CreateDirectory(dir.Replace(source, target));
+
+        foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
+        {
+            string destination = file.Replace(source, target);
+            File.Copy(file, destination, true);
+        }
     }
 
     void SafeDeleteDirectory(string path)
