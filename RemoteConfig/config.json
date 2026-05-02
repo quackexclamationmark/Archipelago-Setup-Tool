@@ -1,0 +1,26 @@
+{
+    "gamePaths": {
+        "subnautica": {
+            "steam": "Steam/steamapps/common/Subnautica",
+            "epic": "Epic Games/Subnautica"
+        },
+        "repo": {
+            "steam": "Steam/steamapps/common/REPO"
+        }
+    },
+    "archipelagoPath": "C:/ProgramData/Archipelago",
+    "downloadMirrors": [
+        "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/download/",
+        "https://ghproxy.com/https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/download/"
+    ],
+    "features": {
+        "autoUpdate": true,
+        "checkUpdatesOnStart": true,
+        "experimentalMods": false
+    },
+    "urls": {
+        "githubRepo": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool",
+        "discord": "https://discord.gg/...",
+        "documentation": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/blob/main/Docs/README.md"
+    }
+}
