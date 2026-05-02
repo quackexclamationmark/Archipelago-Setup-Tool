@@ -404,6 +404,6 @@ public class SubnauticaManualDL : MonoBehaviour
         if (Directory.Exists(path))
             return path;
 
-        return "";
+        return Directory.Exists(path) ? path : "";
     }
 }
