@@ -10330,7 +10330,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1594697442}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.5724322
+  m_Size: 0.00000006134187
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -17367,9 +17367,6 @@ MonoBehaviour:
   confirmationMessage: {fileID: 888815150}
   confirmButton: {fileID: 578744699}
   cancelButton: {fileID: 1474520185}
-  infoPanel: {fileID: 707690368}
-  infoText: {fileID: 399265348}
-  infoOkButton: {fileID: 1021734395}
 --- !u!1 &1404496636
 GameObject:
   m_ObjectHideFlags: 0
@@ -23336,6 +23333,9 @@ MonoBehaviour:
   apMod:
     url: https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.2/Archipelago_192.zip
     fileName: SubnauticaArchipelagoMod
+  bepInEx:
+    url: https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip
+    fileName: BepInEx
   secondLaunchToggle: {fileID: 574926153}
   nonVRToggle: {fileID: 959983634}
   fullCleanBepInExToggle: {fileID: 509413659}
