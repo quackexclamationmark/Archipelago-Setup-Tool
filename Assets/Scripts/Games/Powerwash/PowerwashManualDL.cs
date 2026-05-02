@@ -247,6 +247,7 @@ public class PowerwashManualDL : MonoBehaviour
         LaunchPowerwash();
 
         yield return WaitForConfigFiles();
+        yield return new WaitForSeconds(3f);
 
         ClosePowerwash();
 
@@ -277,12 +278,15 @@ public class PowerwashManualDL : MonoBehaviour
     {
         string cfg = Path.Combine(powerwashPath, "BepInEx", "config", "BepInEx.cfg");
 
-        float timeout = 30f;
         float timer = 0f;
+        float timeout = 60f;
 
         while (timer < timeout)
         {
-            if (File.Exists(cfg))
+            bool cfgOk = File.Exists(cfg);
+            bool pluginsOk = Directory.Exists(Path.Combine(powerwashPath, "BepInEx", "plugins"));
+
+            if (cfgOk && pluginsOk)
                 yield break;
 
             timer += 1f;

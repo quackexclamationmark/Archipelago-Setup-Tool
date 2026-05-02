@@ -4,7 +4,6 @@ using TMPro;
 using System.IO;
 using System.Collections;
 using System.Diagnostics;
-using System;
 
 public class REPOManualDL : MonoBehaviour
 {
@@ -43,11 +42,6 @@ public class REPOManualDL : MonoBehaviour
     public Button confirmButton;
     public Button cancelButton;
 
-    [Header("INFO PANEL")]
-    public GameObject infoPanel;
-    public TextMeshProUGUI infoText;
-    public Button infoOkButton;
-
     private Process repoProcess;
     private string repoPath;
     private string pendingAction;
@@ -75,12 +69,6 @@ public class REPOManualDL : MonoBehaviour
 
         if (fullCleanBepInExToggle != null)
             fullCleanBepInExToggle.onValueChanged.AddListener(OnFullCleanChanged);
-
-        if (infoPanel != null)
-            infoPanel.SetActive(false);
-
-        if (infoOkButton != null)
-            infoOkButton.onClick.AddListener(CloseInfoPanel);
     }
 
     void CleanupProcesses()
@@ -304,21 +292,6 @@ public class REPOManualDL : MonoBehaviour
         File.WriteAllLines(cfgPath, lines);
     }
 
-    void ShowInfo(string message)
-    {
-        if (infoPanel == null || infoText == null)
-            return;
-
-        infoText.text = message;
-        infoPanel.SetActive(true);
-    }
-
-    void CloseInfoPanel()
-    {
-        if (infoPanel != null)
-            infoPanel.SetActive(false);
-    }
-
     IEnumerator InstallFlow()
     {
         if (installAPWorldToggle == null || installAPWorldToggle.isOn)
@@ -339,6 +312,7 @@ public class REPOManualDL : MonoBehaviour
         LaunchREPO();
 
         yield return WaitForConfigFiles();
+        yield return WaitForBepInExConfigComplete();
 
         CloseREPO();
 
@@ -379,6 +353,31 @@ public class REPOManualDL : MonoBehaviour
             LaunchREPO();
 
         yield break;
+    }
+
+    IEnumerator WaitForBepInExConfigComplete()
+    {
+        string cfgPath = Path.Combine(repoPath, "BepInEx", "config", "BepInEx.cfg");
+
+        float timeout = 30f;
+        float timer = 0f;
+
+        while (timer < timeout)
+        {
+            if (File.Exists(cfgPath))
+            {
+                string[] lines = File.ReadAllLines(cfgPath);
+
+                foreach (string line in lines)
+                {
+                    if (line.Contains("HideManagerGameObject"))
+                        yield break;
+                }
+            }
+
+            timer += 1f;
+            yield return new WaitForSeconds(1f);
+        }
     }
 
     IEnumerator RepoLibOnlyFlow()
@@ -427,41 +426,17 @@ public class REPOManualDL : MonoBehaviour
         }
     }
 
-    IEnumerator WaitForBepInExConfigComplete()
-    {
-        string cfgPath = Path.Combine(repoPath, "BepInEx", "config", "BepInEx.cfg");
-
-        float timeout = 30f;
-        float timer = 0f;
-
-        while (timer < timeout)
-        {
-            if (File.Exists(cfgPath))
-            {
-                string[] lines = File.ReadAllLines(cfgPath);
-
-                foreach (string line in lines)
-                {
-                    if (line.Contains("HideManagerGameObject"))
-                        yield break;
-                }
-            }
-
-            timer += 1f;
-            yield return new WaitForSeconds(1f);
-        }
-    }
-
     IEnumerator WaitForConfigFiles()
     {
         string bepConfig = Path.Combine(repoPath, "BepInEx", "config", "BepInEx.cfg");
+        string repoConfig = Path.Combine(repoPath, "BepInEx", "config", "REPOLib.cfg");
 
         float timeout = 30f;
         float timer = 0f;
 
         while (timer < timeout)
         {
-            if (File.Exists(bepConfig))
+            if (File.Exists(bepConfig) && File.Exists(repoConfig))
                 yield break;
 
             timer += 1f;
@@ -476,66 +451,12 @@ public class REPOManualDL : MonoBehaviour
         downloader.DownloadToFolder(apworld, Application.persistentDataPath);
         yield return new WaitForSeconds(1f);
 
+        string target = Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", apworld.fileName);
 
-        string targetFolder = null;
+        SafeDeleteFile(target);
 
-        string[] possiblePaths =
-        {
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Archipelago", "custom_worlds"),
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds")
-    };
-
-        foreach (string path in possiblePaths)
-        {
-            if (Directory.Exists(path))
-            {
-                targetFolder = path;
-                break;
-            }
-        }
-
-        if (string.IsNullOrEmpty(targetFolder))
-        {
-            foreach (DriveInfo drive in DriveInfo.GetDrives())
-            {
-                try
-                {
-                    string path = Path.Combine(drive.RootDirectory.FullName, "Archipelago", "custom_worlds");
-
-                    if (Directory.Exists(path))
-                    {
-                        targetFolder = path;
-                        break;
-                    }
-                }
-                catch
-                {             
-                }
-            }
-        }
-
-
-        if (string.IsNullOrEmpty(targetFolder))
-        {
-            ShowInfo("Archipelago Launcher is not installed.\nPlease install it before using APWorld.");
-            yield break;
-        }
-
-        string target = Path.Combine(targetFolder, apworld.fileName);
-
-        try
-        {
-            if (File.Exists(target))
-                SafeDeleteFile(target);
-
-            if (File.Exists(localPath))
-                File.Copy(localPath, target, true);
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogError("APWorld install failed: " + e.Message);
-            ShowInfo("Failed to install APWorld.");
-        }
+        if (File.Exists(localPath))
+            File.Copy(localPath, target, true);
     }
 
     IEnumerator InstallAPMod()

@@ -17361,15 +17361,12 @@ MonoBehaviour:
   patchBepInExConfigToggle: {fileID: 579751833}
   patchRepoLibConfigToggle: {fileID: 141262363}
   secondLaunchToggle: {fileID: 431598264}
-  patchConfigsToggle: {fileID: 110591802}
+  patchConfigsToggle: {fileID: 0}
   fullCleanBepInExToggle: {fileID: 1737820655}
   confirmationPanel: {fileID: 1692712361}
   confirmationMessage: {fileID: 888815150}
   confirmButton: {fileID: 578744699}
   cancelButton: {fileID: 1474520185}
-  infoPanel: {fileID: 707690368}
-  infoText: {fileID: 399265348}
-  infoOkButton: {fileID: 1021734395}
 --- !u!1 &1404496636
 GameObject:
   m_ObjectHideFlags: 0
