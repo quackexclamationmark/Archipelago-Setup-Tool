@@ -11,6 +11,7 @@ public class SubnauticaManualDL : MonoBehaviour
 
     [Header("SUBNAUTICA FILES")]
     public FileDownloader.FileData apMod;
+    public FileDownloader.FileData bepInEx;
 
     [Header("LAUNCH OPTIONS")]
     public Toggle secondLaunchToggle;
@@ -29,9 +30,20 @@ public class SubnauticaManualDL : MonoBehaviour
     private string subnauticaPath;
     private string pendingAction;
     private bool pendingFullCleanConfirmation = false;
+    private SubnauticaConfig remoteConfig;
+    private bool configLoaded = false;
+    
+    [System.Serializable]
+    public class SubnauticaConfig
+    {
+        public string subnauticaAP;
+        public string subnauticaBepInEx;
+    }
 
     void Start()
     {
+        StartCoroutine(LoadRemoteConfig());
+
         if (secondLaunchToggle != null)
             secondLaunchToggle.isOn = false;
 
@@ -46,6 +58,15 @@ public class SubnauticaManualDL : MonoBehaviour
 
         if (fullCleanBepInExToggle != null)
             fullCleanBepInExToggle.isOn = true;
+    }
+
+    void ApplySubnauticaConfig()
+    {
+        if (remoteConfig == null)
+            return;
+
+        apMod.url = remoteConfig.subnauticaAP;
+        bepInEx.url = remoteConfig.subnauticaBepInEx;
     }
 
     public void RunSetup()
@@ -184,7 +205,8 @@ public class SubnauticaManualDL : MonoBehaviour
     {
         bool secondLaunch = secondLaunchToggle == null || secondLaunchToggle.isOn;
 
-        yield return InstallFullPack();
+        yield return InstallBepInEx();
+        yield return InstallAPMod();
 
         LaunchSubnautica();
 
@@ -196,6 +218,40 @@ public class SubnauticaManualDL : MonoBehaviour
 
         if (secondLaunch)
             LaunchSubnautica();
+    }
+
+    IEnumerator InstallBepInEx()
+    {
+        while (!configLoaded)
+            yield return null;
+
+        string extractPath = Path.Combine(Application.persistentDataPath, "SubnauticaBepInExTemp");
+
+        yield return downloader.DownloadAndExtract(bepInEx, Application.persistentDataPath, extractPath);
+
+        string bepInExTarget = subnauticaPath;
+        MoveDirectory(extractPath, bepInExTarget);
+
+        if (Directory.Exists(extractPath))
+            Directory.Delete(extractPath, true);
+    }
+
+    IEnumerator InstallAPMod()
+    {
+        while (!configLoaded)
+            yield return null;
+
+        string extractPath = Path.Combine(Application.persistentDataPath, "SubnauticaAPTemp");
+
+        yield return downloader.DownloadAndExtract(apMod, Application.persistentDataPath, extractPath);
+
+        string pluginsPath = Path.Combine(subnauticaPath, "BepInEx", "plugins");
+        Directory.CreateDirectory(pluginsPath);
+
+        MoveDirectory(extractPath, pluginsPath);
+
+        if (Directory.Exists(extractPath))
+            Directory.Delete(extractPath, true);
     }
 
     IEnumerator WaitForConfigFiles()
@@ -219,16 +275,24 @@ public class SubnauticaManualDL : MonoBehaviour
         }
     }
 
-    IEnumerator InstallFullPack()
+    IEnumerator LoadRemoteConfig()
     {
-        string extractPath = Path.Combine(Application.persistentDataPath, "SubnauticaPackTemp");
+        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
 
-        yield return downloader.DownloadAndExtract(apMod, Application.persistentDataPath, extractPath);
+        UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url);
+        yield return request.SendWebRequest();
 
-        MoveDirectory(extractPath, subnauticaPath);
+        if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+        {
+            UnityEngine.Debug.LogError("Config load failed: " + request.error);
+            yield break;
+        }
 
-        if (Directory.Exists(extractPath))
-            Directory.Delete(extractPath, true);
+        remoteConfig = JsonUtility.FromJson<SubnauticaConfig>(request.downloadHandler.text);
+
+        ApplySubnauticaConfig();
+
+        configLoaded = true;
     }
 
     void LaunchSubnautica()

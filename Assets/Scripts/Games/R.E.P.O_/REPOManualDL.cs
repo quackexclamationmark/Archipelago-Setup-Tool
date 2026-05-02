@@ -354,6 +354,91 @@ public class REPOManualDL : MonoBehaviour
             LaunchREPO();
     }
 
+    IEnumerator InstallAPWorld()
+    {
+        while (!configLoaded)
+            yield return null;
+
+        string localPath = Path.Combine(Application.persistentDataPath, apworld.fileName);
+
+        downloader.DownloadToFolder(apworld, Application.persistentDataPath);
+        yield return new WaitForSeconds(1f);
+
+        string target = Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", apworld.fileName);
+
+        SafeDeleteFile(target);
+
+        if (File.Exists(localPath))
+            File.Copy(localPath, target, true);
+    }
+
+    IEnumerator InstallAPMod()
+    {
+        while (!configLoaded)
+            yield return null;
+
+        string extractPath = Path.Combine(Application.persistentDataPath, "APModTemp");
+
+        yield return downloader.DownloadAndExtract(apMod, Application.persistentDataPath, extractPath);
+
+        string plugins = Path.Combine(repoPath, "BepInEx", "plugins");
+        Directory.CreateDirectory(plugins);
+
+        CopyIfExists(extractPath, "RepoAP.dll", plugins);
+        CopyIfExists(extractPath, "Archipelago.repobundle", plugins);
+
+        SafeDeleteDirectory(extractPath);
+    }
+
+    IEnumerator InstallMod(FileDownloader.FileData mod, string dllName)
+    {
+        while (!configLoaded)
+            yield return null;
+
+        string extractPath = Path.Combine(Application.persistentDataPath, dllName + "_temp");
+
+        yield return downloader.DownloadAndExtract(mod, Application.persistentDataPath, extractPath);
+
+        string dllPath = FindFile(extractPath, dllName);
+        string plugins = Path.Combine(repoPath, "BepInEx", "plugins");
+
+        Directory.CreateDirectory(plugins);
+
+        if (!string.IsNullOrEmpty(dllPath))
+            File.Copy(dllPath, Path.Combine(plugins, dllName), true);
+
+        SafeDeleteDirectory(extractPath);
+    }
+
+    IEnumerator InstallRepoLib()
+    {
+        while (!configLoaded)
+            yield return null;
+
+        string extractPath = Path.Combine(Application.persistentDataPath, "RepoLibTemp");
+
+        yield return downloader.DownloadAndExtract(repoLib, Application.persistentDataPath, extractPath);
+
+        CopyIfExists(Path.Combine(extractPath, "plugins"), "RepoLib.dll",
+            Path.Combine(repoPath, "BepInEx", "plugins"));
+
+        SafeDeleteDirectory(extractPath);
+    }
+
+    IEnumerator InstallBepInEx()
+    {
+        while (!configLoaded)
+            yield return null;
+
+        string extractPath = Path.Combine(Application.persistentDataPath, "BepInExTemp");
+
+        yield return downloader.DownloadAndExtract(bepInEx, Application.persistentDataPath, extractPath);
+
+        MoveDirectory(extractPath, repoPath);
+
+        SafeDeleteDirectory(extractPath);
+    }
+
     IEnumerator APWorldOnlyFlow()
     {
         yield return InstallAPWorld();
@@ -468,91 +553,6 @@ public class REPOManualDL : MonoBehaviour
             timer += 1f;
             yield return new WaitForSeconds(1f);
         }
-    }
-
-    IEnumerator InstallAPWorld()
-    {
-        while (!configLoaded)
-            yield return null;
-
-        string localPath = Path.Combine(Application.persistentDataPath, apworld.fileName);
-
-        downloader.DownloadToFolder(apworld, Application.persistentDataPath);
-        yield return new WaitForSeconds(1f);
-
-        string target = Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", apworld.fileName);
-
-        SafeDeleteFile(target);
-
-        if (File.Exists(localPath))
-            File.Copy(localPath, target, true);
-    }
-
-    IEnumerator InstallAPMod()
-    {
-        while (!configLoaded)
-            yield return null;
-
-        string extractPath = Path.Combine(Application.persistentDataPath, "APModTemp");
-
-        yield return downloader.DownloadAndExtract(apMod, Application.persistentDataPath, extractPath);
-
-        string plugins = Path.Combine(repoPath, "BepInEx", "plugins");
-        Directory.CreateDirectory(plugins);
-
-        CopyIfExists(extractPath, "RepoAP.dll", plugins);
-        CopyIfExists(extractPath, "Archipelago.repobundle", plugins);
-
-        SafeDeleteDirectory(extractPath);
-    }
-
-    IEnumerator InstallMod(FileDownloader.FileData mod, string dllName)
-    {
-        while (!configLoaded)
-            yield return null;
-
-        string extractPath = Path.Combine(Application.persistentDataPath, dllName + "_temp");
-
-        yield return downloader.DownloadAndExtract(mod, Application.persistentDataPath, extractPath);
-
-        string dllPath = FindFile(extractPath, dllName);
-        string plugins = Path.Combine(repoPath, "BepInEx", "plugins");
-
-        Directory.CreateDirectory(plugins);
-
-        if (!string.IsNullOrEmpty(dllPath))
-            File.Copy(dllPath, Path.Combine(plugins, dllName), true);
-
-        SafeDeleteDirectory(extractPath);
-    }
-
-    IEnumerator InstallRepoLib()
-    {
-        while (!configLoaded)
-            yield return null;
-
-        string extractPath = Path.Combine(Application.persistentDataPath, "RepoLibTemp");
-
-        yield return downloader.DownloadAndExtract(repoLib, Application.persistentDataPath, extractPath);
-
-        CopyIfExists(Path.Combine(extractPath, "plugins"), "RepoLib.dll",
-            Path.Combine(repoPath, "BepInEx", "plugins"));
-
-        SafeDeleteDirectory(extractPath);
-    }
-
-    IEnumerator InstallBepInEx()
-    {
-        while (!configLoaded)
-            yield return null;
-
-        string extractPath = Path.Combine(Application.persistentDataPath, "BepInExTemp");
-
-        yield return downloader.DownloadAndExtract(bepInEx, Application.persistentDataPath, extractPath);
-
-        MoveDirectory(extractPath, repoPath);
-
-        SafeDeleteDirectory(extractPath);
     }
 
     IEnumerator SetBepInExConfig()

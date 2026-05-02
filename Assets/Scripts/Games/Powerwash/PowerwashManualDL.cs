@@ -4,7 +4,6 @@ using TMPro;
 using System.IO;
 using System.Collections;
 using System.Diagnostics;
-using System;
 
 public class PowerwashManualDL : MonoBehaviour
 {
@@ -41,9 +40,21 @@ public class PowerwashManualDL : MonoBehaviour
     private string powerwashPath;
     private string pendingAction;
     private bool pendingFullCleanConfirmation = false;
+    private PowerwashConfig remoteConfig;
+    private bool configLoaded = false;
+
+    [System.Serializable]
+    public class PowerwashConfig
+    {
+        public string powerwashAP;
+        public string powerwashBepInEx;
+        public string powerwashApworld;
+    }
 
     void Start()
     {
+        StartCoroutine(LoadRemoteConfig());
+
         if (secondLaunchToggle != null)
             secondLaunchToggle.isOn = false;
 
@@ -64,6 +75,15 @@ public class PowerwashManualDL : MonoBehaviour
 
         if (infoOkButton != null)
             infoOkButton.onClick.AddListener(CloseInfoPanel);
+    }
+
+    void ApplyPowerwashConfig()
+    {
+        if (remoteConfig == null)
+            return;
+
+        apMod.url = remoteConfig.powerwashAP;
+        bepInEx.url = remoteConfig.powerwashBepInEx;
     }
 
     public void RunSetup()
@@ -256,42 +276,11 @@ public class PowerwashManualDL : MonoBehaviour
             LaunchPowerwash();
     }
 
-    IEnumerator APWorldOnlyFlow()
-    {
-        yield return InstallAPWorld();
-        yield break;
-    }
-
-    IEnumerator BepInExOnlyFlow()
-    {
-        yield return InstallBepInEx();
-
-        LaunchPowerwash();
-        yield return WaitForConfigFiles();
-        ClosePowerwash();
-
-        yield break;
-    }
-
-    IEnumerator WaitForConfigFiles()
-    {
-        string cfg = Path.Combine(powerwashPath, "BepInEx", "config", "BepInEx.cfg");
-
-        float timeout = 30f;
-        float timer = 0f;
-
-        while (timer < timeout)
-        {
-            if (File.Exists(cfg))
-                yield break;
-
-            timer += 1f;
-            yield return new WaitForSeconds(1f);
-        }
-    }
-
     IEnumerator InstallAPWorld()
     {
+        while (!configLoaded)
+            yield return null;
+
         string localPath = Path.Combine(Application.persistentDataPath, apworld.fileName);
 
         yield return downloader.DownloadToFolder(apworld, Application.persistentDataPath);
@@ -375,6 +364,9 @@ public class PowerwashManualDL : MonoBehaviour
 
     IEnumerator InstallAPMod()
     {
+        while (!configLoaded)
+            yield return null;
+
         string extractPath = Path.Combine(Application.persistentDataPath, "PowerwashAPModTemp");
         yield return downloader.DownloadAndExtract(apMod, Application.persistentDataPath, extractPath);
 
@@ -398,6 +390,9 @@ public class PowerwashManualDL : MonoBehaviour
 
     IEnumerator InstallBepInEx()
     {
+        while (!configLoaded)
+            yield return null;
+
         string extractPath = Path.Combine(Application.persistentDataPath, "BepInExTemp");
 
         yield return downloader.DownloadAndExtract(bepInEx, Application.persistentDataPath, extractPath);
@@ -405,6 +400,61 @@ public class PowerwashManualDL : MonoBehaviour
         MoveDirectory(extractPath, powerwashPath);
 
         SafeDeleteDirectory(extractPath);
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return InstallAPWorld();
+        yield break;
+    }
+
+    IEnumerator BepInExOnlyFlow()
+    {
+        yield return InstallBepInEx();
+
+        LaunchPowerwash();
+        yield return WaitForConfigFiles();
+        ClosePowerwash();
+
+        yield break;
+    }
+
+    IEnumerator WaitForConfigFiles()
+    {
+        string cfg = Path.Combine(powerwashPath, "BepInEx", "config", "BepInEx.cfg");
+
+        float timeout = 30f;
+        float timer = 0f;
+
+        while (timer < timeout)
+        {
+            if (File.Exists(cfg))
+                yield break;
+
+            timer += 1f;
+            yield return new WaitForSeconds(1f);
+        }
+    }
+
+
+    IEnumerator LoadRemoteConfig()
+    {
+        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
+
+        UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url);
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+        {
+            UnityEngine.Debug.LogError("Config load failed: " + request.error);
+            yield break;
+        }
+
+        remoteConfig = JsonUtility.FromJson<PowerwashConfig>(request.downloadHandler.text);
+
+        ApplyPowerwashConfig();
+
+        configLoaded = true;
     }
 
     void LaunchPowerwash()
@@ -489,6 +539,11 @@ public class PowerwashManualDL : MonoBehaviour
         if (!Directory.Exists(source))
             return;
 
+        Directory.CreateDirectory(target);
+
+        foreach (string dir in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
+            Directory.CreateDirectory(dir.Replace(source, target));
+
         foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
         {
             string dest = file.Replace(source, target);
@@ -500,6 +555,8 @@ public class PowerwashManualDL : MonoBehaviour
 
             File.Move(file, dest);
         }
+
+        Directory.Delete(source, true);
     }
 
     string GetPowerwashPath()
