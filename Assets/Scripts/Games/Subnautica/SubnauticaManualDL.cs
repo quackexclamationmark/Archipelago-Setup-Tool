@@ -13,6 +13,10 @@ public class SubnauticaManualDL : MonoBehaviour
     public FileDownloader.FileData apMod;
     public FileDownloader.FileData bepInEx;
 
+    [Header("FEATURE TOGGLES")]
+    public Toggle installAPModToggle;
+    public Toggle installBepInExToggle;
+
     [Header("LAUNCH OPTIONS")]
     public Toggle secondLaunchToggle;
     public Toggle nonVRToggle;
@@ -114,9 +118,25 @@ public class SubnauticaManualDL : MonoBehaviour
     private void ExecuteSetup()
     {
         subnauticaPath = GetSubnauticaPath();
-
         if (string.IsNullOrEmpty(subnauticaPath))
             return;
+
+        bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
+        bool mod = installAPModToggle == null || installAPModToggle.isOn;
+
+        int count = (bep ? 1 : 0) + (mod ? 1 : 0);
+
+        if (bep && count == 1)
+        {
+            StartCoroutine(BepInExOnlyFlow());
+            return;
+        }
+
+        if (mod && count == 1)
+        {
+            StartCoroutine(APModOnlyFlow());
+            return;
+        }
 
         StartCoroutine(InstallFlow());
     }
@@ -205,8 +225,11 @@ public class SubnauticaManualDL : MonoBehaviour
     {
         bool secondLaunch = secondLaunchToggle == null || secondLaunchToggle.isOn;
 
-        yield return InstallBepInEx();
-        yield return InstallAPMod();
+        if (installBepInExToggle == null || installBepInExToggle.isOn)
+            yield return InstallBepInEx();
+
+        if (installAPModToggle == null || installAPModToggle.isOn)
+            yield return InstallAPMod();
 
         LaunchSubnautica();
 
@@ -262,6 +285,20 @@ public class SubnauticaManualDL : MonoBehaviour
         CopyDirectory(archipelagoPath, targetPath);
 
         SafeDeleteDirectory(extractPath);
+    }
+
+    IEnumerator BepInExOnlyFlow()
+    {
+        yield return InstallBepInEx();
+
+        LaunchSubnautica();
+        yield return WaitForConfigFiles();
+        CloseSubnautica();
+    }
+
+    IEnumerator APModOnlyFlow()
+    {
+        yield return InstallAPMod();
     }
 
     IEnumerator WaitForConfigFiles()

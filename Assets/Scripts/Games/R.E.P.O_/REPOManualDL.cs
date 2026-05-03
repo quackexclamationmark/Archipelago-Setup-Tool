@@ -169,6 +169,18 @@ public class REPOManualDL : MonoBehaviour
             (apmod ? 1 : 0) +
             (menulib ? 1 : 0) +
             (repolib ? 1 : 0);
+        
+        if (menulib && count == 1)
+        {
+            StartCoroutine(MenuLibOnlyFlow());
+            return;
+        }
+
+        if (apmod && count == 1)
+        {
+            StartCoroutine(APModOnlyFlow());
+            return;
+        }
 
         if (apworld && count == 1)
         {
@@ -390,6 +402,24 @@ public class REPOManualDL : MonoBehaviour
         SafeDeleteDirectory(extractPath);
     }
 
+    IEnumerator InstallRepoLib()
+    {
+        while (!configLoaded)
+            yield return null;
+
+        string extractPath = Path.Combine(Application.persistentDataPath, "RepoLibTemp");
+
+        yield return downloader.DownloadAndExtract(repoLib, Application.persistentDataPath, extractPath);
+
+        string pluginsPath = Path.Combine(repoPath, "BepInEx", "plugins");
+        Directory.CreateDirectory(pluginsPath);
+
+        CopyIfExists(Path.Combine(extractPath, "plugins"), "RepoLib.dll",
+            Path.Combine(repoPath, "BepInEx", "plugins"));
+
+        SafeDeleteDirectory(extractPath);
+    }
+
     IEnumerator InstallMod(FileDownloader.FileData mod, string dllName)
     {
         while (!configLoaded)
@@ -400,27 +430,12 @@ public class REPOManualDL : MonoBehaviour
         yield return downloader.DownloadAndExtract(mod, Application.persistentDataPath, extractPath);
 
         string dllPath = FindFile(extractPath, dllName);
+        
         string plugins = Path.Combine(repoPath, "BepInEx", "plugins");
-
         Directory.CreateDirectory(plugins);
 
         if (!string.IsNullOrEmpty(dllPath))
             File.Copy(dllPath, Path.Combine(plugins, dllName), true);
-
-        SafeDeleteDirectory(extractPath);
-    }
-
-    IEnumerator InstallRepoLib()
-    {
-        while (!configLoaded)
-            yield return null;
-
-        string extractPath = Path.Combine(Application.persistentDataPath, "RepoLibTemp");
-
-        yield return downloader.DownloadAndExtract(repoLib, Application.persistentDataPath, extractPath);
-
-        CopyIfExists(Path.Combine(extractPath, "plugins"), "RepoLib.dll",
-            Path.Combine(repoPath, "BepInEx", "plugins"));
 
         SafeDeleteDirectory(extractPath);
     }
@@ -510,6 +525,46 @@ public class REPOManualDL : MonoBehaviour
             LaunchREPO();
 
         yield break;
+    }
+
+    IEnumerator APModOnlyFlow()
+    {
+        yield return InstallAPMod();
+
+        LaunchREPO();
+        yield return WaitForConfigFiles();
+        yield return WaitForBepInExConfigComplete();
+        CloseREPO();
+
+        yield return new WaitForSeconds(1f);
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+            LaunchREPO();
+    }
+
+    IEnumerator MenuLibOnlyFlow()
+    {
+        repoPath = GetRepoPath();
+
+        if (string.IsNullOrEmpty(repoPath))
+            yield break;
+
+        yield return InstallMod(menuLib, "MenuLib.dll");
+
+        bool shouldPatchConfig = patchConfigsToggle != null && patchConfigsToggle.isOn;
+
+        if (shouldPatchConfig)
+        {
+            LaunchREPO();
+            yield return WaitForBepInExConfigComplete();
+            CloseREPO();
+            yield return new WaitForSeconds(1f);
+
+            yield return SetBepInExConfig();
+        }
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+            LaunchREPO();
     }
 
     IEnumerator WaitForRepoLibConfig()
