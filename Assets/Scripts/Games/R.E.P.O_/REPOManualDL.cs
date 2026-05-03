@@ -456,8 +456,15 @@ public class REPOManualDL : MonoBehaviour
 
     IEnumerator APWorldOnlyFlow()
     {
+        repoPath = GetRepoPath();
+
+        if (string.IsNullOrEmpty(repoPath))
+            yield break;
+
         yield return InstallAPWorld();
-        yield break;
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+            LaunchREPO();
     }
 
     IEnumerator BepInExOnlyFlow()
@@ -529,14 +536,12 @@ public class REPOManualDL : MonoBehaviour
 
     IEnumerator APModOnlyFlow()
     {
+        repoPath = GetRepoPath();
+
+        if (string.IsNullOrEmpty(repoPath))
+            yield break;
+
         yield return InstallAPMod();
-
-        LaunchREPO();
-        yield return WaitForConfigFiles();
-        yield return WaitForBepInExConfigComplete();
-        CloseREPO();
-
-        yield return new WaitForSeconds(1f);
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
             LaunchREPO();
