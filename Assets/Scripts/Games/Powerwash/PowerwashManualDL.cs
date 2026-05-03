@@ -23,8 +23,9 @@ public class PowerwashManualDL : MonoBehaviour
     [Header("LAUNCH OPTIONS")]
     public Toggle secondLaunchToggle;
 
-    [Header("ADVANCED OPTIONS")]
+    [Header("REVERT OPTIONS")]
     public Toggle fullCleanBepInExToggle;
+    public Toggle removeAPModsOnlyToggle;
 
     [Header("CONFIRMATION PANEL")]
     public GameObject confirmationPanel;
@@ -68,14 +69,36 @@ public class PowerwashManualDL : MonoBehaviour
         if (cancelButton != null)
             cancelButton.onClick.AddListener(OnCancel);
 
-        if (fullCleanBepInExToggle != null)
-            fullCleanBepInExToggle.isOn = true;
-
         if (infoPanel != null)
             infoPanel.SetActive(false);
 
         if (infoOkButton != null)
             infoOkButton.onClick.AddListener(CloseInfoPanel);
+
+        if (fullCleanBepInExToggle != null)
+            fullCleanBepInExToggle.isOn = false;
+
+        if (removeAPModsOnlyToggle != null)
+            removeAPModsOnlyToggle.isOn = true;
+
+        if (fullCleanBepInExToggle != null)
+            fullCleanBepInExToggle.onValueChanged.AddListener(OnFullCleanChanged);
+    }
+
+    void OnFullCleanChanged(bool value)
+    {
+        if (removeAPModsOnlyToggle != null)
+        {
+            if (value)
+            {
+                removeAPModsOnlyToggle.isOn = false;
+                removeAPModsOnlyToggle.interactable = false;
+            }
+            else
+            {
+                removeAPModsOnlyToggle.interactable = true;
+            }
+        }
     }
 
     void ApplyPowerwashConfig()
@@ -168,10 +191,29 @@ public class PowerwashManualDL : MonoBehaviour
             return;
 
         string pluginsPath = Path.Combine(powerwashPath, "BepInEx", "plugins");
+
+        bool removeAP = removeAPModsOnlyToggle != null && removeAPModsOnlyToggle.isOn;
+        bool fullClean = fullCleanBepInExToggle != null && fullCleanBepInExToggle.isOn;
+
+        if (!removeAP && !fullClean)
+        {
+            ShowInfo("Please select at least one revert option.");
+            return;
+        }
+
         bool hasOtherMods = HasOtherMods(pluginsPath);
 
-        if (fullCleanBepInExToggle != null &&
-            fullCleanBepInExToggle.isOn &&
+        if (removeAP)
+        {
+            CleanupProcesses();
+
+            SafeDeleteDirectory(Path.Combine(pluginsPath, "SW_CreeperKing.ArchipelagoMod"));
+            SafeDeleteDirectory(Path.Combine(pluginsPath, "Archipelago"));
+
+            return;
+        }
+
+        if (fullClean &&
             hasOtherMods &&
             !pendingFullCleanConfirmation)
         {
@@ -188,11 +230,7 @@ public class PowerwashManualDL : MonoBehaviour
 
         CleanupProcesses();
 
-        SafeDeleteDirectory(Path.Combine(pluginsPath, "SW_CreeperKing.ArchipelagoMod"));
-
-        hasOtherMods = HasOtherMods(pluginsPath);
-
-        if (fullCleanBepInExToggle != null && fullCleanBepInExToggle.isOn)
+        if (fullClean)
         {
             SafeDeleteDirectory(Path.Combine(powerwashPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(powerwashPath, "doorstop_config.ini"));
@@ -201,13 +239,23 @@ public class PowerwashManualDL : MonoBehaviour
             return;
         }
 
-        if (!hasOtherMods)
-        {
-            SafeDeleteDirectory(Path.Combine(powerwashPath, "BepInEx"));
-            SafeDeleteFile(Path.Combine(powerwashPath, "doorstop_config.ini"));
-            SafeDeleteFile(Path.Combine(powerwashPath, "winhttp.dll"));
-            SafeDeleteFile(Path.Combine(powerwashPath, ".doorstop_version"));
-        }
+        SafeDeleteDirectory(Path.Combine(pluginsPath, "SW_CreeperKing.ArchipelagoMod"));
+        SafeDeleteDirectory(Path.Combine(pluginsPath, "Archipelago"));
+    }
+
+    void ShowInfo(string message)
+    {
+        if (infoPanel == null || infoText == null)
+            return;
+
+        infoText.text = message;
+        infoPanel.SetActive(true);
+    }
+
+    void CloseInfoPanel()
+    {
+        if (infoPanel != null)
+            infoPanel.SetActive(false);
     }
 
     bool HasOtherMods(string pluginsPath)
@@ -232,21 +280,6 @@ public class PowerwashManualDL : MonoBehaviour
         }
 
         return false;
-    }
-
-    void ShowInfo(string message)
-    {
-        if (infoPanel == null || infoText == null)
-            return;
-
-        infoText.text = message;
-        infoPanel.SetActive(true);
-    }
-
-    void CloseInfoPanel()
-    {
-        if (infoPanel != null)
-            infoPanel.SetActive(false);
     }
 
     public void QuitLauncher()
@@ -436,7 +469,6 @@ public class PowerwashManualDL : MonoBehaviour
             yield return new WaitForSeconds(1f);
         }
     }
-
 
     IEnumerator LoadRemoteConfig()
     {

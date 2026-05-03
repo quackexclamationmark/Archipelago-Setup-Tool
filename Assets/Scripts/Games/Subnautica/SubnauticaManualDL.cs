@@ -21,8 +21,9 @@ public class SubnauticaManualDL : MonoBehaviour
     public Toggle secondLaunchToggle;
     public Toggle nonVRToggle;
 
-    [Header("ADVANCED OPTIONS")]
+    [Header("REVERT OPTIONS")]
     public Toggle fullCleanBepInExToggle;
+    public Toggle removeAPModsOnlyToggle;
 
     [Header("CONFIRMATION PANEL")]
     public GameObject confirmationPanel;
@@ -30,13 +31,18 @@ public class SubnauticaManualDL : MonoBehaviour
     public Button confirmButton;
     public Button cancelButton;
 
+    [Header("INFO PANEL")]
+    public GameObject infoPanel;
+    public TextMeshProUGUI infoText;
+    public Button infoOkButton;
+
     private Process subnauticaProcess;
     private string subnauticaPath;
     private string pendingAction;
     private bool pendingFullCleanConfirmation = false;
     private SubnauticaConfig remoteConfig;
     private bool configLoaded = false;
-    
+
     [System.Serializable]
     public class SubnauticaConfig
     {
@@ -47,6 +53,9 @@ public class SubnauticaManualDL : MonoBehaviour
     void Start()
     {
         StartCoroutine(LoadRemoteConfig());
+
+        if (infoOkButton != null)
+            infoOkButton.onClick.AddListener(CloseInfoPanel);
 
         if (secondLaunchToggle != null)
             secondLaunchToggle.isOn = false;
@@ -61,8 +70,29 @@ public class SubnauticaManualDL : MonoBehaviour
             cancelButton.onClick.AddListener(OnCancel);
 
         if (fullCleanBepInExToggle != null)
-            fullCleanBepInExToggle.isOn = true;
+            fullCleanBepInExToggle.isOn = false;
+
+        if (removeAPModsOnlyToggle != null)
+            removeAPModsOnlyToggle.isOn = true;
+
+        if (fullCleanBepInExToggle != null)
+            fullCleanBepInExToggle.onValueChanged.AddListener(OnFullCleanChanged);
     }
+
+    // =========================================================
+    // TOGGLE RULE
+    // =========================================================
+
+    void OnFullCleanChanged(bool value)
+    {
+        if (removeAPModsOnlyToggle != null)
+        {
+            removeAPModsOnlyToggle.isOn = false;
+            removeAPModsOnlyToggle.interactable = !value;
+        }
+    }
+
+    // =========================================================
 
     void ApplySubnauticaConfig()
     {
@@ -99,9 +129,11 @@ public class SubnauticaManualDL : MonoBehaviour
             case "Setup":
                 ExecuteSetup();
                 break;
+
             case "Revert":
                 ExecuteRevert();
                 break;
+
             case "ForceFullClean":
                 ExecuteRevert();
                 break;
@@ -114,6 +146,10 @@ public class SubnauticaManualDL : MonoBehaviour
         pendingFullCleanConfirmation = false;
         pendingAction = "";
     }
+
+    // =========================================================
+    // SETUP
+    // =========================================================
 
     private void ExecuteSetup()
     {
@@ -141,6 +177,10 @@ public class SubnauticaManualDL : MonoBehaviour
         StartCoroutine(InstallFlow());
     }
 
+    // =========================================================
+    // REVERT
+    // =========================================================
+
     private void ExecuteRevert()
     {
         subnauticaPath = GetSubnauticaPath();
@@ -149,19 +189,37 @@ public class SubnauticaManualDL : MonoBehaviour
             return;
 
         string pluginsPath = Path.Combine(subnauticaPath, "BepInEx", "plugins");
+
+        bool removeAP = removeAPModsOnlyToggle != null && removeAPModsOnlyToggle.isOn;
+        bool fullClean = fullCleanBepInExToggle != null && fullCleanBepInExToggle.isOn;
+
+        if (!removeAP && !fullClean)
+        {
+            ShowInfo("Please select at least one revert option.");
+            return;
+        }
+
+        if (removeAP)
+        {
+            CleanupProcesses();
+
+            SafeDeleteDirectory(Path.Combine(pluginsPath, "SubnauticaAP"));
+            SafeDeleteDirectory(Path.Combine(pluginsPath, "Archipelago"));
+
+            return;
+        }
+
         bool hasOtherMods = HasOtherMods(pluginsPath);
 
-        if (fullCleanBepInExToggle != null &&
-            fullCleanBepInExToggle.isOn &&
-            hasOtherMods &&
-            !pendingFullCleanConfirmation)
+        if (hasOtherMods && !pendingFullCleanConfirmation)
         {
             pendingFullCleanConfirmation = true;
 
             ShowConfirmation(
-                "Other mods were detected.\nDo you REALLY want to fully delete BepInEx?",
+                "Other mods were detected in BepInEx/plugins.\nDo you want to continue?",
                 "ForceFullClean"
             );
+
             return;
         }
 
@@ -172,18 +230,7 @@ public class SubnauticaManualDL : MonoBehaviour
         SafeDeleteDirectory(Path.Combine(pluginsPath, "SubnauticaAP"));
         SafeDeleteDirectory(Path.Combine(pluginsPath, "Archipelago"));
 
-        hasOtherMods = HasOtherMods(pluginsPath);
-
-        if (fullCleanBepInExToggle != null && fullCleanBepInExToggle.isOn)
-        {
-            SafeDeleteDirectory(Path.Combine(subnauticaPath, "BepInEx"));
-            SafeDeleteFile(Path.Combine(subnauticaPath, "doorstop_config.ini"));
-            SafeDeleteFile(Path.Combine(subnauticaPath, "winhttp.dll"));
-            SafeDeleteFile(Path.Combine(subnauticaPath, ".doorstop_version"));
-            return;
-        }
-
-        if (!hasOtherMods)
+        if (fullClean)
         {
             SafeDeleteDirectory(Path.Combine(subnauticaPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(subnauticaPath, "doorstop_config.ini"));
@@ -192,15 +239,35 @@ public class SubnauticaManualDL : MonoBehaviour
         }
     }
 
+    // =========================================================
+    // INFO
+    // =========================================================
+
+    void ShowInfo(string message)
+    {
+        if (infoPanel == null || infoText == null)
+            return;
+
+        infoText.text = message;
+        infoPanel.SetActive(true);
+    }
+
+    void CloseInfoPanel()
+    {
+        if (infoPanel != null)
+            infoPanel.SetActive(false);
+    }
+
+    // =========================================================
+    // OTHER LOGIC (UNCHANGED)
+    // =========================================================
+
     bool HasOtherMods(string pluginsPath)
     {
         if (!Directory.Exists(pluginsPath))
             return false;
 
-        string[] files = Directory.GetFiles(pluginsPath);
-        string[] dirs = Directory.GetDirectories(pluginsPath);
-
-        foreach (string dir in dirs)
+        foreach (string dir in Directory.GetDirectories(pluginsPath))
         {
             string name = Path.GetFileName(dir);
 
@@ -208,10 +275,8 @@ public class SubnauticaManualDL : MonoBehaviour
                 return true;
         }
 
-        foreach (string file in files)
-        {
+        foreach (string file in Directory.GetFiles(pluginsPath))
             return true;
-        }
 
         return false;
     }
@@ -272,10 +337,7 @@ public class SubnauticaManualDL : MonoBehaviour
         string archipelagoPath = Path.Combine(extractPath, "BepInEx", "plugins", "Archipelago");
 
         if (!Directory.Exists(archipelagoPath))
-        {
-            UnityEngine.Debug.LogError("Archipelago folder not found in zip");
             yield break;
-        }
 
         string targetPath = Path.Combine(pluginsPath, "Archipelago");
 
@@ -310,12 +372,9 @@ public class SubnauticaManualDL : MonoBehaviour
         float timer = 0f;
         float timeout = 30f;
 
-        while (
-            (!File.Exists(cfg) ||
-            !Directory.Exists(pluginsDir) ||
-            !Directory.Exists(patchersDir))
-            && timer < timeout
-        )
+        while ((!File.Exists(cfg) ||
+                !Directory.Exists(pluginsDir) ||
+                !Directory.Exists(patchersDir)) && timer < timeout)
         {
             timer += 1f;
             yield return new WaitForSeconds(1f);
@@ -330,10 +389,7 @@ public class SubnauticaManualDL : MonoBehaviour
         yield return request.SendWebRequest();
 
         if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
-        {
-            UnityEngine.Debug.LogError("Config load failed: " + request.error);
             yield break;
-        }
 
         remoteConfig = JsonUtility.FromJson<SubnauticaConfig>(request.downloadHandler.text);
 
@@ -393,18 +449,22 @@ public class SubnauticaManualDL : MonoBehaviour
             {
                 File.SetAttributes(path, FileAttributes.Normal);
                 File.Delete(path);
-
-                if (!File.Exists(path))
-                    yield break;
             }
             catch { }
 
             timer += 0.5f;
             yield return new WaitForSeconds(0.5f);
         }
+    }
 
-        if (File.Exists(path))
-            UnityEngine.Debug.LogError("FAILED TO DELETE: " + path);
+    void SafeDeleteDirectory(string path)
+    {
+        try
+        {
+            if (Directory.Exists(path))
+                Directory.Delete(path, true);
+        }
+        catch { }
     }
 
     void CopyDirectory(string source, string target)
@@ -419,16 +479,6 @@ public class SubnauticaManualDL : MonoBehaviour
             string destination = file.Replace(source, target);
             File.Copy(file, destination, true);
         }
-    }
-
-    void SafeDeleteDirectory(string path)
-    {
-        try
-        {
-            if (Directory.Exists(path))
-                Directory.Delete(path, true);
-        }
-        catch { }
     }
 
     void MoveDirectory(string source, string target)
@@ -461,9 +511,6 @@ public class SubnauticaManualDL : MonoBehaviour
             "common",
             "Subnautica"
         );
-
-        if (Directory.Exists(path))
-            return path;
 
         return Directory.Exists(path) ? path : "";
     }

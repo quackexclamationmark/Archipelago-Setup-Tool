@@ -168,6 +168,13 @@ public class REPOManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
+        if (!configLoaded)
+        {
+            ShowInfo("Loading configuration, please wait...");
+            StartCoroutine(WaitForConfigThenSetup());
+            return;
+        }
+
         if (string.IsNullOrEmpty(repoPath))
         {
             ShowInfo("REPO path not found. Please check Steam installation.");
@@ -239,6 +246,19 @@ public class REPOManualDL : MonoBehaviour
             return;
         }
 
+        // =========================
+        // 1. PATCH CONFIGS ONLY (IMPORTANT FIX)
+        // =========================
+        if (patchConfigs && !removeAP && !fullClean)
+        {
+            SetDefaultBepInExConfig();
+            SetDefaultRepoLibConfig();
+            return;
+        }
+
+        // =========================
+        // 2. REMOVE AP ONLY
+        // =========================
         if (removeAP)
         {
             CleanupProcesses();
@@ -256,6 +276,9 @@ public class REPOManualDL : MonoBehaviour
 
         bool hasOtherMods = HasOtherMods(pluginsPath);
 
+        // =========================
+        // 3. FULL CLEAN WARNING
+        // =========================
         if (fullClean &&
             hasOtherMods &&
             !pendingFullCleanConfirmation)
@@ -273,6 +296,9 @@ public class REPOManualDL : MonoBehaviour
 
         CleanupProcesses();
 
+        // =========================
+        // 4. ALWAYS REMOVE REPO MODS IF NOT PATCH-ONLY
+        // =========================
         SafeDeleteFile(Path.Combine(pluginsPath, "Archipelago.repobundle"));
         SafeDeleteFile(Path.Combine(pluginsPath, "MenuLib.dll"));
         SafeDeleteFile(Path.Combine(pluginsPath, "RepoAP.dll"));
@@ -280,6 +306,9 @@ public class REPOManualDL : MonoBehaviour
 
         hasOtherMods = HasOtherMods(pluginsPath);
 
+        // =========================
+        // 5. FULL CLEAN
+        // =========================
         if (fullClean)
         {
             SafeDeleteDirectory(Path.Combine(repoPath, "BepInEx"));
@@ -289,17 +318,15 @@ public class REPOManualDL : MonoBehaviour
             return;
         }
 
+        // =========================
+        // 6. NORMAL CLEAN IF NO OTHER MODS
+        // =========================
         if (!hasOtherMods)
         {
             SafeDeleteDirectory(Path.Combine(repoPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(repoPath, "winhttp.dll"));
             SafeDeleteFile(Path.Combine(repoPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(repoPath, ".doorstop_version"));
-        }
-        else if (patchConfigs)
-        {
-            SetDefaultBepInExConfig();
-            SetDefaultRepoLibConfig();
         }
     }
 
@@ -694,6 +721,7 @@ public class REPOManualDL : MonoBehaviour
         if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
         {
             UnityEngine.Debug.LogError("Config load failed: " + request.error);
+            configLoaded = true;
             yield break;
         }
 
@@ -750,6 +778,15 @@ public class REPOManualDL : MonoBehaviour
             timer += 0.5f;
             yield return new WaitForSeconds(0.5f);
         }
+    }
+
+    IEnumerator WaitForConfigThenSetup()
+    {
+        while (!configLoaded)
+            yield return new WaitForSeconds(0.1f);
+
+        CloseInfoPanel();
+        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
     }
 
     void SafeDeleteDirectory(string path)
