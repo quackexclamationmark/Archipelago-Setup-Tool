@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.IO;
@@ -32,15 +32,21 @@ public class REPOManualDL : MonoBehaviour
     [Header("LAUNCH OPTIONS")]
     public Toggle secondLaunchToggle;
 
-    [Header("ADVANCED OPTIONS")]
+    [Header("REVERT OPTIONS")]
     public Toggle patchConfigsToggle;
     public Toggle fullCleanBepInExToggle;
+    public Toggle removeAPModsOnlyToggle;
 
     [Header("CONFIRMATION PANEL")]
     public GameObject confirmationPanel;
     public TextMeshProUGUI confirmationMessage;
     public Button confirmButton;
     public Button cancelButton;
+
+    [Header("INFO PANEL")]
+    public GameObject infoPanel;
+    public TextMeshProUGUI infoText;
+    public Button infoOkButton;
 
     private Process repoProcess;
     private string repoPath;
@@ -61,7 +67,14 @@ public class REPOManualDL : MonoBehaviour
 
     void Start()
     {
+        repoPath = GetRepoPath();
         StartCoroutine(LoadRemoteConfig());
+
+        if (infoPanel != null)
+            infoPanel.SetActive(false);
+
+        if (infoOkButton != null)
+            infoOkButton.onClick.AddListener(CloseInfoPanel);
 
         if (secondLaunchToggle != null)
             secondLaunchToggle.isOn = false;
@@ -75,8 +88,11 @@ public class REPOManualDL : MonoBehaviour
         if (cancelButton != null)
             cancelButton.onClick.AddListener(OnCancel);
 
+        if (removeAPModsOnlyToggle != null)
+            removeAPModsOnlyToggle.isOn = true;
+
         if (fullCleanBepInExToggle != null)
-            fullCleanBepInExToggle.isOn = true;
+            fullCleanBepInExToggle.isOn = false;
 
         if (patchConfigsToggle != null)
             patchConfigsToggle.isOn = false;
@@ -123,6 +139,9 @@ public class REPOManualDL : MonoBehaviour
     {
         confirmationPanel.SetActive(false);
 
+        if (string.IsNullOrEmpty(pendingAction))
+            return;
+
         switch (pendingAction)
         {
             case "Setup":
@@ -146,17 +165,15 @@ public class REPOManualDL : MonoBehaviour
         pendingAction = "";
     }
 
-    void OnFullCleanChanged(bool value)
-    {
-        if (patchConfigsToggle == null)
-            return;
-
-        patchConfigsToggle.isOn = false;
-        patchConfigsToggle.interactable = !value;
-    }
 
     private void ExecuteSetup()
     {
+        if (string.IsNullOrEmpty(repoPath))
+        {
+            ShowInfo("REPO path not found. Please check Steam installation.");
+            return;
+        }
+
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
         bool apmod = installAPModToggle != null && installAPModToggle.isOn;
@@ -188,10 +205,6 @@ public class REPOManualDL : MonoBehaviour
             return;
         }
 
-        repoPath = GetRepoPath();
-        if (string.IsNullOrEmpty(repoPath))
-            return;
-
         if (bep && count == 1)
         {
             StartCoroutine(BepInExOnlyFlow());
@@ -215,10 +228,35 @@ public class REPOManualDL : MonoBehaviour
             return;
 
         string pluginsPath = Path.Combine(repoPath, "BepInEx", "plugins");
+
+        bool removeAP = removeAPModsOnlyToggle != null && removeAPModsOnlyToggle.isOn;
+        bool fullClean = fullCleanBepInExToggle != null && fullCleanBepInExToggle.isOn;
+        bool patchConfigs = patchConfigsToggle != null && patchConfigsToggle.isOn;
+
+        if (!removeAP && !fullClean && !patchConfigs)
+        {
+            ShowInfo("Please select at least one revert option.");
+            return;
+        }
+
+        if (removeAP)
+        {
+            CleanupProcesses();
+
+            if (!Directory.Exists(pluginsPath))
+                return;
+
+            SafeDeleteFile(Path.Combine(pluginsPath, "Archipelago.repobundle"));
+            SafeDeleteFile(Path.Combine(pluginsPath, "MenuLib.dll"));
+            SafeDeleteFile(Path.Combine(pluginsPath, "RepoAP.dll"));
+            SafeDeleteFile(Path.Combine(pluginsPath, "RepoLib.dll"));
+
+            return;
+        }
+
         bool hasOtherMods = HasOtherMods(pluginsPath);
 
-        if (fullCleanBepInExToggle != null &&
-            fullCleanBepInExToggle.isOn &&
+        if (fullClean &&
             hasOtherMods &&
             !pendingFullCleanConfirmation)
         {
@@ -242,7 +280,7 @@ public class REPOManualDL : MonoBehaviour
 
         hasOtherMods = HasOtherMods(pluginsPath);
 
-        if (fullCleanBepInExToggle != null && fullCleanBepInExToggle.isOn)
+        if (fullClean)
         {
             SafeDeleteDirectory(Path.Combine(repoPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(repoPath, "winhttp.dll"));
@@ -258,13 +296,10 @@ public class REPOManualDL : MonoBehaviour
             SafeDeleteFile(Path.Combine(repoPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(repoPath, ".doorstop_version"));
         }
-        else
+        else if (patchConfigs)
         {
-            if (patchConfigsToggle != null && patchConfigsToggle.isOn)
-            {
-                SetDefaultBepInExConfig();
-                SetDefaultRepoLibConfig();
-            }
+            SetDefaultBepInExConfig();
+            SetDefaultRepoLibConfig();
         }
     }
 
@@ -750,6 +785,36 @@ public class REPOManualDL : MonoBehaviour
                 File.Delete(dest);
 
             File.Move(file, dest);
+        }
+    }
+
+    void ShowInfo(string message)
+    {
+        if (infoPanel == null || infoText == null)
+            return;
+
+        infoText.text = message;
+        infoPanel.SetActive(true);
+    }
+
+    void CloseInfoPanel()
+    {
+        if (infoPanel != null)
+            infoPanel.SetActive(false);
+    }
+
+    void OnFullCleanChanged(bool value)
+    {
+        if (patchConfigsToggle != null)
+        {
+            patchConfigsToggle.isOn = false;
+            patchConfigsToggle.interactable = !value;
+        }
+
+        if (removeAPModsOnlyToggle != null)
+        {
+            removeAPModsOnlyToggle.isOn = false;
+            removeAPModsOnlyToggle.interactable = !value;
         }
     }
 
