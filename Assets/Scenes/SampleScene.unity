@@ -19967,7 +19967,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Powerwash Simulator
+  m_text: PowerWash Simulator
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 427c43196483ea14a8dba36ad6c90e3f, type: 2}
   m_sharedMaterial: {fileID: 3146682394430063194, guid: 427c43196483ea14a8dba36ad6c90e3f, type: 2}
