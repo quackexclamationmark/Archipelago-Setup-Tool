@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Diagnostics;
 using System.IO;
+using System;
 using TMPro;
 using UnityEngine;
-using UnityEngine.LightTransport;
 using UnityEngine.UI;
 
 public class SubnauticaManualDL : MonoBehaviour
@@ -505,6 +505,23 @@ public class SubnauticaManualDL : MonoBehaviour
 
     string GetSubnauticaPath()
     {
+        // 1. Steam
+        string steam = GetSteamPath();
+        if (!string.IsNullOrEmpty(steam))
+            return steam;
+
+        // 2. Epic (manifest)
+        string epic = GetEpicPath();
+        if (!string.IsNullOrEmpty(epic))
+            return epic;
+
+        // 3. Manual fallback
+        ShowInfo("Subnautica not found.\nPlease select your game folder manually.");
+        return "";
+    }
+
+    string GetSteamPath()
+    {
         string path = Path.Combine(
             System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86),
             "Steam",
@@ -513,6 +530,52 @@ public class SubnauticaManualDL : MonoBehaviour
             "Subnautica"
         );
 
-        return Directory.Exists(path) ? path : "";
+        if (Directory.Exists(path))
+            return path;
+
+        return "";
+    }
+
+    string GetEpicPath()
+    {
+        string manifestFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+            "Epic",
+            "EpicGamesLauncher",
+            "Data",
+            "Manifests"
+        );
+
+        if (!Directory.Exists(manifestFolder))
+            return "";
+
+        string[] files = Directory.GetFiles(manifestFolder, "*.item");
+
+        foreach (string file in files)
+        {
+            try
+            {
+                string json = File.ReadAllText(file);
+
+                if (!json.Contains("Subnautica"))
+                    continue;
+
+                int index = json.IndexOf("InstallLocation");
+
+                if (index == -1)
+                    continue;
+
+                int start = json.IndexOf(":", index) + 2;
+                int end = json.IndexOf("\"", start);
+
+                string path = json.Substring(start, end - start);
+
+                if (Directory.Exists(path))
+                    return path;
+            }
+            catch { }
+        }
+
+        return "";
     }
 }
