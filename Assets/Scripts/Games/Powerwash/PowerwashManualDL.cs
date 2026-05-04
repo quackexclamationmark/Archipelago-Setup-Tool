@@ -108,6 +108,7 @@ public class PowerwashManualDL : MonoBehaviour
 
         apMod.url = remoteConfig.powerwashAP;
         bepInEx.url = remoteConfig.powerwashBepInEx;
+        apworld.url = remoteConfig.powerwashApworld;
     }
 
     public void RunSetup()

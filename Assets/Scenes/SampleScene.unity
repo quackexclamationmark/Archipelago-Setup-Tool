@@ -25136,7 +25136,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SubnauticaManualDL
   downloader: {fileID: 1670249554}
   apMod:
-    url: https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.1/Archipelago_191.zip
+    url: https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.2/Archipelago_192.zip
     fileName: SubnauticaArchipelagoMod
   bepInEx:
     url: https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip
