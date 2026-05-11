@@ -13297,6 +13297,38 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 918497197}
   m_CullTransparentMesh: 1
+--- !u!1 &940585002
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 940585003}
+  m_Layer: 0
+  m_Name: COE33
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &940585003
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 940585002}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 986751519}
+  m_Father: {fileID: 1670249555}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &947712532
 GameObject:
   m_ObjectHideFlags: 0
@@ -14257,6 +14289,73 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 978808228}
   m_CullTransparentMesh: 1
+--- !u!1 &986751518
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 986751519}
+  - component: {fileID: 986751520}
+  m_Layer: 0
+  m_Name: COE33ManualDL
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &986751519
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 986751518}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 940585003}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &986751520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 986751518}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d63d2758d5433f64bad18ba076a337fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PowerwashManualDL
+  downloader: {fileID: 1670249554}
+  apworld:
+    url: https://github.com/SWCreeperKing/PowerwashSimAP/releases/download/v0.5.14/powerwashsimulator.apworld
+    fileName: powerwashsimulator.apworld
+  apMod:
+    url: https://github.com/SWCreeperKing/PowerwashSimAP/releases/download/v0.5.14/SW_CreeperKing.ArchipelagoMod.zip
+    fileName: PowerwashArchipelagoMod
+  bepInEx:
+    url: https://github.com/BepInEx/BepInEx/releases/download/v6.0.0-pre.1/BepInEx_UnityIL2CPP_x64_6.0.0-pre.1.zip
+    fileName: BepInEx
+  installAPWorldToggle: {fileID: 2056177184}
+  installAPModToggle: {fileID: 151966963}
+  installBepInExToggle: {fileID: 1329286098}
+  secondLaunchToggle: {fileID: 1507198900}
+  fullCleanBepInExToggle: {fileID: 1063187382}
+  removeAPModsOnlyToggle: {fileID: 1498276538}
+  confirmationPanel: {fileID: 898276379}
+  confirmationMessage: {fileID: 745595086}
+  confirmButton: {fileID: 171327564}
+  cancelButton: {fileID: 975971511}
+  infoPanel: {fileID: 1857479046}
+  infoText: {fileID: 1379632502}
+  infoOkButton: {fileID: 690317867}
 --- !u!1 &989332769
 GameObject:
   m_ObjectHideFlags: 0
@@ -22482,6 +22581,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 940585003}
   - {fileID: 1924764511}
   - {fileID: 947712533}
   - {fileID: 816428882}
