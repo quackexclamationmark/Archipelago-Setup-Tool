@@ -4,6 +4,7 @@ using TMPro;
 using System.IO;
 using System.Collections;
 using System.Diagnostics;
+using Microsoft.Win32;
 
 public class REPOManualDL : MonoBehaviour
 {
@@ -866,14 +867,53 @@ public class REPOManualDL : MonoBehaviour
 
     string GetRepoPath()
     {
-        string path = Path.Combine(
-            System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86),
-            "Steam",
-            "steamapps",
-            "common",
-            "REPO"
-        );
+        // 1. Chemins TRÈS courants en premier (optimisation rapide)
+        string[] quickPaths = new string[]
+        {
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "REPO"),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "REPO"),
+        @"D:\Steam\steamapps\common\REPO",
+        @"D:\SteamLibrary\steamapps\common\REPO",
+        @"E:\Steam\steamapps\common\REPO",
+        @"E:\SteamLibrary\steamapps\common\REPO",
+        };
 
-        return Directory.Exists(path) ? path : "";
+        foreach (string path in quickPaths)
+        {
+            try
+            {
+                if (Directory.Exists(path))
+                    return path;
+            }
+            catch { }
+        }
+
+        // 2. Scan complet des disques durs physiques
+        try
+        {
+            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+            foreach (System.IO.DriveInfo drive in drives)
+            {
+                // Seulement disques durs fixes (pas réseau, USB, etc.)
+                if (drive.DriveType != System.IO.DriveType.Fixed)
+                    continue;
+
+                try
+                {
+                    string repoPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "REPO");
+                    if (Directory.Exists(repoPath))
+                        return repoPath;
+
+                    repoPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "REPO");
+                    if (Directory.Exists(repoPath))
+                        return repoPath;
+                }
+                catch { }
+            }
+        }
+        catch { }
+
+        return "";
     }
 }
