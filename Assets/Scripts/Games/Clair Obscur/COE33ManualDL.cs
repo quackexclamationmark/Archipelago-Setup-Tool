@@ -1,33 +1,26 @@
-﻿/*using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.IO;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 public class COE33ManualDL : MonoBehaviour
 {
     public FileDownloader downloader;
 
-    [Header("REPO FILES")]
+    [Header("GAME FILES")]
+    public FileDownloader.FileData modFiles;
     public FileDownloader.FileData apworld;
-    public FileDownloader.FileData apMod;
-
-    [Header("MODS")]
-    public FileDownloader.FileData menuLib;
-    public FileDownloader.FileData repoLib;
-    public FileDownloader.FileData bepInEx;
 
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
-    public Toggle installAPModToggle;
+    public Toggle installModsToggle;
 
     [Header("LAUNCH OPTIONS")]
-    public Toggle secondLaunchToggle;
-
-    [Header("REVERT OPTIONS")]
-    public Toggle fullCleanBepInExToggle;
-    public Toggle removeAPModsOnlyToggle;
+    public Toggle launchGameToggle;
 
     [Header("CONFIRMATION PANEL")]
     public GameObject confirmationPanel;
@@ -40,26 +33,30 @@ public class COE33ManualDL : MonoBehaviour
     public TextMeshProUGUI infoText;
     public Button infoOkButton;
 
-    private Process clairobscurProcess;
-    private string clairobscurPath;
+    private Process gameProcess;
+    private string gamePath;
     private string pendingAction;
-    private bool pendingFullCleanConfirmation = false;
-    private RepoConfig remoteConfig;
+    private GameConfig remoteConfig;
     private bool configLoaded = false;
+    private InstalledFilesManifest currentManifest;
 
     [System.Serializable]
-    public class RepoConfig
+    public class GameConfig
     {
-        public string repoAP;
-        public string repoMenuLib;
-        public string repoRepoLib;
-        public string repoBepInEx;
-        public string repoApworld;
+        public string clairobscurAP;
+        public string clairobscurApworld;
+    }
+
+    [System.Serializable]
+    public class InstalledFilesManifest
+    {
+        public string gameInstallPath = "";
+        public List<string> installedFiles = new List<string>();
     }
 
     void Start()
     {
-        clairobscurPath = GetClairObscurPath();
+        gamePath = GetGamePath();
         StartCoroutine(LoadRemoteConfig());
 
         if (infoPanel != null)
@@ -68,8 +65,14 @@ public class COE33ManualDL : MonoBehaviour
         if (infoOkButton != null)
             infoOkButton.onClick.AddListener(CloseInfoPanel);
 
-        if (secondLaunchToggle != null)
-            secondLaunchToggle.isOn = false;
+        if (launchGameToggle != null)
+            launchGameToggle.isOn = false;
+
+        if (installAPWorldToggle != null)
+            installAPWorldToggle.isOn = true;
+
+        if (installModsToggle != null)
+            installModsToggle.isOn = true;
 
         if (confirmationPanel != null)
             confirmationPanel.SetActive(false);
@@ -79,42 +82,30 @@ public class COE33ManualDL : MonoBehaviour
 
         if (cancelButton != null)
             cancelButton.onClick.AddListener(OnCancel);
-
-        if (removeAPModsOnlyToggle != null)
-            removeAPModsOnlyToggle.isOn = true;
-
-        if (fullCleanBepInExToggle != null)
-            fullCleanBepInExToggle.isOn = false;
-
-        if (fullCleanBepInExToggle != null)
-            fullCleanBepInExToggle.onValueChanged.AddListener(OnFullCleanChanged);
     }
 
     void CleanupProcesses()
     {
-        CloseREPO();
+        CloseGame();
     }
 
-    void ApplyRepoConfig()
+    void ApplyGameConfig()
     {
         if (remoteConfig == null)
             return;
 
-        apMod.url = remoteConfig.repoAP;
-        menuLib.url = remoteConfig.repoMenuLib;
-        repoLib.url = remoteConfig.repoRepoLib;
-        bepInEx.url = remoteConfig.repoBepInEx;
-        apworld.url = remoteConfig.repoApworld;
+        modFiles.url = remoteConfig.clairobscurAP;
+        apworld.url = remoteConfig.clairobscurApworld;
     }
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+        ShowConfirmation("Are you sure you want to install all the files?", "Setup");
     }
 
     public void RevertAll()
     {
-        ShowConfirmation("Are you sure you want to revert?", "Revert");
+        ShowConfirmation("Are you sure you want to revert and remove all mods?", "Revert");
     }
 
     private void ShowConfirmation(string message, string action)
@@ -140,20 +131,14 @@ public class COE33ManualDL : MonoBehaviour
             case "Revert":
                 ExecuteRevert();
                 break;
-
-            case "ForceFullClean":
-                ExecuteRevert();
-                break;
         }
     }
 
     private void OnCancel()
     {
         confirmationPanel.SetActive(false);
-        pendingFullCleanConfirmation = false;
         pendingAction = "";
     }
-
 
     private void ExecuteSetup()
     {
@@ -164,36 +149,17 @@ public class COE33ManualDL : MonoBehaviour
             return;
         }
 
-        if (string.IsNullOrEmpty(repoPath))
+        if (string.IsNullOrEmpty(gamePath))
         {
-            ShowInfo("REPO path not found. Please check Steam installation.");
+            ShowInfo("Game path not found. Please check Steam installation.");
             return;
         }
 
+        // ✅ FLOWS individuels
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
-        bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
-        bool apmod = installAPModToggle != null && installAPModToggle.isOn;
-        bool menulib = installMenuLibToggle != null && installMenuLibToggle.isOn;
-        bool repolib = installRepoLibToggle != null && installRepoLibToggle.isOn;
+        bool mods = installModsToggle == null || installModsToggle.isOn;
 
-        int count =
-            (apworld ? 1 : 0) +
-            (bep ? 1 : 0) +
-            (apmod ? 1 : 0) +
-            (menulib ? 1 : 0) +
-            (repolib ? 1 : 0);
-        
-        if (menulib && count == 1)
-        {
-            StartCoroutine(MenuLibOnlyFlow());
-            return;
-        }
-
-        if (apmod && count == 1)
-        {
-            StartCoroutine(APModOnlyFlow());
-            return;
-        }
+        int count = (apworld ? 1 : 0) + (mods ? 1 : 0);
 
         if (apworld && count == 1)
         {
@@ -201,184 +167,159 @@ public class COE33ManualDL : MonoBehaviour
             return;
         }
 
-        if (bep && count == 1)
+        if (mods && count == 1)
         {
-            StartCoroutine(BepInExOnlyFlow());
+            StartCoroutine(ModsOnlyFlow());
             return;
         }
 
-        if (repolib && count == 1)
-        {
-            StartCoroutine(RepoLibOnlyFlow());
-            return;
-        }
+        StartCoroutine(SetupWithTracking());
+    }
 
-        StartCoroutine(InstallFlow());
+    IEnumerator SetupWithTracking()
+    {
+        ShowInfo("Initializing installation tracker...");
+        yield return new WaitForSeconds(0.5f);
+
+        currentManifest = new InstalledFilesManifest();
+        currentManifest.gameInstallPath = gamePath;
+
+        ShowInfo("Downloading and installing files...");
+
+        yield return InstallFlow();
+
+        SaveInstalledFilesManifest(currentManifest);
+
+        ShowInfo("Installation complete!");
+        yield return new WaitForSeconds(1f);
     }
 
     private void ExecuteRevert()
     {
-        repoPath = GetRepoPath();
+        string manifestPath = Path.Combine(Application.persistentDataPath, "InstalledFilesManifest.json");
 
-        if (string.IsNullOrEmpty(repoPath))
-            return;
-
-        string pluginsPath = Path.Combine(repoPath, "BepInEx", "plugins");
-
-        bool removeAP = removeAPModsOnlyToggle != null && removeAPModsOnlyToggle.isOn;
-        bool fullClean = fullCleanBepInExToggle != null && fullCleanBepInExToggle.isOn;
-        bool patchConfigs = patchConfigsToggle != null && patchConfigsToggle.isOn;
-
-        if (!removeAP && !fullClean && !patchConfigs)
+        if (!File.Exists(manifestPath))
         {
-            ShowInfo("Please select at least one revert option.");
+            ShowInfo("No installation record found. Cannot revert.\nPlease reinstall the game if needed.");
             return;
         }
-
-        // =========================
-        // 1. PATCH CONFIGS ONLY (IMPORTANT FIX)
-        // =========================
-        if (patchConfigs && !removeAP && !fullClean)
-        {
-            SetDefaultBepInExConfig();
-            SetDefaultRepoLibConfig();
-            return;
-        }
-
-        // =========================
-        // 2. REMOVE AP ONLY
-        // =========================
-        if (removeAP)
-        {
-            CleanupProcesses();
-
-            if (!Directory.Exists(pluginsPath))
-                return;
-
-            SafeDeleteFile(Path.Combine(pluginsPath, "Archipelago.repobundle"));
-            SafeDeleteFile(Path.Combine(pluginsPath, "MenuLib.dll"));
-            SafeDeleteFile(Path.Combine(pluginsPath, "RepoAP.dll"));
-            SafeDeleteFile(Path.Combine(pluginsPath, "RepoLib.dll"));
-
-            return;
-        }
-
-        bool hasOtherMods = HasOtherMods(pluginsPath);
-
-        // =========================
-        // 3. FULL CLEAN WARNING
-        // =========================
-        if (fullClean &&
-            hasOtherMods &&
-            !pendingFullCleanConfirmation)
-        {
-            pendingFullCleanConfirmation = true;
-
-            ShowConfirmation(
-                "Other mods were detected.\nDo you REALLY want to fully delete BepInEx?",
-                "ForceFullClean"
-            );
-            return;
-        }
-
-        pendingFullCleanConfirmation = false;
 
         CleanupProcesses();
+        StartCoroutine(RemoveInstalledFilesAsync());
+    }
 
-        // =========================
-        // 4. ALWAYS REMOVE REPO MODS IF NOT PATCH-ONLY
-        // =========================
-        SafeDeleteFile(Path.Combine(pluginsPath, "Archipelago.repobundle"));
-        SafeDeleteFile(Path.Combine(pluginsPath, "MenuLib.dll"));
-        SafeDeleteFile(Path.Combine(pluginsPath, "RepoAP.dll"));
-        SafeDeleteFile(Path.Combine(pluginsPath, "RepoLib.dll"));
+    IEnumerator RemoveInstalledFilesAsync()
+    {
+        string manifestPath = Path.Combine(Application.persistentDataPath, "InstalledFilesManifest.json");
 
-        hasOtherMods = HasOtherMods(pluginsPath);
-
-        // =========================
-        // 5. FULL CLEAN
-        // =========================
-        if (fullClean)
+        if (!File.Exists(manifestPath))
         {
-            SafeDeleteDirectory(Path.Combine(repoPath, "BepInEx"));
-            SafeDeleteFile(Path.Combine(repoPath, "winhttp.dll"));
-            SafeDeleteFile(Path.Combine(repoPath, "doorstop_config.ini"));
-            SafeDeleteFile(Path.Combine(repoPath, ".doorstop_version"));
-            return;
+            ShowInfo("No installation record found.");
+            yield break;
         }
 
-        // =========================
-        // 6. NORMAL CLEAN IF NO OTHER MODS
-        // =========================
-        if (!hasOtherMods)
+        ShowInfo("Reverting modifications...");
+        yield return new WaitForSeconds(0.5f);
+
+        try
         {
-            SafeDeleteDirectory(Path.Combine(repoPath, "BepInEx"));
-            SafeDeleteFile(Path.Combine(repoPath, "winhttp.dll"));
-            SafeDeleteFile(Path.Combine(repoPath, "doorstop_config.ini"));
-            SafeDeleteFile(Path.Combine(repoPath, ".doorstop_version"));
+            string json = File.ReadAllText(manifestPath);
+            InstalledFilesManifest manifest = JsonUtility.FromJson<InstalledFilesManifest>(json);
+
+            if (string.IsNullOrEmpty(manifest.gameInstallPath))
+            {
+                ShowInfo("Error: Game install path not found in manifest.");
+                yield break;
+            }
+
+            int successCount = 0;
+            int errorCount = 0;
+
+            foreach (string filePath in manifest.installedFiles)
+            {
+                if (File.Exists(filePath))
+                {
+                    try
+                    {
+                        File.Delete(filePath);
+                        successCount++;
+                    }
+                    catch (System.Exception e)
+                    {
+                        UnityEngine.Debug.LogWarning("Failed to delete: " + filePath + " - " + e.Message);
+                        errorCount++;
+                    }
+                }
+            }
+
+            RemoveEmptyDirectories(Path.Combine(manifest.gameInstallPath, "Sandfall", "Content"));
+            RemoveEmptyDirectories(Path.Combine(manifest.gameInstallPath, "Sandfall", "Binaries"));
+
+            ShowInfo($"Mods removed successfully!\n({successCount} files deleted)");
+            UnityEngine.Debug.Log($"Revert complete: {successCount} files deleted, {errorCount} errors");
+        }
+        catch (System.Exception e)
+        {
+            ShowInfo("Error during revert:\n" + e.Message);
+            UnityEngine.Debug.LogError("Revert error: " + e);
+        }
+        finally
+        {
+            try
+            {
+                File.Delete(manifestPath);
+            }
+            catch { }
         }
     }
 
-    bool HasOtherMods(string pluginsPath)
+    void RemoveEmptyDirectories(string path)
     {
-        if (!Directory.Exists(pluginsPath))
-            return false;
-
-        string[] files = Directory.GetFiles(pluginsPath);
-        string[] dirs = Directory.GetDirectories(pluginsPath);
-
-        foreach (string file in files)
-        {
-            string name = Path.GetFileName(file);
-
-            if (name != "Archipelago.repobundle" &&
-                name != "MenuLib.dll" &&
-                name != "RepoAP.dll" &&
-                name != "RepoLib.dll")
-                return true;
-        }
-
-        if (dirs.Length > 0)
-            return true;
-
-        return false;
-    }
-
-    void SetDefaultBepInExConfig()
-    {
-        string cfgPath = Path.Combine(repoPath, "BepInEx", "config", "BepInEx.cfg");
-
-        if (!File.Exists(cfgPath))
+        if (!Directory.Exists(path))
             return;
 
-        string[] lines = File.ReadAllLines(cfgPath);
-
-        for (int i = 0; i < lines.Length; i++)
-            if (lines[i].Contains("HideManagerGameObject"))
-                lines[i] = "HideManagerGameObject = false";
-
-        File.WriteAllLines(cfgPath, lines);
+        try
+        {
+            foreach (string dir in Directory.GetDirectories(path, "*", SearchOption.AllDirectories).Reverse())
+            {
+                if (Directory.GetFiles(dir).Length == 0 && Directory.GetDirectories(dir).Length == 0)
+                {
+                    Directory.Delete(dir);
+                }
+            }
+        }
+        catch { }
     }
 
-    void SetDefaultRepoLibConfig()
+    IEnumerator APWorldOnlyFlow()
     {
-        string cfgPath = Path.Combine(repoPath, "BepInEx", "config", "REPOLib.cfg");
+        gamePath = GetGamePath();
 
-        if (!File.Exists(cfgPath))
-            return;
+        if (string.IsNullOrEmpty(gamePath))
+            yield break;
 
-        string[] lines = File.ReadAllLines(cfgPath);
+        yield return InstallAPWorld();
 
-        for (int i = 0; i < lines.Length; i++)
-        {
-            if (lines[i].Contains("VanillaDeveloperMode"))
-                lines[i] = "VanillaDeveloperMode = false";
+        if (launchGameToggle == null || launchGameToggle.isOn)
+            LaunchGame();
+    }
 
-            if (lines[i].Contains("DeveloperMode"))
-                lines[i] = "DeveloperMode = false";
-        }
+    IEnumerator ModsOnlyFlow()
+    {
+        gamePath = GetGamePath();
 
-        File.WriteAllLines(cfgPath, lines);
+        if (string.IsNullOrEmpty(gamePath))
+            yield break;
+
+        currentManifest = new InstalledFilesManifest();
+        currentManifest.gameInstallPath = gamePath;
+
+        yield return InstallMods();
+
+        SaveInstalledFilesManifest(currentManifest);
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+            LaunchGame();
     }
 
     IEnumerator InstallFlow()
@@ -386,361 +327,248 @@ public class COE33ManualDL : MonoBehaviour
         if (installAPWorldToggle == null || installAPWorldToggle.isOn)
             yield return InstallAPWorld();
 
-        if (installBepInExToggle != null && installBepInExToggle.isOn)
-            yield return InstallBepInEx();
+        if (installModsToggle == null || installModsToggle.isOn)
+            yield return InstallMods();
 
-        if (installAPModToggle == null || installAPModToggle.isOn)
-            yield return InstallAPMod();
+        yield return new WaitForSeconds(2f);
 
-        if (installMenuLibToggle == null || installMenuLibToggle.isOn)
-            yield return InstallMod(menuLib, "MenuLib.dll");
+        if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            ShowInfo("Launching game...");
+            yield return new WaitForSeconds(1f);
+            LaunchGame();
+        }
+    }
 
-        if (installRepoLibToggle == null || installRepoLibToggle.isOn)
-            yield return InstallRepoLib();
+    IEnumerator InstallMods()
+    {
+        string extractPath = Path.Combine(Application.persistentDataPath, "ModFilesTemp");
 
-        LaunchREPO();
+        yield return downloader.DownloadAndExtract(modFiles, Application.persistentDataPath, extractPath);
 
-        yield return WaitForConfigFiles();
-        yield return WaitForBepInExConfigComplete();
+        string sandfallPath = Path.Combine(extractPath, "Sandfall");
 
-        CloseREPO();
+        if (!Directory.Exists(sandfallPath))
+        {
+            ShowInfo("ERROR: Sandfall folder not found in extraction!");
+            SafeDeleteDirectory(extractPath);
+            yield break;
+        }
 
+        // Installe Content
+        string contentSource = Path.Combine(sandfallPath, "Content");
+        if (Directory.Exists(contentSource))
+        {
+            string contentTarget = Path.Combine(gamePath, "Sandfall", "Content");
+            MoveDirectoryAndTrack(contentSource, contentTarget);
+
+            if (!VerifyRandomizerPaks(contentTarget))
+            {
+                ShowInfo("WARNING: RandomizerMods pak files not found!");
+            }
+        }
+
+        // Installe Binaries
+        string binariesSource = Path.Combine(sandfallPath, "Binaries");
+        if (Directory.Exists(binariesSource))
+        {
+            string binariesTarget = Path.Combine(gamePath, "Sandfall", "Binaries");
+            MoveDirectoryAndTrack(binariesSource, binariesTarget);
+
+            if (!VerifyUE4SS(binariesTarget))
+            {
+                ShowInfo("WARNING: UE4SS folder not found!");
+            }
+        }
+
+        SafeDeleteDirectory(extractPath);
+
+        ShowInfo("Installation verified successfully!");
         yield return new WaitForSeconds(1f);
+    }
 
-        if (patchBepInExConfigToggle != null && patchBepInExConfigToggle.isOn)
-            yield return SetBepInExConfig();
+    bool VerifyRandomizerPaks(string contentPath)
+    {
+        string[] requiredFiles = new string[]
+        {
+            "ClairObscurRandomizer.pak",
+            "ClairObscurRandomizer.ucas",
+            "ClairObscurRandomizer.utoc"
+        };
 
-        if (patchRepoLibConfigToggle != null && patchRepoLibConfigToggle.isOn)
-            yield return SetRepoLibConfig();
+        string logicModsPath = Path.Combine(contentPath, "Paks", "LogicMods");
 
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-            LaunchREPO();
+        if (!Directory.Exists(logicModsPath))
+        {
+            UnityEngine.Debug.LogError("LogicMods folder not found: " + logicModsPath);
+            return false;
+        }
+
+        foreach (string fileName in requiredFiles)
+        {
+            string filePath = Path.Combine(logicModsPath, fileName);
+            if (!File.Exists(filePath))
+            {
+                UnityEngine.Debug.LogError("Missing file: " + filePath);
+                return false;
+            }
+        }
+
+        UnityEngine.Debug.Log("✓ All RandomizerMods pak files verified!");
+        return true;
+    }
+
+    bool VerifyUE4SS(string binariesPath)
+    {
+        string[] platformFolders = new string[] { "Win64", "WinGDK" };
+
+        foreach (string platform in platformFolders)
+        {
+            string ue4ssPath = Path.Combine(binariesPath, platform, "ue4ss");
+
+            if (Directory.Exists(ue4ssPath))
+            {
+                UnityEngine.Debug.Log("✓ UE4SS folder verified in: " + platform);
+                return true;
+            }
+        }
+
+        UnityEngine.Debug.LogError("UE4SS folder not found in Win64 or WinGDK!");
+        return false;
     }
 
     IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
-            yield return null;
-
-        string localPath = Path.Combine(Application.persistentDataPath, apworld.fileName);
-
-        downloader.DownloadToFolder(apworld, Application.persistentDataPath);
-        yield return new WaitForSeconds(1f);
-
-        string target = Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", apworld.fileName);
-
-        SafeDeleteFile(target);
-
-        if (File.Exists(localPath))
-            File.Copy(localPath, target, true);
-    }
-
-    IEnumerator InstallAPMod()
-    {
-        while (!configLoaded)
-            yield return null;
-
-        string extractPath = Path.Combine(Application.persistentDataPath, "APModTemp");
-
-        yield return downloader.DownloadAndExtract(apMod, Application.persistentDataPath, extractPath);
-
-        string plugins = Path.Combine(repoPath, "BepInEx", "plugins");
-        Directory.CreateDirectory(plugins);
-
-        CopyIfExists(extractPath, "RepoAP.dll", plugins);
-        CopyIfExists(extractPath, "Archipelago.repobundle", plugins);
-
-        SafeDeleteDirectory(extractPath);
-    }
-
-    IEnumerator InstallRepoLib()
-    {
-        while (!configLoaded)
-            yield return null;
-
-        string extractPath = Path.Combine(Application.persistentDataPath, "RepoLibTemp");
-
-        yield return downloader.DownloadAndExtract(repoLib, Application.persistentDataPath, extractPath);
-
-        string pluginsPath = Path.Combine(repoPath, "BepInEx", "plugins");
-        Directory.CreateDirectory(pluginsPath);
-
-        CopyIfExists(Path.Combine(extractPath, "plugins"), "RepoLib.dll",
-            Path.Combine(repoPath, "BepInEx", "plugins"));
-
-        SafeDeleteDirectory(extractPath);
-    }
-
-    IEnumerator InstallMod(FileDownloader.FileData mod, string dllName)
-    {
-        while (!configLoaded)
-            yield return null;
-
-        string extractPath = Path.Combine(Application.persistentDataPath, dllName + "_temp");
-
-        yield return downloader.DownloadAndExtract(mod, Application.persistentDataPath, extractPath);
-
-        string dllPath = FindFile(extractPath, dllName);
-        
-        string plugins = Path.Combine(repoPath, "BepInEx", "plugins");
-        Directory.CreateDirectory(plugins);
-
-        if (!string.IsNullOrEmpty(dllPath))
-            File.Copy(dllPath, Path.Combine(plugins, dllName), true);
-
-        SafeDeleteDirectory(extractPath);
-    }
-
-    IEnumerator InstallBepInEx()
-    {
-        while (!configLoaded)
-            yield return null;
-
-        string extractPath = Path.Combine(Application.persistentDataPath, "BepInExTemp");
-
-        yield return downloader.DownloadAndExtract(bepInEx, Application.persistentDataPath, extractPath);
-
-        MoveDirectory(extractPath, repoPath);
-
-        SafeDeleteDirectory(extractPath);
-    }
-
-    IEnumerator APWorldOnlyFlow()
-    {
-        repoPath = GetRepoPath();
-
-        if (string.IsNullOrEmpty(repoPath))
-            yield break;
-
-        yield return InstallAPWorld();
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-            LaunchREPO();
-    }
-
-    IEnumerator BepInExOnlyFlow()
-    {
-        yield return InstallBepInEx();
-
-        bool shouldPatchConfig = patchBepInExConfigToggle != null && patchBepInExConfigToggle.isOn;
-
-        if (shouldPatchConfig)
         {
-            LaunchREPO();
-            yield return WaitForBepInExConfigComplete();
-            CloseREPO();
-            yield return new WaitForSeconds(1f);
-            yield return SetBepInExConfig();
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
         }
 
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-            LaunchREPO();
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + apworld.url);
 
-        yield break;
-    }
-
-    IEnumerator WaitForBepInExConfigComplete()
-    {
-        string cfgPath = Path.Combine(repoPath, "BepInEx", "config", "BepInEx.cfg");
-
-        float timeout = 30f;
-        float timer = 0f;
-
-        while (timer < timeout)
+        if (string.IsNullOrEmpty(apworld.url))
         {
-            if (File.Exists(cfgPath))
+            ShowInfo("ERROR: APWorld URL is empty!");
+            UnityEngine.Debug.LogError("APWorld URL not set!");
+            yield break;
+        }
+
+        string fileName = apworld.fileName;
+        if (string.IsNullOrEmpty(fileName))
+        {
+            fileName = apworld.url.Substring(apworld.url.LastIndexOf('/') + 1);
+
+            if (fileName.Contains("?"))
+                fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
+        }
+
+        string localPath = Path.Combine(Application.persistentDataPath, fileName);
+
+        UnityEngine.Debug.Log("Downloading APWorld from: " + apworld.url);
+        UnityEngine.Debug.Log("Saving to: " + localPath);
+
+        // ✅ Télécharge directement avec UnityWebRequest
+        yield return DownloadFile(apworld.url, localPath);
+
+        // Vérifie que le fichier existe
+        if (!File.Exists(localPath))
+        {
+            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
+            ShowInfo("ERROR: APWorld download failed!");
+            yield break;
+        }
+
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
+
+        // ✅ Cibles possibles
+        string[] targetPaths = new string[]
+        {
+        Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
+        };
+
+        string target = "";
+        foreach (string path in targetPaths)
+        {
+            try
             {
-                string[] lines = File.ReadAllLines(cfgPath);
-
-                foreach (string line in lines)
-                {
-                    if (line.Contains("HideManagerGameObject"))
-                        yield break;
-                }
+                string dir = Path.GetDirectoryName(path);
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+                target = path;
+                UnityEngine.Debug.Log("Using target path: " + target);
+                break;
             }
-
-            timer += 1f;
-            yield return new WaitForSeconds(1f);
-        }
-    }
-
-    IEnumerator RepoLibOnlyFlow()
-    {
-        yield return InstallRepoLib();
-
-        bool shouldPatchConfig = patchRepoLibConfigToggle != null && patchRepoLibConfigToggle.isOn;
-
-        if (shouldPatchConfig)
-        {
-            LaunchREPO();
-            yield return WaitForRepoLibConfig();
-            CloseREPO();
-            yield return new WaitForSeconds(1f);
-            yield return SetRepoLibConfig();
-        }
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-            LaunchREPO();
-
-        yield break;
-    }
-
-    IEnumerator APModOnlyFlow()
-    { 
-        repoPath = GetRepoPath();
-
-        if (string.IsNullOrEmpty(repoPath))
-            yield break;
-
-        yield return InstallAPMod();
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-            LaunchREPO();
-    }
-
-    IEnumerator MenuLibOnlyFlow()
-    {
-        repoPath = GetRepoPath();
-
-        if (string.IsNullOrEmpty(repoPath))
-            yield break;
-
-        yield return InstallMod(menuLib, "MenuLib.dll");
-
-        bool shouldPatchConfig = patchConfigsToggle != null && patchConfigsToggle.isOn;
-
-        if (shouldPatchConfig)
-        {
-            LaunchREPO();
-            yield return WaitForBepInExConfigComplete();
-            CloseREPO();
-            yield return new WaitForSeconds(1f);
-
-            yield return SetBepInExConfig();
-        }
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-            LaunchREPO();
-    }
-
-    IEnumerator WaitForRepoLibConfig()
-    {
-        string cfgPath = Path.Combine(repoPath, "BepInEx", "config", "REPOLib.cfg");
-
-        float timeout = 30f;
-        float timer = 0f;
-
-        while (timer < timeout)
-        {
-            if (File.Exists(cfgPath))
+            catch (System.Exception e)
             {
-                string[] lines = File.ReadAllLines(cfgPath);
-
-                foreach (string line in lines)
-                {
-                    if (line.Contains("DeveloperMode"))
-                        yield break;
-                }
+                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
             }
-
-            timer += 1f;
-            yield return new WaitForSeconds(1f);
-        }
-    }
-
-    IEnumerator WaitForConfigFiles()
-    {
-        string bepConfig = Path.Combine(repoPath, "BepInEx", "config", "BepInEx.cfg");
-        string repoConfig = Path.Combine(repoPath, "BepInEx", "config", "REPOLib.cfg");
-
-        float timeout = 30f;
-        float timer = 0f;
-
-        while (timer < timeout)
-        {
-            if (File.Exists(bepConfig) && File.Exists(repoConfig))
-                yield break;
-
-            timer += 1f;
-            yield return new WaitForSeconds(1f);
-        }
-    }
-
-    IEnumerator SetBepInExConfig()
-    {
-        string cfgPath = Path.Combine(repoPath, "BepInEx", "config", "BepInEx.cfg");
-
-        yield return new WaitUntil(() => File.Exists(cfgPath));
-
-        string[] lines = File.ReadAllLines(cfgPath);
-
-        for (int i = 0; i < lines.Length; i++)
-            if (lines[i].Contains("HideManagerGameObject"))
-                lines[i] = "HideManagerGameObject = true";
-
-        File.WriteAllLines(cfgPath, lines);
-    }
-
-    IEnumerator SetRepoLibConfig()
-    {
-        string cfgPath = Path.Combine(repoPath, "BepInEx", "config", "REPOLib.cfg");
-
-        yield return new WaitUntil(() => File.Exists(cfgPath));
-
-        string[] lines = File.ReadAllLines(cfgPath);
-
-        for (int i = 0; i < lines.Length; i++)
-        {
-            if (lines[i].StartsWith("VanillaDeveloperMode"))
-                lines[i] = "VanillaDeveloperMode = true";
-            else if (lines[i].StartsWith("DeveloperMode"))
-                lines[i] = "DeveloperMode = true";
         }
 
-        File.WriteAllLines(cfgPath, lines);
-    }
-
-    IEnumerator LoadRemoteConfig()
-    {
-        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
-
-        UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url);
-        yield return request.SendWebRequest();
-
-        if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+        if (string.IsNullOrEmpty(target))
         {
-            UnityEngine.Debug.LogError("Config load failed: " + request.error);
-            configLoaded = true;
+            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
+            UnityEngine.Debug.LogError("No valid target directory found!");
             yield break;
         }
 
-        remoteConfig = JsonUtility.FromJson<RepoConfig>(request.downloadHandler.text);
+        UnityEngine.Debug.Log("Target path: " + target);
 
-        ApplyRepoConfig();
+        // Nettoie l'ancien fichier s'il existe
+        if (File.Exists(target))
+        {
+            try
+            {
+                File.Delete(target);
+                UnityEngine.Debug.Log("Deleted old apworld file");
+            }
+            catch { }
+        }
 
-        configLoaded = true;
-    }
-
-    void LaunchREPO()
-    {
-        string exePath = Path.Combine(repoPath, "REPO.exe");
-
-        if (File.Exists(exePath))
-            repoProcess = Process.Start(exePath);
-    }
-
-    void CloseREPO()
-    {
+        // Copie le fichier téléchargé
         try
         {
-            if (repoProcess != null && !repoProcess.HasExited)
+            File.Copy(localPath, target, true);
+
+            UnityEngine.Debug.Log("APWorld file copied to: " + target);
+
+            if (currentManifest != null)
+                currentManifest.installedFiles.Add(target);
+
+            ShowInfo("APWorld installed successfully!");
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
+            ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+        }
+    }
+
+    // ✅ NOUVELLE FONCTION: Télécharge un fichier directement
+    IEnumerator DownloadFile(string url, string savePath)
+    {
+        UnityEngine.Debug.Log("Starting download from: " + url);
+
+        using (UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url))
+        {
+            request.downloadHandler = new UnityEngine.Networking.DownloadHandlerFile(savePath);
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
             {
-                repoProcess.Kill();
-                repoProcess.Dispose();
-                repoProcess = null;
+                UnityEngine.Debug.LogError("Download error: " + request.error);
+                UnityEngine.Debug.LogError("Response code: " + request.responseCode);
+            }
+            else
+            {
+                UnityEngine.Debug.Log("Download complete! File size: " + new System.IO.FileInfo(savePath).Length + " bytes");
             }
         }
-        catch { }
     }
 
     void SafeDeleteFile(string path)
@@ -769,13 +597,97 @@ public class COE33ManualDL : MonoBehaviour
         }
     }
 
-    IEnumerator WaitForConfigThenSetup()
+    IEnumerator LoadRemoteConfig()
     {
-        while (!configLoaded)
-            yield return new WaitForSeconds(0.1f);
+        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
 
-        CloseInfoPanel();
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+        UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url);
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+        {
+            UnityEngine.Debug.LogError("Config load failed: " + request.error);
+            configLoaded = true;
+            yield break;
+        }
+
+        try
+        {
+            remoteConfig = JsonUtility.FromJson<GameConfig>(request.downloadHandler.text);
+            UnityEngine.Debug.Log("Remote config loaded successfully");
+            ApplyGameConfig();
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to parse config: " + e.Message);
+        }
+
+        configLoaded = true;
+        UnityEngine.Debug.Log("Config marked as loaded");
+    }
+
+    void LaunchGame()
+    {
+        string currentGamePath = GetGamePath();
+        UnityEngine.Debug.Log("LaunchGame called. GamePath: " + currentGamePath);
+
+        if (string.IsNullOrEmpty(currentGamePath))
+        {
+            ShowInfo("Game path not found. Cannot launch.");
+            UnityEngine.Debug.LogError("GamePath is empty!");
+            return;
+        }
+
+        string[] possiblePaths = new string[]
+        {
+            Path.Combine(currentGamePath, "Expedition33_Steam.exe"),
+            Path.Combine(currentGamePath, "Binaries", "Win64", "Expedition33-Win64-Shipping.exe"),
+        };
+
+        string exePath = "";
+        foreach (string path in possiblePaths)
+        {
+            if (File.Exists(path))
+            {
+                exePath = path;
+                break;
+            }
+        }
+
+        if (string.IsNullOrEmpty(exePath))
+        {
+            ShowInfo("Game executable not found. Checked:\n" + string.Join("\n", possiblePaths));
+            UnityEngine.Debug.LogError("Executable not found!");
+            return;
+        }
+
+        UnityEngine.Debug.Log("Checking exe at: " + exePath);
+
+        try
+        {
+            UnityEngine.Debug.Log("Starting process...");
+            gameProcess = Process.Start(exePath);
+            UnityEngine.Debug.Log("Game launched successfully from: " + exePath);
+        }
+        catch (System.Exception e)
+        {
+            ShowInfo("Error launching game:\n" + e.Message);
+            UnityEngine.Debug.LogError("Launch error: " + e);
+        }
+    }
+
+    void CloseGame()
+    {
+        try
+        {
+            if (gameProcess != null && !gameProcess.HasExited)
+            {
+                gameProcess.Kill();
+                gameProcess.Dispose();
+                gameProcess = null;
+            }
+        }
+        catch { }
     }
 
     void SafeDeleteDirectory(string path)
@@ -788,18 +700,12 @@ public class COE33ManualDL : MonoBehaviour
         catch { }
     }
 
-    void CopyIfExists(string root, string file, string target)
-    {
-        string path = Path.Combine(root, file);
-
-        if (File.Exists(path))
-            File.Copy(path, Path.Combine(target, file), true);
-    }
-
-    void MoveDirectory(string source, string target)
+    void MoveDirectoryAndTrack(string source, string target)
     {
         if (!Directory.Exists(source))
             return;
+
+        Directory.CreateDirectory(target);
 
         foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
         {
@@ -811,6 +717,26 @@ public class COE33ManualDL : MonoBehaviour
                 File.Delete(dest);
 
             File.Move(file, dest);
+
+            if (currentManifest != null)
+                currentManifest.installedFiles.Add(dest);
+        }
+    }
+
+    void SaveInstalledFilesManifest(InstalledFilesManifest manifest)
+    {
+        string manifestPath = Path.Combine(Application.persistentDataPath, "InstalledFilesManifest.json");
+        string json = JsonUtility.ToJson(manifest, true);
+
+        try
+        {
+            File.WriteAllText(manifestPath, json);
+            UnityEngine.Debug.Log("Installation manifest saved: " + manifestPath);
+            UnityEngine.Debug.Log("Tracked " + manifest.installedFiles.Count + " files for future revert");
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to save manifest: " + e.Message);
         }
     }
 
@@ -829,35 +755,61 @@ public class COE33ManualDL : MonoBehaviour
             infoPanel.SetActive(false);
     }
 
-    void OnFullCleanChanged(bool value)
+    IEnumerator WaitForConfigThenSetup()
     {
-        if (removeAPModsOnlyToggle != null)
-        {
-            removeAPModsOnlyToggle.isOn = false;
-            removeAPModsOnlyToggle.interactable = !value;
-        }
+        while (!configLoaded)
+            yield return new WaitForSeconds(0.1f);
+
+        CloseInfoPanel();
+        ShowConfirmation("Are you sure you want to install all the files?", "Setup");
     }
 
-    string FindFile(string root, string fileName)
+    string GetGamePath()
     {
-        foreach (string file in Directory.GetFiles(root, "*", SearchOption.AllDirectories))
-            if (Path.GetFileName(file) == fileName)
-                return file;
+        string[] quickPaths = new string[]
+        {
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Expedition 33"),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Expedition 33"),
+            @"D:\Steam\steamapps\common\Expedition 33",
+            @"D:\SteamLibrary\steamapps\common\Expedition 33",
+            @"E:\Steam\steamapps\common\Expedition 33",
+            @"E:\SteamLibrary\steamapps\common\Expedition 33",
+        };
+
+        foreach (string path in quickPaths)
+        {
+            try
+            {
+                if (Directory.Exists(path))
+                    return path;
+            }
+            catch { }
+        }
+
+        try
+        {
+            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+            foreach (System.IO.DriveInfo drive in drives)
+            {
+                if (drive.DriveType != System.IO.DriveType.Fixed)
+                    continue;
+
+                try
+                {
+                    string gamePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Expedition 33");
+                    if (Directory.Exists(gamePath))
+                        return gamePath;
+
+                    gamePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Expedition 33");
+                    if (Directory.Exists(gamePath))
+                        return gamePath;
+                }
+                catch { }
+            }
+        }
+        catch { }
 
         return "";
     }
-
-    string GetClairObscurPath()
-    {
-        string path = Path.Combine(
-            System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86),
-            "Steam",
-            "steamapps",
-            "common",
-            "Expedition 33"
-        );
-
-        return Directory.Exists(path) ? path : "";
-    }
 }
-*/

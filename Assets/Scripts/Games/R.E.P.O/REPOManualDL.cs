@@ -166,16 +166,9 @@ public class REPOManualDL : MonoBehaviour
         pendingAction = "";
     }
 
-
     private void ExecuteSetup()
     {
-        if (!configLoaded)
-        {
-            ShowInfo("Loading configuration, please wait...");
-            StartCoroutine(WaitForConfigThenSetup());
-            return;
-        }
-
+        // ✅ La config n'est PLUS obligatoire
         if (string.IsNullOrEmpty(repoPath))
         {
             ShowInfo("REPO path not found. Please check Steam installation.");
@@ -194,7 +187,7 @@ public class REPOManualDL : MonoBehaviour
             (apmod ? 1 : 0) +
             (menulib ? 1 : 0) +
             (repolib ? 1 : 0);
-        
+
         if (menulib && count == 1)
         {
             StartCoroutine(MenuLibOnlyFlow());
@@ -248,12 +241,13 @@ public class REPOManualDL : MonoBehaviour
         }
 
         // =========================
-        // 1. PATCH CONFIGS ONLY (IMPORTANT FIX)
+        // 1. PATCH CONFIGS ONLY
         // =========================
         if (patchConfigs && !removeAP && !fullClean)
         {
             SetDefaultBepInExConfig();
             SetDefaultRepoLibConfig();
+            ShowInfo("Configs patched successfully!");
             return;
         }
 
@@ -267,11 +261,14 @@ public class REPOManualDL : MonoBehaviour
             if (!Directory.Exists(pluginsPath))
                 return;
 
+            ShowInfo("Removing AP mods...");
+
             SafeDeleteFile(Path.Combine(pluginsPath, "Archipelago.repobundle"));
             SafeDeleteFile(Path.Combine(pluginsPath, "MenuLib.dll"));
             SafeDeleteFile(Path.Combine(pluginsPath, "RepoAP.dll"));
             SafeDeleteFile(Path.Combine(pluginsPath, "RepoLib.dll"));
 
+            ShowInfo("AP mods removed successfully!");
             return;
         }
 
@@ -300,6 +297,8 @@ public class REPOManualDL : MonoBehaviour
         // =========================
         // 4. ALWAYS REMOVE REPO MODS IF NOT PATCH-ONLY
         // =========================
+        ShowInfo("Removing mods...");
+
         SafeDeleteFile(Path.Combine(pluginsPath, "Archipelago.repobundle"));
         SafeDeleteFile(Path.Combine(pluginsPath, "MenuLib.dll"));
         SafeDeleteFile(Path.Combine(pluginsPath, "RepoAP.dll"));
@@ -312,10 +311,14 @@ public class REPOManualDL : MonoBehaviour
         // =========================
         if (fullClean)
         {
+            ShowInfo("Cleaning BepInEx...");
+
             SafeDeleteDirectory(Path.Combine(repoPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(repoPath, "winhttp.dll"));
             SafeDeleteFile(Path.Combine(repoPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(repoPath, ".doorstop_version"));
+
+            ShowInfo("Full clean completed!");
             return;
         }
 
@@ -324,10 +327,14 @@ public class REPOManualDL : MonoBehaviour
         // =========================
         if (!hasOtherMods)
         {
+            ShowInfo("Cleaning BepInEx...");
+
             SafeDeleteDirectory(Path.Combine(repoPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(repoPath, "winhttp.dll"));
             SafeDeleteFile(Path.Combine(repoPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(repoPath, ".doorstop_version"));
+
+            ShowInfo("Revert completed!");
         }
     }
 
@@ -396,20 +403,36 @@ public class REPOManualDL : MonoBehaviour
     IEnumerator InstallFlow()
     {
         if (installAPWorldToggle == null || installAPWorldToggle.isOn)
+        {
+            ShowInfo("Installing APWorld...");
             yield return InstallAPWorld();
+        }
 
         if (installBepInExToggle != null && installBepInExToggle.isOn)
+        {
+            ShowInfo("Installing BepInEx...");
             yield return InstallBepInEx();
+        }
 
         if (installAPModToggle == null || installAPModToggle.isOn)
+        {
+            ShowInfo("Installing AP Mod...");
             yield return InstallAPMod();
+        }
 
         if (installMenuLibToggle == null || installMenuLibToggle.isOn)
+        {
+            ShowInfo("Installing MenuLib...");
             yield return InstallMod(menuLib, "MenuLib.dll");
+        }
 
         if (installRepoLibToggle == null || installRepoLibToggle.isOn)
+        {
+            ShowInfo("Installing RepoLib...");
             yield return InstallRepoLib();
+        }
 
+        ShowInfo("Launching REPO...");
         LaunchREPO();
 
         yield return WaitForConfigFiles();
@@ -420,31 +443,152 @@ public class REPOManualDL : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         if (patchBepInExConfigToggle != null && patchBepInExConfigToggle.isOn)
+        {
+            ShowInfo("Patching BepInEx config...");
             yield return SetBepInExConfig();
+        }
 
         if (patchRepoLibConfigToggle != null && patchRepoLibConfigToggle.isOn)
+        {
+            ShowInfo("Patching RepoLib config...");
             yield return SetRepoLibConfig();
+        }
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Second launch...");
             LaunchREPO();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
     }
 
     IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
-            yield return null;
+        {
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
 
-        string localPath = Path.Combine(Application.persistentDataPath, apworld.fileName);
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + apworld.url);
 
-        downloader.DownloadToFolder(apworld, Application.persistentDataPath);
-        yield return new WaitForSeconds(1f);
+        if (string.IsNullOrEmpty(apworld.url))
+        {
+            ShowInfo("ERROR: APWorld URL is empty!");
+            UnityEngine.Debug.LogError("APWorld URL not set!");
+            yield break;
+        }
 
-        string target = Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", apworld.fileName);
+        string fileName = apworld.fileName;
+        if (string.IsNullOrEmpty(fileName))
+        {
+            fileName = apworld.url.Substring(apworld.url.LastIndexOf('/') + 1);
 
-        SafeDeleteFile(target);
+            if (fileName.Contains("?"))
+                fileName = fileName.Substring(0, fileName.IndexOf("?"));
 
-        if (File.Exists(localPath))
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
+        }
+
+        string localPath = Path.Combine(Application.persistentDataPath, fileName);
+
+        UnityEngine.Debug.Log("Downloading APWorld from: " + apworld.url);
+        UnityEngine.Debug.Log("Saving to: " + localPath);
+
+        // ✅ Télécharge directement avec UnityWebRequest
+        yield return DownloadFile(apworld.url, localPath);
+
+        if (!File.Exists(localPath))
+        {
+            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
+            ShowInfo("ERROR: APWorld download failed!");
+            yield break;
+        }
+
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
+
+        // ✅ Cibles possibles
+        string[] targetPaths = new string[]
+        {
+            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
+        };
+
+        string target = "";
+        foreach (string path in targetPaths)
+        {
+            try
+            {
+                string dir = Path.GetDirectoryName(path);
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+                target = path;
+                UnityEngine.Debug.Log("Using target path: " + target);
+                break;
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
+            }
+        }
+
+        if (string.IsNullOrEmpty(target))
+        {
+            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
+            UnityEngine.Debug.LogError("No valid target directory found!");
+            yield break;
+        }
+
+        if (File.Exists(target))
+        {
+            try
+            {
+                File.Delete(target);
+                UnityEngine.Debug.Log("Deleted old apworld file");
+            }
+            catch { }
+        }
+
+        try
+        {
             File.Copy(localPath, target, true);
+
+            UnityEngine.Debug.Log("APWorld file copied to: " + target);
+
+            ShowInfo("APWorld installed successfully!");
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
+            ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+        }
+    }
+
+    // ✅ NOUVELLE FONCTION: Télécharge un fichier directement
+    IEnumerator DownloadFile(string url, string savePath)
+    {
+        UnityEngine.Debug.Log("Starting download from: " + url);
+
+        using (UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url))
+        {
+            request.downloadHandler = new UnityEngine.Networking.DownloadHandlerFile(savePath);
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+            {
+                UnityEngine.Debug.LogError("Download error: " + request.error);
+                UnityEngine.Debug.LogError("Response code: " + request.responseCode);
+            }
+            else
+            {
+                UnityEngine.Debug.Log("Download complete! File size: " + new System.IO.FileInfo(savePath).Length + " bytes");
+            }
+        }
     }
 
     IEnumerator InstallAPMod()
@@ -493,7 +637,7 @@ public class REPOManualDL : MonoBehaviour
         yield return downloader.DownloadAndExtract(mod, Application.persistentDataPath, extractPath);
 
         string dllPath = FindFile(extractPath, dllName);
-        
+
         string plugins = Path.Combine(repoPath, "BepInEx", "plugins");
         Directory.CreateDirectory(plugins);
 
@@ -532,21 +676,31 @@ public class REPOManualDL : MonoBehaviour
 
     IEnumerator BepInExOnlyFlow()
     {
+        ShowInfo("Installing BepInEx...");
         yield return InstallBepInEx();
 
         bool shouldPatchConfig = patchBepInExConfigToggle != null && patchBepInExConfigToggle.isOn;
 
         if (shouldPatchConfig)
         {
+            ShowInfo("Launching REPO...");
             LaunchREPO();
             yield return WaitForBepInExConfigComplete();
             CloseREPO();
             yield return new WaitForSeconds(1f);
+            ShowInfo("Patching BepInEx config...");
             yield return SetBepInExConfig();
         }
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching REPO...");
             LaunchREPO();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
 
         yield break;
     }
@@ -578,36 +732,49 @@ public class REPOManualDL : MonoBehaviour
 
     IEnumerator RepoLibOnlyFlow()
     {
+        ShowInfo("Installing RepoLib...");
         yield return InstallRepoLib();
 
         bool shouldPatchConfig = patchRepoLibConfigToggle != null && patchRepoLibConfigToggle.isOn;
 
         if (shouldPatchConfig)
         {
+            ShowInfo("Launching REPO...");
             LaunchREPO();
             yield return WaitForRepoLibConfig();
             CloseREPO();
             yield return new WaitForSeconds(1f);
+            ShowInfo("Patching RepoLib config...");
             yield return SetRepoLibConfig();
         }
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching REPO...");
             LaunchREPO();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
 
         yield break;
     }
 
     IEnumerator APModOnlyFlow()
-    { 
+    {
         repoPath = GetRepoPath();
 
         if (string.IsNullOrEmpty(repoPath))
             yield break;
 
+        ShowInfo("Installing AP Mod...");
         yield return InstallAPMod();
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
             LaunchREPO();
+
+        ShowInfo("Installation complete!");
     }
 
     IEnumerator MenuLibOnlyFlow()
@@ -617,22 +784,32 @@ public class REPOManualDL : MonoBehaviour
         if (string.IsNullOrEmpty(repoPath))
             yield break;
 
+        ShowInfo("Installing MenuLib...");
         yield return InstallMod(menuLib, "MenuLib.dll");
 
         bool shouldPatchConfig = patchConfigsToggle != null && patchConfigsToggle.isOn;
 
         if (shouldPatchConfig)
         {
+            ShowInfo("Launching REPO...");
             LaunchREPO();
             yield return WaitForBepInExConfigComplete();
             CloseREPO();
             yield return new WaitForSeconds(1f);
 
+            ShowInfo("Patching BepInEx config...");
             yield return SetBepInExConfig();
         }
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching REPO...");
             LaunchREPO();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
     }
 
     IEnumerator WaitForRepoLibConfig()
@@ -721,14 +898,21 @@ public class REPOManualDL : MonoBehaviour
 
         if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
         {
-            UnityEngine.Debug.LogError("Config load failed: " + request.error);
+            UnityEngine.Debug.LogWarning("Config load failed (this is OK, config is optional): " + request.error);
             configLoaded = true;
             yield break;
         }
 
-        remoteConfig = JsonUtility.FromJson<RepoConfig>(request.downloadHandler.text);
-
-        ApplyRepoConfig();
+        try
+        {
+            remoteConfig = JsonUtility.FromJson<RepoConfig>(request.downloadHandler.text);
+            UnityEngine.Debug.Log("Remote config loaded successfully");
+            ApplyRepoConfig();
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Config parsing failed (this is OK, config is optional): " + e.Message);
+        }
 
         configLoaded = true;
     }
@@ -867,15 +1051,14 @@ public class REPOManualDL : MonoBehaviour
 
     string GetRepoPath()
     {
-        // 1. Chemins TRÈS courants en premier (optimisation rapide)
         string[] quickPaths = new string[]
         {
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "REPO"),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "REPO"),
-        @"D:\Steam\steamapps\common\REPO",
-        @"D:\SteamLibrary\steamapps\common\REPO",
-        @"E:\Steam\steamapps\common\REPO",
-        @"E:\SteamLibrary\steamapps\common\REPO",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "REPO"),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "REPO"),
+            @"D:\Steam\steamapps\common\REPO",
+            @"D:\SteamLibrary\steamapps\common\REPO",
+            @"E:\Steam\steamapps\common\REPO",
+            @"E:\SteamLibrary\steamapps\common\REPO",
         };
 
         foreach (string path in quickPaths)
@@ -888,14 +1071,12 @@ public class REPOManualDL : MonoBehaviour
             catch { }
         }
 
-        // 2. Scan complet des disques durs physiques
         try
         {
             System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
             foreach (System.IO.DriveInfo drive in drives)
             {
-                // Seulement disques durs fixes (pas réseau, USB, etc.)
                 if (drive.DriveType != System.IO.DriveType.Fixed)
                     continue;
 
