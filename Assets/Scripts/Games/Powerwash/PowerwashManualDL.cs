@@ -55,6 +55,7 @@ public class PowerwashManualDL : MonoBehaviour
 
     void Start()
     {
+        powerwashPath = GetPowerwashPath();
         StartCoroutine(LoadRemoteConfig());
 
         if (secondLaunchToggle != null)
@@ -155,6 +156,12 @@ public class PowerwashManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
+        if (string.IsNullOrEmpty(powerwashPath))
+        {
+            ShowInfo("PowerWash Simulator path not found. Please check Steam installation.");
+            return;
+        }
+
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
         bool apmod = installAPModToggle != null && installAPModToggle.isOn;
@@ -170,14 +177,15 @@ public class PowerwashManualDL : MonoBehaviour
             return;
         }
 
-        powerwashPath = GetPowerwashPath();
-
-        if (string.IsNullOrEmpty(powerwashPath))
-            return;
-
         if (bep && count == 1)
         {
             StartCoroutine(BepInExOnlyFlow());
+            return;
+        }
+
+        if (apmod && count == 1)
+        {
+            StartCoroutine(APModOnlyFlow());
             return;
         }
 
@@ -208,9 +216,12 @@ public class PowerwashManualDL : MonoBehaviour
         {
             CleanupProcesses();
 
+            ShowInfo("Removing AP mods...");
+
             SafeDeleteDirectory(Path.Combine(pluginsPath, "SW_CreeperKing.ArchipelagoMod"));
             SafeDeleteDirectory(Path.Combine(pluginsPath, "Archipelago"));
 
+            ShowInfo("AP mods removed successfully!");
             return;
         }
 
@@ -233,15 +244,23 @@ public class PowerwashManualDL : MonoBehaviour
 
         if (fullClean)
         {
+            ShowInfo("Cleaning BepInEx...");
+
             SafeDeleteDirectory(Path.Combine(powerwashPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(powerwashPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(powerwashPath, "winhttp.dll"));
             SafeDeleteFile(Path.Combine(powerwashPath, ".doorstop_version"));
+
+            ShowInfo("Full clean completed!");
             return;
         }
 
+        ShowInfo("Removing mods...");
+
         SafeDeleteDirectory(Path.Combine(pluginsPath, "SW_CreeperKing.ArchipelagoMod"));
         SafeDeleteDirectory(Path.Combine(pluginsPath, "Archipelago"));
+
+        ShowInfo("Revert completed!");
     }
 
     void ShowInfo(string message)
@@ -291,14 +310,24 @@ public class PowerwashManualDL : MonoBehaviour
     IEnumerator InstallFlow()
     {
         if (installAPWorldToggle == null || installAPWorldToggle.isOn)
+        {
+            ShowInfo("Installing APWorld...");
             yield return InstallAPWorld();
+        }
 
         if (installBepInExToggle != null && installBepInExToggle.isOn)
+        {
+            ShowInfo("Installing BepInEx...");
             yield return InstallBepInEx();
+        }
 
         if (installAPModToggle == null || installAPModToggle.isOn)
+        {
+            ShowInfo("Installing AP Mod...");
             yield return InstallAPMod();
+        }
 
+        ShowInfo("Launching PowerWash Simulator...");
         LaunchPowerwash();
 
         yield return WaitForConfigFiles();
@@ -308,47 +337,83 @@ public class PowerwashManualDL : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Second launch...");
             LaunchPowerwash();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
     }
 
     IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
-            yield return null;
-
-        string localPath = Path.Combine(Application.persistentDataPath, apworld.fileName);
-
-        yield return downloader.DownloadToFolder(apworld, Application.persistentDataPath);
-
-        float timeout = 15f;
-        float timer = 0f;
-
-        while (!File.Exists(localPath) && timer < timeout)
         {
-            timer += 0.5f;
+            UnityEngine.Debug.Log("Waiting for config to load...");
             yield return new WaitForSeconds(0.5f);
         }
 
-        if (!File.Exists(localPath))
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + apworld.url);
+
+        if (string.IsNullOrEmpty(apworld.url))
         {
-            ShowInfo("APWorld download failed.");
+            ShowInfo("ERROR: APWorld URL is empty!");
+            UnityEngine.Debug.LogError("APWorld URL not set!");
             yield break;
         }
+
+        string fileName = apworld.fileName;
+        if (string.IsNullOrEmpty(fileName))
+        {
+            fileName = apworld.url.Substring(apworld.url.LastIndexOf('/') + 1);
+
+            if (fileName.Contains("?"))
+                fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
+        }
+
+        string localPath = Path.Combine(Application.persistentDataPath, fileName);
+
+        UnityEngine.Debug.Log("Downloading APWorld from: " + apworld.url);
+        UnityEngine.Debug.Log("Saving to: " + localPath);
+
+        yield return DownloadFile(apworld.url, localPath);
+
+        if (!File.Exists(localPath))
+        {
+            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
+            ShowInfo("ERROR: APWorld download failed!");
+            yield break;
+        }
+
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
         string targetFolder = null;
 
         string[] possiblePaths =
         {
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Archipelago", "custom_worlds"),
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds")
-    };
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Archipelago", "custom_worlds"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds"),
+        };
 
         foreach (string path in possiblePaths)
         {
-            if (Directory.Exists(path))
+            try
             {
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
                 targetFolder = path;
+                UnityEngine.Debug.Log("Using target folder: " + targetFolder);
                 break;
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogWarning("Cannot create directory: " + path + " - " + e.Message);
             }
         }
 
@@ -360,11 +425,12 @@ public class PowerwashManualDL : MonoBehaviour
                 {
                     string path = Path.Combine(drive.RootDirectory.FullName, "Archipelago", "custom_worlds");
 
-                    if (Directory.Exists(path))
-                    {
-                        targetFolder = path;
-                        break;
-                    }
+                    if (!Directory.Exists(path))
+                        Directory.CreateDirectory(path);
+
+                    targetFolder = path;
+                    UnityEngine.Debug.Log("Using target folder on drive: " + targetFolder);
+                    break;
                 }
                 catch { }
             }
@@ -373,27 +439,55 @@ public class PowerwashManualDL : MonoBehaviour
         if (string.IsNullOrEmpty(targetFolder))
         {
             ShowInfo("Archipelago Launcher is not installed.\nPlease install it before using APWorld.");
+            UnityEngine.Debug.LogError("No valid Archipelago folder found!");
             yield break;
         }
 
-        string target = Path.Combine(targetFolder, apworld.fileName);
+        string target = Path.Combine(targetFolder, fileName);
 
-        bool failed = false;
+        if (File.Exists(target))
+        {
+            try
+            {
+                File.Delete(target);
+                UnityEngine.Debug.Log("Deleted old apworld file");
+            }
+            catch { }
+        }
 
         try
         {
             File.Copy(localPath, target, true);
+            UnityEngine.Debug.Log("APWorld file copied to: " + target);
+            ShowInfo("APWorld installed successfully!");
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("APWorld install failed: " + e.Message);
-            failed = true;
-        }
-
-        if (failed)
-        {
             ShowInfo("Failed to install APWorld.");
             yield break;
+        }
+    }
+
+    IEnumerator DownloadFile(string url, string savePath)
+    {
+        UnityEngine.Debug.Log("Starting download from: " + url);
+
+        using (UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url))
+        {
+            request.downloadHandler = new UnityEngine.Networking.DownloadHandlerFile(savePath);
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+            {
+                UnityEngine.Debug.LogError("Download error: " + request.error);
+                UnityEngine.Debug.LogError("Response code: " + request.responseCode);
+            }
+            else
+            {
+                UnityEngine.Debug.Log("Download complete! File size: " + new System.IO.FileInfo(savePath).Length + " bytes");
+            }
         }
     }
 
@@ -418,6 +512,7 @@ public class PowerwashManualDL : MonoBehaviour
                 Directory.Delete(targetMod, true);
 
             CopyDirectory(modFolder, targetMod);
+            UnityEngine.Debug.Log("AP Mod installed successfully!");
         }
 
         SafeDeleteDirectory(extractPath);
@@ -434,6 +529,8 @@ public class PowerwashManualDL : MonoBehaviour
 
         MoveDirectory(extractPath, powerwashPath);
 
+        UnityEngine.Debug.Log("BepInEx installed successfully!");
+
         SafeDeleteDirectory(extractPath);
     }
 
@@ -443,13 +540,34 @@ public class PowerwashManualDL : MonoBehaviour
         yield break;
     }
 
+    IEnumerator APModOnlyFlow()
+    {
+        ShowInfo("Installing AP Mod...");
+        yield return InstallAPMod();
+
+        ShowInfo("Installation complete!");
+        yield break;
+    }
+
     IEnumerator BepInExOnlyFlow()
     {
+        ShowInfo("Installing BepInEx...");
         yield return InstallBepInEx();
 
+        ShowInfo("Launching PowerWash Simulator...");
         LaunchPowerwash();
         yield return WaitForConfigFiles();
         ClosePowerwash();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Second launch...");
+            LaunchPowerwash();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
 
         yield break;
     }
@@ -480,13 +598,21 @@ public class PowerwashManualDL : MonoBehaviour
 
         if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
         {
-            UnityEngine.Debug.LogError("Config load failed: " + request.error);
+            UnityEngine.Debug.LogWarning("Config load failed (this is OK, config is optional): " + request.error);
+            configLoaded = true;
             yield break;
         }
 
-        remoteConfig = JsonUtility.FromJson<PowerwashConfig>(request.downloadHandler.text);
-
-        ApplyPowerwashConfig();
+        try
+        {
+            remoteConfig = JsonUtility.FromJson<PowerwashConfig>(request.downloadHandler.text);
+            UnityEngine.Debug.Log("Remote config loaded successfully");
+            ApplyPowerwashConfig();
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Config parsing failed (this is OK, config is optional): " + e.Message);
+        }
 
         configLoaded = true;
     }
@@ -595,14 +721,47 @@ public class PowerwashManualDL : MonoBehaviour
 
     string GetPowerwashPath()
     {
-        string path = Path.Combine(
-            System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86),
-            "Steam",
-            "steamapps",
-            "common",
-            "PowerWashSimulator"
-        );
+        string[] quickPaths = new string[]
+        {
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "PowerWashSimulator"),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "PowerWashSimulator"),
+            @"D:\Steam\steamapps\common\PowerWashSimulator",
+            @"D:\SteamLibrary\steamapps\common\PowerWashSimulator",
+            @"E:\Steam\steamapps\common\PowerWashSimulator",
+            @"E:\SteamLibrary\steamapps\common\PowerWashSimulator",
+        };
 
-        return Directory.Exists(path) ? path : "";
+        foreach (string path in quickPaths)
+        {
+            try
+            {
+                if (Directory.Exists(path))
+                    return path;
+            }
+            catch { }
+        }
+
+        try
+        {
+            DriveInfo[] drives = DriveInfo.GetDrives();
+
+            foreach (DriveInfo drive in drives)
+            {
+                try
+                {
+                    string path = Path.Combine(drive.RootDirectory.FullName, "Steam", "steamapps", "common", "PowerWashSimulator");
+                    if (Directory.Exists(path))
+                        return path;
+
+                    path = Path.Combine(drive.RootDirectory.FullName, "SteamLibrary", "steamapps", "common", "PowerWashSimulator");
+                    if (Directory.Exists(path))
+                        return path;
+                }
+                catch { }
+            }
+        }
+        catch { }
+
+        return "";
     }
 }

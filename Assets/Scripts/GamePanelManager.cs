@@ -6,6 +6,7 @@ public class GamePanelManager : MonoBehaviour
     public GameObject repoPanel;
     public GameObject powerwashPanel;
     public GameObject coe33Panel;
+    public GameObject lethalcompanyPanel;
 
     void Start()
     {
@@ -30,6 +31,9 @@ public class GamePanelManager : MonoBehaviour
             case "COE33":
                 coe33Panel.SetActive(true);
                 break;
+            case "LethalCompany":
+                lethalcompanyPanel.SetActive(true);
+                break;
         }
     }
 
@@ -39,5 +43,6 @@ public class GamePanelManager : MonoBehaviour
         if (repoPanel != null) repoPanel.SetActive(false);
         if (powerwashPanel != null) powerwashPanel.SetActive(false);
         if (coe33Panel != null) coe33Panel.SetActive(false);
+        if (lethalcompanyPanel != null) lethalcompanyPanel.SetActive(false);
     }
 }

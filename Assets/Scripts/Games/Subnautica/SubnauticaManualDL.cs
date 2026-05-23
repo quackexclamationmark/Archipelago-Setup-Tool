@@ -53,6 +53,7 @@ public class SubnauticaManualDL : MonoBehaviour
 
     void Start()
     {
+        subnauticaPath = GetSubnauticaPath();
         StartCoroutine(LoadRemoteConfig());
 
         if (infoOkButton != null)
@@ -78,6 +79,9 @@ public class SubnauticaManualDL : MonoBehaviour
 
         if (fullCleanBepInExToggle != null)
             fullCleanBepInExToggle.onValueChanged.AddListener(OnFullCleanChanged);
+
+        if (infoPanel != null)
+            infoPanel.SetActive(false);
     }
 
     // =========================================================
@@ -155,8 +159,12 @@ public class SubnauticaManualDL : MonoBehaviour
     private void ExecuteSetup()
     {
         subnauticaPath = GetSubnauticaPath();
+
         if (string.IsNullOrEmpty(subnauticaPath))
+        {
+            ShowInfo("Subnautica not found. Please check Steam/Epic installation.");
             return;
+        }
 
         bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
         bool mod = installAPModToggle == null || installAPModToggle.isOn;
@@ -204,9 +212,14 @@ public class SubnauticaManualDL : MonoBehaviour
         {
             CleanupProcesses();
 
+            ShowInfo("Removing AP mods...");
+
             SafeDeleteDirectory(Path.Combine(pluginsPath, "SubnauticaAP"));
             SafeDeleteDirectory(Path.Combine(pluginsPath, "Archipelago"));
 
+            DeleteOldVersionFiles();
+
+            ShowInfo("AP mods removed successfully!");
             return;
         }
 
@@ -228,15 +241,27 @@ public class SubnauticaManualDL : MonoBehaviour
 
         CleanupProcesses();
 
+        ShowInfo("Removing mods...");
+
         SafeDeleteDirectory(Path.Combine(pluginsPath, "SubnauticaAP"));
         SafeDeleteDirectory(Path.Combine(pluginsPath, "Archipelago"));
 
+        DeleteOldVersionFiles();
+
         if (fullClean)
         {
+            ShowInfo("Cleaning BepInEx...");
+
             SafeDeleteDirectory(Path.Combine(subnauticaPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(subnauticaPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(subnauticaPath, "winhttp.dll"));
             SafeDeleteFile(Path.Combine(subnauticaPath, ".doorstop_version"));
+
+            ShowInfo("Full clean completed!");
+        }
+        else
+        {
+            ShowInfo("Revert completed!");
         }
     }
 
@@ -260,7 +285,7 @@ public class SubnauticaManualDL : MonoBehaviour
     }
 
     // =========================================================
-    // OTHER LOGIC (UNCHANGED)
+    // OTHER LOGIC
     // =========================================================
 
     bool HasOtherMods(string pluginsPath)
@@ -289,14 +314,19 @@ public class SubnauticaManualDL : MonoBehaviour
 
     IEnumerator InstallFlow()
     {
-        bool secondLaunch = secondLaunchToggle == null || secondLaunchToggle.isOn;
-
         if (installBepInExToggle == null || installBepInExToggle.isOn)
+        {
+            ShowInfo("Installing BepInEx...");
             yield return InstallBepInEx();
+        }
 
         if (installAPModToggle == null || installAPModToggle.isOn)
+        {
+            ShowInfo("Installing AP Mod...");
             yield return InstallAPMod();
+        }
 
+        ShowInfo("Launching Subnautica...");
         LaunchSubnautica();
 
         yield return WaitForConfigFiles();
@@ -305,14 +335,24 @@ public class SubnauticaManualDL : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
 
-        if (secondLaunch)
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Second launch...");
             LaunchSubnautica();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
     }
 
     IEnumerator InstallBepInEx()
     {
         while (!configLoaded)
-            yield return null;
+        {
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
 
         string extractPath = Path.Combine(Application.persistentDataPath, "BepInExTemp");
 
@@ -320,15 +360,22 @@ public class SubnauticaManualDL : MonoBehaviour
 
         MoveDirectory(extractPath, subnauticaPath);
 
+        UnityEngine.Debug.Log("BepInEx installed successfully!");
+
         SafeDeleteDirectory(extractPath);
     }
 
     IEnumerator InstallAPMod()
     {
         while (!configLoaded)
-            yield return null;
+        {
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
 
         string extractPath = Path.Combine(Application.persistentDataPath, "SubnauticaAPTemp");
+
+        CreateVersionFile(apMod.url);
 
         yield return downloader.DownloadAndExtract(apMod, Application.persistentDataPath, extractPath);
 
@@ -338,7 +385,11 @@ public class SubnauticaManualDL : MonoBehaviour
         string archipelagoPath = Path.Combine(extractPath, "BepInEx", "plugins", "Archipelago");
 
         if (!Directory.Exists(archipelagoPath))
+        {
+            UnityEngine.Debug.LogError("Archipelago folder not found in extraction!");
+            SafeDeleteDirectory(extractPath);
             yield break;
+        }
 
         string targetPath = Path.Combine(pluginsPath, "Archipelago");
 
@@ -347,21 +398,39 @@ public class SubnauticaManualDL : MonoBehaviour
 
         CopyDirectory(archipelagoPath, targetPath);
 
+        UnityEngine.Debug.Log("AP Mod installed successfully!");
+
         SafeDeleteDirectory(extractPath);
     }
 
     IEnumerator BepInExOnlyFlow()
     {
+        ShowInfo("Installing BepInEx...");
         yield return InstallBepInEx();
 
+        ShowInfo("Launching Subnautica...");
         LaunchSubnautica();
         yield return WaitForConfigFiles();
         CloseSubnautica();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Second launch...");
+            LaunchSubnautica();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
     }
 
     IEnumerator APModOnlyFlow()
     {
+        ShowInfo("Installing AP Mod...");
         yield return InstallAPMod();
+
+        ShowInfo("Installation complete!");
+        yield break;
     }
 
     IEnumerator WaitForConfigFiles()
@@ -390,11 +459,22 @@ public class SubnauticaManualDL : MonoBehaviour
         yield return request.SendWebRequest();
 
         if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+        {
+            UnityEngine.Debug.LogWarning("Config load failed (this is OK, config is optional): " + request.error);
+            configLoaded = true;
             yield break;
+        }
 
-        remoteConfig = JsonUtility.FromJson<SubnauticaConfig>(request.downloadHandler.text);
-
-        ApplySubnauticaConfig();
+        try
+        {
+            remoteConfig = JsonUtility.FromJson<SubnauticaConfig>(request.downloadHandler.text);
+            UnityEngine.Debug.Log("Remote config loaded successfully");
+            ApplySubnauticaConfig();
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Config parsing failed (this is OK, config is optional): " + e.Message);
+        }
 
         configLoaded = true;
     }
@@ -404,7 +484,11 @@ public class SubnauticaManualDL : MonoBehaviour
         string exePath = Path.Combine(subnauticaPath, "Subnautica.exe");
 
         if (!File.Exists(exePath))
+        {
+            ShowInfo("Subnautica executable not found!");
+            UnityEngine.Debug.LogError("Executable not found: " + exePath);
             return;
+        }
 
         ProcessStartInfo startInfo = new ProcessStartInfo();
         startInfo.FileName = exePath;
@@ -413,7 +497,16 @@ public class SubnauticaManualDL : MonoBehaviour
         if (nonVRToggle != null && nonVRToggle.isOn)
             startInfo.Arguments = "-vrmode none";
 
-        subnauticaProcess = Process.Start(startInfo);
+        try
+        {
+            subnauticaProcess = Process.Start(startInfo);
+            UnityEngine.Debug.Log("Subnautica launched successfully!");
+        }
+        catch (System.Exception e)
+        {
+            ShowInfo("Error launching Subnautica:\n" + e.Message);
+            UnityEngine.Debug.LogError("Launch error: " + e);
+        }
     }
 
     void CloseSubnautica()
@@ -450,6 +543,9 @@ public class SubnauticaManualDL : MonoBehaviour
             {
                 File.SetAttributes(path, FileAttributes.Normal);
                 File.Delete(path);
+
+                if (!File.Exists(path))
+                    yield break;
             }
             catch { }
 
@@ -503,20 +599,127 @@ public class SubnauticaManualDL : MonoBehaviour
         }
     }
 
+    // =========================================================
+    // VERSION FILE MANAGEMENT
+    // =========================================================
+
+    void CreateVersionFile(string downloadUrl)
+    {
+        try
+        {
+            string version = ExtractVersionFromUrl(downloadUrl);
+
+            string versionFileName = "Subnautica APMod Version " + version + ".txt";
+            string versionFilePath = Path.Combine(subnauticaPath, versionFileName);
+
+            DeleteOldVersionFiles();
+
+            string content = "Archipelago Setup Tool by quack!\n";
+            content += "https://github.com/quackexclamationmark/Archipelago-Setup-Tool\n";
+            content += "\n";
+            content += "Downloaded from: " + downloadUrl + "\n";
+            content += "Downloaded at: " + System.DateTime.Now + "\n";
+            content += "Version: " + version + "\n";
+
+            File.WriteAllText(versionFilePath, content);
+
+            UnityEngine.Debug.Log("Version file created: " + versionFilePath);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error creating version file: " + e.Message);
+        }
+    }
+
+    void DeleteOldVersionFiles()
+    {
+        try
+        {
+            System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"Subnautica APMod Version \d+\.\d+\.\d+\.txt");
+
+            string[] files = Directory.GetFiles(subnauticaPath);
+
+            foreach (string file in files)
+            {
+                string fileName = Path.GetFileName(file);
+
+                if (pattern.IsMatch(fileName))
+                {
+                    try
+                    {
+                        File.Delete(file);
+                        UnityEngine.Debug.Log("Deleted old version file: " + fileName);
+                    }
+                    catch (System.Exception e)
+                    {
+                        UnityEngine.Debug.LogWarning("Could not delete old version file: " + e.Message);
+                    }
+                }
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error cleaning up old version files: " + e.Message);
+        }
+    }
+
+    string ExtractVersionFromUrl(string url)
+    {
+        System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"/download/(\d+\.\d+\.\d+)/");
+        System.Text.RegularExpressions.Match match = regex.Match(url);
+
+        if (match.Success)
+            return match.Groups[1].Value;
+
+        return "Unknown";
+    }
+
+    // =========================================================
+    // PATH DETECTION
+    // =========================================================
+
     string GetSubnauticaPath()
     {
         // 1. Steam
         string steam = GetSteamPath();
         if (!string.IsNullOrEmpty(steam))
+        {
+            UnityEngine.Debug.Log("Found Subnautica in Steam: " + steam);
             return steam;
+        }
 
         // 2. Epic (manifest)
         string epic = GetEpicPath();
         if (!string.IsNullOrEmpty(epic))
+        {
+            UnityEngine.Debug.Log("Found Subnautica in Epic: " + epic);
             return epic;
+        }
 
-        // 3. Manual fallback
-        ShowInfo("Subnautica not found.\nPlease select your game folder manually.");
+        // 3. Check other common Steam paths
+        string[] otherPaths = new string[]
+        {
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Subnautica"),
+            @"D:\Steam\steamapps\common\Subnautica",
+            @"D:\SteamLibrary\steamapps\common\Subnautica",
+            @"E:\Steam\steamapps\common\Subnautica",
+            @"E:\SteamLibrary\steamapps\common\Subnautica",
+        };
+
+        foreach (string path in otherPaths)
+        {
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Subnautica at: " + path);
+                    return path;
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Subnautica not found.");
         return "";
     }
 
