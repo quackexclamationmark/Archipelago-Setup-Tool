@@ -1,17 +1,32 @@
 {
+    "r2modmanDL": "https://thunderstore.io/package/download/ebkr/r2modman/3.2.16/",
+    
     "clairobscurAP": "https://github.com/Demorck/ClairObscurArchipelagoRandomizer/releases/download/v0.2.1/COE33_Client_Steam.zip",
-    "clairobscurApworld": "https://github.com/Demorck/ClairObscur_APWorld/releases/download/v0.2.0/clair_obscur.apworld"
+    "clairobscurApworld": "https://github.com/Demorck/ClairObscur_APWorld/releases/download/v0.2.0/clair_obscur.apworld",
+
+    "lethalcompanyAP": "https://thunderstore.io/package/download/APLC/APLC/0.7.11/",
+    "lethalcompanyBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+    "lethalcompanyApworld": "https://github.com/T0r1nn/APLC/releases/download/v0.7.11-beta/lethal_company.apworld",
+    "lethalcompanyLethalAPI": "https://thunderstore.io/package/download/LethalAPI/LethalAPI_Terminal/1.0.1/",
+    "lethalcompanyAPScrap": "https://thunderstore.io/package/download/Caigan/Archipelago_Scrap/4.0.3/",
+    "lethalcompanyLevelLoader": "https://thunderstore.io/package/download/IAmBatby/LethalLevelLoader/1.6.9/",
+    "lethalcompanyLethalLib": "https://thunderstore.io/package/download/Evaisa/LethalLib/1.2.0/",
+    "lethalcompanyFixSerialize": "https://thunderstore.io/package/download/Evaisa/FixPluginTypesSerialization/1.1.4/",
+    "lethalcompanyModData": "https://thunderstore.io/package/download/MaxWasUnavailable/LethalModDataLib/1.2.2/",
+    "lethalcompanyHook": "https://thunderstore.io/package/download/Evaisa/HookGenPatcher/0.0.5/",
+    "lethalcompanyMonoDetourBep5": "https://thunderstore.io/package/download/MonoDetour/MonoDetour_BepInEx_5/0.7.13/",
+    "lethalcompanyMonoDetour": "https://thunderstore.io/package/download/MonoDetour/MonoDetour/0.7.13/",
 
     "powerwashAP": "https://github.com/SWCreeperKing/PowerwashSimAP/releases/download/v0.5.14/SW_CreeperKing.ArchipelagoMod.zip",
     "powerwashBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v6.0.0-pre.1/BepInEx_UnityIL2CPP_x64_6.0.0-pre.1.zip",
     "powerwashApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/powerwashsimulator.apworld",
     
-    "repoAP": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.0/ArchipelagoREPOv0.4.0.zip",
-    "repoMenuLib": "https://thunderstore.io/package/download/nickklmao/MenuLib/2.5.1/",
-    "repoRepoLib": "https://thunderstore.io/package/download/Zehs/REPOLib/3.0.4/",
+    "repoAP": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.1-rc1/RepoAP.zip",
+    "repoMenuLib": "https://thunderstore.io/package/download/nickklmao/MenuLib/2.5.3/",
+    "repoRepoLib": "https://thunderstore.io/package/download/Zehs/REPOLib/4.0.3/",
     "repoBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
-    "repoApworld": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.0/repo.apworld",
+    "repoApworld": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.1-rc1/repo.apworld",
     
-    "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.1/Archipelago_191.zip",
+    "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.3/Archipelago_193.zip",
     "subnauticaBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip"
 }
