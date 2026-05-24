@@ -26,6 +26,9 @@
     "repoRepoLib": "https://thunderstore.io/package/download/Zehs/REPOLib/4.0.3/",
     "repoBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "repoApworld": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.1-rc1/repo.apworld",
+
+    "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/0.4.4-alpha/sts2-client.zip",
+    "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/0.4.4-alpha/spire2.apworld",
     
     "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.3/Archipelago_193.zip",
     "subnauticaBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip"
