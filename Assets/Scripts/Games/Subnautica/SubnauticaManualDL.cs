@@ -375,7 +375,7 @@ public class SubnauticaManualDL : MonoBehaviour
 
         string extractPath = Path.Combine(Application.persistentDataPath, "SubnauticaAPTemp");
 
-        CreateVersionFile(apMod.url);
+        CreateVersionFile(apMod.url, bepInEx.url);
 
         yield return downloader.DownloadAndExtract(apMod, Application.persistentDataPath, extractPath);
 
@@ -603,27 +603,47 @@ public class SubnauticaManualDL : MonoBehaviour
     // VERSION FILE MANAGEMENT
     // =========================================================
 
-    void CreateVersionFile(string downloadUrl)
+    void CreateVersionFile(string apmodUrl, string bepinexUrl)
     {
         try
         {
-            string version = ExtractVersionFromUrl(downloadUrl);
+            string apmodVersion = ExtractVersionFromUrl(apmodUrl);
+            string bepinexVersion = ExtractBepInExVersion(bepinexUrl);
 
-            string versionFileName = "Subnautica APMod Version " + version + ".txt";
-            string versionFilePath = Path.Combine(subnauticaPath, versionFileName);
+            string versionFileName = "Subnautica APMod Version " + apmodVersion + ".txt";
 
             DeleteOldVersionFiles();
 
             string content = "Archipelago Setup Tool by quack!\n";
             content += "https://github.com/quackexclamationmark/Archipelago-Setup-Tool\n";
             content += "\n";
-            content += "Downloaded from: " + downloadUrl + "\n";
+            content += "=== AP MOD ===\n";
+            content += "Downloaded from: " + apmodUrl + "\n";
+            content += "Version: " + apmodVersion + "\n";
+            content += "\n";
+            content += "=== BEPINEX ===\n";
+            content += "Downloaded from: " + bepinexUrl + "\n";
+            content += "Version: " + bepinexVersion + "\n";
+            content += "\n";
             content += "Downloaded at: " + System.DateTime.Now + "\n";
-            content += "Version: " + version + "\n";
 
-            File.WriteAllText(versionFilePath, content);
+            // Créer dans le root avec l'exe
+            string rootVersionPath = Path.Combine(subnauticaPath, versionFileName);
+            File.WriteAllText(rootVersionPath, content);
+            UnityEngine.Debug.Log("Version file created in root: " + rootVersionPath);
 
-            UnityEngine.Debug.Log("Version file created: " + versionFilePath);
+            // Créer dans le dossier Archipelago
+            string archipelagoPath = Path.Combine(subnauticaPath, "BepInEx", "plugins", "Archipelago");
+            if (Directory.Exists(archipelagoPath))
+            {
+                string archipelagoVersionPath = Path.Combine(archipelagoPath, versionFileName);
+                File.WriteAllText(archipelagoVersionPath, content);
+                UnityEngine.Debug.Log("Version file created in Archipelago folder: " + archipelagoVersionPath);
+            }
+            else
+            {
+                UnityEngine.Debug.LogWarning("Archipelago folder not found for version file creation");
+            }
         }
         catch (System.Exception e)
         {
@@ -635,24 +655,46 @@ public class SubnauticaManualDL : MonoBehaviour
     {
         try
         {
-            System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"Subnautica APMod Version \d+\.\d+\.\d+\.txt");
+            System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"Subnautica APMod Version .+\.txt");
 
-            string[] files = Directory.GetFiles(subnauticaPath);
-
-            foreach (string file in files)
+            // Supprimer dans le root
+            string[] rootFiles = Directory.GetFiles(subnauticaPath);
+            foreach (string file in rootFiles)
             {
                 string fileName = Path.GetFileName(file);
-
                 if (pattern.IsMatch(fileName))
                 {
                     try
                     {
                         File.Delete(file);
-                        UnityEngine.Debug.Log("Deleted old version file: " + fileName);
+                        UnityEngine.Debug.Log("Deleted old version file in root: " + fileName);
                     }
                     catch (System.Exception e)
                     {
-                        UnityEngine.Debug.LogWarning("Could not delete old version file: " + e.Message);
+                        UnityEngine.Debug.LogWarning("Could not delete old version file in root: " + e.Message);
+                    }
+                }
+            }
+
+            // Supprimer dans le dossier Archipelago
+            string archipelagoPath = Path.Combine(subnauticaPath, "BepInEx", "plugins", "Archipelago");
+            if (Directory.Exists(archipelagoPath))
+            {
+                string[] archipelagoFiles = Directory.GetFiles(archipelagoPath);
+                foreach (string file in archipelagoFiles)
+                {
+                    string fileName = Path.GetFileName(file);
+                    if (pattern.IsMatch(fileName))
+                    {
+                        try
+                        {
+                            File.Delete(file);
+                            UnityEngine.Debug.Log("Deleted old version file in Archipelago folder: " + fileName);
+                        }
+                        catch (System.Exception e)
+                        {
+                            UnityEngine.Debug.LogWarning("Could not delete old version file in Archipelago folder: " + e.Message);
+                        }
                     }
                 }
             }
@@ -666,6 +708,18 @@ public class SubnauticaManualDL : MonoBehaviour
     string ExtractVersionFromUrl(string url)
     {
         System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"/download/(\d+\.\d+\.\d+)/");
+        System.Text.RegularExpressions.Match match = regex.Match(url);
+
+        if (match.Success)
+            return match.Groups[1].Value;
+
+        return "Unknown";
+    }
+
+    string ExtractBepInExVersion(string url)
+    {
+        // Cherche le pattern GitHub releases: /releases/download/VERSION/filename
+        System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"/releases/download/([^/]+)/");
         System.Text.RegularExpressions.Match match = regex.Match(url);
 
         if (match.Success)

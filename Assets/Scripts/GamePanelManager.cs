@@ -7,6 +7,8 @@ public class GamePanelManager : MonoBehaviour
     public GameObject powerwashPanel;
     public GameObject coe33Panel;
     public GameObject lethalcompanyPanel;
+    public GameObject sts2Panel;
+
 
     void Start()
     {
@@ -34,6 +36,9 @@ public class GamePanelManager : MonoBehaviour
             case "LethalCompany":
                 lethalcompanyPanel.SetActive(true);
                 break;
+            case "Slay The Spire 2":
+                sts2Panel.SetActive(true);
+                break;
         }
     }
 
@@ -44,5 +49,6 @@ public class GamePanelManager : MonoBehaviour
         if (powerwashPanel != null) powerwashPanel.SetActive(false);
         if (coe33Panel != null) coe33Panel.SetActive(false);
         if (lethalcompanyPanel != null) lethalcompanyPanel.SetActive(false);
+        if (sts2Panel != null) sts2Panel.SetActive(false);
     }
 }

@@ -268,6 +268,8 @@ public class REPOManualDL : MonoBehaviour
             SafeDeleteFile(Path.Combine(pluginsPath, "RepoAP.dll"));
             SafeDeleteFile(Path.Combine(pluginsPath, "RepoLib.dll"));
 
+            DeleteOldVersionFiles();
+
             ShowInfo("AP mods removed successfully!");
             return;
         }
@@ -303,6 +305,8 @@ public class REPOManualDL : MonoBehaviour
         SafeDeleteFile(Path.Combine(pluginsPath, "MenuLib.dll"));
         SafeDeleteFile(Path.Combine(pluginsPath, "RepoAP.dll"));
         SafeDeleteFile(Path.Combine(pluginsPath, "RepoLib.dll"));
+
+        DeleteOldVersionFiles();
 
         hasOtherMods = HasOtherMods(pluginsPath);
 
@@ -349,6 +353,9 @@ public class REPOManualDL : MonoBehaviour
         foreach (string file in files)
         {
             string name = Path.GetFileName(file);
+
+            if (name.StartsWith("REPO APMod Version") && name.EndsWith(".txt"))
+                continue;
 
             if (name != "Archipelago.repobundle" &&
                 name != "MenuLib.dll" &&
@@ -431,6 +438,9 @@ public class REPOManualDL : MonoBehaviour
             ShowInfo("Installing RepoLib...");
             yield return InstallRepoLib();
         }
+
+        // ✅ Créer le fichier de version APRÈS toutes les installations
+        CreateVersionFile(apMod.url, menuLib.url, repoLib.url, bepInEx.url);
 
         ShowInfo("Launching REPO...");
         LaunchREPO();
@@ -771,6 +781,9 @@ public class REPOManualDL : MonoBehaviour
         ShowInfo("Installing AP Mod...");
         yield return InstallAPMod();
 
+        // ✅ Créer le fichier de version
+        CreateVersionFile(apMod.url, menuLib.url, repoLib.url, bepInEx.url);
+
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
             LaunchREPO();
 
@@ -786,6 +799,9 @@ public class REPOManualDL : MonoBehaviour
 
         ShowInfo("Installing MenuLib...");
         yield return InstallMod(menuLib, "MenuLib.dll");
+
+        // ✅ Créer le fichier de version
+        CreateVersionFile(apMod.url, menuLib.url, repoLib.url, bepInEx.url);
 
         bool shouldPatchConfig = patchConfigsToggle != null && patchConfigsToggle.isOn;
 
@@ -1047,6 +1063,128 @@ public class REPOManualDL : MonoBehaviour
                 return file;
 
         return "";
+    }
+
+    // =========================================================
+    // VERSION FILE MANAGEMENT
+    // =========================================================
+
+    void CreateVersionFile(string apmodUrl, string menulibUrl, string repolibUrl, string bepinexUrl)
+    {
+        try
+        {
+            string apmodVersion = ExtractVersionFromUrl(apmodUrl, @"/releases/download/([^/]+)/");
+            string menulibVersion = ExtractVersionFromUrl(menulibUrl, @"(?:/releases/download/|/download/[^/]+/[^/]+/)([^/]+)/?$");
+            string repolibVersion = ExtractVersionFromUrl(repolibUrl, @"(?:/releases/download/|/download/[^/]+/[^/]+/)([^/]+)/?$");
+            string bepinexVersion = ExtractVersionFromUrl(bepinexUrl, @"/releases/download/([^/]+)/");
+
+            string versionFileName = "REPO APMod Version " + apmodVersion + ".txt";
+            string content = "Archipelago Setup Tool by quack!\n";
+            content += "https://github.com/quackexclamationmark/Archipelago-Setup-Tool\n";
+            content += "\n";
+            content += "=== AP MOD ===\n";
+            content += "Downloaded from: " + apmodUrl + "\n";
+            content += "Version: " + apmodVersion + "\n";
+            content += "\n";
+            content += "=== MENULIB ===\n";
+            content += "Downloaded from: " + menulibUrl + "\n";
+            content += "Version: " + menulibVersion + "\n";
+            content += "\n";
+            content += "=== REPOLIB ===\n";
+            content += "Downloaded from: " + repolibUrl + "\n";
+            content += "Version: " + repolibVersion + "\n";
+            content += "\n";
+            content += "=== BEPINEX ===\n";
+            content += "Downloaded from: " + bepinexUrl + "\n";
+            content += "Version: " + bepinexVersion + "\n";
+            content += "\n";
+            content += "Downloaded at: " + System.DateTime.Now + "\n";
+
+            DeleteOldVersionFiles();
+
+            // Créer dans le root
+            string rootVersionPath = Path.Combine(repoPath, versionFileName);
+            File.WriteAllText(rootVersionPath, content);
+            UnityEngine.Debug.Log("Version file created in root: " + rootVersionPath);
+
+            // Créer dans BepInEx/plugins
+            string pluginsPath = Path.Combine(repoPath, "BepInEx", "plugins");
+            if (Directory.Exists(pluginsPath))
+            {
+                string pluginsVersionPath = Path.Combine(pluginsPath, versionFileName);
+                File.WriteAllText(pluginsVersionPath, content);
+                UnityEngine.Debug.Log("Version file created in plugins: " + pluginsVersionPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error creating version file: " + e.Message);
+        }
+    }
+
+    void DeleteOldVersionFiles()
+    {
+        try
+        {
+            System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"REPO APMod Version .+\.txt");
+
+            // Supprimer dans le root
+            string[] rootFiles = Directory.GetFiles(repoPath);
+            foreach (string file in rootFiles)
+            {
+                string fileName = Path.GetFileName(file);
+                if (pattern.IsMatch(fileName))
+                {
+                    try
+                    {
+                        File.Delete(file);
+                        UnityEngine.Debug.Log("Deleted old version file in root: " + fileName);
+                    }
+                    catch (System.Exception e)
+                    {
+                        UnityEngine.Debug.LogWarning("Could not delete old version file in root: " + e.Message);
+                    }
+                }
+            }
+
+            // Supprimer dans le dossier BepInEx/plugins
+            string pluginsPath = Path.Combine(repoPath, "BepInEx", "plugins");
+            if (Directory.Exists(pluginsPath))
+            {
+                string[] pluginsFiles = Directory.GetFiles(pluginsPath);
+                foreach (string file in pluginsFiles)
+                {
+                    string fileName = Path.GetFileName(file);
+                    if (pattern.IsMatch(fileName))
+                    {
+                        try
+                        {
+                            File.Delete(file);
+                            UnityEngine.Debug.Log("Deleted old version file in plugins: " + fileName);
+                        }
+                        catch (System.Exception e)
+                        {
+                            UnityEngine.Debug.LogWarning("Could not delete old version file in plugins: " + e.Message);
+                        }
+                    }
+                }
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error cleaning up old version files: " + e.Message);
+        }
+    }
+
+    string ExtractVersionFromUrl(string url, string pattern)
+    {
+        System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(pattern);
+        System.Text.RegularExpressions.Match match = regex.Match(url);
+
+        if (match.Success)
+            return match.Groups[1].Value;
+
+        return "Unknown";
     }
 
     string GetRepoPath()

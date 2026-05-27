@@ -220,6 +220,7 @@ public class PowerwashManualDL : MonoBehaviour
 
             SafeDeleteDirectory(Path.Combine(pluginsPath, "SW_CreeperKing.ArchipelagoMod"));
             SafeDeleteDirectory(Path.Combine(pluginsPath, "Archipelago"));
+            DeleteOldVersionFiles();
 
             ShowInfo("AP mods removed successfully!");
             return;
@@ -250,6 +251,7 @@ public class PowerwashManualDL : MonoBehaviour
             SafeDeleteFile(Path.Combine(powerwashPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(powerwashPath, "winhttp.dll"));
             SafeDeleteFile(Path.Combine(powerwashPath, ".doorstop_version"));
+            DeleteOldVersionFiles();
 
             ShowInfo("Full clean completed!");
             return;
@@ -259,6 +261,7 @@ public class PowerwashManualDL : MonoBehaviour
 
         SafeDeleteDirectory(Path.Combine(pluginsPath, "SW_CreeperKing.ArchipelagoMod"));
         SafeDeleteDirectory(Path.Combine(pluginsPath, "Archipelago"));
+        DeleteOldVersionFiles();
 
         ShowInfo("Revert completed!");
     }
@@ -296,6 +299,12 @@ public class PowerwashManualDL : MonoBehaviour
 
         foreach (string file in files)
         {
+            string fileName = Path.GetFileName(file);
+            
+            // Ignorer les fichiers de version PowerWash APMod
+            if (fileName.StartsWith("PowerWash APMod Version") && fileName.EndsWith(".txt"))
+                continue;
+
             return true;
         }
 
@@ -326,6 +335,8 @@ public class PowerwashManualDL : MonoBehaviour
             ShowInfo("Installing AP Mod...");
             yield return InstallAPMod();
         }
+
+        CreateVersionFile(apMod.url, bepInEx.url, apworld.url);
 
         ShowInfo("Launching PowerWash Simulator...");
         LaunchPowerwash();
@@ -545,6 +556,8 @@ public class PowerwashManualDL : MonoBehaviour
         ShowInfo("Installing AP Mod...");
         yield return InstallAPMod();
 
+        CreateVersionFile(apMod.url, bepInEx.url, apworld.url);
+
         ShowInfo("Installation complete!");
         yield break;
     }
@@ -763,5 +776,120 @@ public class PowerwashManualDL : MonoBehaviour
         catch { }
 
         return "";
+    }
+
+    // =========================================================
+    // VERSION FILE MANAGEMENT
+    // =========================================================
+
+    void CreateVersionFile(string apmodUrl, string bepinexUrl, string apworldUrl)
+    {
+        try
+        {
+            string apmodVersion = ExtractVersionFromUrl(apmodUrl, @"/releases/download/([^/]+)/");
+            string bepinexVersion = ExtractVersionFromUrl(bepinexUrl, @"/releases/download/([^/]+)/");
+            string apworldVersion = "N/A";
+
+            string versionFileName = "PowerWash APMod Version " + apmodVersion + ".txt";
+            string content = "Archipelago Setup Tool by quack!\n";
+            content += "https://github.com/quackexclamationmark/Archipelago-Setup-Tool\n";
+            content += "\n";
+            content += "=== AP MOD ===\n";
+            content += "Downloaded from: " + apmodUrl + "\n";
+            content += "Version: " + apmodVersion + "\n";
+            content += "\n";
+            content += "=== BEPINEX ===\n";
+            content += "Downloaded from: " + bepinexUrl + "\n";
+            content += "Version: " + bepinexVersion + "\n";
+            content += "\n";
+            content += "=== APWORLD ===\n";
+            content += "Downloaded from: " + apworldUrl + "\n";
+            content += "Version: " + apworldVersion + "\n";
+            content += "\n";
+            content += "Downloaded at: " + System.DateTime.Now + "\n";
+
+            DeleteOldVersionFiles();
+
+            string rootVersionPath = Path.Combine(powerwashPath, versionFileName);
+            File.WriteAllText(rootVersionPath, content);
+            UnityEngine.Debug.Log("Version file created in root: " + rootVersionPath);
+
+            string pluginsPath = Path.Combine(powerwashPath, "BepInEx", "plugins");
+            if (Directory.Exists(pluginsPath))
+            {
+                string pluginsVersionPath = Path.Combine(pluginsPath, versionFileName);
+                File.WriteAllText(pluginsVersionPath, content);
+                UnityEngine.Debug.Log("Version file created in plugins: " + pluginsVersionPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error creating version file: " + e.Message);
+        }
+    }
+
+    void DeleteOldVersionFiles()
+    {
+        try
+        {
+            System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"PowerWash APMod Version .+\.txt");
+
+            // Supprimer les fichiers à la racine
+            string[] rootFiles = Directory.GetFiles(powerwashPath);
+            foreach (string file in rootFiles)
+            {
+                string fileName = Path.GetFileName(file);
+                if (pattern.IsMatch(fileName))
+                {
+                    try
+                    {
+                        File.Delete(file);
+                        UnityEngine.Debug.Log("Deleted old version file in root: " + fileName);
+                    }
+                    catch (System.Exception e)
+                    {
+                        UnityEngine.Debug.LogWarning("Could not delete old version file in root: " + e.Message);
+                    }
+                }
+            }
+
+            // Supprimer les fichiers dans plugins
+            string pluginsPath = Path.Combine(powerwashPath, "BepInEx", "plugins");
+            if (Directory.Exists(pluginsPath))
+            {
+                string[] pluginsFiles = Directory.GetFiles(pluginsPath);
+                foreach (string file in pluginsFiles)
+                {
+                    string fileName = Path.GetFileName(file);
+                    if (pattern.IsMatch(fileName))
+                    {
+                        try
+                        {
+                            File.Delete(file);
+                            UnityEngine.Debug.Log("Deleted old version file in plugins: " + fileName);
+                        }
+                        catch (System.Exception e)
+                        {
+                            UnityEngine.Debug.LogWarning("Could not delete old version file in plugins: " + e.Message);
+                        }
+                    }
+                }
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error cleaning up old version files: " + e.Message);
+        }
+    }
+
+    string ExtractVersionFromUrl(string url, string pattern)
+    {
+        System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(pattern);
+        System.Text.RegularExpressions.Match match = regex.Match(url);
+
+        if (match.Success)
+            return match.Groups[1].Value;
+
+        return "Unknown";
     }
 }

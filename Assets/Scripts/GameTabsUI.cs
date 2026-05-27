@@ -7,6 +7,7 @@ public class GameTabsUI : MonoBehaviour
     [Header("PANELS")]
     public GameObject setupPanel;
     public GameObject infosPanel;
+    public GameObject popTrackerPanel;
 
     [Header("AUTO OBJECTS ON SETUP")]
     public GameObject revertInfos;
@@ -15,6 +16,7 @@ public class GameTabsUI : MonoBehaviour
     [Header("TAB BUTTONS")]
     public Button setupButton;
     public Button infosButton;
+    public Button popTrackerButton;
 
     [Header("COLORS")]
     public Color activeColor = Color.white;
@@ -22,11 +24,16 @@ public class GameTabsUI : MonoBehaviour
     public Color highlightedColor = new Color(0.85f, 0.85f, 0.85f);
 
     private bool setupIsActive = true;
+    private bool infosIsActive = false;
+    private bool popTrackerIsActive = false;
 
     void Start()
     {
-        AddHoverEvents(setupButton, true);
-        AddHoverEvents(infosButton, false);
+        AddHoverEvents(setupButton, "setup");
+        AddHoverEvents(infosButton, "infos");
+
+        if (popTrackerButton != null)
+            AddHoverEvents(popTrackerButton, "poptracker");
 
         OpenSetup();
     }
@@ -41,12 +48,17 @@ public class GameTabsUI : MonoBehaviour
     public void OpenSetup()
     {
         setupIsActive = true;
+        infosIsActive = false;
+        popTrackerIsActive = false;
 
         if (setupPanel != null)
             setupPanel.SetActive(true);
 
         if (infosPanel != null)
             infosPanel.SetActive(false);
+
+        if (popTrackerPanel != null)
+            popTrackerPanel.SetActive(false);
 
         // Active aussi ces objets
         if (revertInfos != null)
@@ -61,6 +73,8 @@ public class GameTabsUI : MonoBehaviour
     public void OpenInfos()
     {
         setupIsActive = false;
+        infosIsActive = true;
+        popTrackerIsActive = false;
 
         if (setupPanel != null)
             setupPanel.SetActive(false);
@@ -68,7 +82,35 @@ public class GameTabsUI : MonoBehaviour
         if (infosPanel != null)
             infosPanel.SetActive(true);
 
+        if (popTrackerPanel != null)
+            popTrackerPanel.SetActive(false);
+
         // Cache ces objets en mode infos
+        if (revertInfos != null)
+            revertInfos.SetActive(false);
+
+        if (revertButton != null)
+            revertButton.SetActive(false);
+
+        UpdateButtonColors();
+    }
+
+    public void OpenPopTracker()
+    {
+        setupIsActive = false;
+        infosIsActive = false;
+        popTrackerIsActive = true;
+
+        if (setupPanel != null)
+            setupPanel.SetActive(false);
+
+        if (infosPanel != null)
+            infosPanel.SetActive(false);
+
+        if (popTrackerPanel != null)
+            popTrackerPanel.SetActive(true);
+
+        // Cache ces objets en mode pop tracker
         if (revertInfos != null)
             revertInfos.SetActive(false);
 
@@ -86,7 +128,10 @@ public class GameTabsUI : MonoBehaviour
             SetButtonColor(setupButton, setupIsActive ? activeColor : inactiveColor);
 
         if (infosButton != null)
-            SetButtonColor(infosButton, setupIsActive ? inactiveColor : activeColor);
+            SetButtonColor(infosButton, infosIsActive ? activeColor : inactiveColor);
+
+        if (popTrackerButton != null)
+            SetButtonColor(popTrackerButton, popTrackerIsActive ? activeColor : inactiveColor);
     }
 
     void SetButtonColor(Button button, Color color)
@@ -99,7 +144,7 @@ public class GameTabsUI : MonoBehaviour
 
     // ---------------- HOVER ----------------
 
-    void AddHoverEvents(Button button, bool isSetupButton)
+    void AddHoverEvents(Button button, string tabType)
     {
         if (button == null)
             return;
@@ -113,9 +158,20 @@ public class GameTabsUI : MonoBehaviour
 
         AddEvent(trigger, EventTriggerType.PointerEnter, () =>
         {
-            bool isActive =
-                (isSetupButton && setupIsActive) ||
-                (!isSetupButton && !setupIsActive);
+            bool isActive = false;
+
+            switch (tabType)
+            {
+                case "setup":
+                    isActive = setupIsActive;
+                    break;
+                case "infos":
+                    isActive = infosIsActive;
+                    break;
+                case "poptracker":
+                    isActive = popTrackerIsActive;
+                    break;
+            }
 
             if (!isActive)
                 SetButtonColor(button, highlightedColor);

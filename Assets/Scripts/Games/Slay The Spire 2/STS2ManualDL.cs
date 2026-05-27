@@ -44,8 +44,8 @@ public class STS2ManualDL : MonoBehaviour
     [System.Serializable]
     public class STS2Config
     {
-        public string repoApworld;
-        public string repoAPMod;
+        public string sts2Apworld;
+        public string sts2AP;
     }
 
     void Start()
@@ -85,8 +85,8 @@ public class STS2ManualDL : MonoBehaviour
         if (remoteConfig == null)
             return;
 
-        apworld.url = remoteConfig.repoApworld;
-        apmod.url = remoteConfig.repoAPMod;
+        apworld.url = remoteConfig.sts2Apworld;
+        apmod.url = remoteConfig.sts2AP;
     }
 
     public void RunSetup()
@@ -189,6 +189,8 @@ public class STS2ManualDL : MonoBehaviour
         ShowInfo("Removing AP mods...");
 
         SafeDeleteDirectory(Path.Combine(modsPath, "Archipelago"));
+
+        DeleteOldVersionFiles();
 
         ShowInfo("AP mods removed successfully!");
     }
@@ -379,6 +381,10 @@ public class STS2ManualDL : MonoBehaviour
             CopyDirectory(archipelagoDir, targetArchipelagoPath);
 
             UnityEngine.Debug.Log("Archipelago mod installed to: " + targetArchipelagoPath);
+
+            // Créer les fichiers version APRÈS l'installation
+            CreateVersionFile(apmod.url, apworld.url);
+
             ShowInfo("AP Mod installed successfully!");
         }
         else
@@ -516,6 +522,145 @@ public class STS2ManualDL : MonoBehaviour
     {
         if (infoPanel != null)
             infoPanel.SetActive(false);
+    }
+
+    // =========================================================
+    // VERSION FILE MANAGEMENT
+    // =========================================================
+
+    void CreateVersionFile(string apmodUrl, string apworldUrl)
+    {
+        try
+        {
+            string apmodVersion = ExtractVersionFromUrl(apmodUrl);
+            string apworldVersion = ExtractApworldVersion(apworldUrl);
+
+            string versionFileName = "STS2 APMod Version " + apmodVersion + ".txt";
+
+            string content = "Archipelago Setup Tool by quack!\n";
+            content += "https://github.com/quackexclamationmark/Archipelago-Setup-Tool\n";
+            content += "\n";
+            content += "=== AP MOD ===\n";
+            content += "Downloaded from: " + apmodUrl + "\n";
+            content += "Version: " + apmodVersion + "\n";
+            content += "\n";
+            content += "=== APWORLD ===\n";
+            content += "Downloaded from: " + apworldUrl + "\n";
+            content += "Version: " + apworldVersion + "\n";
+            content += "\n";
+            content += "Downloaded at: " + System.DateTime.Now + "\n";
+
+            DeleteOldVersionFiles();
+
+            // Créer dans le root avec l'exe
+            string rootVersionPath = Path.Combine(sts2Path, versionFileName);
+            File.WriteAllText(rootVersionPath, content);
+            UnityEngine.Debug.Log("Version file created in root: " + rootVersionPath);
+
+            // Créer dans le dossier Archipelago
+            string archipelagoPath = Path.Combine(sts2Path, "mods", "Archipelago");
+            if (Directory.Exists(archipelagoPath))
+            {
+                string archipelagoVersionPath = Path.Combine(archipelagoPath, versionFileName);
+                File.WriteAllText(archipelagoVersionPath, content);
+                UnityEngine.Debug.Log("Version file created in Archipelago folder: " + archipelagoVersionPath);
+            }
+            else
+            {
+                UnityEngine.Debug.LogWarning("Archipelago folder not found for version file creation");
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error creating version file: " + e.Message);
+        }
+    }
+
+    void DeleteOldVersionFiles()
+    {
+        try
+        {
+            System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"STS2 APMod Version .+\.txt");
+
+            // Supprimer dans le root
+            string[] rootFiles = Directory.GetFiles(sts2Path);
+            foreach (string file in rootFiles)
+            {
+                string fileName = Path.GetFileName(file);
+                if (pattern.IsMatch(fileName))
+                {
+                    try
+                    {
+                        File.Delete(file);
+                        UnityEngine.Debug.Log("Deleted old version file in root: " + fileName);
+                    }
+                    catch (System.Exception e)
+                    {
+                        UnityEngine.Debug.LogWarning("Could not delete old version file in root: " + e.Message);
+                    }
+                }
+            }
+
+            // Supprimer dans le dossier Archipelago
+            string archipelagoPath = Path.Combine(sts2Path, "mods", "Archipelago");
+            if (Directory.Exists(archipelagoPath))
+            {
+                string[] archipelagoFiles = Directory.GetFiles(archipelagoPath);
+                foreach (string file in archipelagoFiles)
+                {
+                    string fileName = Path.GetFileName(file);
+                    if (pattern.IsMatch(fileName))
+                    {
+                        try
+                        {
+                            File.Delete(file);
+                            UnityEngine.Debug.Log("Deleted old version file in Archipelago folder: " + fileName);
+                        }
+                        catch (System.Exception e)
+                        {
+                            UnityEngine.Debug.LogWarning("Could not delete old version file in Archipelago folder: " + e.Message);
+                        }
+                    }
+                }
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error cleaning up old version files: " + e.Message);
+        }
+    }
+
+    string ExtractVersionFromUrl(string url)
+    {
+        System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"/download/([^/]+)/sts2-client\.zip");
+        System.Text.RegularExpressions.Match match = regex.Match(url);
+
+        if (match.Success)
+            return match.Groups[1].Value;
+
+        return "Unknown";
+    }
+
+    string ExtractApworldVersion(string url)
+    {
+        // Cherche le pattern GitHub releases: /releases/download/VERSION/filename
+        System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"/releases/download/([^/]+)/");
+        System.Text.RegularExpressions.Match match = regex.Match(url);
+
+        if (match.Success)
+            return match.Groups[1].Value;
+
+        // Fallback: extrait le nom du fichier depuis l'URL
+        string fileName = url.Substring(url.LastIndexOf('/') + 1);
+
+        if (fileName.Contains("?"))
+            fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+        // Enlève l'extension .apworld
+        if (fileName.EndsWith(".apworld"))
+            fileName = fileName.Substring(0, fileName.Length - 8);
+
+        return fileName;
     }
 
     string GetSTS2Path()

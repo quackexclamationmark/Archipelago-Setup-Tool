@@ -233,6 +233,8 @@ public class LethalCompanyManualDL : MonoBehaviour
             SafeDeleteFile(Path.Combine(pluginsPath, "Archipelago.MultiClient.Net.dll"));
             SafeDeleteFile(Path.Combine(pluginsPath, "Archipelago_Scrap.dll"));
 
+            DeleteOldVersionFiles();
+
             ShowInfo("AP mods removed successfully!");
             return;
         }
@@ -259,6 +261,8 @@ public class LethalCompanyManualDL : MonoBehaviour
         SafeDeleteFile(Path.Combine(pluginsPath, "APLC.dll"));
         SafeDeleteFile(Path.Combine(pluginsPath, "Archipelago.MultiClient.Net.dll"));
         SafeDeleteFile(Path.Combine(pluginsPath, "Archipelago_Scrap.dll"));
+
+        DeleteOldVersionFiles();
 
         if (fullClean)
         {
@@ -290,6 +294,9 @@ public class LethalCompanyManualDL : MonoBehaviour
             foreach (string file in files)
             {
                 string name = Path.GetFileName(file);
+
+                if (name.StartsWith("LethalCompany APMod Version") && name.EndsWith(".txt"))
+                    continue;
 
                 if (name != "APLC.dll" &&
                     name != "Archipelago.MultiClient.Net.dll" &&
@@ -389,6 +396,8 @@ public class LethalCompanyManualDL : MonoBehaviour
             ShowInfo("Installing MonoDetour...");
             yield return InstallMonoDetour();
         }
+
+        CreateVersionFile(apMod.url, bepInEx.url, apworld.url, lethalAPI.url, apScrap.url, levelLoader.url, lethalLib.url, fixSerialize.url, modData.url, hook.url, monoDetourBep5.url, monoDetour.url);
 
         ShowInfo("Launching Lethal Company...");
         LaunchLethalCompany();
@@ -848,7 +857,6 @@ public class LethalCompanyManualDL : MonoBehaviour
 
         try
         {
-            // Essai simple d'abord
             Directory.Delete(path, true);
         }
         catch
@@ -921,7 +929,6 @@ public class LethalCompanyManualDL : MonoBehaviour
 
         try
         {
-            // Copie simple et rapide
             CopyDirectory(source, target);
             SafeDeleteDirectory(source);
         }
@@ -1006,5 +1013,170 @@ public class LethalCompanyManualDL : MonoBehaviour
 
         UnityEngine.Debug.LogWarning("Lethal Company not found.");
         return "";
+    }
+
+    // =========================================================
+    // VERSION FILE MANAGEMENT
+    // =========================================================
+
+    void CreateVersionFile(string apmodUrl, string bepinexUrl, string apworldUrl, string lethalApiUrl, string apScrapUrl, string levelLoaderUrl, string lethalLibUrl, string fixSerializeUrl, string modDataUrl, string hookUrl, string monoDetourBep5Url, string monoDetourUrl)
+    {
+        try
+        {
+            string apmodVersion = ExtractVersionFromUrl(apmodUrl, @"/download/[^/]+/[^/]+/([^/]+)/?$");
+            string bepinexVersion = ExtractVersionFromUrl(bepinexUrl, @"/releases/download/([^/]+)/");
+            string apworldVersion = ExtractVersionFromUrl(apworldUrl, "");
+            string lethalApiVersion = ExtractVersionFromUrl(lethalApiUrl, @"(?:/releases/download/|/download/[^/]+/[^/]+/)([^/]+)/?$");
+            string apScrapVersion = ExtractVersionFromUrl(apScrapUrl, @"(?:/releases/download/|/download/[^/]+/[^/]+/)([^/]+)/?$");
+            string levelLoaderVersion = ExtractVersionFromUrl(levelLoaderUrl, @"(?:/releases/download/|/download/[^/]+/[^/]+/)([^/]+)/?$");
+            string lethalLibVersion = ExtractVersionFromUrl(lethalLibUrl, @"(?:/releases/download/|/download/[^/]+/[^/]+/)([^/]+)/?$");
+            string fixSerializeVersion = ExtractVersionFromUrl(fixSerializeUrl, @"(?:/releases/download/|/download/[^/]+/[^/]+/)([^/]+)/?$");
+            string modDataVersion = ExtractVersionFromUrl(modDataUrl, @"(?:/releases/download/|/download/[^/]+/[^/]+/)([^/]+)/?$");
+            string hookVersion = ExtractVersionFromUrl(hookUrl, @"(?:/releases/download/|/download/[^/]+/[^/]+/)([^/]+)/?$");
+            string monoDetourBep5Version = ExtractVersionFromUrl(monoDetourBep5Url, @"(?:/releases/download/|/download/[^/]+/[^/]+/)([^/]+)/?$");
+            string monoDetourVersion = ExtractVersionFromUrl(monoDetourUrl, @"(?:/releases/download/|/download/[^/]+/[^/]+/)([^/]+)/?$");
+
+            string versionFileName = "LethalCompany APMod Version " + apmodVersion + ".txt";
+            string content = "Archipelago Setup Tool by quack!\n";
+            content += "https://github.com/quackexclamationmark/Archipelago-Setup-Tool\n";
+            content += "\n";
+            content += "=== AP MOD ===\n";
+            content += "Downloaded from: " + apmodUrl + "\n";
+            content += "Version: " + apmodVersion + "\n";
+            content += "\n";
+            content += "=== BEPINEX ===\n";
+            content += "Downloaded from: " + bepinexUrl + "\n";
+            content += "Version: " + bepinexVersion + "\n";
+            content += "\n";
+            content += "=== APWORLD ===\n";
+            content += "Downloaded from: " + apworldUrl + "\n";
+            content += "Version: " + apworldVersion + "\n";
+            content += "\n";
+            content += "=== LETHAL API ===\n";
+            content += "Downloaded from: " + lethalApiUrl + "\n";
+            content += "Version: " + lethalApiVersion + "\n";
+            content += "\n";
+            content += "=== AP SCRAP ===\n";
+            content += "Downloaded from: " + apScrapUrl + "\n";
+            content += "Version: " + apScrapVersion + "\n";
+            content += "\n";
+            content += "=== LEVEL LOADER ===\n";
+            content += "Downloaded from: " + levelLoaderUrl + "\n";
+            content += "Version: " + levelLoaderVersion + "\n";
+            content += "\n";
+            content += "=== LETHAL LIB ===\n";
+            content += "Downloaded from: " + lethalLibUrl + "\n";
+            content += "Version: " + lethalLibVersion + "\n";
+            content += "\n";
+            content += "=== FIX SERIALIZE ===\n";
+            content += "Downloaded from: " + fixSerializeUrl + "\n";
+            content += "Version: " + fixSerializeVersion + "\n";
+            content += "\n";
+            content += "=== MOD DATA ===\n";
+            content += "Downloaded from: " + modDataUrl + "\n";
+            content += "Version: " + modDataVersion + "\n";
+            content += "\n";
+            content += "=== HOOK ===\n";
+            content += "Downloaded from: " + hookUrl + "\n";
+            content += "Version: " + hookVersion + "\n";
+            content += "\n";
+            content += "=== MONO DETOUR BEP5 ===\n";
+            content += "Downloaded from: " + monoDetourBep5Url + "\n";
+            content += "Version: " + monoDetourBep5Version + "\n";
+            content += "\n";
+            content += "=== MONO DETOUR ===\n";
+            content += "Downloaded from: " + monoDetourUrl + "\n";
+            content += "Version: " + monoDetourVersion + "\n";
+            content += "\n";
+            content += "Downloaded at: " + System.DateTime.Now + "\n";
+
+            DeleteOldVersionFiles();
+
+            string rootVersionPath = Path.Combine(lethalCompanyPath, versionFileName);
+            File.WriteAllText(rootVersionPath, content);
+            UnityEngine.Debug.Log("Version file created in root: " + rootVersionPath);
+
+            string pluginsPath = Path.Combine(lethalCompanyPath, "BepInEx", "plugins");
+            if (Directory.Exists(pluginsPath))
+            {
+                string pluginsVersionPath = Path.Combine(pluginsPath, versionFileName);
+                File.WriteAllText(pluginsVersionPath, content);
+                UnityEngine.Debug.Log("Version file created in plugins: " + pluginsVersionPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error creating version file: " + e.Message);
+        }
+    }
+
+    void DeleteOldVersionFiles()
+    {
+        try
+        {
+            System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"LethalCompany APMod Version .+\.txt");
+
+            string[] rootFiles = Directory.GetFiles(lethalCompanyPath);
+            foreach (string file in rootFiles)
+            {
+                string fileName = Path.GetFileName(file);
+                if (pattern.IsMatch(fileName))
+                {
+                    try
+                    {
+                        File.Delete(file);
+                        UnityEngine.Debug.Log("Deleted old version file in root: " + fileName);
+                    }
+                    catch (System.Exception e)
+                    {
+                        UnityEngine.Debug.LogWarning("Could not delete old version file in root: " + e.Message);
+                    }
+                }
+            }
+
+            string pluginsPath = Path.Combine(lethalCompanyPath, "BepInEx", "plugins");
+            if (Directory.Exists(pluginsPath))
+            {
+                string[] pluginsFiles = Directory.GetFiles(pluginsPath);
+                foreach (string file in pluginsFiles)
+                {
+                    string fileName = Path.GetFileName(file);
+                    if (pattern.IsMatch(fileName))
+                    {
+                        try
+                        {
+                            File.Delete(file);
+                            UnityEngine.Debug.Log("Deleted old version file in plugins: " + fileName);
+                        }
+                        catch (System.Exception e)
+                        {
+                            UnityEngine.Debug.LogWarning("Could not delete old version file in plugins: " + e.Message);
+                        }
+                    }
+                }
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error cleaning up old version files: " + e.Message);
+        }
+    }
+
+    string ExtractVersionFromUrl(string url, string pattern)
+    {
+        // Pattern pour Thunderstore: https://thunderstore.io/package/download/Author/Package/VERSION/
+        System.Text.RegularExpressions.Regex thunderstorePattern = new System.Text.RegularExpressions.Regex(@"thunderstore\.io/package/download/[^/]+/[^/]+/([^/]+)/?$");
+        System.Text.RegularExpressions.Match thunderstoreMatch = thunderstorePattern.Match(url);
+
+        if (thunderstoreMatch.Success)
+            return thunderstoreMatch.Groups[1].Value;
+
+        System.Text.RegularExpressions.Regex githubPattern = new System.Text.RegularExpressions.Regex(@"/releases/download/([^/]+)/");
+        System.Text.RegularExpressions.Match githubMatch = githubPattern.Match(url);
+
+        if (githubMatch.Success)
+            return githubMatch.Groups[1].Value;
+
+        return "Unknown";
     }
 }

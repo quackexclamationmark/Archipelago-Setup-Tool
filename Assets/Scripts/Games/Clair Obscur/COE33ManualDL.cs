@@ -255,6 +255,8 @@ public class COE33ManualDL : MonoBehaviour
             RemoveEmptyDirectories(Path.Combine(manifest.gameInstallPath, "Sandfall", "Content"));
             RemoveEmptyDirectories(Path.Combine(manifest.gameInstallPath, "Sandfall", "Binaries"));
 
+            DeleteOldVersionFiles();
+
             ShowInfo($"Mods removed successfully!\n({successCount} files deleted)");
             UnityEngine.Debug.Log($"Revert complete: {successCount} files deleted, {errorCount} errors");
         }
@@ -329,6 +331,8 @@ public class COE33ManualDL : MonoBehaviour
 
         if (installModsToggle == null || installModsToggle.isOn)
             yield return InstallMods();
+
+        CreateVersionFile(modFiles.url, apworld.url);
 
         yield return new WaitForSeconds(2f);
 
@@ -548,7 +552,6 @@ public class COE33ManualDL : MonoBehaviour
         }
     }
 
-    // ✅ NOUVELLE FONCTION: Télécharge un fichier directement
     IEnumerator DownloadFile(string url, string savePath)
     {
         UnityEngine.Debug.Log("Starting download from: " + url);
@@ -811,5 +814,94 @@ public class COE33ManualDL : MonoBehaviour
         catch { }
 
         return "";
+    }
+
+    // =========================================================
+    // VERSION FILE MANAGEMENT
+    // =========================================================
+
+    void CreateVersionFile(string modFilesUrl, string apworldUrl)
+    {
+        try
+        {
+            string modFilesVersion = ExtractVersionFromUrl(modFilesUrl, "");
+            string apworldVersion = ExtractVersionFromUrl(apworldUrl, "");
+
+            string versionFileName = "ClairObscur APMod Version " + modFilesVersion + ".txt";
+            string content = "Archipelago Setup Tool by quack!\n";
+            content += "https://github.com/quackexclamationmark/Archipelago-Setup-Tool\n";
+            content += "\n";
+            content += "=== MOD FILES ===\n";
+            content += "Downloaded from: " + modFilesUrl + "\n";
+            content += "Version: " + modFilesVersion + "\n";
+            content += "\n";
+            content += "=== APWORLD ===\n";
+            content += "Downloaded from: " + apworldUrl + "\n";
+            content += "Version: " + apworldVersion + "\n";
+            content += "\n";
+            content += "Downloaded at: " + System.DateTime.Now + "\n";
+
+            DeleteOldVersionFiles();
+
+            string coreVersionPath = Path.Combine(gamePath, versionFileName);
+            File.WriteAllText(coreVersionPath, content);
+            UnityEngine.Debug.Log("Version file created: " + coreVersionPath);
+
+            if (currentManifest != null)
+                currentManifest.installedFiles.Add(coreVersionPath);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error creating version file: " + e.Message);
+        }
+    }
+
+    void DeleteOldVersionFiles()
+    {
+        try
+        {
+            System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"ClairObscur APMod Version .+\.txt");
+
+            string[] rootFiles = Directory.GetFiles(gamePath);
+            foreach (string file in rootFiles)
+            {
+                string fileName = Path.GetFileName(file);
+                if (pattern.IsMatch(fileName))
+                {
+                    try
+                    {
+                        File.Delete(file);
+                        UnityEngine.Debug.Log("Deleted old version file: " + fileName);
+                    }
+                    catch (System.Exception e)
+                    {
+                        UnityEngine.Debug.LogWarning("Could not delete old version file: " + e.Message);
+                    }
+                }
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error cleaning up old version files: " + e.Message);
+        }
+    }
+
+    string ExtractVersionFromUrl(string url, string pattern)
+    {
+        // Pattern pour Thunderstore: https://thunderstore.io/package/download/Author/Package/VERSION/
+        System.Text.RegularExpressions.Regex thunderstorePattern = new System.Text.RegularExpressions.Regex(@"thunderstore\.io/package/download/[^/]+/[^/]+/([^/]+)/?$");
+        System.Text.RegularExpressions.Match thunderstoreMatch = thunderstorePattern.Match(url);
+
+        if (thunderstoreMatch.Success)
+            return thunderstoreMatch.Groups[1].Value;
+
+        // Pattern pour GitHub releases: /releases/download/VERSION/
+        System.Text.RegularExpressions.Regex githubPattern = new System.Text.RegularExpressions.Regex(@"/releases/download/([^/]+)/");
+        System.Text.RegularExpressions.Match githubMatch = githubPattern.Match(url);
+
+        if (githubMatch.Success)
+            return githubMatch.Groups[1].Value;
+
+        return "Unknown";
     }
 }
