@@ -23,6 +23,7 @@ Next on the list:
 Features to add in the future:
 
 * Adding support for games available across multiple platforms.
+* Adding support for other OS (Linux).
 * A new tab above the game selector, providing quick access to required tools and a detailed guide on how to host an Archipelago session.
 * Adding a live log to display all actions performed during setup in real time.
 
