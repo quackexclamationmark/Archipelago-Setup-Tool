@@ -7,12 +7,12 @@ After setting up a game, all credits can be found in the game's directory.
 
 Currently, the following games are supported:
 
-* PowerWash Simulator
-* R.E.P.O.
-* Subnautica
 * Clair Obscur: Expedition 33
 * Lethal Company
+* PowerWash Simulator
+* R.E.P.O.
 * Slay The Spire 2
+* Subnautica
 
 Next on the list:
 * Content Warning
