@@ -3,6 +3,8 @@
 # Archipelago Setup Tool
 ### [Download latest version | v0.1.0](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v0.1.0)
 
+After setting up a game, all credits can be found in the game's directory.
+
 Currently, the following games are supported:
 
 * PowerWash Simulator
