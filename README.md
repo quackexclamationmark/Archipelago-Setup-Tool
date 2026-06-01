@@ -8,12 +8,15 @@ Currently, the following games are supported:
 * PowerWash Simulator
 * R.E.P.O.
 * Subnautica
+* Clair Obscur: Expedition 33
+* Lethal Company
+* Slay The Spire 2
 
 Next on the list:
-* Clair Obscur: Expedition 33
+* Content Warning
+* The Witness
 * Dark Souls 3
 * Dark Souls Remastered
-* Lethal Company
 * Slime Rancher
 
 
