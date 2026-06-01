@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using SimpleFileBrowser;
@@ -23,16 +23,16 @@ public class COE33PopTrackerInstaller : MonoBehaviour
     public Button infoOkButton;
 
     [Header("CONFIG")]
-    public string configUrl = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
+    public string configUrl = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/main/RemoteConfig/config.json";
 
     private string selectedDirectory = "";
     private string poptrackerDownloadUrl = "";
-    private string coe33poptrackerDownloadUrl = "";
-    private Coe33PopTrackerConfig remoteConfig;
+    private string gamepackDownloadUrl = "";
+    private RemoteConfig remoteConfig;
     private bool configLoaded = false;
 
     [System.Serializable]
-    public class Coe33PopTrackerConfig
+    public class RemoteConfig
     {
         public string poptrackerDL;
         public string coe33poptrackerDL;
@@ -56,9 +56,7 @@ public class COE33PopTrackerInstaller : MonoBehaviour
             selectedPathPlaceholder.gameObject.SetActive(true);
 
         if (selectedPathInputField != null)
-        {
             selectedPathInputField.onValueChanged.AddListener(OnPathInputChanged);
-        }
 
         string defaultDocumentsPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
         SetDirectory(defaultDocumentsPath);
@@ -68,7 +66,7 @@ public class COE33PopTrackerInstaller : MonoBehaviour
 
     IEnumerator LoadRemoteConfig()
     {
-        Debug.Log("Loading COE33 PopTracker config from: " + configUrl);
+        Debug.Log("Loading PopTracker config from: " + configUrl);
 
         UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(configUrl);
         request.timeout = 30;
@@ -83,12 +81,12 @@ public class COE33PopTrackerInstaller : MonoBehaviour
 
         try
         {
-            remoteConfig = JsonUtility.FromJson<Coe33PopTrackerConfig>(request.downloadHandler.text);
+            remoteConfig = JsonUtility.FromJson<RemoteConfig>(request.downloadHandler.text);
             poptrackerDownloadUrl = remoteConfig.poptrackerDL;
-            coe33poptrackerDownloadUrl = remoteConfig.coe33poptrackerDL;
-            Debug.Log("COE33 PopTracker config loaded successfully.");
+            gamepackDownloadUrl = remoteConfig.coe33poptrackerDL;
+            Debug.Log("PopTracker config loaded successfully.");
             Debug.Log("PopTracker URL: " + poptrackerDownloadUrl);
-            Debug.Log("COE33 PopTracker URL: " + coe33poptrackerDownloadUrl);
+            Debug.Log("COE33 Pack URL: " + gamepackDownloadUrl);
         }
         catch (System.Exception e)
         {
@@ -116,19 +114,24 @@ public class COE33PopTrackerInstaller : MonoBehaviour
             Debug.LogWarning("DarkSkin not assigned!");
         }
 
-        string documentsPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+        // Utiliser le chemin actuellement sÃ©lectionnÃ© si valide, sinon Documents
+        string startPath = selectedDirectory;
+        if (string.IsNullOrEmpty(startPath) || !IsValidPath(startPath))
+        {
+            startPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+        }
 
         yield return FileBrowser.WaitForLoadDialog(
             FileBrowser.PickMode.Folders,
             false,
-            documentsPath,
+            startPath,
             "Select PopTracker Installation Folder"
         );
 
         if (FileBrowser.Success && FileBrowser.Result != null && FileBrowser.Result.Length > 0)
         {
             string selectedPath = FileBrowser.Result[0];
-            Debug.Log("DEBUG: Path from FileBrowser: " + selectedPath);
+            Debug.Log("Path from FileBrowser: " + selectedPath);
             SetDirectory(selectedPath);
         }
     }
@@ -150,7 +153,6 @@ public class COE33PopTrackerInstaller : MonoBehaviour
         {
             selectedPathInputField.gameObject.SetActive(true);
             selectedPathInputField.text = path;
-            Debug.Log("Selected path text updated to: " + path);
         }
 
         Debug.Log("Directory selected: " + path);
@@ -160,13 +162,9 @@ public class COE33PopTrackerInstaller : MonoBehaviour
     void OnPathInputChanged(string newValue)
     {
         if (IsValidPath(newValue))
-        {
             selectedDirectory = newValue;
-        }
         else
-        {
             selectedDirectory = "";
-        }
         UpdateUI();
     }
 
@@ -196,16 +194,16 @@ public class COE33PopTrackerInstaller : MonoBehaviour
             return;
         }
 
-        if (string.IsNullOrEmpty(coe33poptrackerDownloadUrl))
+        if (string.IsNullOrEmpty(gamepackDownloadUrl))
         {
-            ShowInfo("COE33 PopTracker download URL not loaded");
+            ShowInfo("Game Pack download URL not loaded");
             return;
         }
 
-        StartCoroutine(DownloadAndInstallPopTracker());
+        StartCoroutine(DownloadAndInstall());
     }
 
-    IEnumerator DownloadAndInstallPopTracker()
+    IEnumerator DownloadAndInstall()
     {
         while (!configLoaded)
         {
@@ -213,182 +211,206 @@ public class COE33PopTrackerInstaller : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
         }
 
-        if (string.IsNullOrEmpty(coe33poptrackerDownloadUrl))
-        {
-            ShowInfo("ERROR: COE33 PopTracker URL is empty!");
-            Debug.LogError("COE33 PopTracker URL not set!");
-            yield break;
-        }
-
-        ShowInfo("Checking for PopTracker...");
+        ShowInfo("Analyzing directory...");
         installButton.interactable = false;
 
-        string tempDownloadPath = Path.Combine(Application.persistentDataPath, "Coe33PopTrackerTemp");
+        string tempDownloadPath = Path.Combine(Application.persistentDataPath, "PopTrackerTemp");
         if (!Directory.Exists(tempDownloadPath))
         {
             Directory.CreateDirectory(tempDownloadPath);
         }
 
-        // Déterminer le répertoire cible
-        string targetPath = selectedDirectory;
-        bool isPacksDirectory = new DirectoryInfo(selectedDirectory).Name.Equals("packs", System.StringComparison.OrdinalIgnoreCase);
+        // STEP 1: Determine PopTracker path and if we need to download PopTracker
+        string popTrackerPath = "";
+        bool isUserInPacksFolder = new DirectoryInfo(selectedDirectory).Name.Equals("packs", System.StringComparison.OrdinalIgnoreCase);
 
-        if (isPacksDirectory)
+        if (isUserInPacksFolder)
         {
-            // L'utilisateur a sélectionné le dossier packs
-            targetPath = Directory.GetParent(selectedDirectory).FullName;
-            Debug.Log("Detected packs directory. Target path set to: " + targetPath);
+            // User selected the packs folder directly
+            popTrackerPath = Directory.GetParent(selectedDirectory).FullName;
+            Debug.Log("User selected packs folder. PopTracker path: " + popTrackerPath);
         }
         else
         {
-            // Chercher un dossier contenant "poptracker" dans le nom
-            string popTrackerFolder = FindPopTrackerFolderInDirectory(selectedDirectory);
-            if (!string.IsNullOrEmpty(popTrackerFolder))
-            {
-                targetPath = popTrackerFolder;
-                Debug.Log("Found poptracker folder: " + targetPath);
-            }
+            popTrackerPath = DeterminPopTrackerPath(selectedDirectory);
         }
 
-        // Vérifier si PopTracker.exe existe dans le dossier cible
-        string popTrackerExePath = Path.Combine(targetPath, "PopTracker.exe");
-        bool popTrackerExists = File.Exists(popTrackerExePath);
+        Debug.Log("PopTracker path: " + popTrackerPath);
 
-        Debug.Log("Checking for PopTracker.exe at: " + popTrackerExePath);
-        Debug.Log("PopTracker.exe exists: " + popTrackerExists);
+        // STEP 2: Validate PopTracker (only if user didn't select packs folder)
+        bool needsPopTrackerDownload = false;
 
-        // Si PopTracker n'existe pas, télécharger et installer
-        if (!popTrackerExists)
+        if (!isUserInPacksFolder)
+        {
+            needsPopTrackerDownload = !IsPopTrackerValid(popTrackerPath);
+            if (needsPopTrackerDownload)
+            {
+                ShowInfo("PopTracker incomplete. Downloading...");
+            }
+            else
+            {
+                ShowInfo("PopTracker valid!");
+            }
+        }
+        else
+        {
+            ShowInfo("Installing pack only...");
+        }
+
+        // STEP 3: Download PopTracker if needed
+        if (needsPopTrackerDownload)
         {
             if (string.IsNullOrEmpty(poptrackerDownloadUrl))
             {
                 ShowInfo("ERROR: PopTracker URL is empty!");
-                Debug.LogError("PopTracker URL not set!");
                 installButton.interactable = true;
                 SafeDeleteDirectory(tempDownloadPath);
                 yield break;
             }
 
             ShowInfo("Downloading PopTracker...");
-
             string fileName = ExtractFileNameFromUrl(poptrackerDownloadUrl);
             string zipPath = Path.Combine(tempDownloadPath, fileName);
-
-            Debug.Log("Downloading PopTracker from: " + poptrackerDownloadUrl);
-            Debug.Log("Saving to: " + zipPath);
 
             yield return DownloadFile(poptrackerDownloadUrl, zipPath);
 
             if (!File.Exists(zipPath))
             {
-                Debug.LogError("Download failed: file not found at " + zipPath);
                 ShowInfo("ERROR: PopTracker download failed!");
                 installButton.interactable = true;
                 SafeDeleteDirectory(tempDownloadPath);
                 yield break;
             }
 
-            Debug.Log("File downloaded successfully: " + zipPath);
             ShowInfo("Extracting PopTracker...");
-
             string extractPath = Path.Combine(tempDownloadPath, "extracted");
             if (Directory.Exists(extractPath))
-            {
                 Directory.Delete(extractPath, true);
-            }
             Directory.CreateDirectory(extractPath);
 
             yield return ExtractZipAsync(zipPath, extractPath);
 
             string popTrackerSourceFolder = FindPopTrackerFolder(extractPath);
-
             if (string.IsNullOrEmpty(popTrackerSourceFolder))
             {
-                Debug.LogError("Could not find 'poptracker' folder in extracted files!");
-                ShowInfo("ERROR: Could not find PopTracker folder in archive!");
+                ShowInfo("ERROR: PopTracker folder not found in archive!");
                 installButton.interactable = true;
                 SafeDeleteDirectory(tempDownloadPath);
                 yield break;
             }
 
-            Debug.Log("Found PopTracker folder at: " + popTrackerSourceFolder);
             ShowInfo("Installing PopTracker...");
+            if (!Directory.Exists(popTrackerPath))
+                Directory.CreateDirectory(popTrackerPath);
 
-            yield return CopyDirectoryRecursive(popTrackerSourceFolder, targetPath);
-
-            Debug.Log("PopTracker installed to: " + targetPath);
-            ShowInfo("PopTracker installation complete!");
-            Debug.Log("Installation complete in: " + targetPath);
-        }
-        else
-        {
-            Debug.Log("PopTracker.exe found. Skipping PopTracker installation.");
-            ShowInfo("PopTracker found! Installing COE33 pack only...");
+            yield return CopyDirectoryRecursive(popTrackerSourceFolder, popTrackerPath);
         }
 
-        // Télécharger et installer le pack COE33
-        if (string.IsNullOrEmpty(coe33poptrackerDownloadUrl))
+        // STEP 4: Download and install game pack
+        if (string.IsNullOrEmpty(gamepackDownloadUrl))
         {
-            Debug.LogWarning("COE33 PopTracker URL is empty, skipping COE33 pack installation");
+            ShowInfo("ERROR: Game Pack URL not loaded");
+            installButton.interactable = true;
+            SafeDeleteDirectory(tempDownloadPath);
+            yield break;
         }
-        else
+
+        ShowInfo("Downloading game pack...");
+        string gamepackZipPath = Path.Combine(tempDownloadPath, "GamePack.zip");
+
+        yield return DownloadFile(gamepackDownloadUrl, gamepackZipPath);
+
+        if (!File.Exists(gamepackZipPath))
         {
-            ShowInfo("Downloading COE33 PopTracker pack...");
+            ShowInfo("ERROR: Game pack download failed!");
+            installButton.interactable = true;
+            SafeDeleteDirectory(tempDownloadPath);
+            yield break;
+        }
 
-            string coe33FileName = "COE33ArchipelagoPopTracker.zip";
-            string coe33ZipPath = Path.Combine(tempDownloadPath, coe33FileName);
-
-            Debug.Log("Downloading COE33 PopTracker from: " + coe33poptrackerDownloadUrl);
-            Debug.Log("Saving to: " + coe33ZipPath);
-
-            yield return DownloadFile(coe33poptrackerDownloadUrl, coe33ZipPath);
-
-            if (!File.Exists(coe33ZipPath))
-            {
-                Debug.LogError("COE33 download failed: file not found at " + coe33ZipPath);
-                ShowInfo("ERROR: COE33 PopTracker download failed!");
-                installButton.interactable = true;
-                SafeDeleteDirectory(tempDownloadPath);
-                yield break;
-            }
-
-            Debug.Log("COE33 file downloaded successfully: " + coe33ZipPath);
-            ShowInfo("Installing COE33 pack...");
-
-            string packsPath = Path.Combine(targetPath, "packs");
+        ShowInfo("Installing game pack...");
+        string packsPath = Path.Combine(popTrackerPath, "packs");
+        if (!Directory.Exists(packsPath))
             Directory.CreateDirectory(packsPath);
 
-            Debug.Log("Created/verified packs directory at: " + packsPath);
+        // COPIER LE ZIP DIRECTEMENT DANS packs/ AVEC LE BON NOM
+        string packDestZipPath = Path.Combine(packsPath, "COE33APPoptracker.zip");
+        File.Copy(gamepackZipPath, packDestZipPath, true);
+        Debug.Log("Pack copied to: " + packDestZipPath);
 
-            string packsZipPath = Path.Combine(packsPath, coe33FileName);
+        ShowInfo("Installation complete in:\n" + popTrackerPath);
+        SafeDeleteDirectory(tempDownloadPath);
+        installButton.interactable = true;
+    }
 
-            try
+    string DeterminPopTrackerPath(string selectedPath)
+    {
+        if (new DirectoryInfo(selectedPath).Name.Equals("poptracker", System.StringComparison.OrdinalIgnoreCase))
+            return selectedPath;
+
+        string popTrackerFolder = FindPopTrackerFolderInDirectory(selectedPath);
+        if (!string.IsNullOrEmpty(popTrackerFolder))
+            return popTrackerFolder;
+
+        return Path.Combine(selectedPath, "poptracker");
+    }
+
+    bool IsPopTrackerValid(string popTrackerPath)
+    {
+        if (!Directory.Exists(popTrackerPath))
+            return false;
+
+        string popTrackerExePath = Path.Combine(popTrackerPath, "PopTracker.exe");
+        if (!File.Exists(popTrackerExePath))
+            return false;
+
+        string packsPath = Path.Combine(popTrackerPath, "packs");
+        if (!Directory.Exists(packsPath))
+            return false;
+
+        return true;
+    }
+
+    string FindPopTrackerFolder(string rootPath)
+    {
+        try
+        {
+            foreach (string dir in Directory.GetDirectories(rootPath, "*", System.IO.SearchOption.AllDirectories))
             {
-                File.Copy(coe33ZipPath, packsZipPath, true);
-                Debug.Log("COE33 pack copied to: " + packsZipPath);
+                string folderName = new DirectoryInfo(dir).Name;
+                if (folderName.Equals("poptracker", System.StringComparison.OrdinalIgnoreCase))
+                    return dir;
             }
-            catch (System.Exception e)
-            {
-                Debug.LogError("Error copying COE33 pack: " + e.Message);
-                ShowInfo("ERROR: Failed to copy COE33 pack!");
-                installButton.interactable = true;
-                SafeDeleteDirectory(tempDownloadPath);
-                yield break;
-            }
-
-            ShowInfo("Installation complete in:\n" + targetPath);
-            Debug.Log("Installation complete in: " + targetPath);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError("Error searching for poptracker folder: " + e.Message);
         }
 
-        SafeDeleteDirectory(tempDownloadPath);
+        return "";
+    }
 
-        installButton.interactable = true;
+    string FindPopTrackerFolderInDirectory(string rootPath)
+    {
+        try
+        {
+            foreach (string dir in Directory.GetDirectories(rootPath))
+            {
+                string folderName = new DirectoryInfo(dir).Name;
+                if (folderName.IndexOf("poptracker", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                    return dir;
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError("Error searching for poptracker folder: " + e.Message);
+        }
+
+        return "";
     }
 
     IEnumerator DownloadFile(string url, string savePath)
     {
-        Debug.Log("Starting download from: " + url);
-
         using (UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url))
         {
             request.downloadHandler = new UnityEngine.Networking.DownloadHandlerFile(savePath);
@@ -397,21 +419,14 @@ public class COE33PopTrackerInstaller : MonoBehaviour
             yield return request.SendWebRequest();
 
             if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
-            {
                 Debug.LogError("Download error: " + request.error);
-                Debug.LogError("Response code: " + request.responseCode);
-            }
             else
-            {
-                Debug.Log("Download complete! File size: " + new System.IO.FileInfo(savePath).Length + " bytes");
-            }
+                Debug.Log("Download complete!");
         }
     }
 
     IEnumerator ExtractZipAsync(string zipPath, string extractPath)
     {
-        Debug.Log("Starting ZIP extraction from: " + zipPath + " to: " + extractPath);
-
         bool extractionComplete = false;
         System.Exception extractionException = null;
 
@@ -420,7 +435,6 @@ public class COE33PopTrackerInstaller : MonoBehaviour
             try
             {
                 ZipFile.ExtractToDirectory(zipPath, extractPath, true);
-                Debug.Log("ZIP extracted successfully");
             }
             catch (System.Exception e)
             {
@@ -436,61 +450,10 @@ public class COE33PopTrackerInstaller : MonoBehaviour
         extractThread.Start();
 
         while (!extractionComplete)
-        {
             yield return new WaitForSeconds(0.1f);
-        }
 
         if (extractionException != null)
-        {
             Debug.LogError("ZIP extraction failed: " + extractionException.Message);
-        }
-    }
-
-    string FindPopTrackerFolder(string rootPath)
-    {
-        try
-        {
-            foreach (string dir in Directory.GetDirectories(rootPath, "*", System.IO.SearchOption.AllDirectories))
-            {
-                string folderName = new DirectoryInfo(dir).Name;
-                if (folderName.Equals("poptracker", System.StringComparison.OrdinalIgnoreCase))
-                {
-                    Debug.Log("Found poptracker folder: " + dir);
-                    return dir;
-                }
-            }
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError("Error searching for poptracker folder: " + e.Message);
-        }
-
-        Debug.LogWarning("No 'poptracker' folder found in: " + rootPath);
-        return "";
-    }
-
-    string FindPopTrackerFolderInDirectory(string rootPath)
-    {
-        try
-        {
-            // Chercher dans le répertoire racine d'abord (sans récursion)
-            foreach (string dir in Directory.GetDirectories(rootPath))
-            {
-                string folderName = new DirectoryInfo(dir).Name;
-                if (folderName.IndexOf("poptracker", System.StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    Debug.Log("Found poptracker folder: " + dir);
-                    return dir;
-                }
-            }
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError("Error searching for poptracker folder: " + e.Message);
-        }
-
-        Debug.Log("No 'poptracker' folder found in: " + rootPath);
-        return "";
     }
 
     IEnumerator CopyDirectoryRecursive(string sourceDir, string targetDir)
@@ -505,7 +468,6 @@ public class COE33PopTrackerInstaller : MonoBehaviour
             try
             {
                 PerformDirectoryCopy(sourceDir, targetDir);
-                Debug.Log("Directory copy complete: " + sourceDir + " -> " + targetDir);
             }
             catch (System.Exception e)
             {
@@ -521,14 +483,10 @@ public class COE33PopTrackerInstaller : MonoBehaviour
         copyThread.Start();
 
         while (!copyComplete)
-        {
             yield return new WaitForSeconds(0.1f);
-        }
 
         if (copyException != null)
-        {
             Debug.LogError("Directory copy failed: " + copyException.Message);
-        }
     }
 
     void PerformDirectoryCopy(string sourceDir, string targetDir)
@@ -553,11 +511,8 @@ public class COE33PopTrackerInstaller : MonoBehaviour
     string ExtractFileNameFromUrl(string url)
     {
         string fileName = url.Substring(url.LastIndexOf('/') + 1);
-
         if (fileName.Contains("?"))
             fileName = fileName.Substring(0, fileName.IndexOf("?"));
-
-        Debug.Log("Extracted filename from URL: " + fileName);
         return fileName;
     }
 
@@ -582,8 +537,6 @@ public class COE33PopTrackerInstaller : MonoBehaviour
     {
         if (installButton != null)
             installButton.interactable = configLoaded && !string.IsNullOrEmpty(selectedDirectory) && IsValidPath(selectedDirectory);
-
-        Debug.Log("UI Updated - ConfigLoaded: " + configLoaded + ", PathValid: " + (!string.IsNullOrEmpty(selectedDirectory) && IsValidPath(selectedDirectory)));
     }
 
     void SafeDeleteDirectory(string path)
