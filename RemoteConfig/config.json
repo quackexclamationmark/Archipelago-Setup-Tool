@@ -43,7 +43,7 @@
     "subnauticaBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
     "toolVersions": {
-        "1.0.0": "latest"
+        "0.1.2": "obsolete"
     },
     "toolLatestDownloadUrl": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases"
 }
