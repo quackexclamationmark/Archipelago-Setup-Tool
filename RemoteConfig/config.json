@@ -8,6 +8,9 @@
     "clairobscurAP": "https://github.com/Demorck/ClairObscurArchipelagoRandomizer/releases/download/v0.2.1/COE33_Client_Steam.zip",
     "clairobscurApworld": "https://github.com/Demorck/ClairObscur_APWorld/releases/download/v0.2.0/clair_obscur.apworld",
 
+    "hadesApworld": "https://github.com/NaixGames/Polycosmos/releases/download/0.15.1/hades.apworld"
+    "hadesAP": "https://github.com/NaixGames/PolycosmosInstaller/releases/download/0.3/Installer.exe"
+
     "lethalcompanyAP": "https://thunderstore.io/package/download/APLC/APLC/0.7.11/",
     "lethalcompanyBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "lethalcompanyApworld": "https://github.com/T0r1nn/APLC/releases/download/v0.7.11-beta/lethal_company.apworld",
