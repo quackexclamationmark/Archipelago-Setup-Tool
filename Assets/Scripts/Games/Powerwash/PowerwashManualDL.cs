@@ -300,7 +300,7 @@ public class PowerwashManualDL : MonoBehaviour
         foreach (string file in files)
         {
             string fileName = Path.GetFileName(file);
-            
+
             // Ignorer les fichiers de version PowerWash APMod
             if (fileName.StartsWith("PowerWash APMod Version") && fileName.EndsWith(".txt"))
                 continue;
@@ -736,12 +736,12 @@ public class PowerwashManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "PowerWashSimulator"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "PowerWashSimulator"),
-            @"D:\Steam\steamapps\common\PowerWashSimulator",
-            @"D:\SteamLibrary\steamapps\common\PowerWashSimulator",
-            @"E:\Steam\steamapps\common\PowerWashSimulator",
-            @"E:\SteamLibrary\steamapps\common\PowerWashSimulator",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "PowerWash Simulator"),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "PowerWash Simulator"),
+            @"D:\Steam\steamapps\common\PowerWash Simulator",
+            @"D:\SteamLibrary\steamapps\common\PowerWash Simulator",
+            @"E:\Steam\steamapps\common\PowerWash Simulator",
+            @"E:\SteamLibrary\steamapps\common\PowerWash Simulator",
         };
 
         foreach (string path in quickPaths)
@@ -762,11 +762,11 @@ public class PowerwashManualDL : MonoBehaviour
             {
                 try
                 {
-                    string path = Path.Combine(drive.RootDirectory.FullName, "Steam", "steamapps", "common", "PowerWashSimulator");
+                    string path = Path.Combine(drive.RootDirectory.FullName, "Steam", "steamapps", "common", "PowerWash Simulator");
                     if (Directory.Exists(path))
                         return path;
 
-                    path = Path.Combine(drive.RootDirectory.FullName, "SteamLibrary", "steamapps", "common", "PowerWashSimulator");
+                    path = Path.Combine(drive.RootDirectory.FullName, "SteamLibrary", "steamapps", "common", "PowerWash Simulator");
                     if (Directory.Exists(path))
                         return path;
                 }
