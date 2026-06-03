@@ -4,9 +4,19 @@
     "poptrackerDL": "https://github.com/black-sliver/PopTracker/releases/download/v0.35.1/poptracker_0-35-1_win64.zip",
     "coe33poptrackerDL": "https://github.com/Demorck/ClairObscur-Archipelago-Poptracker/releases/download/v0.2.3/ClairObscurAP_Poptracker.zip",
     "subnauticapoptrackerDL": "https://github.com/lurch9229/SubnauticaAP_maptracker_lurch9229/archive/refs/tags/0.2.1.zip",
-    
+
+    "btd6AP": "https://github.com/Matt41321/BloonsArchipelago/releases/download/0.8.6/BloonsArchipelago.dll",
+    "btd6MelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
+    "btd6Apworld": "https://github.com/Matt41321/Archipelago/releases/download/v0.6.3/bloonstd6.apworld",
+    "btd6ModHelper": "https://github.com/gurrenm3/BTD-Mod-Helper/releases/download/3.6.4/Btd6ModHelper.dll",
+
     "clairobscurAP": "https://github.com/Demorck/ClairObscurArchipelagoRandomizer/releases/download/v0.2.1/COE33_Client_Steam.zip",
     "clairobscurApworld": "https://github.com/Demorck/ClairObscur_APWorld/releases/download/v0.2.0/clair_obscur.apworld",
+
+    "contentwarningApworld": "https://github.com/Jakeodude/cw-apworld/releases/download/1.0.1/content_warning.apworld",
+    "contentwarningAP": "https://thunderstore.io/package/download/Faust/ContentWarningArchipelago/1.0.6/",
+    "contentwarningBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+    "contentwarningMycelium": "https://github.com/RugbugRedfern/Mycelium-Networking-For-Content-Warning/releases/download/v1.0.14/MyceliumNetworkingForCW-Debug.dll",
 
     "lethalcompanyAP": "https://thunderstore.io/package/download/APLC/APLC/0.7.11/",
     "lethalcompanyBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
@@ -20,6 +30,10 @@
     "lethalcompanyHook": "https://thunderstore.io/package/download/Evaisa/HookGenPatcher/0.0.5/",
     "lethalcompanyMonoDetourBep5": "https://thunderstore.io/package/download/MonoDetour/MonoDetour_BepInEx_5/0.7.13/",
     "lethalcompanyMonoDetour": "https://thunderstore.io/package/download/MonoDetour/MonoDetour/0.7.13/",
+
+    "peaksofyoreAP": "https://thunderstore.io/package/download/c0der23/PeaksOfArchipelago/2.2.1/",
+    "peaksofyoreBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+    "peaksofyoreApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/peaks_of_yore.apworld",
 
     "powerwashAP": "https://github.com/SWCreeperKing/PowerwashSimAP/releases/download/v0.5.14/SW_CreeperKing.ArchipelagoMod.zip",
     "powerwashBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v6.0.0-pre.1/BepInEx_UnityIL2CPP_x64_6.0.0-pre.1.zip",
@@ -35,5 +49,11 @@
     "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/0.4.4-alpha/spire2.apworld",
     
     "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.3/Archipelago_193.zip",
-    "subnauticaBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip"
+    "subnauticaBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+
+    "toolVersions": {
+        "0.2.0": "obsolete",
+        "0.2.1": "latest"
+    },
+    "toolLatestDownloadUrl": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/download/v0.2.1/Archipelago.Setup.Tool.v0.2.1.zip"
 }
