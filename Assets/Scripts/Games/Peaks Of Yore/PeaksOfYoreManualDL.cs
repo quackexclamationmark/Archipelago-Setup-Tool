@@ -6,37 +6,26 @@ using System.Collections;
 using System.Diagnostics;
 using Microsoft.Win32;
 
-public class REPOManualDL : MonoBehaviour
+public class PeaksOfYoreManualDL : MonoBehaviour
 {
     public FileDownloader downloader;
 
-    [Header("REPO FILES")]
+    [Header("PEAKS OF YORE FILES")]
     public FileDownloader.FileData apworld;
     public FileDownloader.FileData apMod;
-
-    [Header("MODS")]
-    public FileDownloader.FileData menuLib;
-    public FileDownloader.FileData repoLib;
     public FileDownloader.FileData bepInEx;
 
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
-    public Toggle installMenuLibToggle;
-    public Toggle installRepoLibToggle;
     public Toggle installBepInExToggle;
-
-    [Header("CONFIG TOGGLES")]
-    public Toggle patchBepInExConfigToggle;
-    public Toggle patchRepoLibConfigToggle;
 
     [Header("LAUNCH OPTIONS")]
     public Toggle secondLaunchToggle;
 
     [Header("REVERT OPTIONS")]
-    public Toggle patchConfigsToggle;
-    public Toggle fullCleanBepInExToggle;
     public Toggle removeAPModsOnlyToggle;
+    public Toggle fullCleanBepInExToggle;
 
     [Header("CONFIRMATION PANEL")]
     public GameObject confirmationPanel;
@@ -49,26 +38,23 @@ public class REPOManualDL : MonoBehaviour
     public TextMeshProUGUI infoText;
     public Button infoOkButton;
 
-    private Process repoProcess;
-    private string repoPath;
+    private string peaksOfYorePath;
     private string pendingAction;
     private bool pendingFullCleanConfirmation = false;
-    private RepoConfig remoteConfig;
+    private PeaksOfYoreConfig remoteConfig;
     private bool configLoaded = false;
 
     [System.Serializable]
-    public class RepoConfig
+    public class PeaksOfYoreConfig
     {
-        public string repoAP;
-        public string repoMenuLib;
-        public string repoRepoLib;
-        public string repoBepInEx;
-        public string repoApworld;
+        public string peaksofyoreAP;
+        public string peaksofyoreBepInEx;
+        public string peaksofyoreApworld;
     }
 
     void Start()
     {
-        repoPath = GetRepoPath();
+        peaksOfYorePath = GetPeaksOfYorePath();
         StartCoroutine(LoadRemoteConfig());
 
         if (infoPanel != null)
@@ -95,28 +81,18 @@ public class REPOManualDL : MonoBehaviour
         if (fullCleanBepInExToggle != null)
             fullCleanBepInExToggle.isOn = false;
 
-        if (patchConfigsToggle != null)
-            patchConfigsToggle.isOn = false;
-
         if (fullCleanBepInExToggle != null)
             fullCleanBepInExToggle.onValueChanged.AddListener(OnFullCleanChanged);
     }
 
-    void CleanupProcesses()
-    {
-        CloseREPO();
-    }
-
-    void ApplyRepoConfig()
+    void ApplyPeaksOfYoreConfig()
     {
         if (remoteConfig == null)
             return;
 
-        apMod.url = remoteConfig.repoAP;
-        menuLib.url = remoteConfig.repoMenuLib;
-        repoLib.url = remoteConfig.repoRepoLib;
-        bepInEx.url = remoteConfig.repoBepInEx;
-        apworld.url = remoteConfig.repoApworld;
+        apMod.url = remoteConfig.peaksofyoreAP;
+        bepInEx.url = remoteConfig.peaksofyoreBepInEx;
+        apworld.url = remoteConfig.peaksofyoreApworld;
     }
 
     public void RunSetup()
@@ -168,28 +144,24 @@ public class REPOManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(repoPath))
+        if (string.IsNullOrEmpty(peaksOfYorePath))
         {
-            ShowInfo("REPO path not found. Please check Steam installation.");
+            ShowInfo("Peaks of Yore path not found. Please check Steam installation.");
             return;
         }
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
         bool apmod = installAPModToggle != null && installAPModToggle.isOn;
-        bool menulib = installMenuLibToggle != null && installMenuLibToggle.isOn;
-        bool repolib = installRepoLibToggle != null && installRepoLibToggle.isOn;
 
         int count =
             (apworld ? 1 : 0) +
             (bep ? 1 : 0) +
-            (apmod ? 1 : 0) +
-            (menulib ? 1 : 0) +
-            (repolib ? 1 : 0);
+            (apmod ? 1 : 0);
 
-        if (menulib && count == 1)
+        if (apworld && count == 1)
         {
-            StartCoroutine(MenuLibOnlyFlow());
+            StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
@@ -199,21 +171,9 @@ public class REPOManualDL : MonoBehaviour
             return;
         }
 
-        if (apworld && count == 1)
-        {
-            StartCoroutine(APWorldOnlyFlow());
-            return;
-        }
-
         if (bep && count == 1)
         {
             StartCoroutine(BepInExOnlyFlow());
-            return;
-        }
-
-        if (repolib && count == 1)
-        {
-            StartCoroutine(RepoLibOnlyFlow());
             return;
         }
 
@@ -222,46 +182,32 @@ public class REPOManualDL : MonoBehaviour
 
     private void ExecuteRevert()
     {
-        repoPath = GetRepoPath();
+        peaksOfYorePath = GetPeaksOfYorePath();
 
-        if (string.IsNullOrEmpty(repoPath))
+        if (string.IsNullOrEmpty(peaksOfYorePath))
             return;
 
-        string pluginsPath = Path.Combine(repoPath, "BepInEx", "plugins");
+        string pluginsPath = Path.Combine(peaksOfYorePath, "BepInEx", "plugins");
 
         bool removeAP = removeAPModsOnlyToggle != null && removeAPModsOnlyToggle.isOn;
         bool fullClean = fullCleanBepInExToggle != null && fullCleanBepInExToggle.isOn;
-        bool patchConfigs = patchConfigsToggle != null && patchConfigsToggle.isOn;
 
-        if (!removeAP && !fullClean && !patchConfigs)
+        if (!removeAP && !fullClean)
         {
             ShowInfo("Please select at least one revert option.");
             return;
         }
 
-        if (patchConfigs && !removeAP && !fullClean)
-        {
-            SetDefaultBepInExConfig();
-            SetDefaultRepoLibConfig();
-            ShowInfo("Configs patched successfully!");
-            return;
-        }
-
         if (removeAP)
         {
-            CleanupProcesses();
-
             if (!Directory.Exists(pluginsPath))
                 return;
 
             ShowInfo("Removing AP mods...");
 
-            SafeDeleteFile(Path.Combine(pluginsPath, "Archipelago.repobundle"));
-            SafeDeleteFile(Path.Combine(pluginsPath, "MenuLib.dll"));
-            SafeDeleteFile(Path.Combine(pluginsPath, "RepoAP.dll"));
-            SafeDeleteFile(Path.Combine(pluginsPath, "RepoLib.dll"));
-
             DeleteOldVersionFiles();
+
+            SafeDeleteDirectory(Path.Combine(pluginsPath, "com.c0der23.PeaksOfArchipelago"));
 
             ShowInfo("AP mods removed successfully!");
             return;
@@ -282,16 +228,11 @@ public class REPOManualDL : MonoBehaviour
 
         pendingFullCleanConfirmation = false;
 
-        CleanupProcesses();
-
         ShowInfo("Removing mods...");
 
-        SafeDeleteFile(Path.Combine(pluginsPath, "Archipelago.repobundle"));
-        SafeDeleteFile(Path.Combine(pluginsPath, "MenuLib.dll"));
-        SafeDeleteFile(Path.Combine(pluginsPath, "RepoAP.dll"));
-        SafeDeleteFile(Path.Combine(pluginsPath, "RepoLib.dll"));
-
         DeleteOldVersionFiles();
+
+        SafeDeleteDirectory(Path.Combine(pluginsPath, "com.c0der23.PeaksOfArchipelago"));
 
         hasOtherMods = HasOtherMods(pluginsPath);
 
@@ -299,10 +240,10 @@ public class REPOManualDL : MonoBehaviour
         {
             ShowInfo("Cleaning BepInEx...");
 
-            SafeDeleteDirectory(Path.Combine(repoPath, "BepInEx"));
-            SafeDeleteFile(Path.Combine(repoPath, "winhttp.dll"));
-            SafeDeleteFile(Path.Combine(repoPath, "doorstop_config.ini"));
-            SafeDeleteFile(Path.Combine(repoPath, ".doorstop_version"));
+            SafeDeleteDirectory(Path.Combine(peaksOfYorePath, "BepInEx"));
+            SafeDeleteFile(Path.Combine(peaksOfYorePath, "winhttp.dll"));
+            SafeDeleteFile(Path.Combine(peaksOfYorePath, "doorstop_config.ini"));
+            SafeDeleteFile(Path.Combine(peaksOfYorePath, ".doorstop_version"));
 
             ShowInfo("Full clean completed!");
             return;
@@ -312,10 +253,10 @@ public class REPOManualDL : MonoBehaviour
         {
             ShowInfo("Cleaning BepInEx...");
 
-            SafeDeleteDirectory(Path.Combine(repoPath, "BepInEx"));
-            SafeDeleteFile(Path.Combine(repoPath, "winhttp.dll"));
-            SafeDeleteFile(Path.Combine(repoPath, "doorstop_config.ini"));
-            SafeDeleteFile(Path.Combine(repoPath, ".doorstop_version"));
+            SafeDeleteDirectory(Path.Combine(peaksOfYorePath, "BepInEx"));
+            SafeDeleteFile(Path.Combine(peaksOfYorePath, "winhttp.dll"));
+            SafeDeleteFile(Path.Combine(peaksOfYorePath, "doorstop_config.ini"));
+            SafeDeleteFile(Path.Combine(peaksOfYorePath, ".doorstop_version"));
 
             ShowInfo("Revert completed!");
         }
@@ -333,57 +274,25 @@ public class REPOManualDL : MonoBehaviour
         {
             string name = Path.GetFileName(file);
 
-            if (name.StartsWith("REPO APMod Version") && name.EndsWith(".txt"))
+            if (name.StartsWith("POY APMod Version") && name.EndsWith(".txt"))
                 continue;
 
-            if (name != "Archipelago.repobundle" &&
-                name != "MenuLib.dll" &&
-                name != "RepoAP.dll" &&
-                name != "RepoLib.dll")
+            if (name != "com.c0der23.PeaksOfArchipelago" &&
+                !name.StartsWith("com.c0der23.PeaksOfArchipelago"))
                 return true;
         }
 
         if (dirs.Length > 0)
-            return true;
-
-        return false;
-    }
-
-    void SetDefaultBepInExConfig()
-    {
-        string cfgPath = Path.Combine(repoPath, "BepInEx", "config", "BepInEx.cfg");
-
-        if (!File.Exists(cfgPath))
-            return;
-
-        string[] lines = File.ReadAllLines(cfgPath);
-
-        for (int i = 0; i < lines.Length; i++)
-            if (lines[i].Contains("HideManagerGameObject"))
-                lines[i] = "HideManagerGameObject = false";
-
-        File.WriteAllLines(cfgPath, lines);
-    }
-
-    void SetDefaultRepoLibConfig()
-    {
-        string cfgPath = Path.Combine(repoPath, "BepInEx", "config", "REPOLib.cfg");
-
-        if (!File.Exists(cfgPath))
-            return;
-
-        string[] lines = File.ReadAllLines(cfgPath);
-
-        for (int i = 0; i < lines.Length; i++)
         {
-            if (lines[i].Contains("VanillaDeveloperMode"))
-                lines[i] = "VanillaDeveloperMode = false";
-
-            if (lines[i].Contains("DeveloperMode"))
-                lines[i] = "DeveloperMode = false";
+            foreach (string dir in dirs)
+            {
+                string dirName = Path.GetFileName(dir);
+                if (dirName != "com.c0der23.PeaksOfArchipelago")
+                    return true;
+            }
         }
 
-        File.WriteAllLines(cfgPath, lines);
+        return false;
     }
 
     IEnumerator InstallFlow()
@@ -406,51 +315,16 @@ public class REPOManualDL : MonoBehaviour
             yield return InstallAPMod();
         }
 
-        if (installMenuLibToggle == null || installMenuLibToggle.isOn)
-        {
-            ShowInfo("Installing MenuLib...");
-            yield return InstallMod(menuLib, "MenuLib.dll");
-        }
+        CreateVersionFile(apMod.url, bepInEx.url, apworld.url);
 
-        if (installRepoLibToggle == null || installRepoLibToggle.isOn)
-        {
-            ShowInfo("Installing RepoLib...");
-            yield return InstallRepoLib();
-        }
-
-        CreateVersionFile(apMod.url, menuLib.url, repoLib.url, bepInEx.url, apworld.url);
-
-        ShowInfo("Launching REPO...");
-        LaunchREPO();
-
-        yield return WaitForConfigFiles();
-        yield return WaitForBepInExConfigComplete();
-
-        CloseREPO();
-
-        yield return new WaitForSeconds(1f);
-
-        if (patchBepInExConfigToggle != null && patchBepInExConfigToggle.isOn)
-        {
-            ShowInfo("Patching BepInEx config...");
-            yield return SetBepInExConfig();
-        }
-
-        if (patchRepoLibConfigToggle != null && patchRepoLibConfigToggle.isOn)
-        {
-            ShowInfo("Patching RepoLib config...");
-            yield return SetRepoLibConfig();
-        }
+        ShowInfo("Installation complete!");
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
-            ShowInfo("Second launch...");
-            LaunchREPO();
+            ShowInfo("You can now launch Peaks of Yore!");
         }
-        else
-        {
-            ShowInfo("Installation complete!");
-        }
+
+        yield return null;
     }
 
     IEnumerator InstallAPWorld()
@@ -581,53 +455,24 @@ public class REPOManualDL : MonoBehaviour
         while (!configLoaded)
             yield return null;
 
-        string extractPath = Path.Combine(Application.persistentDataPath, "APModTemp");
+        string extractPath = Path.Combine(Application.persistentDataPath, "POYAPModTemp");
 
         yield return downloader.DownloadAndExtract(apMod, Application.persistentDataPath, extractPath);
 
-        string plugins = Path.Combine(repoPath, "BepInEx", "plugins");
-        Directory.CreateDirectory(plugins);
-
-        CopyIfExists(extractPath, "RepoAP.dll", plugins);
-        CopyIfExists(extractPath, "Archipelago.repobundle", plugins);
-
-        SafeDeleteDirectory(extractPath);
-    }
-
-    IEnumerator InstallRepoLib()
-    {
-        while (!configLoaded)
-            yield return null;
-
-        string extractPath = Path.Combine(Application.persistentDataPath, "RepoLibTemp");
-
-        yield return downloader.DownloadAndExtract(repoLib, Application.persistentDataPath, extractPath);
-
-        string pluginsPath = Path.Combine(repoPath, "BepInEx", "plugins");
+        string pluginsPath = Path.Combine(peaksOfYorePath, "BepInEx", "plugins");
         Directory.CreateDirectory(pluginsPath);
 
-        CopyIfExists(Path.Combine(extractPath, "plugins"), "RepoLib.dll",
-            Path.Combine(repoPath, "BepInEx", "plugins"));
+        string sourceModPath = FindDirectory(extractPath, "com.c0der23.PeaksOfArchipelago");
+        if (!string.IsNullOrEmpty(sourceModPath))
+        {
+            string destModPath = Path.Combine(pluginsPath, "com.c0der23.PeaksOfArchipelago");
 
-        SafeDeleteDirectory(extractPath);
-    }
+            if (Directory.Exists(destModPath))
+                SafeDeleteDirectory(destModPath);
 
-    IEnumerator InstallMod(FileDownloader.FileData mod, string dllName)
-    {
-        while (!configLoaded)
-            yield return null;
-
-        string extractPath = Path.Combine(Application.persistentDataPath, dllName + "_temp");
-
-        yield return downloader.DownloadAndExtract(mod, Application.persistentDataPath, extractPath);
-
-        string dllPath = FindFile(extractPath, dllName);
-
-        string plugins = Path.Combine(repoPath, "BepInEx", "plugins");
-        Directory.CreateDirectory(plugins);
-
-        if (!string.IsNullOrEmpty(dllPath))
-            File.Copy(dllPath, Path.Combine(plugins, dllName), true);
+            MoveDirectory(sourceModPath, destModPath);
+            UnityEngine.Debug.Log("Mod folder copied to: " + destModPath);
+        }
 
         SafeDeleteDirectory(extractPath);
     }
@@ -641,22 +486,21 @@ public class REPOManualDL : MonoBehaviour
 
         yield return downloader.DownloadAndExtract(bepInEx, Application.persistentDataPath, extractPath);
 
-        MoveDirectory(extractPath, repoPath);
+        MoveDirectory(extractPath, peaksOfYorePath);
 
         SafeDeleteDirectory(extractPath);
     }
 
     IEnumerator APWorldOnlyFlow()
     {
-        repoPath = GetRepoPath();
+        peaksOfYorePath = GetPeaksOfYorePath();
 
-        if (string.IsNullOrEmpty(repoPath))
+        if (string.IsNullOrEmpty(peaksOfYorePath))
             yield break;
 
         yield return InstallAPWorld();
 
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-            LaunchREPO();
+        ShowInfo("APWorld installed successfully!");
     }
 
     IEnumerator BepInExOnlyFlow()
@@ -664,79 +508,11 @@ public class REPOManualDL : MonoBehaviour
         ShowInfo("Installing BepInEx...");
         yield return InstallBepInEx();
 
-        bool shouldPatchConfig = patchBepInExConfigToggle != null && patchBepInExConfigToggle.isOn;
-
-        if (shouldPatchConfig)
-        {
-            ShowInfo("Launching REPO...");
-            LaunchREPO();
-            yield return WaitForBepInExConfigComplete();
-            CloseREPO();
-            yield return new WaitForSeconds(1f);
-            ShowInfo("Patching BepInEx config...");
-            yield return SetBepInExConfig();
-        }
+        ShowInfo("BepInEx installed successfully!");
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
-            ShowInfo("Launching REPO...");
-            LaunchREPO();
-        }
-        else
-        {
-            ShowInfo("Installation complete!");
-        }
-
-        yield break;
-    }
-
-    IEnumerator WaitForBepInExConfigComplete()
-    {
-        string cfgPath = Path.Combine(repoPath, "BepInEx", "config", "BepInEx.cfg");
-
-        float timeout = 30f;
-        float timer = 0f;
-
-        while (timer < timeout)
-        {
-            if (File.Exists(cfgPath))
-            {
-                string[] lines = File.ReadAllLines(cfgPath);
-
-                foreach (string line in lines)
-                {
-                    if (line.Contains("HideManagerGameObject"))
-                        yield break;
-                }
-            }
-
-            timer += 1f;
-            yield return new WaitForSeconds(1f);
-        }
-    }
-
-    IEnumerator RepoLibOnlyFlow()
-    {
-        ShowInfo("Installing RepoLib...");
-        yield return InstallRepoLib();
-
-        bool shouldPatchConfig = patchRepoLibConfigToggle != null && patchRepoLibConfigToggle.isOn;
-
-        if (shouldPatchConfig)
-        {
-            ShowInfo("Launching REPO...");
-            LaunchREPO();
-            yield return WaitForRepoLibConfig();
-            CloseREPO();
-            yield return new WaitForSeconds(1f);
-            ShowInfo("Patching RepoLib config...");
-            yield return SetRepoLibConfig();
-        }
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-        {
-            ShowInfo("Launching REPO...");
-            LaunchREPO();
+            ShowInfo("You can now launch Peaks of Yore!");
         }
         else
         {
@@ -748,134 +524,24 @@ public class REPOManualDL : MonoBehaviour
 
     IEnumerator APModOnlyFlow()
     {
-        repoPath = GetRepoPath();
+        peaksOfYorePath = GetPeaksOfYorePath();
 
-        if (string.IsNullOrEmpty(repoPath))
+        if (string.IsNullOrEmpty(peaksOfYorePath))
             yield break;
 
         ShowInfo("Installing AP Mod...");
         yield return InstallAPMod();
 
-        CreateVersionFile(apMod.url, menuLib.url, repoLib.url, bepInEx.url, apworld.url);
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-            LaunchREPO();
-
-        ShowInfo("Installation complete!");
-    }
-
-    IEnumerator MenuLibOnlyFlow()
-    {
-        repoPath = GetRepoPath();
-
-        if (string.IsNullOrEmpty(repoPath))
-            yield break;
-
-        ShowInfo("Installing MenuLib...");
-        yield return InstallMod(menuLib, "MenuLib.dll");
-
-        CreateVersionFile(apMod.url, menuLib.url, repoLib.url, bepInEx.url, apworld.url);
-
-        bool shouldPatchConfig = patchConfigsToggle != null && patchConfigsToggle.isOn;
-
-        if (shouldPatchConfig)
-        {
-            ShowInfo("Launching REPO...");
-            LaunchREPO();
-            yield return WaitForBepInExConfigComplete();
-            CloseREPO();
-            yield return new WaitForSeconds(1f);
-
-            ShowInfo("Patching BepInEx config...");
-            yield return SetBepInExConfig();
-        }
+        CreateVersionFile(apMod.url, bepInEx.url, apworld.url);
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
-            ShowInfo("Launching REPO...");
-            LaunchREPO();
+            ShowInfo("AP Mod installed successfully!");
         }
         else
         {
             ShowInfo("Installation complete!");
         }
-    }
-
-    IEnumerator WaitForRepoLibConfig()
-    {
-        string cfgPath = Path.Combine(repoPath, "BepInEx", "config", "REPOLib.cfg");
-
-        float timeout = 30f;
-        float timer = 0f;
-
-        while (timer < timeout)
-        {
-            if (File.Exists(cfgPath))
-            {
-                string[] lines = File.ReadAllLines(cfgPath);
-
-                foreach (string line in lines)
-                {
-                    if (line.Contains("DeveloperMode"))
-                        yield break;
-                }
-            }
-
-            timer += 1f;
-            yield return new WaitForSeconds(1f);
-        }
-    }
-
-    IEnumerator WaitForConfigFiles()
-    {
-        string bepConfig = Path.Combine(repoPath, "BepInEx", "config", "BepInEx.cfg");
-        string repoConfig = Path.Combine(repoPath, "BepInEx", "config", "REPOLib.cfg");
-
-        float timeout = 30f;
-        float timer = 0f;
-
-        while (timer < timeout)
-        {
-            if (File.Exists(bepConfig) && File.Exists(repoConfig))
-                yield break;
-
-            timer += 1f;
-            yield return new WaitForSeconds(1f);
-        }
-    }
-
-    IEnumerator SetBepInExConfig()
-    {
-        string cfgPath = Path.Combine(repoPath, "BepInEx", "config", "BepInEx.cfg");
-
-        yield return new WaitUntil(() => File.Exists(cfgPath));
-
-        string[] lines = File.ReadAllLines(cfgPath);
-
-        for (int i = 0; i < lines.Length; i++)
-            if (lines[i].Contains("HideManagerGameObject"))
-                lines[i] = "HideManagerGameObject = true";
-
-        File.WriteAllLines(cfgPath, lines);
-    }
-
-    IEnumerator SetRepoLibConfig()
-    {
-        string cfgPath = Path.Combine(repoPath, "BepInEx", "config", "REPOLib.cfg");
-
-        yield return new WaitUntil(() => File.Exists(cfgPath));
-
-        string[] lines = File.ReadAllLines(cfgPath);
-
-        for (int i = 0; i < lines.Length; i++)
-        {
-            if (lines[i].StartsWith("VanillaDeveloperMode"))
-                lines[i] = "VanillaDeveloperMode = true";
-            else if (lines[i].StartsWith("DeveloperMode"))
-                lines[i] = "DeveloperMode = true";
-        }
-
-        File.WriteAllLines(cfgPath, lines);
     }
 
     IEnumerator LoadRemoteConfig()
@@ -894,9 +560,9 @@ public class REPOManualDL : MonoBehaviour
 
         try
         {
-            remoteConfig = JsonUtility.FromJson<RepoConfig>(request.downloadHandler.text);
+            remoteConfig = JsonUtility.FromJson<PeaksOfYoreConfig>(request.downloadHandler.text);
             UnityEngine.Debug.Log("Remote config loaded successfully");
-            ApplyRepoConfig();
+            ApplyPeaksOfYoreConfig();
         }
         catch (System.Exception e)
         {
@@ -904,28 +570,6 @@ public class REPOManualDL : MonoBehaviour
         }
 
         configLoaded = true;
-    }
-
-    void LaunchREPO()
-    {
-        string exePath = Path.Combine(repoPath, "REPO.exe");
-
-        if (File.Exists(exePath))
-            repoProcess = Process.Start(exePath);
-    }
-
-    void CloseREPO()
-    {
-        try
-        {
-            if (repoProcess != null && !repoProcess.HasExited)
-            {
-                repoProcess.Kill();
-                repoProcess.Dispose();
-                repoProcess = null;
-            }
-        }
-        catch { }
     }
 
     void SafeDeleteFile(string path)
@@ -954,15 +598,6 @@ public class REPOManualDL : MonoBehaviour
         }
     }
 
-    IEnumerator WaitForConfigThenSetup()
-    {
-        while (!configLoaded)
-            yield return new WaitForSeconds(0.1f);
-
-        CloseInfoPanel();
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
-    }
-
     void SafeDeleteDirectory(string path)
     {
         try
@@ -971,14 +606,6 @@ public class REPOManualDL : MonoBehaviour
                 Directory.Delete(path, true);
         }
         catch { }
-    }
-
-    void CopyIfExists(string root, string file, string target)
-    {
-        string path = Path.Combine(root, file);
-
-        if (File.Exists(path))
-            File.Copy(path, Path.Combine(target, file), true);
     }
 
     void MoveDirectory(string source, string target)
@@ -1016,12 +643,6 @@ public class REPOManualDL : MonoBehaviour
 
     void OnFullCleanChanged(bool value)
     {
-        if (patchConfigsToggle != null)
-        {
-            patchConfigsToggle.isOn = false;
-            patchConfigsToggle.interactable = !value;
-        }
-
         if (removeAPModsOnlyToggle != null)
         {
             removeAPModsOnlyToggle.isOn = false;
@@ -1029,27 +650,31 @@ public class REPOManualDL : MonoBehaviour
         }
     }
 
-    string FindFile(string root, string fileName)
+    string FindDirectory(string root, string dirName)
     {
-        foreach (string file in Directory.GetFiles(root, "*", SearchOption.AllDirectories))
-            if (Path.GetFileName(file) == fileName)
-                return file;
+        try
+        {
+            foreach (string dir in Directory.GetDirectories(root, "*", SearchOption.AllDirectories))
+            {
+                if (Path.GetFileName(dir) == dirName)
+                    return dir;
+            }
+        }
+        catch { }
 
         return "";
     }
 
-    void CreateVersionFile(string apmodUrl, string menulibUrl, string repolibUrl, string bepinexUrl, string apworldUrl)
+    void CreateVersionFile(string apmodUrl, string bepinexUrl, string apworldUrl)
     {
         try
         {
-            string apmodVersion = ExtractVersionFromUrl(apmodUrl, @"/releases/download/([^/]+)/");
-            string menulibVersion = ExtractVersionFromUrl(menulibUrl, @"(?:/releases/download/|/download/[^/]+/[^/]+/)([^/]+)/?$");
-            string repolibVersion = ExtractVersionFromUrl(repolibUrl, @"(?:/releases/download/|/download/[^/]+/[^/]+/)([^/]+)/?$");
+            string apmodVersion = ExtractVersionFromUrl(apmodUrl, @"(?:/releases/download/|/download/[^/]+/[^/]+/)([^/]+)/?$");
             string bepinexVersion = ExtractVersionFromUrl(bepinexUrl, @"/releases/download/([^/]+)/");
             string apworldVersion = ExtractVersionFromUrl(apworldUrl, @"/([^/]+)\.apworld");
 
-            string versionFileName = "REPO APMod Version " + apmodVersion + ".txt";
-            string content = "Archipelago Setup Tool by quack!\n";
+            string versionFileName = "POY APMod Version " + apmodVersion + ".txt";
+            string content = "Peaks of Yore Archipelago Setup Tool by quack!\n";
             content += "https://github.com/quackexclamationmark/Archipelago-Setup-Tool\n";
             content += "\n";
             content += "=== AP MOD ===\n";
@@ -1060,14 +685,6 @@ public class REPOManualDL : MonoBehaviour
             content += "Downloaded from: " + apworldUrl + "\n";
             content += "Name: " + apworldVersion + ".apworld\n";
             content += "\n";
-            content += "=== MENULIB ===\n";
-            content += "Downloaded from: " + menulibUrl + "\n";
-            content += "Version: " + menulibVersion + "\n";
-            content += "\n";
-            content += "=== REPOLIB ===\n";
-            content += "Downloaded from: " + repolibUrl + "\n";
-            content += "Version: " + repolibVersion + "\n";
-            content += "\n";
             content += "=== BEPINEX ===\n";
             content += "Downloaded from: " + bepinexUrl + "\n";
             content += "Version: " + bepinexVersion + "\n";
@@ -1076,11 +693,11 @@ public class REPOManualDL : MonoBehaviour
 
             DeleteOldVersionFiles();
 
-            string rootVersionPath = Path.Combine(repoPath, versionFileName);
+            string rootVersionPath = Path.Combine(peaksOfYorePath, versionFileName);
             File.WriteAllText(rootVersionPath, content);
             UnityEngine.Debug.Log("Version file created in root: " + rootVersionPath);
 
-            string pluginsPath = Path.Combine(repoPath, "BepInEx", "plugins");
+            string pluginsPath = Path.Combine(peaksOfYorePath, "BepInEx", "plugins");
             if (Directory.Exists(pluginsPath))
             {
                 string pluginsVersionPath = Path.Combine(pluginsPath, versionFileName);
@@ -1098,27 +715,31 @@ public class REPOManualDL : MonoBehaviour
     {
         try
         {
-            System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"REPO APMod Version .+\.txt");
+            System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"POY APMod Version .+\.txt");
 
-            string[] rootFiles = Directory.GetFiles(repoPath);
-            foreach (string file in rootFiles)
+            if (Directory.Exists(peaksOfYorePath))
             {
-                string fileName = Path.GetFileName(file);
-                if (pattern.IsMatch(fileName))
+                string[] rootFiles = Directory.GetFiles(peaksOfYorePath);
+                foreach (string file in rootFiles)
                 {
-                    try
+                    string fileName = Path.GetFileName(file);
+                    if (pattern.IsMatch(fileName))
                     {
-                        File.Delete(file);
-                        UnityEngine.Debug.Log("Deleted old version file in root: " + fileName);
-                    }
-                    catch (System.Exception e)
-                    {
-                        UnityEngine.Debug.LogWarning("Could not delete old version file in root: " + e.Message);
+                        try
+                        {
+                            File.SetAttributes(file, FileAttributes.Normal);
+                            File.Delete(file);
+                            UnityEngine.Debug.Log("Deleted old version file in root: " + fileName);
+                        }
+                        catch (System.Exception e)
+                        {
+                            UnityEngine.Debug.LogWarning("Could not delete old version file in root: " + e.Message);
+                        }
                     }
                 }
             }
 
-            string pluginsPath = Path.Combine(repoPath, "BepInEx", "plugins");
+            string pluginsPath = Path.Combine(peaksOfYorePath, "BepInEx", "plugins");
             if (Directory.Exists(pluginsPath))
             {
                 string[] pluginsFiles = Directory.GetFiles(pluginsPath);
@@ -1129,6 +750,7 @@ public class REPOManualDL : MonoBehaviour
                     {
                         try
                         {
+                            File.SetAttributes(file, FileAttributes.Normal);
                             File.Delete(file);
                             UnityEngine.Debug.Log("Deleted old version file in plugins: " + fileName);
                         }
@@ -1157,16 +779,16 @@ public class REPOManualDL : MonoBehaviour
         return "Unknown";
     }
 
-    string GetRepoPath()
+    string GetPeaksOfYorePath()
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "REPO"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "REPO"),
-            @"D:\Steam\steamapps\common\REPO",
-            @"D:\SteamLibrary\steamapps\common\REPO",
-            @"E:\Steam\steamapps\common\REPO",
-            @"E:\SteamLibrary\steamapps\common\REPO",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Peaks of Yore"),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Peaks of Yore"),
+            @"D:\Steam\steamapps\common\Peaks of Yore",
+            @"D:\SteamLibrary\steamapps\common\Peaks of Yore",
+            @"E:\Steam\steamapps\common\Peaks of Yore",
+            @"E:\SteamLibrary\steamapps\common\Peaks of Yore",
         };
 
         foreach (string path in quickPaths)
@@ -1190,13 +812,13 @@ public class REPOManualDL : MonoBehaviour
 
                 try
                 {
-                    string repoPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "REPO");
-                    if (Directory.Exists(repoPath))
-                        return repoPath;
+                    string poyPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Peaks of Yore");
+                    if (Directory.Exists(poyPath))
+                        return poyPath;
 
-                    repoPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "REPO");
-                    if (Directory.Exists(repoPath))
-                        return repoPath;
+                    poyPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Peaks of Yore");
+                    if (Directory.Exists(poyPath))
+                        return poyPath;
                 }
                 catch { }
             }

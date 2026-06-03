@@ -8,7 +8,9 @@ public class GamePanelManager : MonoBehaviour
     public GameObject coe33Panel;
     public GameObject lethalcompanyPanel;
     public GameObject sts2Panel;
-
+    public GameObject contentwarningPanel;
+    public GameObject peaksofyorePanel;
+    public GameObject btd6Panel;
 
     void Start()
     {
@@ -39,6 +41,15 @@ public class GamePanelManager : MonoBehaviour
             case "Slay The Spire 2":
                 sts2Panel.SetActive(true);
                 break;
+            case "ContentWarning":
+                contentwarningPanel.SetActive(true);
+                break;
+            case "PeaksOfYore":
+                peaksofyorePanel.SetActive(true);
+                break;
+            case "BTD6":
+                btd6Panel.SetActive(true);
+                break;
         }
     }
 
@@ -50,5 +61,8 @@ public class GamePanelManager : MonoBehaviour
         if (coe33Panel != null) coe33Panel.SetActive(false);
         if (lethalcompanyPanel != null) lethalcompanyPanel.SetActive(false);
         if (sts2Panel != null) sts2Panel.SetActive(false);
+        if (contentwarningPanel != null) contentwarningPanel.SetActive(false);
+        if (peaksofyorePanel != null) peaksofyorePanel.SetActive(false);
+        if (btd6Panel != null) btd6Panel.SetActive(false);
     }
 }
