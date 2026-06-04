@@ -8,6 +8,7 @@ public class GameTabsUI : MonoBehaviour
     public GameObject setupPanel;
     public GameObject infosPanel;
     public GameObject popTrackerPanel;
+    public GameObject downloadPanel;
 
     [Header("AUTO OBJECTS ON SETUP")]
     public GameObject revertInfos;
@@ -17,6 +18,7 @@ public class GameTabsUI : MonoBehaviour
     public Button setupButton;
     public Button infosButton;
     public Button popTrackerButton;
+    public Button downloadButton;
 
     [Header("COLORS")]
     public Color activeColor = Color.white;
@@ -26,6 +28,7 @@ public class GameTabsUI : MonoBehaviour
     private bool setupIsActive = true;
     private bool infosIsActive = false;
     private bool popTrackerIsActive = false;
+    private bool downloadIsActive = false;
 
     void Start()
     {
@@ -34,6 +37,9 @@ public class GameTabsUI : MonoBehaviour
 
         if (popTrackerButton != null)
             AddHoverEvents(popTrackerButton, "poptracker");
+
+        if (downloadButton != null)
+            AddHoverEvents(downloadButton, "download");
 
         OpenSetup();
     }
@@ -50,6 +56,7 @@ public class GameTabsUI : MonoBehaviour
         setupIsActive = true;
         infosIsActive = false;
         popTrackerIsActive = false;
+        downloadIsActive = false;
 
         if (setupPanel != null)
             setupPanel.SetActive(true);
@@ -59,6 +66,9 @@ public class GameTabsUI : MonoBehaviour
 
         if (popTrackerPanel != null)
             popTrackerPanel.SetActive(false);
+
+        if (downloadPanel != null)
+            downloadPanel.SetActive(false);
 
         // Active aussi ces objets
         if (revertInfos != null)
@@ -75,6 +85,7 @@ public class GameTabsUI : MonoBehaviour
         setupIsActive = false;
         infosIsActive = true;
         popTrackerIsActive = false;
+        downloadIsActive = false;
 
         if (setupPanel != null)
             setupPanel.SetActive(false);
@@ -84,6 +95,9 @@ public class GameTabsUI : MonoBehaviour
 
         if (popTrackerPanel != null)
             popTrackerPanel.SetActive(false);
+
+        if (downloadPanel != null)
+            downloadPanel.SetActive(false);
 
         // Cache ces objets en mode infos
         if (revertInfos != null)
@@ -100,6 +114,7 @@ public class GameTabsUI : MonoBehaviour
         setupIsActive = false;
         infosIsActive = false;
         popTrackerIsActive = true;
+        downloadIsActive = false;
 
         if (setupPanel != null)
             setupPanel.SetActive(false);
@@ -110,7 +125,39 @@ public class GameTabsUI : MonoBehaviour
         if (popTrackerPanel != null)
             popTrackerPanel.SetActive(true);
 
+        if (downloadPanel != null)
+            downloadPanel.SetActive(false);
+
         // Cache ces objets en mode pop tracker
+        if (revertInfos != null)
+            revertInfos.SetActive(false);
+
+        if (revertButton != null)
+            revertButton.SetActive(false);
+
+        UpdateButtonColors();
+    }
+
+    public void OpenDownload()
+    {
+        setupIsActive = false;
+        infosIsActive = false;
+        popTrackerIsActive = false;
+        downloadIsActive = true;
+
+        if (setupPanel != null)
+            setupPanel.SetActive(false);
+
+        if (infosPanel != null)
+            infosPanel.SetActive(false);
+
+        if (popTrackerPanel != null)
+            popTrackerPanel.SetActive(false);
+
+        if (downloadPanel != null)
+            downloadPanel.SetActive(true);
+
+        // Cache ces objets en mode download
         if (revertInfos != null)
             revertInfos.SetActive(false);
 
@@ -132,6 +179,9 @@ public class GameTabsUI : MonoBehaviour
 
         if (popTrackerButton != null)
             SetButtonColor(popTrackerButton, popTrackerIsActive ? activeColor : inactiveColor);
+
+        if (downloadButton != null)
+            SetButtonColor(downloadButton, downloadIsActive ? activeColor : inactiveColor);
     }
 
     void SetButtonColor(Button button, Color color)
@@ -170,6 +220,9 @@ public class GameTabsUI : MonoBehaviour
                     break;
                 case "poptracker":
                     isActive = popTrackerIsActive;
+                    break;
+                case "download":
+                    isActive = downloadIsActive;
                     break;
             }
 

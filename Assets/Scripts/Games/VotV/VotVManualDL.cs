@@ -29,16 +29,29 @@ public class VotVManualDL : MonoBehaviour
     public Button selectDownloadDirectoryButton;
     public TMP_InputField downloadPathInputField;
 
+    [Header("REVERT OPTIONS")]
+    public Toggle removeAPModsToggle;
+    public Toggle fullCleanUE4SSToggle;
+
     [Header("CONFIRMATION PANEL")]
     public GameObject confirmationPanel;
     public TextMeshProUGUI confirmationMessage;
     public Button confirmButton;
     public Button cancelButton;
 
+    [Header("CONFIRMATION PANEL - DOWNLOADER")]
+    public GameObject downloadConfirmationPanel;
+    public TextMeshProUGUI downloadConfirmationMessage;
+    public Button downloadConfirmButton;
+    public Button downloadCancelButton;
+
     [Header("INFO PANEL")]
     public GameObject infoPanel;
     public TextMeshProUGUI infoText;
     public Button infoOkButton;
+
+    [Header("DOWNLOAD BUTTON")]
+    public Button downloadButton;
 
     [Header("SKIN")]
     public UISkin darkSkin;
@@ -48,8 +61,9 @@ public class VotVManualDL : MonoBehaviour
     private string pendingAction;
     private VotVConfig remoteConfig;
     private bool configLoaded = false;
+    private bool hasRunSetup = false;
 
-    private const string VOTVDOWNLOAD_FILENAME = "Voices Of The Void 0.9.0j.zip";
+    private const string VOTVDOWNLOAD_FILENAME = "Voices Of The Void 0.9.0j.7z";
 
     [System.Serializable]
     public class VotVConfig
@@ -57,7 +71,7 @@ public class VotVManualDL : MonoBehaviour
         public string votvAP;
         public string votvUE4SS;
         public string votvApworld;
-        public string votvDownloadUrl;
+        public string votvDL;
     }
 
     void Start()
@@ -77,13 +91,33 @@ public class VotVManualDL : MonoBehaviour
         if (cancelButton != null)
             cancelButton.onClick.AddListener(OnCancel);
 
+        if (downloadConfirmationPanel != null)
+            downloadConfirmationPanel.SetActive(false);
+
+        if (downloadConfirmButton != null)
+            downloadConfirmButton.onClick.AddListener(OnDownloadConfirm);
+
+        if (downloadCancelButton != null)
+            downloadCancelButton.onClick.AddListener(OnDownloadCancel);
+
         if (selectDirectoryButton != null)
             selectDirectoryButton.onClick.AddListener(OnSelectDirectoryClick);
 
         if (selectDownloadDirectoryButton != null)
             selectDownloadDirectoryButton.onClick.AddListener(OnSelectDownloadDirectoryClick);
 
-        // Initialiser les chemins par défaut
+        if (downloadButton != null)
+            downloadButton.onClick.AddListener(OnDownloadClick);
+
+        if (removeAPModsToggle != null)
+            removeAPModsToggle.isOn = true;
+
+        if (fullCleanUE4SSToggle != null)
+            fullCleanUE4SSToggle.isOn = false;
+
+        if (fullCleanUE4SSToggle != null)
+            fullCleanUE4SSToggle.onValueChanged.AddListener(OnFullCleanChanged);
+
         InitializeDefaultPaths();
 
         StartCoroutine(LoadRemoteConfig());
@@ -91,20 +125,20 @@ public class VotVManualDL : MonoBehaviour
 
     void InitializeDefaultPaths()
     {
-        string documentsPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+        string defaultDocsPath = Path.Combine("C:\\Users", System.Environment.UserName, "Documents");
 
-        if (selectedPathInputField != null && string.IsNullOrEmpty(selectedPathInputField.text))
+        if (selectedPathInputField != null)
         {
-            selectedPathInputField.text = documentsPath;
-            votVPath = documentsPath;
-            UnityEngine.Debug.Log("Default VotV path set to: " + documentsPath);
+            selectedPathInputField.text = defaultDocsPath;
+            votVPath = defaultDocsPath;
+            UnityEngine.Debug.Log("VotV path initialized to: " + votVPath);
         }
 
-        if (downloadPathInputField != null && string.IsNullOrEmpty(downloadPathInputField.text))
+        if (downloadPathInputField != null)
         {
-            downloadPathInputField.text = documentsPath;
-            downloadPath = documentsPath;
-            UnityEngine.Debug.Log("Default download path set to: " + documentsPath);
+            downloadPathInputField.text = defaultDocsPath;
+            downloadPath = defaultDocsPath;
+            UnityEngine.Debug.Log("Download path initialized to: " + downloadPath);
         }
     }
 
@@ -118,6 +152,8 @@ public class VotVManualDL : MonoBehaviour
         apworld.url = remoteConfig.votvApworld;
     }
 
+    // ========== SETUP & REVERT ==========
+
     public void RunSetup()
     {
         if (string.IsNullOrEmpty(votVPath))
@@ -126,18 +162,24 @@ public class VotVManualDL : MonoBehaviour
             return;
         }
 
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
-    }
-
-    public void DownloadVotV()
-    {
-        if (string.IsNullOrEmpty(downloadPath))
+        if (hasRunSetup)
         {
-            ShowInfo("Please select download directory first!");
+            ShowInfo("Setup has already been run. Please revert first if you want to reinstall.");
             return;
         }
 
-        ShowConfirmation("Download Voices of the Void v0.9.0j?", "DownloadVotV");
+        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+    }
+
+    public void RevertAll()
+    {
+        if (string.IsNullOrEmpty(votVPath))
+        {
+            ShowInfo("Please select VotV directory first!");
+            return;
+        }
+
+        ShowConfirmation("Are you sure you want to revert?", "Revert");
     }
 
     private void ShowConfirmation(string message, string action)
@@ -157,13 +199,16 @@ public class VotVManualDL : MonoBehaviour
         switch (pendingAction)
         {
             case "Setup":
+                hasRunSetup = true;
                 ExecuteSetup();
                 break;
 
-            case "DownloadVotV":
-                StartCoroutine(DownloadVotVFlow());
+            case "Revert":
+                ExecuteRevert();
                 break;
         }
+
+        pendingAction = "";
     }
 
     private void OnCancel()
@@ -210,23 +255,104 @@ public class VotVManualDL : MonoBehaviour
         StartCoroutine(InstallFlow());
     }
 
+    private void ExecuteRevert()
+    {
+        if (string.IsNullOrEmpty(votVPath))
+        {
+            ShowInfo("VotV path not set.");
+            return;
+        }
+
+        bool removeAP = removeAPModsToggle != null && removeAPModsToggle.isOn;
+        bool fullClean = fullCleanUE4SSToggle != null && fullCleanUE4SSToggle.isOn;
+
+        UnityEngine.Debug.Log($"ExecuteRevert - removeAP: {removeAP}, fullClean: {fullClean}, votVPath: {votVPath}");
+
+        if (!removeAP && !fullClean)
+        {
+            ShowInfo("Please select at least one revert option.");
+            return;
+        }
+
+        if (fullClean)
+        {
+            ShowInfo("Removing UE4SS and dwmapi.dll...");
+
+            string win64Path = Path.Combine(votVPath, "VotV", "Binaries", "Win64");
+            string ue4ssPath = Path.Combine(win64Path, "ue4ss");
+            string dwmapiPath = Path.Combine(win64Path, "dwmapi.dll");
+
+            UnityEngine.Debug.Log($"Deleting: {ue4ssPath}");
+            UnityEngine.Debug.Log($"Deleting: {dwmapiPath}");
+
+            SafeDeleteDirectory(ue4ssPath);
+            SafeDeleteFile(dwmapiPath);
+
+            UnityEngine.Debug.Log("Full clean completed!");
+            ShowInfo("Full clean completed!");
+            hasRunSetup = false;
+            return;
+        }
+
+        if (removeAP)
+        {
+            ShowInfo("Removing AP mod...");
+
+            string modsPath = Path.Combine(votVPath, "VotV", "Binaries", "Win64", "ue4ss", "Mods");
+            string apModPath = Path.Combine(modsPath, "votv_ap-main");
+
+            UnityEngine.Debug.Log($"Deleting: {apModPath}");
+
+            if (Directory.Exists(modsPath))
+            {
+                SafeDeleteDirectory(apModPath);
+            }
+
+            DeleteOldVersionFiles();
+            UnityEngine.Debug.Log("AP mod removed!");
+            ShowInfo("AP mod removed successfully!");
+            hasRunSetup = false;
+        }
+    }
+
+    bool HasOtherMods()
+    {
+        string modsPath = Path.Combine(votVPath, "VotV", "Binaries", "Win64", "ue4ss", "Mods");
+
+        if (!Directory.Exists(modsPath))
+            return false;
+
+        string[] dirs = Directory.GetDirectories(modsPath);
+
+        foreach (string dir in dirs)
+        {
+            string dirName = Path.GetFileName(dir);
+            if (dirName != "votv_ap-main")
+                return true;
+        }
+
+        return false;
+    }
+
+    // ========== INSTALL FLOWS ==========
+
     IEnumerator InstallFlow()
     {
+        ShowInfo("Please wait...\n\nInstalling APWorld...");
         if (installAPWorldToggle == null || installAPWorldToggle.isOn)
         {
-            ShowInfo("Installing APWorld...");
             yield return InstallAPWorld();
         }
 
+        ShowInfo("Please wait...\n\nInstalling UE4SS...");
         if (installUE4SSToggle != null && installUE4SSToggle.isOn)
         {
-            ShowInfo("Installing UE4SS...");
             yield return InstallUE4SS();
         }
 
+        ShowInfo("Please wait...\n\nInstalling AP Mod...");
         if (installAPModToggle == null || installAPModToggle.isOn)
         {
-            ShowInfo("Installing AP Mod...");
             yield return InstallAPMod();
         }
 
@@ -397,36 +523,91 @@ public class VotVManualDL : MonoBehaviour
 
     IEnumerator APWorldOnlyFlow()
     {
+        ShowInfo("Please wait...\n\nInstalling APWorld...");
         yield return InstallAPWorld();
     }
 
     IEnumerator UE4SSOnlyFlow()
     {
+        ShowInfo("Please wait...\n\nInstalling UE4SS...");
         yield return InstallUE4SS();
     }
 
     IEnumerator APModOnlyFlow()
     {
+        ShowInfo("Please wait...\n\nInstalling AP Mod...");
         yield return InstallAPMod();
     }
 
-    IEnumerator DownloadVotVFlow()
+    // ========== DOWNLOADER ==========
+
+    void OnDownloadClick()
     {
-        ShowInfo("Opening download page...");
+        downloadPath = downloadPathInputField != null ? downloadPathInputField.text : "";
 
-        string downloadUrl = "https://store.steampowered.com/app/1958810/Voices_of_the_Void/";
-
-        if (remoteConfig != null && !string.IsNullOrEmpty(remoteConfig.votvDownloadUrl))
+        if (string.IsNullOrEmpty(downloadPath))
         {
-            downloadUrl = remoteConfig.votvDownloadUrl;
+            ShowInfo("Please select download directory first!");
+            return;
         }
 
-        Application.OpenURL(downloadUrl);
-
-        ShowInfo($"Download link opened in your browser.\n\nSave the file to:\n{downloadPath}\n\nThe file will be renamed to:\n{VOTVDOWNLOAD_FILENAME}");
-
-        yield return null;
+        ShowDownloadConfirmation("Download Voices of the Void v0.9.0j?");
     }
+
+    private void ShowDownloadConfirmation(string message)
+    {
+        if (downloadConfirmationMessage != null)
+            downloadConfirmationMessage.text = message;
+
+        if (downloadConfirmationPanel != null)
+            downloadConfirmationPanel.SetActive(true);
+    }
+
+    private void OnDownloadConfirm()
+    {
+        if (downloadConfirmationPanel != null)
+            downloadConfirmationPanel.SetActive(false);
+
+        StartCoroutine(DownloadVotVFile());
+    }
+
+    private void OnDownloadCancel()
+    {
+        if (downloadConfirmationPanel != null)
+            downloadConfirmationPanel.SetActive(false);
+    }
+
+    IEnumerator DownloadVotVFile()
+    {
+        while (!configLoaded)
+        {
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        if (remoteConfig == null || string.IsNullOrEmpty(remoteConfig.votvDL))
+        {
+            ShowInfo("ERROR: Download URL not available!");
+            yield break;
+        }
+
+        ShowInfo("Please wait...\n\nDownloading Voices of the Void...");
+
+        string savePath = Path.Combine(downloadPath, VOTVDOWNLOAD_FILENAME);
+
+        yield return DownloadFile(remoteConfig.votvDL, savePath);
+
+        if (File.Exists(savePath))
+        {
+            ShowInfo($"Download complete!\nFile saved to:\n{savePath}");
+        }
+        else
+        {
+            ShowInfo("ERROR: Download failed!");
+        }
+    }
+
+    // ========== FILE OPERATIONS ==========
 
     IEnumerator DownloadFile(string url, string savePath)
     {
@@ -489,18 +670,27 @@ public class VotVManualDL : MonoBehaviour
         if (darkSkin != null)
             FileBrowser.Skin = darkSkin;
 
-        string startPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+        string startPath = string.IsNullOrEmpty(votVPath)
+            ? Path.Combine("C:\\Users", System.Environment.UserName, "Documents")
+            : votVPath;
+
+        FileBrowser.SetFilters(true, new FileBrowser.Filter("Executable", ".exe"), new FileBrowser.Filter("All Files", "*"));
 
         yield return FileBrowser.WaitForLoadDialog(
-            FileBrowser.PickMode.Folders,
+            FileBrowser.PickMode.FilesAndFolders,
             false,
             startPath,
-            "Select VotV Directory (folder with VotV.exe)"
+            "Select VotV Directory or VotV.exe"
         );
 
         if (FileBrowser.Success && FileBrowser.Result != null && FileBrowser.Result.Length > 0)
         {
             string selectedPath = FileBrowser.Result[0];
+
+            if (selectedPath.EndsWith(".exe"))
+            {
+                selectedPath = Path.GetDirectoryName(selectedPath);
+            }
 
             if (File.Exists(Path.Combine(selectedPath, "VotV.exe")))
             {
@@ -509,11 +699,11 @@ public class VotVManualDL : MonoBehaviour
                     selectedPathInputField.text = votVPath;
 
                 UnityEngine.Debug.Log("VotV directory selected: " + votVPath);
-                ShowInfo("VotV directory selected successfully!");
             }
             else
             {
-                ShowInfo("ERROR: VotV.exe not found in this directory!");
+                ShowInfo("ERROR: VotV.exe not found in the selected directory!\nPlease select the correct VotV installation folder.");
+                UnityEngine.Debug.LogError("VotV.exe not found at: " + Path.Combine(selectedPath, "VotV.exe"));
             }
         }
     }
@@ -523,7 +713,9 @@ public class VotVManualDL : MonoBehaviour
         if (darkSkin != null)
             FileBrowser.Skin = darkSkin;
 
-        string startPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+        string startPath = string.IsNullOrEmpty(downloadPath)
+            ? Path.Combine("C:\\Users", System.Environment.UserName, "Documents")
+            : downloadPath;
 
         yield return FileBrowser.WaitForLoadDialog(
             FileBrowser.PickMode.Folders,
@@ -539,7 +731,23 @@ public class VotVManualDL : MonoBehaviour
                 downloadPathInputField.text = downloadPath;
 
             UnityEngine.Debug.Log("Download directory selected: " + downloadPath);
-            ShowInfo($"Download directory selected successfully!\n\nFile will be saved as:\n{VOTVDOWNLOAD_FILENAME}");
+        }
+    }
+
+    void SafeDeleteFile(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+            {
+                File.SetAttributes(path, FileAttributes.Normal);
+                File.Delete(path);
+                UnityEngine.Debug.Log("File deleted: " + path);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error deleting file: " + path + " - " + e.Message);
         }
     }
 
@@ -548,9 +756,15 @@ public class VotVManualDL : MonoBehaviour
         try
         {
             if (Directory.Exists(path))
+            {
                 Directory.Delete(path, true);
+                UnityEngine.Debug.Log("Directory deleted: " + path);
+            }
         }
-        catch { }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error deleting directory: " + path + " - " + e.Message);
+        }
     }
 
     void MoveDirectory(string source, string target)
@@ -570,7 +784,7 @@ public class VotVManualDL : MonoBehaviour
         }
     }
 
-    void ShowInfo(string message)
+    public void ShowInfo(string message)
     {
         if (infoPanel == null || infoText == null)
             return;
@@ -583,6 +797,15 @@ public class VotVManualDL : MonoBehaviour
     {
         if (infoPanel != null)
             infoPanel.SetActive(false);
+    }
+
+    void OnFullCleanChanged(bool value)
+    {
+        if (removeAPModsToggle != null)
+        {
+            removeAPModsToggle.isOn = false;
+            removeAPModsToggle.interactable = !value;
+        }
     }
 
     string FindFile(string root, string fileName)
@@ -613,36 +836,6 @@ public class VotVManualDL : MonoBehaviour
         return "";
     }
 
-    string RenameDownloadedFile(string originalPath)
-    {
-        try
-        {
-            string directory = Path.GetDirectoryName(originalPath);
-            string newPath = Path.Combine(directory, VOTVDOWNLOAD_FILENAME);
-
-            // Supprimer le fichier destination s'il existe
-            if (File.Exists(newPath))
-            {
-                File.Delete(newPath);
-                UnityEngine.Debug.Log("Existing file deleted: " + newPath);
-            }
-
-            // Renommer le fichier
-            if (File.Exists(originalPath))
-            {
-                File.Move(originalPath, newPath);
-                UnityEngine.Debug.Log($"File renamed from {Path.GetFileName(originalPath)} to {VOTVDOWNLOAD_FILENAME}");
-                return newPath;
-            }
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogError("Error renaming file: " + e.Message);
-        }
-
-        return originalPath;
-    }
-
     void CreateVersionFile(string apmodUrl, string ue4ssUrl, string apworldUrl)
     {
         try
@@ -669,6 +862,8 @@ public class VotVManualDL : MonoBehaviour
             content += "\n";
             content += "Downloaded at: " + System.DateTime.Now + "\n";
 
+            DeleteOldVersionFiles();
+
             string rootVersionPath = Path.Combine(votVPath, versionFileName);
             File.WriteAllText(rootVersionPath, content);
             UnityEngine.Debug.Log("Version file created: " + rootVersionPath);
@@ -676,6 +871,40 @@ public class VotVManualDL : MonoBehaviour
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Error creating version file: " + e.Message);
+        }
+    }
+
+    void DeleteOldVersionFiles()
+    {
+        try
+        {
+            System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"VotV APMod Version .+\.txt");
+
+            if (Directory.Exists(votVPath))
+            {
+                string[] rootFiles = Directory.GetFiles(votVPath);
+                foreach (string file in rootFiles)
+                {
+                    string fileName = Path.GetFileName(file);
+                    if (pattern.IsMatch(fileName))
+                    {
+                        try
+                        {
+                            File.SetAttributes(file, FileAttributes.Normal);
+                            File.Delete(file);
+                            UnityEngine.Debug.Log("Deleted old version file: " + fileName);
+                        }
+                        catch (System.Exception e)
+                        {
+                            UnityEngine.Debug.LogWarning("Could not delete old version file: " + e.Message);
+                        }
+                    }
+                }
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error cleaning up old version files: " + e.Message);
         }
     }
 
