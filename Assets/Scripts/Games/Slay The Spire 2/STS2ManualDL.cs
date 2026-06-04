@@ -667,12 +667,16 @@ public class STS2ManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Slay the Spire 2"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Slay the Spire 2"),
-            @"D:\Steam\steamapps\common\Slay the Spire 2",
-            @"D:\SteamLibrary\steamapps\common\Slay the Spire 2",
-            @"E:\Steam\steamapps\common\Slay the Spire 2",
-            @"E:\SteamLibrary\steamapps\common\Slay the Spire 2",
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Slay the Spire 2"),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Slay the Spire 2"),
+        @"D:\Steam\steamapps\common\Slay the Spire 2",
+        @"D:\SteamLibrary\steamapps\common\Slay the Spire 2",
+        @"D:\steamapps\common\Slay the Spire 2",
+        @"E:\Steam\steamapps\common\Slay the Spire 2",
+        @"E:\SteamLibrary\steamapps\common\Slay the Spire 2",
+        @"E:\steamapps\common\Slay the Spire 2",
+        @"E:\Program Files (x86)\steamapps\common\Slay the Spire 2",
+        @"E:\Program Files\steamapps\common\Slay the Spire 2",
         };
 
         foreach (string path in quickPaths)
@@ -696,11 +700,28 @@ public class STS2ManualDL : MonoBehaviour
 
                 try
                 {
+                    // Cherche Steam\steamapps
                     string sts2Path = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Slay the Spire 2");
                     if (Directory.Exists(sts2Path))
                         return sts2Path;
 
+                    // Cherche SteamLibrary\steamapps
                     sts2Path = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Slay the Spire 2");
+                    if (Directory.Exists(sts2Path))
+                        return sts2Path;
+
+                    // Cherche directement steamapps à la racine du disque
+                    sts2Path = Path.Combine(drive.Name, "steamapps", "common", "Slay the Spire 2");
+                    if (Directory.Exists(sts2Path))
+                        return sts2Path;
+
+                    // Cherche dans Program Files (x86)\steamapps
+                    sts2Path = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Slay the Spire 2");
+                    if (Directory.Exists(sts2Path))
+                        return sts2Path;
+
+                    // Cherche dans Program Files\steamapps
+                    sts2Path = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Slay the Spire 2");
                     if (Directory.Exists(sts2Path))
                         return sts2Path;
                 }

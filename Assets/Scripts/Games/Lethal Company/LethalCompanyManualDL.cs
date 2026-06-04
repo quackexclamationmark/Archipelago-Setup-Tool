@@ -966,12 +966,16 @@ public class LethalCompanyManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Lethal Company"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Lethal Company"),
-            @"D:\Steam\steamapps\common\Lethal Company",
-            @"D:\SteamLibrary\steamapps\common\Lethal Company",
-            @"E:\Steam\steamapps\common\Lethal Company",
-            @"E:\SteamLibrary\steamapps\common\Lethal Company",
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Lethal Company"),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Lethal Company"),
+        @"D:\Steam\steamapps\common\Lethal Company",
+        @"D:\SteamLibrary\steamapps\common\Lethal Company",
+        @"D:\steamapps\common\Lethal Company",
+        @"E:\Steam\steamapps\common\Lethal Company",
+        @"E:\SteamLibrary\steamapps\common\Lethal Company",
+        @"E:\steamapps\common\Lethal Company",
+        @"E:\Program Files (x86)\steamapps\common\Lethal Company",
+        @"E:\Program Files\steamapps\common\Lethal Company",
         };
 
         foreach (string path in quickPaths)
@@ -998,11 +1002,28 @@ public class LethalCompanyManualDL : MonoBehaviour
 
                 try
                 {
+                    // Cherche Steam\steamapps
                     string lcPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Lethal Company");
                     if (Directory.Exists(lcPath))
                         return lcPath;
 
+                    // Cherche SteamLibrary\steamapps
                     lcPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Lethal Company");
+                    if (Directory.Exists(lcPath))
+                        return lcPath;
+
+                    // Cherche directement steamapps à la racine du disque
+                    lcPath = Path.Combine(drive.Name, "steamapps", "common", "Lethal Company");
+                    if (Directory.Exists(lcPath))
+                        return lcPath;
+
+                    // Cherche dans Program Files (x86)\steamapps
+                    lcPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Lethal Company");
+                    if (Directory.Exists(lcPath))
+                        return lcPath;
+
+                    // Cherche dans Program Files\steamapps
+                    lcPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Lethal Company");
                     if (Directory.Exists(lcPath))
                         return lcPath;
                 }

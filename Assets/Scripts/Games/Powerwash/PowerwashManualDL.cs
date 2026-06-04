@@ -736,12 +736,16 @@ public class PowerwashManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "PowerWash Simulator"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "PowerWash Simulator"),
-            @"D:\Steam\steamapps\common\PowerWash Simulator",
-            @"D:\SteamLibrary\steamapps\common\PowerWash Simulator",
-            @"E:\Steam\steamapps\common\PowerWash Simulator",
-            @"E:\SteamLibrary\steamapps\common\PowerWash Simulator",
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "PowerWash Simulator"),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "PowerWash Simulator"),
+        @"D:\Steam\steamapps\common\PowerWash Simulator",
+        @"D:\SteamLibrary\steamapps\common\PowerWash Simulator",
+        @"D:\steamapps\common\PowerWash Simulator",
+        @"E:\Steam\steamapps\common\PowerWash Simulator",
+        @"E:\SteamLibrary\steamapps\common\PowerWash Simulator",
+        @"E:\steamapps\common\PowerWash Simulator",
+        @"E:\Program Files (x86)\steamapps\common\PowerWash Simulator",
+        @"E:\Program Files\steamapps\common\PowerWash Simulator",
         };
 
         foreach (string path in quickPaths)
@@ -762,11 +766,28 @@ public class PowerwashManualDL : MonoBehaviour
             {
                 try
                 {
+                    // Cherche Steam\steamapps
                     string path = Path.Combine(drive.RootDirectory.FullName, "Steam", "steamapps", "common", "PowerWash Simulator");
                     if (Directory.Exists(path))
                         return path;
 
+                    // Cherche SteamLibrary\steamapps
                     path = Path.Combine(drive.RootDirectory.FullName, "SteamLibrary", "steamapps", "common", "PowerWash Simulator");
+                    if (Directory.Exists(path))
+                        return path;
+
+                    // Cherche directement steamapps à la racine du disque
+                    path = Path.Combine(drive.RootDirectory.FullName, "steamapps", "common", "PowerWash Simulator");
+                    if (Directory.Exists(path))
+                        return path;
+
+                    // Cherche dans Program Files (x86)\steamapps
+                    path = Path.Combine(drive.RootDirectory.FullName, "Program Files (x86)", "steamapps", "common", "PowerWash Simulator");
+                    if (Directory.Exists(path))
+                        return path;
+
+                    // Cherche dans Program Files\steamapps
+                    path = Path.Combine(drive.RootDirectory.FullName, "Program Files", "steamapps", "common", "PowerWash Simulator");
                     if (Directory.Exists(path))
                         return path;
                 }

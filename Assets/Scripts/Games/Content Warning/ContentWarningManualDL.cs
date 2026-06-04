@@ -765,12 +765,16 @@ public class ContentWarningManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Content Warning"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Content Warning"),
-            @"D:\Steam\steamapps\common\Content Warning",
-            @"D:\SteamLibrary\steamapps\common\Content Warning",
-            @"E:\Steam\steamapps\common\Content Warning",
-            @"E:\SteamLibrary\steamapps\common\Content Warning",
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Content Warning"),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Content Warning"),
+        @"D:\Steam\steamapps\common\Content Warning",
+        @"D:\SteamLibrary\steamapps\common\Content Warning",
+        @"D:\steamapps\common\Content Warning",
+        @"E:\Steam\steamapps\common\Content Warning",
+        @"E:\SteamLibrary\steamapps\common\Content Warning",
+        @"E:\steamapps\common\Content Warning",
+        @"E:\Program Files (x86)\steamapps\common\Content Warning",
+        @"E:\Program Files\steamapps\common\Content Warning",
         };
 
         foreach (string path in quickPaths)
@@ -794,6 +798,7 @@ public class ContentWarningManualDL : MonoBehaviour
             {
                 try
                 {
+                    // Cherche Steam\steamapps
                     string path = Path.Combine(drive.RootDirectory.FullName, "Steam", "steamapps", "common", "Content Warning");
                     if (Directory.Exists(path))
                     {
@@ -801,7 +806,32 @@ public class ContentWarningManualDL : MonoBehaviour
                         return path;
                     }
 
+                    // Cherche SteamLibrary\steamapps
                     path = Path.Combine(drive.RootDirectory.FullName, "SteamLibrary", "steamapps", "common", "Content Warning");
+                    if (Directory.Exists(path))
+                    {
+                        UnityEngine.Debug.Log("Game path found: " + path);
+                        return path;
+                    }
+
+                    // Cherche directement steamapps à la racine du disque
+                    path = Path.Combine(drive.RootDirectory.FullName, "steamapps", "common", "Content Warning");
+                    if (Directory.Exists(path))
+                    {
+                        UnityEngine.Debug.Log("Game path found: " + path);
+                        return path;
+                    }
+
+                    // Cherche dans Program Files (x86)\steamapps
+                    path = Path.Combine(drive.RootDirectory.FullName, "Program Files (x86)", "steamapps", "common", "Content Warning");
+                    if (Directory.Exists(path))
+                    {
+                        UnityEngine.Debug.Log("Game path found: " + path);
+                        return path;
+                    }
+
+                    // Cherche dans Program Files\steamapps
+                    path = Path.Combine(drive.RootDirectory.FullName, "Program Files", "steamapps", "common", "Content Warning");
                     if (Directory.Exists(path))
                     {
                         UnityEngine.Debug.Log("Game path found: " + path);

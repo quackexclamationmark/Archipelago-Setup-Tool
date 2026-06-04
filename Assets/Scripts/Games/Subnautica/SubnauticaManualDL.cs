@@ -734,33 +734,21 @@ public class SubnauticaManualDL : MonoBehaviour
 
     string GetSubnauticaPath()
     {
-        // 1. Steam
-        string steam = GetSteamPath();
-        if (!string.IsNullOrEmpty(steam))
+        string[] quickPaths = new string[]
         {
-            UnityEngine.Debug.Log("Found Subnautica in Steam: " + steam);
-            return steam;
-        }
-
-        // 2. Epic (manifest)
-        string epic = GetEpicPath();
-        if (!string.IsNullOrEmpty(epic))
-        {
-            UnityEngine.Debug.Log("Found Subnautica in Epic: " + epic);
-            return epic;
-        }
-
-        // 3. Check other common Steam paths
-        string[] otherPaths = new string[]
-        {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Subnautica"),
-            @"D:\Steam\steamapps\common\Subnautica",
-            @"D:\SteamLibrary\steamapps\common\Subnautica",
-            @"E:\Steam\steamapps\common\Subnautica",
-            @"E:\SteamLibrary\steamapps\common\Subnautica",
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Subnautica"),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Subnautica"),
+        @"D:\Steam\steamapps\common\Subnautica",
+        @"D:\SteamLibrary\steamapps\common\Subnautica",
+        @"D:\steamapps\common\Subnautica",
+        @"E:\Steam\steamapps\common\Subnautica",
+        @"E:\SteamLibrary\steamapps\common\Subnautica",
+        @"E:\steamapps\common\Subnautica",
+        @"E:\Program Files (x86)\steamapps\common\Subnautica",
+        @"E:\Program Files\steamapps\common\Subnautica",
         };
 
-        foreach (string path in otherPaths)
+        foreach (string path in quickPaths)
         {
             try
             {
@@ -773,66 +761,63 @@ public class SubnauticaManualDL : MonoBehaviour
             catch { }
         }
 
-        UnityEngine.Debug.LogWarning("Subnautica not found.");
-        return "";
-    }
-
-    string GetSteamPath()
-    {
-        string path = Path.Combine(
-            System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86),
-            "Steam",
-            "steamapps",
-            "common",
-            "Subnautica"
-        );
-
-        if (Directory.Exists(path))
-            return path;
-
-        return "";
-    }
-
-    string GetEpicPath()
-    {
-        string manifestFolder = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-            "Epic",
-            "EpicGamesLauncher",
-            "Data",
-            "Manifests"
-        );
-
-        if (!Directory.Exists(manifestFolder))
-            return "";
-
-        string[] files = Directory.GetFiles(manifestFolder, "*.item");
-
-        foreach (string file in files)
+        try
         {
-            try
+            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+            foreach (System.IO.DriveInfo drive in drives)
             {
-                string json = File.ReadAllText(file);
-
-                if (!json.Contains("Subnautica"))
+                if (drive.DriveType != System.IO.DriveType.Fixed)
                     continue;
 
-                int index = json.IndexOf("InstallLocation");
+                try
+                {
+                    // Cherche Steam\steamapps
+                    string subPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Subnautica");
+                    if (Directory.Exists(subPath))
+                    {
+                        UnityEngine.Debug.Log("Found Subnautica at: " + subPath);
+                        return subPath;
+                    }
 
-                if (index == -1)
-                    continue;
+                    // Cherche SteamLibrary\steamapps
+                    subPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Subnautica");
+                    if (Directory.Exists(subPath))
+                    {
+                        UnityEngine.Debug.Log("Found Subnautica at: " + subPath);
+                        return subPath;
+                    }
 
-                int start = json.IndexOf(":", index) + 2;
-                int end = json.IndexOf("\"", start);
+                    // Cherche directement steamapps à la racine du disque
+                    subPath = Path.Combine(drive.Name, "steamapps", "common", "Subnautica");
+                    if (Directory.Exists(subPath))
+                    {
+                        UnityEngine.Debug.Log("Found Subnautica at: " + subPath);
+                        return subPath;
+                    }
 
-                string path = json.Substring(start, end - start);
+                    // Cherche dans Program Files (x86)\steamapps
+                    subPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Subnautica");
+                    if (Directory.Exists(subPath))
+                    {
+                        UnityEngine.Debug.Log("Found Subnautica at: " + subPath);
+                        return subPath;
+                    }
 
-                if (Directory.Exists(path))
-                    return path;
+                    // Cherche dans Program Files\steamapps
+                    subPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Subnautica");
+                    if (Directory.Exists(subPath))
+                    {
+                        UnityEngine.Debug.Log("Found Subnautica at: " + subPath);
+                        return subPath;
+                    }
+                }
+                catch { }
             }
-            catch { }
         }
+        catch { }
 
+        UnityEngine.Debug.LogWarning("Subnautica not found.");
         return "";
     }
 }

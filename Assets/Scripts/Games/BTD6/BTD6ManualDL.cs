@@ -946,8 +946,12 @@ public class BloonsTD6ManualDL : MonoBehaviour
             Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "BloonsTD6"),
             @"D:\Steam\steamapps\common\BloonsTD6",
             @"D:\SteamLibrary\steamapps\common\BloonsTD6",
+            @"D:\steamapps\common\BloonsTD6",
             @"E:\Steam\steamapps\common\BloonsTD6",
             @"E:\SteamLibrary\steamapps\common\BloonsTD6",
+            @"E:\steamapps\common\BloonsTD6",
+            @"E:\Program Files (x86)\steamapps\common\BloonsTD6",
+            @"E:\Program Files\steamapps\common\BloonsTD6",
         };
 
         foreach (string path in quickPaths)
@@ -971,11 +975,28 @@ public class BloonsTD6ManualDL : MonoBehaviour
 
                 try
                 {
+                    // Cherche Steam\steamapps
                     string btd6Path = Path.Combine(drive.Name, "Steam", "steamapps", "common", "BloonsTD6");
                     if (Directory.Exists(btd6Path))
                         return btd6Path;
 
+                    // Cherche SteamLibrary\steamapps
                     btd6Path = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "BloonsTD6");
+                    if (Directory.Exists(btd6Path))
+                        return btd6Path;
+
+                    // Cherche directement steamapps à la racine du disque
+                    btd6Path = Path.Combine(drive.Name, "steamapps", "common", "BloonsTD6");
+                    if (Directory.Exists(btd6Path))
+                        return btd6Path;
+
+                    // Cherche dans Program Files (x86)\steamapps
+                    btd6Path = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "BloonsTD6");
+                    if (Directory.Exists(btd6Path))
+                        return btd6Path;
+
+                    // Cherche dans Program Files\steamapps
+                    btd6Path = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "BloonsTD6");
                     if (Directory.Exists(btd6Path))
                         return btd6Path;
                 }

@@ -771,12 +771,16 @@ public class COE33ManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Expedition 33"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Expedition 33"),
-            @"D:\Steam\steamapps\common\Expedition 33",
-            @"D:\SteamLibrary\steamapps\common\Expedition 33",
-            @"E:\Steam\steamapps\common\Expedition 33",
-            @"E:\SteamLibrary\steamapps\common\Expedition 33",
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Expedition 33"),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Expedition 33"),
+        @"D:\Steam\steamapps\common\Expedition 33",
+        @"D:\SteamLibrary\steamapps\common\Expedition 33",
+        @"D:\steamapps\common\Expedition 33",
+        @"E:\Steam\steamapps\common\Expedition 33",
+        @"E:\SteamLibrary\steamapps\common\Expedition 33",
+        @"E:\steamapps\common\Expedition 33",
+        @"E:\Program Files (x86)\steamapps\common\Expedition 33",
+        @"E:\Program Files\steamapps\common\Expedition 33",
         };
 
         foreach (string path in quickPaths)
@@ -800,11 +804,28 @@ public class COE33ManualDL : MonoBehaviour
 
                 try
                 {
+                    // Cherche Steam\steamapps
                     string gamePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Expedition 33");
                     if (Directory.Exists(gamePath))
                         return gamePath;
 
+                    // Cherche SteamLibrary\steamapps
                     gamePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Expedition 33");
+                    if (Directory.Exists(gamePath))
+                        return gamePath;
+
+                    // Cherche directement steamapps à la racine du disque
+                    gamePath = Path.Combine(drive.Name, "steamapps", "common", "Expedition 33");
+                    if (Directory.Exists(gamePath))
+                        return gamePath;
+
+                    // Cherche dans Program Files (x86)\steamapps
+                    gamePath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Expedition 33");
+                    if (Directory.Exists(gamePath))
+                        return gamePath;
+
+                    // Cherche dans Program Files\steamapps
+                    gamePath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Expedition 33");
                     if (Directory.Exists(gamePath))
                         return gamePath;
                 }

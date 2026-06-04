@@ -787,8 +787,12 @@ public class PeaksOfYoreManualDL : MonoBehaviour
             Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Peaks of Yore"),
             @"D:\Steam\steamapps\common\Peaks of Yore",
             @"D:\SteamLibrary\steamapps\common\Peaks of Yore",
+            @"D:\steamapps\common\Peaks of Yore",
             @"E:\Steam\steamapps\common\Peaks of Yore",
             @"E:\SteamLibrary\steamapps\common\Peaks of Yore",
+            @"E:\steamapps\common\Peaks of Yore",
+            @"E:\Program Files (x86)\steamapps\common\Peaks of Yore",
+            @"E:\Program Files\steamapps\common\Peaks of Yore",
         };
 
         foreach (string path in quickPaths)
@@ -812,11 +816,28 @@ public class PeaksOfYoreManualDL : MonoBehaviour
 
                 try
                 {
+                    // Cherche Steam\steamapps
                     string poyPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Peaks of Yore");
                     if (Directory.Exists(poyPath))
                         return poyPath;
 
+                    // Cherche SteamLibrary\steamapps
                     poyPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Peaks of Yore");
+                    if (Directory.Exists(poyPath))
+                        return poyPath;
+
+                    // Cherche directement steamapps à la racine du disque
+                    poyPath = Path.Combine(drive.Name, "steamapps", "common", "Peaks of Yore");
+                    if (Directory.Exists(poyPath))
+                        return poyPath;
+
+                    // Cherche dans Program Files (x86)\steamapps
+                    poyPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Peaks of Yore");
+                    if (Directory.Exists(poyPath))
+                        return poyPath;
+
+                    // Cherche dans Program Files\steamapps
+                    poyPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Peaks of Yore");
                     if (Directory.Exists(poyPath))
                         return poyPath;
                 }

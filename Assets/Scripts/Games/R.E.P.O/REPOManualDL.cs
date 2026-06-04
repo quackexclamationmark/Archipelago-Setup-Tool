@@ -1161,12 +1161,16 @@ public class REPOManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "REPO"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "REPO"),
-            @"D:\Steam\steamapps\common\REPO",
-            @"D:\SteamLibrary\steamapps\common\REPO",
-            @"E:\Steam\steamapps\common\REPO",
-            @"E:\SteamLibrary\steamapps\common\REPO",
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "REPO"),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "REPO"),
+        @"D:\Steam\steamapps\common\REPO",
+        @"D:\SteamLibrary\steamapps\common\REPO",
+        @"D:\steamapps\common\REPO",
+        @"E:\Steam\steamapps\common\REPO",
+        @"E:\SteamLibrary\steamapps\common\REPO",
+        @"E:\steamapps\common\REPO",
+        @"E:\Program Files (x86)\steamapps\common\REPO",
+        @"E:\Program Files\steamapps\common\REPO",
         };
 
         foreach (string path in quickPaths)
@@ -1190,11 +1194,28 @@ public class REPOManualDL : MonoBehaviour
 
                 try
                 {
+                    // Cherche Steam\steamapps
                     string repoPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "REPO");
                     if (Directory.Exists(repoPath))
                         return repoPath;
 
+                    // Cherche SteamLibrary\steamapps
                     repoPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "REPO");
+                    if (Directory.Exists(repoPath))
+                        return repoPath;
+
+                    // Cherche directement steamapps à la racine du disque
+                    repoPath = Path.Combine(drive.Name, "steamapps", "common", "REPO");
+                    if (Directory.Exists(repoPath))
+                        return repoPath;
+
+                    // Cherche dans Program Files (x86)\steamapps
+                    repoPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "REPO");
+                    if (Directory.Exists(repoPath))
+                        return repoPath;
+
+                    // Cherche dans Program Files\steamapps
+                    repoPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "REPO");
                     if (Directory.Exists(repoPath))
                         return repoPath;
                 }
