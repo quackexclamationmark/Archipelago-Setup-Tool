@@ -12,6 +12,7 @@ public class GamePanelManager : MonoBehaviour
     public GameObject peaksofyorePanel;
     public GameObject btd6Panel;
     public GameObject votvPanel;
+    public GameObject balatroPanel;
 
     void Start()
     {
@@ -54,6 +55,9 @@ public class GamePanelManager : MonoBehaviour
             case "VoicesOfTheVoid":
                 votvPanel.SetActive(true);
                 break;
+            case "Balatro":
+                balatroPanel.SetActive(true);
+                break;
         }
     }
 
@@ -69,5 +73,6 @@ public class GamePanelManager : MonoBehaviour
         if (peaksofyorePanel != null) peaksofyorePanel.SetActive(false);
         if (btd6Panel != null) btd6Panel.SetActive(false);
         if (votvPanel != null) votvPanel.SetActive(false);
+        if (balatroPanel != null) balatroPanel.SetActive(false);
     }
 }
