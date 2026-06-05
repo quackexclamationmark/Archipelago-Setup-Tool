@@ -36,6 +36,13 @@
     "lethalcompanyMonoDetourBep5": "https://thunderstore.io/package/download/MonoDetour/MonoDetour_BepInEx_5/0.7.13/",
     "lethalcompanyMonoDetour": "https://thunderstore.io/package/download/MonoDetour/MonoDetour/0.7.13/",
 
+    "ninesolsAP": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.5.3/Ixrec-ArchipelagoRandomizer-0.5.3.zip",
+    "ninesolsApworld": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.5.3/nine_sols.apworld",
+    "ninesolsAPI": "https://thunderstore.io/package/download/ninesolsmodding/NineSolsAPI/1.3.1/",
+    "ninesolsBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+    "ninesolsBepInExConfiguration": "https://thunderstore.io/package/download/ninesolsmodding/BepinExConfigurationManager/18.3.1/",
+    "ninesolsTeleport": "https://thunderstore.io/package/download/Ixrec/TeleportFromAnywhere/1.1.0/",
+    
     "peaksofyoreAP": "https://thunderstore.io/package/download/c0der23/PeaksOfArchipelago/2.2.1/",
     "peaksofyoreBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "peaksofyoreApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/peaks_of_yore.apworld",
