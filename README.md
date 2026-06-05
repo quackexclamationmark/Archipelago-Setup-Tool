@@ -18,12 +18,6 @@ Currently, the following games are supported:
 * Peaks Of Yore
 * Voices Of The Void
 
-Next on the list:
-* The Witness
-* Dark Souls 3
-* Dark Souls Remastered
-* Slime Rancher
-
 Features to add in the future:
 
 * Adding support for games available across multiple platforms.
