@@ -51,10 +51,10 @@ public class BalatroManualDL : MonoBehaviour
     [System.Serializable]
     public class BalatroConfig
     {
-        public string balatro_apworld;
-        public string balatro_lovely;
-        public string balatro_steamodded;
-        public string balatro_ap_mod;
+        public string balatroApworld;
+        public string balatroLovely;
+        public string balatroSteamodded;
+        public string balatroAP;
     }
 
     void Start()
@@ -101,10 +101,10 @@ public class BalatroManualDL : MonoBehaviour
         if (remoteConfig == null)
             return;
 
-        balatroapworld.url = remoteConfig.balatro_apworld;
-        lovely.url = remoteConfig.balatro_lovely;
-        steamodded.url = remoteConfig.balatro_steamodded;
-        balatroapMod.url = remoteConfig.balatro_ap_mod;
+        balatroapworld.url = remoteConfig.balatroApworld;
+        lovely.url = remoteConfig.balatroLovely;
+        steamodded.url = remoteConfig.balatroSteamodded;
+        balatroapMod.url = remoteConfig.balatroAP;
     }
 
     public void RunSetup()
@@ -227,6 +227,7 @@ public class BalatroManualDL : MonoBehaviour
             ShowInfo("Removing Balatro AP mods...");
 
             SafeDeleteDirectory(Path.Combine(modsPath, "BalatroAP"));
+            SafeDeleteDirectory(Path.Combine(modsPath, "steamodded"));
 
             DeleteOldVersionFiles();
 

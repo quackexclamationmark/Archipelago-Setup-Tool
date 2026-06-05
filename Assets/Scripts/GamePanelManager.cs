@@ -14,6 +14,7 @@ public class GamePanelManager : MonoBehaviour
     public GameObject votvPanel;
     public GameObject balatroPanel;
     public GameObject ninesolsPanel;
+    public GameObject peakPanel;
 
     void Start()
     {
@@ -62,6 +63,9 @@ public class GamePanelManager : MonoBehaviour
             case "NineSols":
                 ninesolsPanel.SetActive(true);
                 break;
+            case "PEAK":
+                peakPanel.SetActive(true);
+                break;
         }
     }
 
@@ -79,5 +83,6 @@ public class GamePanelManager : MonoBehaviour
         if (votvPanel != null) votvPanel.SetActive(false);
         if (balatroPanel != null) balatroPanel.SetActive(false);
         if (ninesolsPanel != null) ninesolsPanel.SetActive(false);
+        if (peakPanel != null) peakPanel.SetActive(false);
     }
 }
