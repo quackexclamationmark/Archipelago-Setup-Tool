@@ -61412,7 +61412,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59132eaa0295d0a449c8e12adbfc10c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ToolVersionManager
-  currentToolVersion: 0.2.2
+  currentToolVersion: 0.2.3
   updatePanel: {fileID: 550308499}
   updateMessage: {fileID: 944625233}
   updateDownloadButton: {fileID: 496543453}
