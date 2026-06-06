@@ -15,6 +15,8 @@ public class GamePanelManager : MonoBehaviour
     public GameObject balatroPanel;
     public GameObject ninesolsPanel;
     public GameObject peakPanel;
+    public GameObject outerwildsPanel;
+    public GameObject cupheadPanel;
 
     void Start()
     {
@@ -66,6 +68,12 @@ public class GamePanelManager : MonoBehaviour
             case "PEAK":
                 peakPanel.SetActive(true);
                 break;
+            case "OuterWilds":
+                outerwildsPanel.SetActive(true);
+                break;
+            case "Cuphead":
+                cupheadPanel.SetActive(true);
+                break;
         }
     }
 
@@ -84,5 +92,7 @@ public class GamePanelManager : MonoBehaviour
         if (balatroPanel != null) balatroPanel.SetActive(false);
         if (ninesolsPanel != null) ninesolsPanel.SetActive(false);
         if (peakPanel != null) peakPanel.SetActive(false);
+        if (outerwildsPanel != null) outerwildsPanel.SetActive(false);
+        if (cupheadPanel != null) cupheadPanel.SetActive(false);
     }
 }
