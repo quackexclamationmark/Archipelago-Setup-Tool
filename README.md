@@ -17,6 +17,11 @@ Currently, the following games are supported:
 * Bloons TD 6
 * Peaks Of Yore
 * Voices Of The Void
+* PEAK
+* Balatro
+* Nine Sols
+* Cuphead
+* Outer Wilds
 
 Features to add in the future:
 
