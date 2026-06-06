@@ -2,8 +2,10 @@
     "r2modmanDL": "https://thunderstore.io/c/lethal-company/p/ebkr/r2modman/",
 
     "poptrackerDL": "https://github.com/black-sliver/PopTracker/releases/download/v0.35.1/poptracker_0-35-1_win64.zip",
-    "coe33poptrackerDL": "https://github.com/Demorck/ClairObscur-Archipelago-Poptracker/releases/download/v0.2.3/ClairObscurAP_Poptracker.zip",
+    "coe33poptrackerDL": "https://github.com/Demorck/ClairObscur-Archipelago-Poptracker/releases/download/v0.2.4/ClairObscurAP_Poptracker.zip",
     "subnauticapoptrackerDL": "https://github.com/lurch9229/SubnauticaAP_maptracker_lurch9229/archive/refs/tags/0.2.1.zip",
+    "outerwildsPopTracker": "https://github.com/magicdotexe/Outer-Wilds-PopTracker-Pack/releases/download/1.0.0/Outer-Wilds-PopTracker-Pack.zip",
+
 
     "balatroAP": "https://github.com/BurndiL/BalatroAP/releases/download/v0.1.9f/BalatroAP.zip",
     "balatroApworld": "https://github.com/BurndiL/BalatroAP/releases/download/v0.1.9f/balatro.apworld",
@@ -22,6 +24,10 @@
     "contentwarningAP": "https://thunderstore.io/package/download/Faust/ContentWarningArchipelago/1.0.6/",
     "contentwarningBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "contentwarningMycelium": "https://github.com/RugbugRedfern/Mycelium-Networking-For-Content-Warning/releases/download/v1.0.14/MyceliumNetworkingForCW-Debug.dll",
+
+    "cupheadAP": "https://github.com/JKLeckr/CupheadArchipelagoMod/releases/download/alpha03d/CupheadArchipelago-alpha03d_win64.zip",
+    "cupheadApworld": "https://github.com/JKLeckr/Archipelago-cuphead/releases/download/alpha03d/cuphead.apworld",
+    "cupheadBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
     "lethalcompanyAP": "https://thunderstore.io/package/download/APLC/APLC/0.7.11/",
     "lethalcompanyBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
@@ -42,6 +48,16 @@
     "ninesolsBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "ninesolsBepInExConfiguration": "https://thunderstore.io/package/download/ninesolsmodding/BepinExConfigurationManager/18.3.1/",
     "ninesolsTeleport": "https://thunderstore.io/package/download/Ixrec/TeleportFromAnywhere/1.1.0/",
+
+    "outerwildsAP": "https://github.com/Ixrec/OuterWildsArchipelagoRandomizer/releases/download/v1.2.1/Ixrec.ArchipelagoRandomizer.zip",
+    "outerwildsApworld": "https://github.com/Ixrec/OuterWildsArchipelagoRandomizer/releases/download/v1.2.1/outer_wilds.apworld",
+    "outerwildsOWML": "https://github.com/ow-mods/owml/releases/download/2.16.2/OWML.zip",
+    "outerwildsCustomShipLog": "https://github.com/dgarroDC/CustomShipLogModes/releases/download/1.2.1/dgarro.CustomShipLogModes.zip",
+    "outerwildsEnableMeditation": "https://github.com/xen-42/outer-wilds-meditation/releases/download/1.0.0/xen.EnableMeditation.zip",
+
+    "peakAP": "https://github.com/Mickemoose/peak-archipelago/releases/download/0.6.0/peakpelago_0.6.0.zip",
+    "peakBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+    "peakApworld": "https://github.com/Mickemoose/peak-archipelago/releases/download/0.6.0/peak.apworld",
     
     "peaksofyoreAP": "https://thunderstore.io/package/download/c0der23/PeaksOfArchipelago/2.2.1/",
     "peaksofyoreBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",

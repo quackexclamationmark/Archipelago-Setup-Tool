@@ -18,12 +18,6 @@ Currently, the following games are supported:
 * Peaks Of Yore
 * Voices Of The Void
 
-Next on the list:
-* The Witness
-* Dark Souls 3
-* Dark Souls Remastered
-* Slime Rancher
-
 Features to add in the future:
 
 * Adding support for games available across multiple platforms.
@@ -34,7 +28,7 @@ Features to add in the future:
 
 I don’t plan to support emulated games like Super Mario Sunshine due to obvious legal concerns, but I might add a detailed setup guide for them later on.
 
-I don't own all the games so some game path can be wrong and lead to a "Path not found" but I'm trying as hard as I can to get the right path name. If you get this error, feel free to report it to me on Discord: quackdubs
+I don't own all the games so some game path can be wrong and lead to a "Path not found" but I'm trying as hard as I can to get the right path name. If you get this error, feel free to report it to me on Discord: quackdub
 
 ## Required Tools
 
