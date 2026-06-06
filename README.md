@@ -1,7 +1,7 @@
 # If you see a “Windows protected your PC” message, no worries—just click “More info” and then “Run anyway.” This happens because the tool installs mods automatically, which Windows can sometimes flag as suspicious.
 
 # Archipelago Setup Tool
-### [Download latest version | v0.2.2](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v0.2.2)
+### [Download latest version | v0.2.3](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v0.2.3)
 
 After setting up a game, all credits can be found in the game's directory, inside the game's directory.
 
