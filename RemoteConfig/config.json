@@ -46,6 +46,9 @@
     "lethalcompanyHook": "https://thunderstore.io/package/download/Evaisa/HookGenPatcher/0.0.5/",
     "lethalcompanyMonoDetourBep5": "https://thunderstore.io/package/download/MonoDetour/MonoDetour_BepInEx_5/0.7.13/",
     "lethalcompanyMonoDetour": "https://thunderstore.io/package/download/MonoDetour/MonoDetour/0.7.13/",
+    
+    "librarianAP": "https://github.com/Str8UpWHITE64/Librarian-AP/releases/download/1.0.4/Librarian-AP_v1.0.4.zip",
+    "librarianApworld": "https://github.com/Str8UpWHITE64/Librarian-AP/releases/download/1.0.4/librarian.apworld",
 
     "ninesolsAP": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.5.3/Ixrec-ArchipelagoRandomizer-0.5.3.zip",
     "ninesolsApworld": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.5.3/nine_sols.apworld",
