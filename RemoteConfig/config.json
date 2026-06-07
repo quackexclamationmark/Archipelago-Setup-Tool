@@ -18,6 +18,10 @@
     "btd6Apworld": "https://github.com/Matt41321/Archipelago/releases/download/v0.6.3/bloonstd6.apworld",
     "btd6ModHelper": "https://github.com/gurrenm3/BTD-Mod-Helper/releases/download/3.6.4/Btd6ModHelper.dll",
 
+    "bombrushBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+    "bombrushAP": "https://github.com/TRPG0/BRC-Archipelago/releases/download/1.0.6/BRC-Archipelago.1.0.6.zip",
+    "bombrushModLocalizer": "https://github.com/TRPG0/BRC-ModLocalizer/releases/download/1.0.1/ModLocalizer.dll",
+
     "clairobscurAP": "https://github.com/Demorck/ClairObscurArchipelagoRandomizer/releases/download/v0.2.1/COE33_Client_Steam.zip",
     "clairobscurApworld": "https://github.com/Demorck/ClairObscur_APWorld/releases/download/v0.2.0/clair_obscur.apworld",
 
