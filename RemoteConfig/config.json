@@ -68,6 +68,9 @@
     "peaksofyoreBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "peaksofyoreApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/peaks_of_yore.apworld",
 
+    "portal2AP": "https://github.com/GlassToadstool/Portal2ArchipelagoMod/releases/download/0.7.0/Portal2ArchipelagoMod.zip",
+    "portal2Apworld": "https://github.com/GlassToadstool/Archipelago/releases/download/0.7.1/portal2.apworld",
+
     "powerwashAP": "https://github.com/SWCreeperKing/PowerwashSimAP/releases/download/v0.5.14/SW_CreeperKing.ArchipelagoMod.zip",
     "powerwashBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v6.0.0-pre.1/BepInEx_UnityIL2CPP_x64_6.0.0-pre.1.zip",
     "powerwashApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/powerwashsimulator.apworld",
