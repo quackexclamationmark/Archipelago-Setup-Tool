@@ -20,6 +20,7 @@ public class GamePanelManager : MonoBehaviour
     public GameObject ror2Panel;
     public GameObject brcPanel;
     public GameObject portal2Panel;
+    public GameObject ltutalPanel;
 
     void Start()
     {
@@ -86,6 +87,9 @@ public class GamePanelManager : MonoBehaviour
             case "Portal2":
                 portal2Panel.SetActive(true);
                 break;
+            case "LTUTAL":
+                ltutalPanel.SetActive(true);
+                break;
         }
     }
 
@@ -109,5 +113,6 @@ public class GamePanelManager : MonoBehaviour
         if (ror2Panel != null) ror2Panel.SetActive(false);
         if (brcPanel != null) brcPanel.SetActive(false);
         if (portal2Panel != null) portal2Panel.SetActive(false);
+        if (ltutalPanel != null) ltutalPanel.SetActive(false);
     }
 }
