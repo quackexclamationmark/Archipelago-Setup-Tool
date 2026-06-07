@@ -10940,7 +10940,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 806343874}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.40654233
+  m_Size: 0.41311225
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -47588,8 +47588,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Reverting will revert all the changes that were made to the game's files.
-    As simple as that.\n\t"
+  m_text: Reverting will revert all the changes that were made to the game's files.
+    As simple as that.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
   m_sharedMaterial: {fileID: -9134737203265703719, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
