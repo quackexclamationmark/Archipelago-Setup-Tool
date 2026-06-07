@@ -17,6 +17,9 @@ public class GamePanelManager : MonoBehaviour
     public GameObject peakPanel;
     public GameObject outerwildsPanel;
     public GameObject cupheadPanel;
+    public GameObject ror2Panel;
+    public GameObject brcPanel;
+    public GameObject portal2Panel;
 
     void Start()
     {
@@ -74,6 +77,15 @@ public class GamePanelManager : MonoBehaviour
             case "Cuphead":
                 cupheadPanel.SetActive(true);
                 break;
+            case "RiskOfRain2":
+                ror2Panel.SetActive(true);
+                break;
+            case "BombRushCyberfunk":
+                brcPanel.SetActive(true);
+                break;
+            case "Portal2":
+                portal2Panel.SetActive(true);
+                break;
         }
     }
 
@@ -94,5 +106,8 @@ public class GamePanelManager : MonoBehaviour
         if (peakPanel != null) peakPanel.SetActive(false);
         if (outerwildsPanel != null) outerwildsPanel.SetActive(false);
         if (cupheadPanel != null) cupheadPanel.SetActive(false);
+        if (ror2Panel != null) ror2Panel.SetActive(false);
+        if (brcPanel != null) brcPanel.SetActive(false);
+        if (portal2Panel != null) portal2Panel.SetActive(false);
     }
 }
