@@ -1,26 +1,21 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using SimpleFileBrowser;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Diagnostics;
 
 public class ToolVersionManager : MonoBehaviour
 {
     [Header("VERSION CONFIG")]
-    public string currentToolVersion = "0.2.4"; // À mettre à jour à chaque nouvelle version
+    public string currentToolVersion = "0.2.4.2"; // À mettre à jour à chaque nouvelle version
 
     [Header("UPDATE PANEL")]
     public GameObject updatePanel;
     public TextMeshProUGUI updateMessage;
     public Button updateDownloadButton;
     public Button updateIgnoreButton;
-    public Button selectDirectoryButton;
-    public TMP_InputField selectedPathInputField;
-
-    [Header("SKIN")]
-    public UISkin darkSkin;
 
     [Header("INFO PANEL")]
     public GameObject infoPanel;
@@ -28,7 +23,8 @@ public class ToolVersionManager : MonoBehaviour
     public Button infoOkButton;
 
     private RemoteConfig remoteConfig;
-    private string selectedDownloadDirectory = "";
+    private string applicationExePath = "";
+    private string applicationVersionFolder = "";
 
     [System.Serializable]
     public class RemoteConfig
@@ -39,6 +35,9 @@ public class ToolVersionManager : MonoBehaviour
 
     void Start()
     {
+        // Déterminer le chemin de l'exe actuel et son dossier parent
+        GetApplicationPaths();
+
         if (updatePanel != null)
             updatePanel.SetActive(false);
 
@@ -48,29 +47,30 @@ public class ToolVersionManager : MonoBehaviour
         if (updateIgnoreButton != null)
             updateIgnoreButton.onClick.AddListener(OnUpdateIgnore);
 
-        if (selectDirectoryButton != null)
-            selectDirectoryButton.onClick.AddListener(OnSelectDirectoryClick);
-
         if (infoPanel != null)
             infoPanel.SetActive(false);
 
         if (infoOkButton != null)
             infoOkButton.onClick.AddListener(CloseInfoPanel);
 
-        // Initialiser le chemin par défaut
-        InitializeDefaultPath();
-
         StartCoroutine(LoadRemoteConfig());
     }
 
-    void InitializeDefaultPath()
+    void GetApplicationPaths()
     {
-        if (selectedPathInputField != null && string.IsNullOrEmpty(selectedPathInputField.text))
+        try
         {
-            string documentsPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
-            selectedPathInputField.text = documentsPath;
-            selectedDownloadDirectory = documentsPath;
-            UnityEngine.Debug.Log("Default path set to: " + documentsPath);
+            applicationExePath = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+            // applicationVersionFolder est le dossier parent de l'exe (ex: "Archipelago Setup Tool v0.2.4.2")
+            applicationVersionFolder = System.IO.Path.GetDirectoryName(applicationExePath);
+            UnityEngine.Debug.Log("Application exe path: " + applicationExePath);
+            UnityEngine.Debug.Log("Application version folder: " + applicationVersionFolder);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error getting application path: " + e);
+            applicationExePath = "";
+            applicationVersionFolder = "";
         }
     }
 
@@ -87,9 +87,18 @@ public class ToolVersionManager : MonoBehaviour
             yield break;
         }
 
+        bool parseSuccess = ParseRemoteConfig(request.downloadHandler.text);
+
+        if (parseSuccess)
+        {
+            CheckToolVersion();
+        }
+    }
+
+    bool ParseRemoteConfig(string json)
+    {
         try
         {
-            string json = request.downloadHandler.text;
             UnityEngine.Debug.Log("JSON loaded, parsing...");
 
             // Parser les versions
@@ -133,16 +142,19 @@ public class ToolVersionManager : MonoBehaviour
                 UnityEngine.Debug.Log("Download URL: " + downloadUrl);
             }
 
-            remoteConfig = new RemoteConfig();
+            RemoteConfig remoteConfig = new RemoteConfig();
             remoteConfig.toolVersions = versions;
             remoteConfig.toolLatestDownloadUrl = downloadUrl;
 
+            this.remoteConfig = remoteConfig;
+
             UnityEngine.Debug.Log("Remote config loaded successfully");
-            CheckToolVersion();
+            return true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Config parsing failed: " + e.Message);
+            return false;
         }
     }
 
@@ -217,71 +229,12 @@ public class ToolVersionManager : MonoBehaviour
         updatePanel.SetActive(true);
     }
 
-    void OnSelectDirectoryClick()
-    {
-        StartCoroutine(ShowFileBrowser());
-    }
-
-    IEnumerator ShowFileBrowser()
-    {
-        if (darkSkin != null)
-        {
-            FileBrowser.Skin = darkSkin;
-            UnityEngine.Debug.Log("DarkSkin assigned!");
-        }
-        else
-        {
-            UnityEngine.Debug.LogWarning("DarkSkin not assigned!");
-        }
-
-        // Déterminer le chemin de départ
-        string startPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
-
-        // Si le champ texte contient un chemin valide, l'utiliser
-        if (selectedPathInputField != null && !string.IsNullOrEmpty(selectedPathInputField.text))
-        {
-            string inputPath = selectedPathInputField.text.Trim();
-            if (Directory.Exists(inputPath))
-            {
-                startPath = inputPath;
-                UnityEngine.Debug.Log("Using path from input field: " + startPath);
-            }
-            else
-            {
-                UnityEngine.Debug.LogWarning("Path from input field does not exist, using Documents folder: " + inputPath);
-            }
-        }
-
-        yield return FileBrowser.WaitForLoadDialog(
-            FileBrowser.PickMode.Folders,
-            false,
-            startPath,
-            "Select Download Folder"
-        );
-
-        if (FileBrowser.Success && FileBrowser.Result != null && FileBrowser.Result.Length > 0)
-        {
-            selectedDownloadDirectory = FileBrowser.Result[0];
-            UnityEngine.Debug.Log("Download directory selected: " + selectedDownloadDirectory);
-
-            // Mettre à jour le champ input
-            if (selectedPathInputField != null)
-                selectedPathInputField.text = selectedDownloadDirectory;
-        }
-    }
-
     void OnUpdateDownloadClick()
     {
-        if (string.IsNullOrEmpty(selectedDownloadDirectory))
-        {
-            ShowInfo("Please select a download directory first!");
-            return;
-        }
-
-        StartCoroutine(DownloadUpdate());
+        StartCoroutine(DownloadAndUpdateTool());
     }
 
-    IEnumerator DownloadUpdate()
+    IEnumerator DownloadAndUpdateTool()
     {
         if (string.IsNullOrEmpty(remoteConfig?.toolLatestDownloadUrl))
         {
@@ -289,46 +242,136 @@ public class ToolVersionManager : MonoBehaviour
             yield break;
         }
 
-        if (string.IsNullOrEmpty(selectedDownloadDirectory) || !Directory.Exists(selectedDownloadDirectory))
-        {
-            ShowInfo("ERROR: Invalid download directory!");
-            yield break;
-        }
+        ShowInfo("Closing current application...");
+        yield return new WaitForSeconds(1f);
 
-        ShowInfo("Downloading new version...");
+        // Créer un script de mise à jour qui sera exécuté après la fermeture
+        string parentFolder = Path.GetDirectoryName(applicationVersionFolder);
+        string updateScriptPath = Path.Combine(parentFolder, "update_tool.bat");
+        CreateUpdateScript(updateScriptPath, parentFolder);
 
-        string fileName = ExtractFileNameFromUrl(remoteConfig.toolLatestDownloadUrl);
-        string downloadPath = Path.Combine(selectedDownloadDirectory, fileName);
+        yield return new WaitForSeconds(0.5f);
 
-        yield return DownloadFile(remoteConfig.toolLatestDownloadUrl, downloadPath);
-
-        if (!File.Exists(downloadPath))
-        {
-            ShowInfo("ERROR: Download failed!");
-            yield break;
-        }
-
-        updatePanel.SetActive(false);
-        ShowInfo($"Download complete!\n\nSaved to:\n{downloadPath}");
+        // Lancer le script de mise à jour
+        LaunchUpdateScript(updateScriptPath);
     }
 
-    IEnumerator DownloadFile(string url, string savePath)
+    void LaunchUpdateScript(string scriptPath)
     {
-        using (UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url))
+        try
         {
-            request.downloadHandler = new UnityEngine.Networking.DownloadHandlerFile(savePath);
-            request.timeout = 300;
+            ProcessStartInfo psi = new ProcessStartInfo();
+            psi.FileName = scriptPath;
+            psi.UseShellExecute = true;
+            psi.CreateNoWindow = false;
 
-            yield return request.SendWebRequest();
+            Process.Start(psi);
+            UnityEngine.Debug.Log("Update script started");
 
-            if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
-            {
-                UnityEngine.Debug.LogError("Download error: " + request.error);
-            }
-            else
-            {
-                UnityEngine.Debug.Log("Download complete!");
-            }
+            // Fermer l'application après un délai
+            System.Threading.Thread.Sleep(500);
+            UnityEngine.Application.Quit();
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error launching update script: " + e);
+            ShowInfo("ERROR: Failed to start update!\n" + e.Message);
+        }
+    }
+
+    void CreateUpdateScript(string scriptPath, string parentFolder)
+    {
+        try
+        {
+            string fileName = ExtractFileNameFromUrl(remoteConfig.toolLatestDownloadUrl);
+            string tempDownloadPath = Path.Combine(parentFolder, fileName);
+            string extractPath = Path.Combine(parentFolder, "ArchipelagoToolUpdate");
+            string tempVersionFolderPath = Path.Combine(extractPath, "temp_version_content");
+
+            string batchContent = "@echo off\n";
+            batchContent += "setlocal enabledelayedexpansion\n";
+            batchContent += "cd /d \"" + parentFolder + "\"\n";
+            batchContent += "\n";
+            batchContent += "echo Downloading new version...\n";
+            batchContent += "powershell -Command \"(New-Object Net.WebClient).DownloadFile('" + remoteConfig.toolLatestDownloadUrl + "', '" + tempDownloadPath + "')\"\n";
+            batchContent += "if !ERRORLEVEL! neq 0 (\n";
+            batchContent += "    echo Error: Download failed\n";
+            batchContent += "    pause\n";
+            batchContent += "    exit /b 1\n";
+            batchContent += ")\n";
+            batchContent += "\n";
+            batchContent += "echo Extracting files...\n";
+            batchContent += "powershell -Command \"Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('" + tempDownloadPath + "', '" + extractPath + "')\"\n";
+            batchContent += "if !ERRORLEVEL! neq 0 (\n";
+            batchContent += "    echo Error: Extraction failed\n";
+            batchContent += "    pause\n";
+            batchContent += "    exit /b 1\n";
+            batchContent += ")\n";
+            batchContent += "\n";
+            batchContent += "echo Finding new version folder (Archipelago Setup Tool v*)...\n";
+            batchContent += "set \"NEW_VERSION_FOLDER=\"\n";
+            batchContent += "set \"NEW_VERSION_NAME=\"\n";
+            batchContent += "for /d %%A in (\"" + extractPath + "\\Archipelago Setup Tool v*\") do (\n";
+            batchContent += "    set \"NEW_VERSION_FOLDER=%%A\"\n";
+            batchContent += "    for %%B in (\"%%A\") do set \"NEW_VERSION_NAME=%%~nxB\"\n";
+            batchContent += "    goto :found\n";
+            batchContent += ")\n";
+            batchContent += ":found\n";
+            batchContent += "\n";
+            batchContent += "if not defined NEW_VERSION_FOLDER (\n";
+            batchContent += "    echo Error: No 'Archipelago Setup Tool v*' folder found in ZIP\n";
+            batchContent += "    pause\n";
+            batchContent += "    exit /b 1\n";
+            batchContent += ")\n";
+            batchContent += "\n";
+            batchContent += "echo New version folder name: !NEW_VERSION_NAME!\n";
+            batchContent += "\n";
+            batchContent += "echo Clearing old version folder content...\n";
+            batchContent += "for /d %%D in (\"" + applicationVersionFolder + "\\*\") do rmdir /s /q \"%%D\" >nul 2>&1\n";
+            batchContent += "for %%F in (\"" + applicationVersionFolder + "\\*\") do del \"%%F\" >nul 2>&1\n";
+            batchContent += "\n";
+            batchContent += "echo Copying new version files...\n";
+            batchContent += "xcopy \"!NEW_VERSION_FOLDER!\\*\" \"" + applicationVersionFolder + "\" /E /I /Y >nul 2>&1\n";
+            batchContent += "if !ERRORLEVEL! neq 0 (\n";
+            batchContent += "    echo Error: Failed to copy new version files\n";
+            batchContent += "    pause\n";
+            batchContent += "    exit /b 1\n";
+            batchContent += ")\n";
+            batchContent += "\n";
+            batchContent += "echo Renaming version folder...\n";
+            batchContent += "cd /d \"" + parentFolder + "\"\n";
+            batchContent += "set \"OLD_FOLDER_NAME=\"\n";
+            batchContent += "for /d %%A in (\"Archipelago Setup Tool v*\") do (\n";
+            batchContent += "    if \"%%A\" neq \"!NEW_VERSION_NAME!\" (\n";
+            batchContent += "        set \"OLD_FOLDER_NAME=%%A\"\n";
+            batchContent += "        goto :rename_now\n";
+            batchContent += "    )\n";
+            batchContent += ")\n";
+            batchContent += ":rename_now\n";
+            batchContent += "if defined OLD_FOLDER_NAME (\n";
+            batchContent += "    ren \"!OLD_FOLDER_NAME!\" \"!NEW_VERSION_NAME!\"\n";
+            batchContent += "    if !ERRORLEVEL! neq 0 (\n";
+            batchContent += "        echo Warning: Failed to rename folder, but update was successful\n";
+            batchContent += "    )\n";
+            batchContent += ")\n";
+            batchContent += "\n";
+            batchContent += "echo Cleaning up temporary files...\n";
+            batchContent += "rmdir /s /q \"" + extractPath + "\" >nul 2>&1\n";
+            batchContent += "del \"" + tempDownloadPath + "\" >nul 2>&1\n";
+            batchContent += "\n";
+            batchContent += "echo Launching new version...\n";
+            batchContent += "start \"\" \"" + parentFolder + "\\!NEW_VERSION_NAME!\\Archipelago Setup Tool.exe\"\n";
+            batchContent += "\n";
+            batchContent += "echo Update complete\n";
+            batchContent += "del \"" + scriptPath + "\" >nul 2>&1\n";
+            batchContent += "exit /b 0\n";
+
+            File.WriteAllText(scriptPath, batchContent);
+            UnityEngine.Debug.Log("Update script created: " + scriptPath);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error creating update script: " + e);
         }
     }
 
@@ -342,9 +385,6 @@ public class ToolVersionManager : MonoBehaviour
 
     void OnUpdateIgnore()
     {
-        selectedDownloadDirectory = "";
-        if (selectedPathInputField != null)
-            selectedPathInputField.text = "";
         updatePanel.SetActive(false);
     }
 

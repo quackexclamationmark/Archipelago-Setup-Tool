@@ -1,197 +1,290 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using SimpleFileBrowser;
 using System.IO;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 public class VotVManualDL : MonoBehaviour
 {
     public FileDownloader downloader;
 
-    [Header("VOTV FILES")]
+    [Header("GAME FILES")]
+    public FileDownloader.FileData ue4ssFiles;
+    public FileDownloader.FileData apmodFiles;
     public FileDownloader.FileData apworld;
-    public FileDownloader.FileData apMod;
-    public FileDownloader.FileData ue4ss;
 
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
-    public Toggle installAPModToggle;
     public Toggle installUE4SSToggle;
-    public Toggle downloadVotVToggle;
+    public Toggle installAPModToggle;
 
-    [Header("DIRECTORY SELECTION - VotV")]
-    public Button selectDirectoryButton;
-    public TMP_InputField selectedPathInputField;
+    [Header("LAUNCH OPTIONS")]
+    public Toggle launchGameToggle;
 
-    [Header("DIRECTORY SELECTION - Download")]
-    public Button selectDownloadDirectoryButton;
-    public TMP_InputField downloadPathInputField;
-
-    [Header("REVERT OPTIONS")]
-    public Toggle removeAPModsToggle;
-    public Toggle fullCleanUE4SSToggle;
-
-    [Header("CONFIRMATION PANEL")]
-    public GameObject confirmationPanel;
-    public TextMeshProUGUI confirmationMessage;
-    public Button confirmButton;
-    public Button cancelButton;
-
-    [Header("CONFIRMATION PANEL - DOWNLOADER")]
-    public GameObject downloadConfirmationPanel;
-    public TextMeshProUGUI downloadConfirmationMessage;
-    public Button downloadConfirmButton;
-    public Button downloadCancelButton;
-
-    [Header("INFO PANEL")]
-    public GameObject infoPanel;
-    public TextMeshProUGUI infoText;
-    public Button infoOkButton;
-
-    [Header("DOWNLOAD BUTTON")]
-    public Button downloadButton;
-
-    [Header("SKIN")]
+    [Header("DIRECTORY SELECTION")]
+    public Button directoryButton;
+    public TMP_InputField directoryInputField;
+    public TextMeshProUGUI directoryPlaceholder;
     public UISkin darkSkin;
 
-    private string votVPath;
-    private string downloadPath;
-    private string pendingAction;
-    private VotVConfig remoteConfig;
-    private bool configLoaded = false;
-    private bool hasRunSetup = false;
+    [Header("REVERT OPTIONS")]
+    public Toggle fullCleanUE4SSToggle;
+    public Toggle removeAPModsOnlyToggle;
 
-    private const string VOTVDOWNLOAD_FILENAME = "Voices Of The Void 0.9.0j.7z";
+    [Header("CONFIRMATION PANEL - SETUP")]
+    public GameObject setupConfirmationPanel;
+    public TextMeshProUGUI setupConfirmationMessage;
+    public Button setupConfirmButton;
+    public Button setupCancelButton;
+
+    [Header("INFO PANEL - SETUP")]
+    public GameObject setupInfoPanel;
+    public TextMeshProUGUI setupInfoText;
+    public Button setupInfoOkButton;
+
+    private Process gameProcess;
+    private string gamePath;
+    private string pendingAction;
+    private bool pendingFullCleanConfirmation = false;
+    private GameConfig remoteConfig;
+    private bool configLoaded = false;
+    private InstalledFilesManifest currentManifest;
 
     [System.Serializable]
-    public class VotVConfig
+    public class GameConfig
     {
-        public string votvAP;
         public string votvUE4SS;
+        public string votvAP;
         public string votvApworld;
-        public string votvDL;
+    }
+
+    [System.Serializable]
+    public class InstalledFilesManifest
+    {
+        public string gameInstallPath = "";
+        public List<string> installedFiles = new List<string>();
     }
 
     void Start()
     {
-        if (infoPanel != null)
-            infoPanel.SetActive(false);
+        gamePath = "";
+        StartCoroutine(LoadRemoteConfig());
 
-        if (infoOkButton != null)
-            infoOkButton.onClick.AddListener(CloseInfoPanel);
+        if (setupInfoPanel != null)
+            setupInfoPanel.SetActive(false);
 
-        if (confirmationPanel != null)
-            confirmationPanel.SetActive(false);
+        if (setupInfoOkButton != null)
+            setupInfoOkButton.onClick.AddListener(CloseSetupInfoPanel);
 
-        if (confirmButton != null)
-            confirmButton.onClick.AddListener(OnConfirm);
+        if (launchGameToggle != null)
+            launchGameToggle.isOn = false;
 
-        if (cancelButton != null)
-            cancelButton.onClick.AddListener(OnCancel);
+        if (installAPWorldToggle != null)
+            installAPWorldToggle.isOn = true;
 
-        if (downloadConfirmationPanel != null)
-            downloadConfirmationPanel.SetActive(false);
+        if (installUE4SSToggle != null)
+            installUE4SSToggle.isOn = true;
 
-        if (downloadConfirmButton != null)
-            downloadConfirmButton.onClick.AddListener(OnDownloadConfirm);
+        if (installAPModToggle != null)
+            installAPModToggle.isOn = true;
 
-        if (downloadCancelButton != null)
-            downloadCancelButton.onClick.AddListener(OnDownloadCancel);
+        if (setupConfirmationPanel != null)
+            setupConfirmationPanel.SetActive(false);
 
-        if (selectDirectoryButton != null)
-            selectDirectoryButton.onClick.AddListener(OnSelectDirectoryClick);
+        if (setupConfirmButton != null)
+            setupConfirmButton.onClick.AddListener(OnSetupConfirm);
 
-        if (selectDownloadDirectoryButton != null)
-            selectDownloadDirectoryButton.onClick.AddListener(OnSelectDownloadDirectoryClick);
+        if (setupCancelButton != null)
+            setupCancelButton.onClick.AddListener(OnSetupCancel);
 
-        if (downloadButton != null)
-            downloadButton.onClick.AddListener(OnDownloadClick);
+        if (directoryButton != null)
+            directoryButton.onClick.AddListener(SelectDirectory);
 
-        if (removeAPModsToggle != null)
-            removeAPModsToggle.isOn = true;
+        if (directoryInputField != null)
+        {
+            directoryInputField.onEndEdit.AddListener(OnDirectoryInputChanged);
+            if (directoryPlaceholder != null)
+                directoryPlaceholder.gameObject.SetActive(true);
+        }
 
+        // Revert toggles setup
         if (fullCleanUE4SSToggle != null)
             fullCleanUE4SSToggle.isOn = false;
 
+        if (removeAPModsOnlyToggle != null)
+            removeAPModsOnlyToggle.isOn = true;
+
         if (fullCleanUE4SSToggle != null)
             fullCleanUE4SSToggle.onValueChanged.AddListener(OnFullCleanChanged);
-
-        InitializeDefaultPaths();
-
-        StartCoroutine(LoadRemoteConfig());
     }
 
-    void InitializeDefaultPaths()
+    void OnFullCleanChanged(bool value)
     {
-        string defaultDocsPath = Path.Combine("C:\\Users", System.Environment.UserName, "Documents");
-
-        if (selectedPathInputField != null)
+        if (removeAPModsOnlyToggle != null)
         {
-            selectedPathInputField.text = defaultDocsPath;
-            votVPath = defaultDocsPath;
-            UnityEngine.Debug.Log("VotV path initialized to: " + votVPath);
-        }
-
-        if (downloadPathInputField != null)
-        {
-            downloadPathInputField.text = defaultDocsPath;
-            downloadPath = defaultDocsPath;
-            UnityEngine.Debug.Log("Download path initialized to: " + downloadPath);
+            if (value)
+            {
+                removeAPModsOnlyToggle.isOn = false;
+                removeAPModsOnlyToggle.interactable = false;
+            }
+            else
+            {
+                removeAPModsOnlyToggle.interactable = true;
+            }
         }
     }
 
-    void ApplyVotVConfig()
+    void SelectDirectory()
+    {
+        StartCoroutine(ShowFileBrowser());
+    }
+
+    IEnumerator ShowFileBrowser()
+    {
+        if (darkSkin != null)
+        {
+            FileBrowser.Skin = darkSkin;
+            UnityEngine.Debug.Log("DarkSkin assigned!");
+        }
+
+        string startPath = gamePath;
+        if (directoryInputField != null && !string.IsNullOrEmpty(directoryInputField.text))
+        {
+            string inputPath = directoryInputField.text;
+            if (Directory.Exists(inputPath))
+                startPath = inputPath;
+        }
+
+        if (string.IsNullOrEmpty(startPath) || !Directory.Exists(startPath))
+        {
+            startPath = "C:\\";
+        }
+
+        // Show .exe files in the browser
+        FileBrowser.SetFilters(true, new FileBrowser.Filter("Executable", ".exe"));
+
+        yield return FileBrowser.WaitForLoadDialog(
+            FileBrowser.PickMode.FilesAndFolders,
+            false,
+            startPath,
+            "Select votv.exe or VotV Game Directory"
+        );
+
+        if (FileBrowser.Success && FileBrowser.Result != null && FileBrowser.Result.Length > 0)
+        {
+            string selectedPath = FileBrowser.Result[0];
+
+            // If a file is selected (votv.exe), get its directory
+            if (File.Exists(selectedPath) && selectedPath.EndsWith("votv.exe", System.StringComparison.OrdinalIgnoreCase))
+            {
+                selectedPath = Path.GetDirectoryName(selectedPath);
+            }
+
+            SetDirectory(selectedPath);
+        }
+    }
+
+    void SetDirectory(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            ShowSetupInfo("Directory path is empty!");
+            return;
+        }
+
+        // Verify votv.exe exists in the selected directory
+        string votvExePath = Path.Combine(path, "votv.exe");
+        if (!File.Exists(votvExePath))
+        {
+            ShowSetupInfo("Invalid directory! votv.exe not found.\nPlease select the directory containing votv.exe");
+            return;
+        }
+
+        if (!Directory.Exists(path))
+        {
+            ShowSetupInfo("Invalid directory path!");
+            return;
+        }
+
+        gamePath = path;
+
+        if (directoryPlaceholder != null)
+            directoryPlaceholder.gameObject.SetActive(false);
+
+        if (directoryInputField != null)
+        {
+            directoryInputField.gameObject.SetActive(true);
+            directoryInputField.text = path;
+        }
+
+        UnityEngine.Debug.Log("Directory selected: " + path);
+    }
+
+    void OnDirectoryInputChanged(string newDirectory)
+    {
+        if (string.IsNullOrEmpty(newDirectory))
+        {
+            gamePath = "";
+            UnityEngine.Debug.Log("Directory input cleared");
+            return;
+        }
+
+        if (!Directory.Exists(newDirectory))
+        {
+            UnityEngine.Debug.Log("Directory does not exist: " + newDirectory);
+            return;
+        }
+
+        string votvExePath = Path.Combine(newDirectory, "votv.exe");
+        if (!File.Exists(votvExePath))
+        {
+            ShowSetupInfo("votv.exe not found in this directory!");
+            return;
+        }
+
+        gamePath = newDirectory;
+        UnityEngine.Debug.Log("Game path updated from input field: " + gamePath);
+    }
+
+    void CleanupProcesses()
+    {
+        CloseGame();
+    }
+
+    void ApplyGameConfig()
     {
         if (remoteConfig == null)
             return;
 
-        apMod.url = remoteConfig.votvAP;
-        ue4ss.url = remoteConfig.votvUE4SS;
+        ue4ssFiles.url = remoteConfig.votvUE4SS;
+        apmodFiles.url = remoteConfig.votvAP;
         apworld.url = remoteConfig.votvApworld;
     }
 
-    // ========== SETUP & REVERT ==========
-
     public void RunSetup()
     {
-        if (string.IsNullOrEmpty(votVPath))
-        {
-            ShowInfo("Please select VotV directory first!");
-            return;
-        }
-
-        if (hasRunSetup)
-        {
-            ShowInfo("Setup has already been run. Please revert first if you want to reinstall.");
-            return;
-        }
-
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+        ShowSetupConfirmation("Are you sure you want to install all the files?", "Setup");
     }
 
     public void RevertAll()
     {
-        if (string.IsNullOrEmpty(votVPath))
-        {
-            ShowInfo("Please select VotV directory first!");
-            return;
-        }
-
-        ShowConfirmation("Are you sure you want to revert?", "Revert");
+        ShowSetupConfirmation("Are you sure you want to revert?", "Revert");
     }
 
-    private void ShowConfirmation(string message, string action)
+    private void ShowSetupConfirmation(string message, string action)
     {
         pendingAction = action;
-        confirmationMessage.text = message;
-        confirmationPanel.SetActive(true);
+        setupConfirmationMessage.text = message;
+        setupConfirmationPanel.SetActive(true);
     }
 
-    private void OnConfirm()
+    private void OnSetupConfirm()
     {
-        confirmationPanel.SetActive(false);
+        setupConfirmationPanel.SetActive(false);
 
         if (string.IsNullOrEmpty(pendingAction))
             return;
@@ -199,48 +292,71 @@ public class VotVManualDL : MonoBehaviour
         switch (pendingAction)
         {
             case "Setup":
-                hasRunSetup = true;
                 ExecuteSetup();
                 break;
 
             case "Revert":
                 ExecuteRevert();
                 break;
-        }
 
-        pendingAction = "";
+            case "ForceFullClean":
+                ExecuteRevert();
+                break;
+        }
     }
 
-    private void OnCancel()
+    private void OnSetupCancel()
     {
-        confirmationPanel.SetActive(false);
+        setupConfirmationPanel.SetActive(false);
+        pendingFullCleanConfirmation = false;
         pendingAction = "";
     }
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(votVPath))
+        if (!configLoaded)
         {
-            ShowInfo("VotV path not found.");
+            ShowSetupInfo("Loading configuration, please wait...");
+            StartCoroutine(WaitForConfigThenSetup());
             return;
         }
 
-        bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
-        bool ue4ssToggle = installUE4SSToggle != null && installUE4SSToggle.isOn;
-        bool apmod = installAPModToggle != null && installAPModToggle.isOn;
+        // VERIF STRICTE: Vérifier que le chemin est valide
+        if (directoryInputField == null || string.IsNullOrEmpty(directoryInputField.text))
+        {
+            ShowSetupInfo("Please select a directory first!");
+            return;
+        }
 
-        int count =
-            (apworld ? 1 : 0) +
-            (ue4ssToggle ? 1 : 0) +
-            (apmod ? 1 : 0);
+        string testPath = directoryInputField.text;
+        if (!Directory.Exists(testPath))
+        {
+            ShowSetupInfo("Selected directory does not exist:\n" + testPath);
+            return;
+        }
 
-        if (apworld && count == 1)
+        string votvExePath = Path.Combine(testPath, "votv.exe");
+        if (!File.Exists(votvExePath))
+        {
+            ShowSetupInfo("votv.exe not found in selected directory!");
+            return;
+        }
+
+        gamePath = testPath;
+
+        bool apworldInstall = installAPWorldToggle == null || installAPWorldToggle.isOn;
+        bool ue4ss = installUE4SSToggle == null || installUE4SSToggle.isOn;
+        bool apmod = installAPModToggle == null || installAPModToggle.isOn;
+
+        int count = (apworldInstall ? 1 : 0) + (ue4ss ? 1 : 0) + (apmod ? 1 : 0);
+
+        if (apworldInstall && count == 1)
         {
             StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
-        if (ue4ssToggle && count == 1)
+        if (ue4ss && count == 1)
         {
             StartCoroutine(UE4SSOnlyFlow());
             return;
@@ -252,72 +368,126 @@ public class VotVManualDL : MonoBehaviour
             return;
         }
 
-        StartCoroutine(InstallFlow());
+        StartCoroutine(SetupWithTracking());
+    }
+
+    IEnumerator SetupWithTracking()
+    {
+        ShowSetupInfo("Initializing installation tracker...");
+        yield return new WaitForSeconds(0.5f);
+
+        currentManifest = new InstalledFilesManifest();
+        currentManifest.gameInstallPath = gamePath;
+
+        ShowSetupInfo("Downloading and installing files...");
+
+        yield return InstallFlow();
+
+        SaveInstalledFilesManifest(currentManifest);
+
+        ShowSetupInfo("Installation complete!");
+        yield return new WaitForSeconds(1f);
+
+        // Reset les toggles après l'installation
+        ResetInstallationToggles();
     }
 
     private void ExecuteRevert()
     {
-        if (string.IsNullOrEmpty(votVPath))
+        // VERIF STRICTE: Vérifier que le chemin est valide AVANT de faire le revert
+        if (directoryInputField == null || string.IsNullOrEmpty(directoryInputField.text))
         {
-            ShowInfo("VotV path not set.");
+            ShowSetupInfo("Please select a directory first!");
             return;
         }
 
-        bool removeAP = removeAPModsToggle != null && removeAPModsToggle.isOn;
+        string testPath = directoryInputField.text;
+        if (!Directory.Exists(testPath))
+        {
+            ShowSetupInfo("Selected directory does not exist!");
+            return;
+        }
+
+        string votvExePath = Path.Combine(testPath, "votv.exe");
+        if (!File.Exists(votvExePath))
+        {
+            ShowSetupInfo("votv.exe not found in selected directory!");
+            return;
+        }
+
+        gamePath = testPath;
+
+        string win64Path = Path.Combine(gamePath, "VotV", "Binaries", "Win64");
+        string ue4ssPath = Path.Combine(win64Path, "ue4ss");
+
+        bool removeAP = removeAPModsOnlyToggle != null && removeAPModsOnlyToggle.isOn;
         bool fullClean = fullCleanUE4SSToggle != null && fullCleanUE4SSToggle.isOn;
 
-        UnityEngine.Debug.Log($"ExecuteRevert - removeAP: {removeAP}, fullClean: {fullClean}, votVPath: {votVPath}");
+        UnityEngine.Debug.Log("ExecuteRevert - removeAP: " + removeAP + ", fullClean: " + fullClean);
 
         if (!removeAP && !fullClean)
         {
-            ShowInfo("Please select at least one revert option.");
+            ShowSetupInfo("Please select at least one revert option.");
+            return;
+        }
+
+        bool hasOtherMods = HasOtherMods(ue4ssPath);
+
+        if (removeAP && !fullClean)
+        {
+            CleanupProcesses();
+
+            ShowSetupInfo("Removing AP mods...");
+
+            string modsPath = Path.Combine(ue4ssPath, "Mods");
+            string apmodTargetPath = Path.Combine(modsPath, "votv_ap-main");
+
+            UnityEngine.Debug.Log("Attempting to remove: " + apmodTargetPath);
+
+            SafeDeleteDirectory(apmodTargetPath);
+            DeleteOldVersionFiles();
+
+            ShowSetupInfo("AP mods removed successfully!");
+            return;
+        }
+
+        if (fullClean && hasOtherMods && !pendingFullCleanConfirmation)
+        {
+            pendingFullCleanConfirmation = true;
+
+            ShowSetupConfirmation(
+                "Other mods were detected.\nDo you REALLY want to fully delete UE4SS?",
+                "ForceFullClean"
+            );
             return;
         }
 
         if (fullClean)
         {
-            ShowInfo("Removing UE4SS and dwmapi.dll...");
+            pendingFullCleanConfirmation = false;
 
-            string win64Path = Path.Combine(votVPath, "VotV", "Binaries", "Win64");
-            string ue4ssPath = Path.Combine(win64Path, "ue4ss");
-            string dwmapiPath = Path.Combine(win64Path, "dwmapi.dll");
+            CleanupProcesses();
 
-            UnityEngine.Debug.Log($"Deleting: {ue4ssPath}");
-            UnityEngine.Debug.Log($"Deleting: {dwmapiPath}");
+            ShowSetupInfo("Cleaning UE4SS...");
+
+            UnityEngine.Debug.Log("Removing UE4SS at: " + ue4ssPath);
+            UnityEngine.Debug.Log("Removing dwmapi.dll at: " + Path.Combine(win64Path, "dwmapi.dll"));
 
             SafeDeleteDirectory(ue4ssPath);
-            SafeDeleteFile(dwmapiPath);
+            SafeDeleteFile(Path.Combine(win64Path, "dwmapi.dll"));
+            DeleteOldVersionFiles();
 
-            UnityEngine.Debug.Log("Full clean completed!");
-            ShowInfo("Full clean completed!");
-            hasRunSetup = false;
+            ShowSetupInfo("Full clean completed!");
             return;
         }
 
-        if (removeAP)
-        {
-            ShowInfo("Removing AP mod...");
-
-            string modsPath = Path.Combine(votVPath, "VotV", "Binaries", "Win64", "ue4ss", "Mods");
-            string apModPath = Path.Combine(modsPath, "votv_ap-main");
-
-            UnityEngine.Debug.Log($"Deleting: {apModPath}");
-
-            if (Directory.Exists(modsPath))
-            {
-                SafeDeleteDirectory(apModPath);
-            }
-
-            DeleteOldVersionFiles();
-            UnityEngine.Debug.Log("AP mod removed!");
-            ShowInfo("AP mod removed successfully!");
-            hasRunSetup = false;
-        }
+        // Si on arrive ici, c'est qu'aucune action n'a été exécutée
+        UnityEngine.Debug.LogWarning("ExecuteRevert: No revert action was performed!");
     }
 
-    bool HasOtherMods()
+    bool HasOtherMods(string ue4ssPath)
     {
-        string modsPath = Path.Combine(votVPath, "VotV", "Binaries", "Win64", "ue4ss", "Mods");
+        string modsPath = Path.Combine(ue4ssPath, "Mods");
 
         if (!Directory.Exists(modsPath))
             return false;
@@ -326,41 +496,164 @@ public class VotVManualDL : MonoBehaviour
 
         foreach (string dir in dirs)
         {
-            string dirName = Path.GetFileName(dir);
-            if (dirName != "votv_ap-main")
+            string name = Path.GetFileName(dir);
+
+            if (name != "votv_ap-main")
                 return true;
         }
 
         return false;
     }
 
-    // ========== INSTALL FLOWS ==========
+    IEnumerator APWorldOnlyFlow()
+    {
+        if (string.IsNullOrEmpty(gamePath))
+            yield break;
+
+        yield return InstallAPWorld();
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+            LaunchGame();
+
+        // Reset les toggles après l'installation
+        ResetInstallationToggles();
+    }
+
+    IEnumerator UE4SSOnlyFlow()
+    {
+        if (string.IsNullOrEmpty(gamePath))
+            yield break;
+
+        currentManifest = new InstalledFilesManifest();
+        currentManifest.gameInstallPath = gamePath;
+
+        yield return InstallUE4SS();
+
+        SaveInstalledFilesManifest(currentManifest);
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+            LaunchGame();
+
+        // Reset les toggles après l'installation
+        ResetInstallationToggles();
+    }
+
+    IEnumerator APModOnlyFlow()
+    {
+        if (string.IsNullOrEmpty(gamePath))
+            yield break;
+
+        currentManifest = new InstalledFilesManifest();
+        currentManifest.gameInstallPath = gamePath;
+
+        yield return InstallAPMod();
+
+        SaveInstalledFilesManifest(currentManifest);
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+            LaunchGame();
+
+        // Reset les toggles après l'installation
+        ResetInstallationToggles();
+    }
 
     IEnumerator InstallFlow()
     {
-        ShowInfo("Please wait...\n\nInstalling APWorld...");
         if (installAPWorldToggle == null || installAPWorldToggle.isOn)
-        {
             yield return InstallAPWorld();
-        }
 
-        ShowInfo("Please wait...\n\nInstalling UE4SS...");
-        if (installUE4SSToggle != null && installUE4SSToggle.isOn)
-        {
+        if (installUE4SSToggle == null || installUE4SSToggle.isOn)
             yield return InstallUE4SS();
-        }
 
-        ShowInfo("Please wait...\n\nInstalling AP Mod...");
         if (installAPModToggle == null || installAPModToggle.isOn)
-        {
             yield return InstallAPMod();
+
+        CreateVersionFile(ue4ssFiles.url, apmodFiles.url, apworld.url);
+
+        yield return new WaitForSeconds(2f);
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            ShowSetupInfo("Launching game...");
+            yield return new WaitForSeconds(1f);
+            LaunchGame();
+        }
+    }
+
+    IEnumerator InstallUE4SS()
+    {
+        string extractPath = Path.Combine(Application.persistentDataPath, "UE4SSTemp");
+
+        yield return downloader.DownloadAndExtract(ue4ssFiles, Application.persistentDataPath, extractPath);
+
+        string ue4ssSourcePath = Path.Combine(extractPath, "ue4ss");
+
+        if (!Directory.Exists(ue4ssSourcePath))
+        {
+            ShowSetupInfo("ERROR: ue4ss folder not found in extraction!");
+            SafeDeleteDirectory(extractPath);
+            yield break;
         }
 
-        CreateVersionFile(apMod.url, ue4ss.url, apworld.url);
+        // Target path: [gamePath]\VotV\Binaries\Win64
+        string targetBasePath = Path.Combine(gamePath, "VotV", "Binaries", "Win64");
+        Directory.CreateDirectory(targetBasePath);
 
-        ShowInfo("Installation complete!");
+        string ue4ssTargetPath = Path.Combine(targetBasePath, "ue4ss");
+        MoveDirectoryAndTrack(ue4ssSourcePath, ue4ssTargetPath);
 
-        yield return null;
+        string dwmapiSource = Path.Combine(extractPath, "dwmapi.dll");
+        if (File.Exists(dwmapiSource))
+        {
+            string dwmapiTarget = Path.Combine(targetBasePath, "dwmapi.dll");
+
+            if (File.Exists(dwmapiTarget))
+                File.Delete(dwmapiTarget);
+
+            File.Copy(dwmapiSource, dwmapiTarget, true);
+
+            if (currentManifest != null)
+                currentManifest.installedFiles.Add(dwmapiTarget);
+
+            UnityEngine.Debug.Log("dwmapi.dll installed to: " + dwmapiTarget);
+        }
+        else
+        {
+            UnityEngine.Debug.LogWarning("WARNING: dwmapi.dll not found in extraction!");
+        }
+
+        SafeDeleteDirectory(extractPath);
+
+        ShowSetupInfo("UE4SS installation verified successfully!");
+        yield return new WaitForSeconds(1f);
+    }
+
+    IEnumerator InstallAPMod()
+    {
+        string extractPath = Path.Combine(Application.persistentDataPath, "APModTemp");
+
+        yield return downloader.DownloadAndExtract(apmodFiles, Application.persistentDataPath, extractPath);
+
+        string apmodSourcePath = Path.Combine(extractPath, "votv_ap-main");
+
+        if (!Directory.Exists(apmodSourcePath))
+        {
+            ShowSetupInfo("ERROR: votv_ap-main folder not found in extraction!");
+            SafeDeleteDirectory(extractPath);
+            yield break;
+        }
+
+        // Target path: [gamePath]\VotV\Binaries\Win64\ue4ss\Mods
+        string targetModsPath = Path.Combine(gamePath, "VotV", "Binaries", "Win64", "ue4ss", "Mods");
+        Directory.CreateDirectory(targetModsPath);
+
+        string apmodTargetPath = Path.Combine(targetModsPath, "votv_ap-main");
+        MoveDirectoryAndTrack(apmodSourcePath, apmodTargetPath);
+
+        SafeDeleteDirectory(extractPath);
+
+        ShowSetupInfo("APMod installation verified successfully!");
+        yield return new WaitForSeconds(1f);
     }
 
     IEnumerator InstallAPWorld()
@@ -371,9 +664,12 @@ public class VotVManualDL : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
         }
 
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + apworld.url);
+
         if (string.IsNullOrEmpty(apworld.url))
         {
-            ShowInfo("ERROR: APWorld URL is empty!");
+            ShowSetupInfo("ERROR: APWorld URL is empty!");
+            UnityEngine.Debug.LogError("APWorld URL not set!");
             yield break;
         }
 
@@ -381,25 +677,34 @@ public class VotVManualDL : MonoBehaviour
         if (string.IsNullOrEmpty(fileName))
         {
             fileName = apworld.url.Substring(apworld.url.LastIndexOf('/') + 1);
+
             if (fileName.Contains("?"))
                 fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
         }
 
         string localPath = Path.Combine(Application.persistentDataPath, fileName);
+
+        UnityEngine.Debug.Log("Downloading APWorld from: " + apworld.url);
+        UnityEngine.Debug.Log("Saving to: " + localPath);
 
         yield return DownloadFile(apworld.url, localPath);
 
         if (!File.Exists(localPath))
         {
-            ShowInfo("ERROR: APWorld download failed!");
+            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
+            ShowSetupInfo("ERROR: APWorld download failed!");
             yield break;
         }
 
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
+
         string[] targetPaths = new string[]
         {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
+        Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
         };
 
         string target = "";
@@ -411,25 +716,30 @@ public class VotVManualDL : MonoBehaviour
                 if (!Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
                 target = path;
+                UnityEngine.Debug.Log("Using target path: " + target);
                 break;
             }
             catch (System.Exception e)
             {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + e.Message);
+                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
             }
         }
 
         if (string.IsNullOrEmpty(target))
         {
-            ShowInfo("ERROR: Cannot find Archipelago custom_worlds directory!");
+            ShowSetupInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
+            UnityEngine.Debug.LogError("No valid target directory found!");
             yield break;
         }
+
+        UnityEngine.Debug.Log("Target path: " + target);
 
         if (File.Exists(target))
         {
             try
             {
                 File.Delete(target);
+                UnityEngine.Debug.Log("Deleted old apworld file");
             }
             catch { }
         }
@@ -437,192 +747,39 @@ public class VotVManualDL : MonoBehaviour
         try
         {
             File.Copy(localPath, target, true);
-            ShowInfo("APWorld installed successfully!");
+
+            UnityEngine.Debug.Log("APWorld file copied to: " + target);
+
+            if (currentManifest != null)
+                currentManifest.installedFiles.Add(target);
+
+            ShowSetupInfo("APWorld installed successfully!");
         }
         catch (System.Exception e)
         {
-            ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
+            ShowSetupInfo("ERROR: Failed to install APWorld\n" + e.Message);
         }
     }
-
-    IEnumerator InstallUE4SS()
-    {
-        while (!configLoaded)
-            yield return null;
-
-        string extractPath = Path.Combine(Application.persistentDataPath, "UE4SSTemp");
-        yield return downloader.DownloadAndExtract(ue4ss, Application.persistentDataPath, extractPath);
-
-        string targetPath = Path.Combine(votVPath, "VotV", "Binaries", "Win64");
-        Directory.CreateDirectory(targetPath);
-
-        string sourceUE4SSFolder = FindDirectory(extractPath, "ue4ss");
-        if (!string.IsNullOrEmpty(sourceUE4SSFolder))
-        {
-            string destUE4SSFolder = Path.Combine(targetPath, "ue4ss");
-            if (Directory.Exists(destUE4SSFolder))
-                SafeDeleteDirectory(destUE4SSFolder);
-
-            MoveDirectory(sourceUE4SSFolder, destUE4SSFolder);
-            UnityEngine.Debug.Log("UE4SS folder moved to: " + destUE4SSFolder);
-        }
-
-        string dwmapiSource = FindFile(extractPath, "dwmapi.dll");
-        if (!string.IsNullOrEmpty(dwmapiSource))
-        {
-            string dwmapiDest = Path.Combine(targetPath, "dwmapi.dll");
-            File.Copy(dwmapiSource, dwmapiDest, true);
-            UnityEngine.Debug.Log("dwmapi.dll copied to: " + dwmapiDest);
-        }
-
-        SafeDeleteDirectory(extractPath);
-
-        ShowInfo("UE4SS installed successfully!");
-    }
-
-    IEnumerator InstallAPMod()
-    {
-        while (!configLoaded)
-            yield return null;
-
-        string extractPath = Path.Combine(Application.persistentDataPath, "VotVAPModTemp");
-        yield return downloader.DownloadAndExtract(apMod, Application.persistentDataPath, extractPath);
-
-        string modsPath = Path.Combine(votVPath, "VotV", "Binaries", "Win64", "ue4ss", "Mods");
-        Directory.CreateDirectory(modsPath);
-
-        string sourceModFolder = FindDirectory(extractPath, "votv_ap-main");
-        if (string.IsNullOrEmpty(sourceModFolder))
-        {
-            sourceModFolder = FindDirectory(extractPath, "votv_ap");
-        }
-
-        if (!string.IsNullOrEmpty(sourceModFolder))
-        {
-            string destModFolder = Path.Combine(modsPath, "votv_ap-main");
-
-            if (Directory.Exists(destModFolder))
-                SafeDeleteDirectory(destModFolder);
-
-            if (Directory.Exists(Path.Combine(sourceModFolder, "votv_ap-main")))
-            {
-                MoveDirectory(Path.Combine(sourceModFolder, "votv_ap-main"), destModFolder);
-            }
-            else
-            {
-                MoveDirectory(sourceModFolder, destModFolder);
-            }
-
-            UnityEngine.Debug.Log("AP Mod folder moved to: " + destModFolder);
-        }
-
-        SafeDeleteDirectory(extractPath);
-
-        ShowInfo("AP Mod installed successfully!");
-    }
-
-    IEnumerator APWorldOnlyFlow()
-    {
-        ShowInfo("Please wait...\n\nInstalling APWorld...");
-        yield return InstallAPWorld();
-    }
-
-    IEnumerator UE4SSOnlyFlow()
-    {
-        ShowInfo("Please wait...\n\nInstalling UE4SS...");
-        yield return InstallUE4SS();
-    }
-
-    IEnumerator APModOnlyFlow()
-    {
-        ShowInfo("Please wait...\n\nInstalling AP Mod...");
-        yield return InstallAPMod();
-    }
-
-    // ========== DOWNLOADER ==========
-
-    void OnDownloadClick()
-    {
-        downloadPath = downloadPathInputField != null ? downloadPathInputField.text : "";
-
-        if (string.IsNullOrEmpty(downloadPath))
-        {
-            ShowInfo("Please select download directory first!");
-            return;
-        }
-
-        ShowDownloadConfirmation("Download Voices of the Void v0.9.0j?");
-    }
-
-    private void ShowDownloadConfirmation(string message)
-    {
-        if (downloadConfirmationMessage != null)
-            downloadConfirmationMessage.text = message;
-
-        if (downloadConfirmationPanel != null)
-            downloadConfirmationPanel.SetActive(true);
-    }
-
-    private void OnDownloadConfirm()
-    {
-        if (downloadConfirmationPanel != null)
-            downloadConfirmationPanel.SetActive(false);
-
-        StartCoroutine(DownloadVotVFile());
-    }
-
-    private void OnDownloadCancel()
-    {
-        if (downloadConfirmationPanel != null)
-            downloadConfirmationPanel.SetActive(false);
-    }
-
-    IEnumerator DownloadVotVFile()
-    {
-        while (!configLoaded)
-        {
-            UnityEngine.Debug.Log("Waiting for config to load...");
-            yield return new WaitForSeconds(0.5f);
-        }
-
-        if (remoteConfig == null || string.IsNullOrEmpty(remoteConfig.votvDL))
-        {
-            ShowInfo("ERROR: Download URL not available!");
-            yield break;
-        }
-
-        ShowInfo("Please wait...\n\nDownloading Voices of the Void...");
-
-        string savePath = Path.Combine(downloadPath, VOTVDOWNLOAD_FILENAME);
-
-        yield return DownloadFile(remoteConfig.votvDL, savePath);
-
-        if (File.Exists(savePath))
-        {
-            ShowInfo($"Download complete!\nFile saved to:\n{savePath}");
-        }
-        else
-        {
-            ShowInfo("ERROR: Download failed!");
-        }
-    }
-
-    // ========== FILE OPERATIONS ==========
 
     IEnumerator DownloadFile(string url, string savePath)
     {
+        UnityEngine.Debug.Log("Starting download from: " + url);
+
         using (UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url))
         {
             request.downloadHandler = new UnityEngine.Networking.DownloadHandlerFile(savePath);
+
             yield return request.SendWebRequest();
 
             if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
             {
                 UnityEngine.Debug.LogError("Download error: " + request.error);
+                UnityEngine.Debug.LogError("Response code: " + request.responseCode);
             }
             else
             {
-                UnityEngine.Debug.Log("Download complete!");
+                UnityEngine.Debug.Log("Download complete! File size: " + new System.IO.FileInfo(savePath).Length + " bytes");
             }
         }
     }
@@ -636,101 +793,100 @@ public class VotVManualDL : MonoBehaviour
 
         if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
         {
-            UnityEngine.Debug.LogWarning("Config load failed: " + request.error);
+            UnityEngine.Debug.LogError("Config load failed: " + request.error);
             configLoaded = true;
             yield break;
         }
 
         try
         {
-            remoteConfig = JsonUtility.FromJson<VotVConfig>(request.downloadHandler.text);
+            remoteConfig = JsonUtility.FromJson<GameConfig>(request.downloadHandler.text);
             UnityEngine.Debug.Log("Remote config loaded successfully");
-            ApplyVotVConfig();
+            ApplyGameConfig();
         }
         catch (System.Exception e)
         {
-            UnityEngine.Debug.LogWarning("Config parsing failed: " + e.Message);
+            UnityEngine.Debug.LogError("Failed to parse config: " + e.Message);
         }
 
         configLoaded = true;
+        UnityEngine.Debug.Log("Config marked as loaded");
     }
 
-    void OnSelectDirectoryClick()
+    void LaunchGame()
     {
-        StartCoroutine(ShowVotVFileBrowser());
-    }
-
-    void OnSelectDownloadDirectoryClick()
-    {
-        StartCoroutine(ShowDownloadFileBrowser());
-    }
-
-    IEnumerator ShowVotVFileBrowser()
-    {
-        if (darkSkin != null)
-            FileBrowser.Skin = darkSkin;
-
-        string startPath = string.IsNullOrEmpty(votVPath)
-            ? Path.Combine("C:\\Users", System.Environment.UserName, "Documents")
-            : votVPath;
-
-        FileBrowser.SetFilters(true, new FileBrowser.Filter("Executable", ".exe"), new FileBrowser.Filter("All Files", "*"));
-
-        yield return FileBrowser.WaitForLoadDialog(
-            FileBrowser.PickMode.FilesAndFolders,
-            false,
-            startPath,
-            "Select VotV Directory or VotV.exe"
-        );
-
-        if (FileBrowser.Success && FileBrowser.Result != null && FileBrowser.Result.Length > 0)
+        if (string.IsNullOrEmpty(gamePath))
         {
-            string selectedPath = FileBrowser.Result[0];
+            ShowSetupInfo("Game path not found. Cannot launch.");
+            UnityEngine.Debug.LogError("GamePath is empty!");
+            return;
+        }
 
-            if (selectedPath.EndsWith(".exe"))
-            {
-                selectedPath = Path.GetDirectoryName(selectedPath);
-            }
+        string[] possibleExePaths = new string[]
+        {
+            Path.Combine(gamePath, "votv.exe"),
+        };
 
-            if (File.Exists(Path.Combine(selectedPath, "VotV.exe")))
+        string exePath = "";
+        foreach (string path in possibleExePaths)
+        {
+            if (File.Exists(path))
             {
-                votVPath = selectedPath;
-                if (selectedPathInputField != null)
-                    selectedPathInputField.text = votVPath;
+                exePath = path;
+                break;
+            }
+        }
 
-                UnityEngine.Debug.Log("VotV directory selected: " + votVPath);
-            }
-            else
-            {
-                ShowInfo("ERROR: VotV.exe not found in the selected directory!\nPlease select the correct VotV installation folder.");
-                UnityEngine.Debug.LogError("VotV.exe not found at: " + Path.Combine(selectedPath, "VotV.exe"));
-            }
+        if (string.IsNullOrEmpty(exePath))
+        {
+            ShowSetupInfo("Game executable not found at:\n" + gamePath + "\\votv.exe");
+            UnityEngine.Debug.LogError("Executable not found!");
+            return;
+        }
+
+        UnityEngine.Debug.Log("Checking exe at: " + exePath);
+
+        try
+        {
+            UnityEngine.Debug.Log("Starting process...");
+            gameProcess = Process.Start(exePath);
+            UnityEngine.Debug.Log("Game launched successfully from: " + exePath);
+        }
+        catch (System.Exception e)
+        {
+            ShowSetupInfo("Error launching game:\n" + e.Message);
+            UnityEngine.Debug.LogError("Launch error: " + e);
         }
     }
 
-    IEnumerator ShowDownloadFileBrowser()
+    void CloseGame()
     {
-        if (darkSkin != null)
-            FileBrowser.Skin = darkSkin;
-
-        string startPath = string.IsNullOrEmpty(downloadPath)
-            ? Path.Combine("C:\\Users", System.Environment.UserName, "Documents")
-            : downloadPath;
-
-        yield return FileBrowser.WaitForLoadDialog(
-            FileBrowser.PickMode.Folders,
-            false,
-            startPath,
-            "Select Download Folder for VotV"
-        );
-
-        if (FileBrowser.Success && FileBrowser.Result != null && FileBrowser.Result.Length > 0)
+        try
         {
-            downloadPath = FileBrowser.Result[0];
-            if (downloadPathInputField != null)
-                downloadPathInputField.text = downloadPath;
+            if (gameProcess != null && !gameProcess.HasExited)
+            {
+                gameProcess.Kill();
+                gameProcess.Dispose();
+                gameProcess = null;
+            }
+        }
+        catch { }
+    }
 
-            UnityEngine.Debug.Log("Download directory selected: " + downloadPath);
+    void SafeDeleteDirectory(string path)
+    {
+        try
+        {
+            if (Directory.Exists(path))
+            {
+                UnityEngine.Debug.Log("Deleting directory: " + path);
+                Directory.Delete(path, true);
+                UnityEngine.Debug.Log("Directory deleted successfully: " + path);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error deleting directory: " + path + " - " + e.Message);
         }
     }
 
@@ -740,9 +896,9 @@ public class VotVManualDL : MonoBehaviour
         {
             if (File.Exists(path))
             {
-                File.SetAttributes(path, FileAttributes.Normal);
+                UnityEngine.Debug.Log("Deleting file: " + path);
                 File.Delete(path);
-                UnityEngine.Debug.Log("File deleted: " + path);
+                UnityEngine.Debug.Log("File deleted successfully: " + path);
             }
         }
         catch (System.Exception e)
@@ -751,122 +907,80 @@ public class VotVManualDL : MonoBehaviour
         }
     }
 
-    void SafeDeleteDirectory(string path)
-    {
-        try
-        {
-            if (Directory.Exists(path))
-            {
-                Directory.Delete(path, true);
-                UnityEngine.Debug.Log("Directory deleted: " + path);
-            }
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogError("Error deleting directory: " + path + " - " + e.Message);
-        }
-    }
-
-    void MoveDirectory(string source, string target)
+    void MoveDirectoryAndTrack(string source, string target)
     {
         if (!Directory.Exists(source))
             return;
 
+        Directory.CreateDirectory(target);
+
         foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
         {
             string dest = file.Replace(source, target);
+
             Directory.CreateDirectory(Path.GetDirectoryName(dest));
 
             if (File.Exists(dest))
                 File.Delete(dest);
 
             File.Move(file, dest);
+
+            if (currentManifest != null)
+                currentManifest.installedFiles.Add(dest);
         }
     }
 
-    public void ShowInfo(string message)
+    void SaveInstalledFilesManifest(InstalledFilesManifest manifest)
     {
-        if (infoPanel == null || infoText == null)
-            return;
+        string manifestPath = Path.Combine(Application.persistentDataPath, "VotVInstalledFilesManifest.json");
+        string json = JsonUtility.ToJson(manifest, true);
 
-        infoText.text = message;
-        infoPanel.SetActive(true);
-    }
-
-    void CloseInfoPanel()
-    {
-        if (infoPanel != null)
-            infoPanel.SetActive(false);
-    }
-
-    void OnFullCleanChanged(bool value)
-    {
-        if (removeAPModsToggle != null)
+        try
         {
-            removeAPModsToggle.isOn = false;
-            removeAPModsToggle.interactable = !value;
+            File.WriteAllText(manifestPath, json);
+            UnityEngine.Debug.Log("Installation manifest saved: " + manifestPath);
+            UnityEngine.Debug.Log("Tracked " + manifest.installedFiles.Count + " files for future revert");
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to save manifest: " + e.Message);
         }
     }
 
-    string FindFile(string root, string fileName)
+    void CreateVersionFile(string ue4ssUrl, string apmodUrl, string apworldUrl)
     {
         try
         {
-            foreach (string file in Directory.GetFiles(root, "*", SearchOption.AllDirectories))
-                if (Path.GetFileName(file) == fileName)
-                    return file;
-        }
-        catch { }
-
-        return "";
-    }
-
-    string FindDirectory(string root, string dirName)
-    {
-        try
-        {
-            foreach (string dir in Directory.GetDirectories(root, "*", SearchOption.AllDirectories))
-            {
-                if (Path.GetFileName(dir) == dirName)
-                    return dir;
-            }
-        }
-        catch { }
-
-        return "";
-    }
-
-    void CreateVersionFile(string apmodUrl, string ue4ssUrl, string apworldUrl)
-    {
-        try
-        {
-            string apmodVersion = ExtractVersionFromUrl(apmodUrl, @"(?:/releases/download/|/download/[^/]+/[^/]+/)([^/]+)/?$");
-            string ue4ssVersion = ExtractVersionFromUrl(ue4ssUrl, @"(?:/releases/download/|/download/[^/]+/[^/]+/)([^/]+)/?$");
-            string apworldVersion = ExtractVersionFromUrl(apworldUrl, @"/([^/]+)\.apworld");
+            string ue4ssVersion = ExtractVersionFromUrl(ue4ssUrl);
+            string apmodVersion = ExtractVersionFromUrl(apmodUrl);
+            string apworldVersion = ExtractVersionFromUrl(apworldUrl);
 
             string versionFileName = "VotV APMod Version " + apmodVersion + ".txt";
-            string content = "Voices of the Void Archipelago Setup Tool by quack!\n";
+            string content = "Archipelago Setup Tool by quack!\n";
             content += "https://github.com/quackexclamationmark/Archipelago-Setup-Tool\n";
-            content += "\n";
-            content += "=== AP MOD ===\n";
-            content += "Downloaded from: " + apmodUrl + "\n";
-            content += "Version: " + apmodVersion + "\n";
-            content += "\n";
-            content += "=== APWORLD ===\n";
-            content += "Downloaded from: " + apworldUrl + "\n";
-            content += "Name: " + apworldVersion + ".apworld\n";
             content += "\n";
             content += "=== UE4SS ===\n";
             content += "Downloaded from: " + ue4ssUrl + "\n";
             content += "Version: " + ue4ssVersion + "\n";
             content += "\n";
+            content += "=== APMOD ===\n";
+            content += "Downloaded from: " + apmodUrl + "\n";
+            content += "Version: " + apmodVersion + "\n";
+            content += "\n";
+            content += "=== APWORLD ===\n";
+            content += "Downloaded from: " + apworldUrl + "\n";
+            content += "Version: " + apworldVersion + "\n";
+            content += "\n";
             content += "Downloaded at: " + System.DateTime.Now + "\n";
 
             DeleteOldVersionFiles();
 
-            string rootVersionPath = Path.Combine(votVPath, versionFileName);
-            File.WriteAllText(rootVersionPath, content);
-            UnityEngine.Debug.Log("Version file created: " + rootVersionPath);
+            string versionPath = Path.Combine(gamePath, versionFileName);
+            File.WriteAllText(versionPath, content);
+            UnityEngine.Debug.Log("Version file created: " + versionPath);
+
+            if (currentManifest != null)
+                currentManifest.installedFiles.Add(versionPath);
         }
         catch (System.Exception e)
         {
@@ -880,24 +994,20 @@ public class VotVManualDL : MonoBehaviour
         {
             System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"VotV APMod Version .+\.txt");
 
-            if (Directory.Exists(votVPath))
+            string[] rootFiles = Directory.GetFiles(gamePath);
+            foreach (string file in rootFiles)
             {
-                string[] rootFiles = Directory.GetFiles(votVPath);
-                foreach (string file in rootFiles)
+                string fileName = Path.GetFileName(file);
+                if (pattern.IsMatch(fileName))
                 {
-                    string fileName = Path.GetFileName(file);
-                    if (pattern.IsMatch(fileName))
+                    try
                     {
-                        try
-                        {
-                            File.SetAttributes(file, FileAttributes.Normal);
-                            File.Delete(file);
-                            UnityEngine.Debug.Log("Deleted old version file: " + fileName);
-                        }
-                        catch (System.Exception e)
-                        {
-                            UnityEngine.Debug.LogWarning("Could not delete old version file: " + e.Message);
-                        }
+                        File.Delete(file);
+                        UnityEngine.Debug.Log("Deleted old version file: " + fileName);
+                    }
+                    catch (System.Exception e)
+                    {
+                        UnityEngine.Debug.LogWarning("Could not delete old version file: " + e.Message);
                     }
                 }
             }
@@ -908,14 +1018,86 @@ public class VotVManualDL : MonoBehaviour
         }
     }
 
-    string ExtractVersionFromUrl(string url, string pattern)
+    string ExtractVersionFromUrl(string url)
     {
-        System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(pattern);
-        System.Text.RegularExpressions.Match match = regex.Match(url);
+        if (string.IsNullOrEmpty(url))
+            return "Unknown";
 
-        if (match.Success)
-            return match.Groups[1].Value;
+        System.Text.RegularExpressions.Regex thunderstorePattern = new System.Text.RegularExpressions.Regex(@"thunderstore\.io/package/download/[^/]+/[^/]+/([^/]+)/?$");
+        System.Text.RegularExpressions.Match thunderstoreMatch = thunderstorePattern.Match(url);
+
+        if (thunderstoreMatch.Success)
+            return thunderstoreMatch.Groups[1].Value;
+
+        System.Text.RegularExpressions.Regex githubPattern = new System.Text.RegularExpressions.Regex(@"/releases/download/([^/]+)/");
+        System.Text.RegularExpressions.Match githubMatch = githubPattern.Match(url);
+
+        if (githubMatch.Success)
+            return githubMatch.Groups[1].Value;
 
         return "Unknown";
+    }
+
+    void ShowSetupInfo(string message)
+    {
+        if (setupInfoPanel == null || setupInfoText == null)
+            return;
+
+        setupInfoText.text = message;
+        setupInfoPanel.SetActive(true);
+    }
+
+    void CloseSetupInfoPanel()
+    {
+        if (setupInfoPanel != null)
+            setupInfoPanel.SetActive(false);
+    }
+
+    void ResetInstallationToggles()
+    {
+        if (installAPWorldToggle != null)
+            installAPWorldToggle.isOn = true;
+
+        if (installUE4SSToggle != null)
+            installUE4SSToggle.isOn = true;
+
+        if (installAPModToggle != null)
+            installAPModToggle.isOn = true;
+
+        UnityEngine.Debug.Log("Installation toggles reset to default state");
+    }
+
+    public void ResetState()
+    {
+        ResetInstallationToggles();
+        pendingAction = "";
+        pendingFullCleanConfirmation = false;
+        gamePath = "";
+
+        if (directoryInputField != null)
+        {
+            directoryInputField.text = "";
+            directoryInputField.gameObject.SetActive(false);
+        }
+
+        if (directoryPlaceholder != null)
+            directoryPlaceholder.gameObject.SetActive(true);
+
+        if (setupConfirmationPanel != null)
+            setupConfirmationPanel.SetActive(false);
+
+        if (setupInfoPanel != null)
+            setupInfoPanel.SetActive(false);
+
+        UnityEngine.Debug.Log("VotVManualDL state reset");
+    }
+
+    IEnumerator WaitForConfigThenSetup()
+    {
+        while (!configLoaded)
+            yield return new WaitForSeconds(0.1f);
+
+        CloseSetupInfoPanel();
+        ShowSetupConfirmation("Are you sure you want to install all the files?", "Setup");
     }
 }
