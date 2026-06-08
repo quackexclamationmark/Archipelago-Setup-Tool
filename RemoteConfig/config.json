@@ -125,7 +125,7 @@
 
     "votvUE4SS": "https://github.com/UE4SS-RE/RE-UE4SS/releases/download/experimental-latest/UE4SS_v3.0.1-953-gb872ad11.zip",
     "votvApworld": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.0.2/votv.apworld",
-    "votvAP": "https://github.com/Nathan-R-Og/votv_ap/archive/refs/heads/main.zip",
+    "votvAP": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.0.2/votv_ap-main.zip",
     "votvDL": "https://r2.votv.dev/archive/votv/090j_0001.7z",
 
     "toolVersions": {
