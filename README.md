@@ -22,6 +22,10 @@ Currently, the following games are supported:
 * Nine Sols
 * Cuphead
 * Outer Wilds
+* Risk Of Rain 2
+* Librarian Tidy Up the Arcane Library
+* Bomb Rush Cyberfunk
+* Portal 2
 
 Features to add in the future:
 
