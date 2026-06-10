@@ -40,6 +40,86 @@ public class CelesteManualDL : MonoBehaviour
 
     private const string INSTALL_TRACKER_FILE = "CelesteAP_installed.txt";
 
+    // Dossiers et fichiers à TOUJOURS supprimer lors du revert
+    private readonly string[] DIRS_TO_REMOVE = new string[]
+    {
+        "orig",
+        "everest-lib",
+        "EverestSplash",
+        "lib64-win-x64",
+        "Mods",
+        "piton-apphosts",
+        "Celeste.deps.json",
+        "Celeste.dll",
+        "Celeste.Mod.mm.deps.json",
+        "Celeste.Mod.mm.dll",
+        "Celeste.Mod.mm.pdb",
+        "Celeste.Mod.mm.xml",
+        "Celeste.pdb",
+        "Celeste.runtimeconfig.json",
+        "Celeste.xml",
+        "DiscordGameSDK.dll",
+        "DiscordGameSDK.pdb",
+        "DotNetZip.dll",
+        "FNA.dll",
+        "FNA.pdb",
+        "FNA.xml",
+        "Jdenticon.dll",
+        "KeraLua.dll",
+        "MAB.DotIgnore.dll",
+        "Microsoft.NET.HostModel.dll",
+        "Microsoft.Win32.SystemEvents.dll",
+        "MiniInstaller.deps.json",
+        "MiniInstaller.dll",
+        "MiniInstaller.pdb",
+        "MiniInstaller.runtimeconfig.json",
+        "MiniInstaller-linux",
+        "MiniInstaller-osx",
+        "MiniInstaller-win.exe",
+        "MiniInstaller-win64.exe",
+        "MMHOOK_Celeste.dll",
+        "MMHOOK_Celeste.pdb",
+        "Mono.Cecil.dll",
+        "Mono.Cecil.Mdb.dll",
+        "Mono.Cecil.Pdb.dll",
+        "Mono.Cecil.Rocks.dll",
+        "MonoMod.Backports.dll",
+        "MonoMod.Core.dll",
+        "MonoMod.Core.pdb",
+        "MonoMod.Core.xml",
+        "MonoMod.Iced.dll",
+        "MonoMod.Iced.pdb",
+        "MonoMod.Iced.xml",
+        "MonoMod.ILHelpers.dll",
+        "MonoMod.Patcher",
+        "MonoMod.Patcher.dll",
+        "MonoMod.Patcher.pdb",
+        "MonoMod.Patcher.runtimeconfig.json",
+        "MonoMod.Patcher.xml",
+        "MonoMod.RuntimeDetour.dll",
+        "MonoMod.RuntimeDetour.HookGen",
+        "MonoMod.RuntimeDetour.HookGen.dll",
+        "MonoMod.RuntimeDetour.HookGen.pdb",
+        "MonoMod.RuntimeDetour.HookGen.runtimeconfig.json",
+        "MonoMod.RuntimeDetour.HookGen.xml",
+        "MonoMod.RuntimeDetour.pdb",
+        "MonoMod.RuntimeDetour.xml",
+        "MonoMod.Utils.dll",
+        "MonoMod.Utils.pdb",
+        "MonoMod.Utils.xml",
+        "NETCoreifier.deps.json",
+        "NETCoreifier.dll",
+        "NETCoreifier.pdb",
+        "Newtonsoft.Json.dll",
+        "NLua.dll",
+        "NLua.pdb",
+        "piton-runtime.yaml",
+        "System.Drawing.Common.dll",
+        "System.Security.Permissions.dll",
+        "System.Windows.Extensions.dll",
+        "YamlDotNet.dll"
+    };
+
     [System.Serializable]
     public class CelesteConfig
     {
@@ -231,39 +311,45 @@ public class CelesteManualDL : MonoBehaviour
             return;
         }
 
-        // Charger la liste des fichiers installés
-        LoadInstalledFilesList();
-
-        if (installedFiles.Count == 0)
-        {
-            ShowInfo("No Celeste Archipelago Mod installation found. Nothing to revert.");
-            return;
-        }
-
         ShowInfo("Removing Celeste Archipelago Mod...");
 
-        // Supprimer tous les fichiers listés
-        foreach (string file in installedFiles)
+        // Supprimer les fichiers et dossiers listés
+        foreach (string item in DIRS_TO_REMOVE)
         {
-            SafeDeleteFile(file);
-        }
+            string fullPath = Path.Combine(celesteGamePath, item);
 
-        // Supprimer le fichier de tracking
-        SafeDeleteFile(Path.Combine(celesteGamePath, INSTALL_TRACKER_FILE));
-
-        // Supprimer le dossier Mods s'il est vide
-        try
-        {
-            string modsPath = Path.Combine(celesteGamePath, "Mods");
-            if (Directory.Exists(modsPath) && Directory.GetFiles(modsPath).Length == 0 && Directory.GetDirectories(modsPath).Length == 0)
+            // Vérifier si c'est un répertoire
+            if (Directory.Exists(fullPath))
             {
-                Directory.Delete(modsPath);
-                UnityEngine.Debug.Log("Deleted empty Mods directory");
+                SafeDeleteDirectory(fullPath);
+            }
+            // Vérifier si c'est un fichier
+            else if (File.Exists(fullPath))
+            {
+                SafeDeleteFile(fullPath);
             }
         }
-        catch { }
+
+        // Supprimer tous les fichiers .txt à la racine
+        DeleteRootTextFiles();
 
         ShowInfo("Celeste Archipelago Mod removed successfully!");
+    }
+
+    void DeleteRootTextFiles()
+    {
+        try
+        {
+            string[] txtFiles = Directory.GetFiles(celesteGamePath, "*.txt", SearchOption.TopDirectoryOnly);
+            foreach (string file in txtFiles)
+            {
+                SafeDeleteFile(file);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Error deleting root text files: " + e.Message);
+        }
     }
 
     void LoadInstalledFilesList()
@@ -353,6 +439,19 @@ public class CelesteManualDL : MonoBehaviour
 
         yield return downloader.DownloadAndExtract(celesteAP, Application.persistentDataPath, extractPath);
 
+        bool installSuccess = ProcessCelesteAPArchive(extractPath);
+
+        if (installSuccess)
+        {
+            // Lance le MiniInstaller avec privilèges admin
+            yield return RunMiniInstaller();
+        }
+
+        SafeDeleteDirectory(extractPath);
+    }
+
+    bool ProcessCelesteAPArchive(string extractPath)
+    {
         try
         {
             // Cherche le dossier "Preloaded-CelesteAP" à l'intérieur de l'archive
@@ -365,8 +464,8 @@ public class CelesteManualDL : MonoBehaviour
                 // Copie TOUT le contenu du dossier vers la racine du jeu Celeste
                 CopyDirectory(modSourcePath, celesteGamePath);
 
-                UnityEngine.Debug.Log("Celeste Archipelago Mod installed to: " + celesteGamePath);
-                ShowInfo("Celeste Archipelago Mod installed successfully!");
+                UnityEngine.Debug.Log("Celeste Archipelago Mod files extracted to: " + celesteGamePath);
+                return true;
             }
             else
             {
@@ -381,15 +480,61 @@ public class CelesteManualDL : MonoBehaviour
                 }
 
                 ShowInfo("ERROR: Preloaded-CelesteAP folder not found in the zip!");
+                return false;
             }
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Error installing Celeste AP: " + e.Message);
             ShowInfo("ERROR: Failed to install Celeste mod!\n" + e.Message);
+            return false;
+        }
+    }
+
+    IEnumerator RunMiniInstaller()
+    {
+        string miniInstallerPath = Path.Combine(celesteGamePath, "MiniInstaller-win64.exe");
+
+        if (!File.Exists(miniInstallerPath))
+        {
+            UnityEngine.Debug.LogError("MiniInstaller-win64.exe not found at: " + miniInstallerPath);
+            ShowInfo("ERROR: MiniInstaller-win64.exe not found!");
+            yield break;
         }
 
-        SafeDeleteDirectory(extractPath);
+        Process installerProcess = null;
+
+        try
+        {
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = miniInstallerPath,
+                UseShellExecute = true,
+                Verb = "runas", // Lance avec privilèges administrateur
+                WorkingDirectory = celesteGamePath,
+                CreateNoWindow = false
+            };
+
+            installerProcess = Process.Start(psi);
+            UnityEngine.Debug.Log("MiniInstaller launched with admin privileges from: " + miniInstallerPath);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error launching MiniInstaller: " + e.Message);
+            ShowInfo("ERROR: Failed to launch MiniInstaller!\n" + e.Message);
+            yield break;
+        }
+
+        // Attend que le processus se termine
+        if (installerProcess != null)
+        {
+            while (!installerProcess.HasExited)
+            {
+                yield return new WaitForSeconds(0.5f);
+            }
+
+            UnityEngine.Debug.Log("MiniInstaller completed with exit code: " + installerProcess.ExitCode);
+        }
     }
 
     IEnumerator LoadRemoteConfig()

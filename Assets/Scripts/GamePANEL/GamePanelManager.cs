@@ -24,6 +24,7 @@ public class GamePanelManager : MonoBehaviour
     public GameObject minecraftPanel;
     public GameObject celesteOWPanel;
     public GameObject slimerancherPanel;
+    public GameObject slimerancher2Panel;
 
     void Start()
     {
@@ -102,6 +103,9 @@ public class GamePanelManager : MonoBehaviour
             case "SlimeRancher":
                 slimerancherPanel.SetActive(true);
                 break;
+            case "SlimeRancher2":
+                slimerancher2Panel.SetActive(true);
+                break;
         }
     }
 
@@ -129,5 +133,6 @@ public class GamePanelManager : MonoBehaviour
         if (minecraftPanel != null) minecraftPanel.SetActive(false);
         if (celesteOWPanel != null) celesteOWPanel.SetActive(false);
         if (slimerancherPanel != null) slimerancherPanel.SetActive(false);
+        if (slimerancher2Panel != null) slimerancher2Panel.SetActive(false);
     }
 }
