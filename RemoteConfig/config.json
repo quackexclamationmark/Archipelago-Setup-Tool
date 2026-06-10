@@ -125,6 +125,10 @@
 
     "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/0.4.4-alpha/sts2-client.zip",
     "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/0.4.4-alpha/spire2.apworld",
+
+    "slimerancherAP": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.0/Slimipelago.zip",
+    "slimerancherApworld": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.0/slime_rancher.apworld",
+    "slimerancherMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.1/MelonLoader.x64.zip",
     
     "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.3/Archipelago_193.zip",
     "subnauticaBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
