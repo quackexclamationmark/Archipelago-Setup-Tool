@@ -21,6 +21,9 @@ public class GamePanelManager : MonoBehaviour
     public GameObject brcPanel;
     public GameObject portal2Panel;
     public GameObject ltutalPanel;
+    public GameObject minecraftPanel;
+    public GameObject celesteOWPanel;
+    public GameObject slimerancherPanel;
 
     void Start()
     {
@@ -90,6 +93,15 @@ public class GamePanelManager : MonoBehaviour
             case "LTUTAL":
                 ltutalPanel.SetActive(true);
                 break;
+            case "Minecraft":
+                minecraftPanel.SetActive(true);
+                break;
+            case "CelesteOW":
+                celesteOWPanel.SetActive(true);
+                break;
+            case "SlimeRancher":
+                slimerancherPanel.SetActive(true);
+                break;
         }
     }
 
@@ -114,5 +126,8 @@ public class GamePanelManager : MonoBehaviour
         if (brcPanel != null) brcPanel.SetActive(false);
         if (portal2Panel != null) portal2Panel.SetActive(false);
         if (ltutalPanel != null) ltutalPanel.SetActive(false);
+        if (minecraftPanel != null) minecraftPanel.SetActive(false);
+        if (celesteOWPanel != null) celesteOWPanel.SetActive(false);
+        if (slimerancherPanel != null) slimerancherPanel.SetActive(false);
     }
 }

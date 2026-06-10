@@ -1036,8 +1036,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Slime Rancher is not a core Archipelago game, it needs a custom world file.
-    When "slime_rancher.apworld" is downloaded in the Archipelago Folder (by clicking
+  m_text: Bloons TD 6 is not a core Archipelago game, it needs a custom world file.
+    When "bloonstd6.apworld" is downloaded in the Archipelago Folder (by clicking
     START SETUP), boot-up the Archipelago Launcher and go to "Options Creator" to
     create your .yaml file and then, when you're done, send it to the person who
     will host the AP Multiworld.
@@ -1324,7 +1324,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1541927450}
   m_Direction: 2
   m_Value: 1.0000001
-  m_Size: 0.59344745
+  m_Size: 0.5934474
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -13875,7 +13875,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 806343874}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.41311228
+  m_Size: 0.41311225
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -14357,8 +14357,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u2022 MelonLoader (+ all its folders & version.dll)\n\u2022 Slimipelago
-    folder and .dll (Archipelago Mod)\n\u2022 slime_rancher.apworld\n"
+  m_text: "\u2022 MelonLoader (+ all its folders & version.dll)\n\u2022 BloonsArchipelago.dll
+    (Archipelago Mod)\n\u2022 Btd6ModHelper.dll\n\u2022 bloonstd6.apworld\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
   m_sharedMaterial: {fileID: -9134737203265703719, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
@@ -14385,8 +14385,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 22
-  m_fontSizeBase: 22
+  m_fontSize: 20
+  m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -18276,7 +18276,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 55841013}
   m_HandleRect: {fileID: 55841012}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 1.0000002
   m_Size: 0.5317274
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -21733,7 +21733,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1354890805}
   m_HandleRect: {fileID: 1354890804}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 1.0000002
   m_Size: 0.490623
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -23755,7 +23755,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1165781730}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.5702849
+  m_Size: 0.5702848
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -24090,7 +24090,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 778189628}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.3247355
+  m_Size: 0.32066202
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -28009,7 +28009,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 535796399}
   m_Direction: 2
   m_Value: 0.9999999
-  m_Size: 0.3778334
+  m_Size: 0.37783337
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -37177,7 +37177,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1510912499}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.6546688
+  m_Size: 0.65466875
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -50621,28 +50621,29 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Once everything is set up, go into Options and it should open in the ''Archipelago''
-    tab.
+  m_text: 'Once everything is set up, a new "Mods" button should appear in the main
+    menu in the bottom-right corner, click it and then, click the little cog icon
+    located under the "Bloons Archipelago" mod button.
 
 
-    In the "Address:Port" field, enter archipelago.gg: followed by the
-    port. This is a 5-digit number that you can find on the website after creating
-    a new room.
+    In the "URL" field,
+    enter "archipelago.gg".
 
 
-    The "Password" field is optional. If the host did not set one,
-    leave it blank.
+    In the "PORT" field, enter the port. This is a
+    5-digit number that you can find on the website after creating a new room.
 
 
-    In "Slot name", enter the name assigned to your YAML file.
+    In
+    "SLOT", enter the name assigned to your YAML file.
 
 
-    Finally,
-    click "ARCHIPELAGO CONNECT" and then you can start playing!
+    The "Password" field
+    is optional. If the host did not set one, leave it blank.
 
 
-    You can also
-    change some options on this tab.'
+    Finally, click
+    "ARCHIPELAGO CONNECT" and then you can start playing!'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
   m_sharedMaterial: {fileID: -9134737203265703719, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
@@ -55084,7 +55085,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1850183717}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.36537993
+  m_Size: 0.3653799
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -58808,7 +58809,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 2043376966}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.49088472
+  m_Size: 0.49088466
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -63299,9 +63300,9 @@ MonoBehaviour:
       m_Calls: []
   m_text: "You have 2 revert options, both can't be enabled at the same time.\n\nIf
     you use the \"Clear AP Mods\" option it will only delete the mods that are required
-    for Slime Rancher Archipelago.\n\nIf you use the \"Full Clear MelonLoader\" option
-    it will delete everything related to MelonLoader and mods. If other mods are
-    detected an additionnal confirmation will appear.\n\t"
+    for BTD6 Archipelago.\n\nIf you use the \"Full Clear MelonLoader\" option it
+    will delete everything related to MelonLoader and mods. If other mods are detected
+    an additionnal confirmation will appear.\n\t"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
   m_sharedMaterial: {fileID: -9134737203265703719, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
@@ -70496,7 +70497,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 96235964}
   m_HandleRect: {fileID: 96235963}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 1.0000001
   m_Size: 0.38238624
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -76810,8 +76811,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1594697443}
   m_HandleRect: {fileID: 1594697442}
   m_Direction: 2
-  m_Value: 0.5
-  m_Size: 0.38825658
+  m_Value: 0.49999994
+  m_Size: 0.3825368
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -124301,7 +124302,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2132530165}
   m_HandleRect: {fileID: 2132530164}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 1.0000001
   m_Size: 0.5789666
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -138066,7 +138067,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1700876221}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.46367824
+  m_Size: 0.4554176
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -139475,15 +139476,14 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'When you click "START SETUP" in the "SETUP" tab, slime_rancher.apworld
-    will be installed and moved into the "custom_worlds" folder inside the Archipelago
+  m_text: 'When you click "START SETUP" in the "SETUP" tab, bloonstd6.apworld will
+    be installed and moved into the "custom_worlds" folder inside the Archipelago
     Launcher directory. MelonLoader will then be installed into the game''s core
-    folder. The  required folder and .dll will be installed inside the BloonsTD6\Mods
-    directory and the UserLibs folder will be created with all its content.
+    folder. Both required dlls will be installed inside the BloonsTD6\Mods directory.
 
     Only
-    the Mods and the UserLibs folder will be created automatically, the other ones
-    will be created after starting the game.'
+    the Mods folder will be created automatically, the other ones will be created
+    after starting the game.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
   m_sharedMaterial: {fileID: -9134737203265703719, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
@@ -140144,7 +140144,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 491580279}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.5308023
+  m_Size: 0.53080225
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -157882,8 +157882,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 837060527}
   m_HandleRect: {fileID: 837060526}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 0.65398663
+  m_Value: 1.0000002
+  m_Size: 0.6539865
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -164198,7 +164198,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 2112081299}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.77352846
+  m_Size: 0.7508092
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -198357,7 +198357,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 2053461177}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.49625573
+  m_Size: 0.5002235
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -201356,7 +201356,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1170916429}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.49246082
+  m_Size: 0.49246076
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -216910,8 +216910,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 22
-  m_fontSizeBase: 22
+  m_fontSize: 20
+  m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -219201,7 +219201,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 497582965}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.5671163
+  m_Size: 0.56711626
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -219555,7 +219555,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1286442052}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.55447364
+  m_Size: 0.5544736
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -222171,7 +222171,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 520930222}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.5283692
+  m_Size: 0.5002235
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

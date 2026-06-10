@@ -17,6 +17,9 @@ public class URLButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     public Button targetButton;
     public Button buttonToDeactivate;
 
+    [Header("TEXT TRIGGER (si linkType = 2)")]
+    public string triggerText = "";
+
     void Start()
     {
         if (button != null)
@@ -46,6 +49,10 @@ public class URLButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
             case 1: // SwitchButton
                 SwitchButton();
                 break;
+
+            case 2: // TextTrigger
+                TriggerByText();
+                break;
         }
     }
 
@@ -64,16 +71,50 @@ public class URLButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
 
     void SwitchButton()
     {
-        if (targetButton != null)
+        if (targetButton != null && buttonToDeactivate != null)
         {
+            // Les deux restent toujours interactifs
             targetButton.interactable = true;
-            UnityEngine.Debug.Log("Activated: " + targetButton.gameObject.name);
-        }
+            buttonToDeactivate.interactable = true;
 
-        if (buttonToDeactivate != null)
+            UnityEngine.Debug.Log("Activated: " + targetButton.gameObject.name);
+            UnityEngine.Debug.Log("Kept active: " + buttonToDeactivate.gameObject.name);
+
+            // Simuler un vrai clic sur le bouton cible
+            targetButton.onClick.Invoke();
+            UnityEngine.Debug.Log("Clicked: " + targetButton.gameObject.name);
+        }
+        else
         {
-            buttonToDeactivate.interactable = false;
-            UnityEngine.Debug.Log("Deactivated: " + buttonToDeactivate.gameObject.name);
+            UnityEngine.Debug.LogWarning("Target Button or Button To Deactivate is not assigned!");
+        }
+    }
+
+    void TriggerByText()
+    {
+        if (!string.IsNullOrEmpty(triggerText))
+        {
+            // Cherche tous les boutons dans la scène (sans tri pour plus de performance)
+            Button[] allButtons = FindObjectsByType<Button>(FindObjectsSortMode.None);
+
+            foreach (Button btn in allButtons)
+            {
+                // Cherche le texte du bouton
+                Text buttonText = btn.GetComponentInChildren<Text>();
+
+                if (buttonText != null && buttonText.text == triggerText)
+                {
+                    btn.onClick.Invoke();
+                    UnityEngine.Debug.Log("Triggered button with text: " + triggerText);
+                    return;
+                }
+            }
+
+            UnityEngine.Debug.LogWarning("No button found with text: " + triggerText);
+        }
+        else
+        {
+            UnityEngine.Debug.LogWarning("Trigger text is empty!");
         }
     }
 }
