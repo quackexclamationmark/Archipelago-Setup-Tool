@@ -3,7 +3,7 @@
 Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could (idk I didn't try it) but it COULD delete everything that is next to the .exe (in the same folder) even tho it's not supposed to. Basically, you can move the folder but probably don't rename it and do not touch what's inside.
 
 # Archipelago Setup Tool
-### [Download latest version | v0.2.4.3](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v0.2.4.3)
+### [Download latest version | v0.3.0](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v0.3.0)
 
 After setting up a game, all credits can be found in the game's directory, inside the game's directory.
 
@@ -29,13 +29,15 @@ Currently, the following games are supported:
 * Bomb Rush Cyberfunk
 * Portal 2
 * Minecraft
+* Clustertruck
+* Hollow Knight
+* Slime Rancher
+* Slime Rancher 2
 
 Features to add in the future:
 
 * Adding support for games available across multiple platforms.
 * Adding support for other OS (Linux).
-* A new tab above the game selector, providing quick access to required tools and a detailed guide on how to host an Archipelago session.
-* Fully detailed infos and guide on how to host an Archipelago session.
 
 I don’t plan to support emulated games like Super Mario Sunshine due to obvious legal concerns, but I might add a detailed setup guide for them later on.
 
