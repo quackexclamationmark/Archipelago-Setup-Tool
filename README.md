@@ -35,7 +35,6 @@ Features to add in the future:
 * Adding support for games available across multiple platforms.
 * Adding support for other OS (Linux).
 * A new tab above the game selector, providing quick access to required tools and a detailed guide on how to host an Archipelago session.
-* Adding a live log to display all actions performed during setup in real time.
 * Fully detailed infos and guide on how to host an Archipelago session.
 
 I don’t plan to support emulated games like Super Mario Sunshine due to obvious legal concerns, but I might add a detailed setup guide for them later on.
