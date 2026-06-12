@@ -96,6 +96,10 @@
     "repoBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "repoApworld": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.3/repo.apworld",
 
+    "re7AP": "https://github.com/ElGrenier/RE7_AP_Client/archive/refs/tags/0.4.2.zip",
+    "re7Framework": "https://github.com/praydog/REFramework/releases/download/v1.5.9.1/RE7.zip",
+    "re7Apworld": "https://github.com/ElGrenier/RE7_AP_World/releases/download/0.4.0/residentevil7biohazard.apworld",
+
     "ror2BepInEx": "https://thunderstore.io/package/download/bbepis/BepInExPack/5.4.2121/",
     "ror2AP": "https://thunderstore.io/package/download/Sneaki/Archipelago/1.5.3/",
     "ror2HookGenPatcher": "https://thunderstore.io/package/download/RiskofThunder/HookGenPatcher/1.2.9/",
