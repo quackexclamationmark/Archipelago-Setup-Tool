@@ -133,6 +133,10 @@
     "ror2SeekersPatcher": "https://thunderstore.io/package/download/pseudopulse/SeekersPatcher/1.4.1/",
     "ror2MiscFixes": "https://thunderstore.io/package/download/score/MiscFixes/1.5.9/",
 
+    "scheduleAP": "https://thunderstore.io/package/download/Narcopelago/Narcopelago/1.5.4/",
+    "scheduleApworld": "https://github.com/MacH8s/Narcopelago/releases/download/v3.6.3/Schedule_I.apworld",
+    "scheduleMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
+
     "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/0.4.4-alpha/sts2-client.zip",
     "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/0.4.4-alpha/spire2.apworld",
 
