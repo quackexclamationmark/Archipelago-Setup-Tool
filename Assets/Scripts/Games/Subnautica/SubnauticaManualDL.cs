@@ -139,7 +139,7 @@ public class SubnauticaManualDL : MonoBehaviour
         {
             string platform = isEpic ? "Epic Games" : "Steam";
             string status = string.IsNullOrEmpty(subnauticaPath) ? "Not Found" : "Found";
-            platformStatus.text = $"Platform: {platform} - {status}";
+            platformStatus.text = $"Platform: {platform} \n {status}";
         }
     }
 

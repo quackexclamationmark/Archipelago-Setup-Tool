@@ -40,6 +40,7 @@ public class HadesManualDL : MonoBehaviour
 
     private string backupPath;
     private const string BACKUP_FOLDER = "HadesSetupToolBackup";
+    private const string BACKUP_SCRIPTS_FOLDER = "HadesScriptsBackup";
 
     [System.Serializable]
     public class HadesConfig
@@ -168,8 +169,8 @@ public class HadesManualDL : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
         }
 
-        // Backup important files first
-        yield return BackupImportantFiles();
+        // Backup Scripts directory first (full backup)
+        yield return BackupScriptsDirectory();
 
         // Install APWorld if toggled
         if (installApworld)
@@ -193,41 +194,47 @@ public class HadesManualDL : MonoBehaviour
         yield return null;
     }
 
-    private IEnumerator BackupImportantFiles()
+    private IEnumerator BackupScriptsDirectory()
     {
-        UnityEngine.Debug.Log("START: Backup Important Files");
+        UnityEngine.Debug.Log("START: Backup Scripts Directory");
 
-        string contentPath = Path.Combine(hadesPath, "Content");
-        Directory.CreateDirectory(backupPath);
+        string scriptsPath = Path.Combine(hadesPath, "Content", "Scripts");
+        string backupScriptsPath = Path.Combine(Application.persistentDataPath, BACKUP_SCRIPTS_FOLDER);
 
-        string[] filesToBackup = new string[]
+        // Delete old backup if it exists
+        if (Directory.Exists(backupScriptsPath))
         {
-            "ConditionalItemData.lua",
-            "Main.lua",
-            "RoomManager.lua",
-            "TextLineSets.lua"
-        };
-
-        foreach (string fileName in filesToBackup)
-        {
-            string sourceFile = Path.Combine(contentPath, fileName);
-            string backupFile = Path.Combine(backupPath, fileName);
-
-            if (File.Exists(sourceFile))
+            try
             {
-                try
-                {
-                    File.Copy(sourceFile, backupFile, true);
-                    UnityEngine.Debug.Log("Backed up: " + fileName);
-                }
-                catch (System.Exception e)
-                {
-                    UnityEngine.Debug.LogWarning("Could not backup " + fileName + ": " + e.Message);
-                }
+                Directory.Delete(backupScriptsPath, true);
+                UnityEngine.Debug.Log("Deleted old scripts backup");
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogWarning("Could not delete old backup: " + e.Message);
             }
         }
 
-        UnityEngine.Debug.Log("END: Backup Important Files");
+        // Create backup of entire Scripts folder
+        if (Directory.Exists(scriptsPath))
+        {
+            try
+            {
+                CopyDirectory(scriptsPath, backupScriptsPath);
+                UnityEngine.Debug.Log("Backed up entire Scripts directory to: " + backupScriptsPath);
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogError("Could not backup Scripts directory: " + e.Message);
+                ShowInfo("ERROR: Could not backup Scripts directory\n" + e.Message);
+            }
+        }
+        else
+        {
+            UnityEngine.Debug.LogWarning("Scripts directory not found at: " + scriptsPath);
+        }
+
+        UnityEngine.Debug.Log("END: Backup Scripts Directory");
         yield return null;
     }
 
@@ -417,14 +424,20 @@ public class HadesManualDL : MonoBehaviour
 
         ShowInfo("Reverting Hades changes...");
 
-        // Delete files from Hades root
+        string contentPath = Path.Combine(hadesPath, "Content");
+        string scriptsPath = Path.Combine(contentPath, "Scripts");
+        string backupScriptsPath = Path.Combine(Application.persistentDataPath, BACKUP_SCRIPTS_FOLDER);
+
+        // STEP 1: Delete files from Hades root
+        UnityEngine.Debug.Log("STEP 1: Deleting root files...");
         string[] rootFilesToDelete = new string[]
         {
             ".gitignore",
             "README.md",
             "StyxScribe.py",
             "SubsumeHades.py",
-            "SubsumePyre.py"
+            "SubsumePyre.py",
+            "Installer.exe"
         };
 
         foreach (string fileName in rootFilesToDelete)
@@ -445,8 +458,34 @@ public class HadesManualDL : MonoBehaviour
             }
         }
 
-        // Delete directories from Hades\Content
-        string contentPath = Path.Combine(hadesPath, "Content");
+        // STEP 2: Delete files from Hades\Content
+        UnityEngine.Debug.Log("STEP 2: Deleting Content files...");
+        string[] contentFilesToDelete = new string[]
+        {
+            "modimporter.exe",
+            "modimporter.log.txt"
+        };
+
+        foreach (string fileName in contentFilesToDelete)
+        {
+            string filePath = Path.Combine(contentPath, fileName);
+            if (File.Exists(filePath))
+            {
+                try
+                {
+                    File.SetAttributes(filePath, FileAttributes.Normal);
+                    File.Delete(filePath);
+                    UnityEngine.Debug.Log("Deleted from Content: " + fileName);
+                }
+                catch (System.Exception e)
+                {
+                    UnityEngine.Debug.LogWarning("Could not delete " + fileName + ": " + e.Message);
+                }
+            }
+        }
+
+        // STEP 3: Delete modified directories
+        UnityEngine.Debug.Log("STEP 3: Deleting modified directories...");
         string[] dirsToDelete = new string[]
         {
             "Mods",
@@ -463,61 +502,36 @@ public class HadesManualDL : MonoBehaviour
             }
         }
 
-        // Restore backed-up files
-        ShowInfo("Restoring backed-up files...");
-        yield return RestoreBackupedFiles();
+        // STEP 4: Delete modified Scripts directory and restore backup
+        UnityEngine.Debug.Log("STEP 4: Restoring Scripts directory...");
+        ShowInfo("Restoring Scripts directory...");
+
+        if (Directory.Exists(scriptsPath))
+        {
+            yield return SafeDeleteDirectoryAsync(scriptsPath);
+        }
+
+        if (Directory.Exists(backupScriptsPath))
+        {
+            try
+            {
+                CopyDirectory(backupScriptsPath, scriptsPath);
+                UnityEngine.Debug.Log("Restored Scripts directory from backup");
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogError("Could not restore Scripts directory: " + e.Message);
+                ShowInfo("ERROR: Could not restore Scripts directory\n" + e.Message);
+            }
+        }
+        else
+        {
+            UnityEngine.Debug.LogWarning("Scripts backup not found at: " + backupScriptsPath);
+        }
 
         ShowInfo("Hades revert complete!");
         UnityEngine.Debug.Log("END: Hades Revert");
 
-        yield return null;
-    }
-
-    private IEnumerator RestoreBackupedFiles()
-    {
-        UnityEngine.Debug.Log("START: Restore Backuped Files");
-
-        if (!Directory.Exists(backupPath))
-        {
-            UnityEngine.Debug.LogWarning("Backup folder not found: " + backupPath);
-            yield break;
-        }
-
-        string contentPath = Path.Combine(hadesPath, "Content");
-        Directory.CreateDirectory(contentPath);
-
-        string[] filesToRestore = new string[]
-        {
-            "ConditionalItemData.lua",
-            "Main.lua",
-            "RoomManager.lua",
-            "TextLineSets.lua"
-        };
-
-        foreach (string fileName in filesToRestore)
-        {
-            string backupFile = Path.Combine(backupPath, fileName);
-            string targetFile = Path.Combine(contentPath, fileName);
-
-            if (File.Exists(backupFile))
-            {
-                try
-                {
-                    File.Copy(backupFile, targetFile, true);
-                    UnityEngine.Debug.Log("Restored: " + fileName);
-                }
-                catch (System.Exception e)
-                {
-                    UnityEngine.Debug.LogError("Could not restore " + fileName + ": " + e.Message);
-                }
-            }
-            else
-            {
-                UnityEngine.Debug.LogWarning("Backup file not found: " + fileName);
-            }
-        }
-
-        UnityEngine.Debug.Log("END: Restore Backuped Files");
         yield return null;
     }
 
@@ -636,6 +650,37 @@ public class HadesManualDL : MonoBehaviour
                     throw;
                 }
             }
+        }
+    }
+
+    void CopyDirectory(string source, string target)
+    {
+        if (!Directory.Exists(source))
+        {
+            UnityEngine.Debug.LogWarning("Source directory does not exist: " + source);
+            return;
+        }
+
+        Directory.CreateDirectory(target);
+
+        try
+        {
+            foreach (string file in Directory.GetFiles(source))
+            {
+                string dest = Path.Combine(target, Path.GetFileName(file));
+                File.Copy(file, dest, true);
+            }
+
+            foreach (string dir in Directory.GetDirectories(source))
+            {
+                string dest = Path.Combine(target, Path.GetFileName(dir));
+                CopyDirectory(dir, dest);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error copying directory: " + e.Message);
+            throw;
         }
     }
 

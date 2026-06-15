@@ -16,6 +16,11 @@ public class BloonsTD6ManualDL : MonoBehaviour
     public FileDownloader.FileData melonLoader;
     public FileDownloader.FileData modHelper;
 
+    [Header("PLATFORM SELECTION")]
+    public Button steamButton;
+    public Button epicButton;
+    public TextMeshProUGUI platformStatus;
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
@@ -45,6 +50,7 @@ public class BloonsTD6ManualDL : MonoBehaviour
     private bool pendingFullCleanConfirmation = false;
     private BTD6Config remoteConfig;
     private bool configLoaded = false;
+    private bool isEpic = false;
 
     [System.Serializable]
     public class BTD6Config
@@ -57,6 +63,16 @@ public class BloonsTD6ManualDL : MonoBehaviour
 
     void Start()
     {
+        // Initialize platform buttons
+        if (steamButton != null)
+            steamButton.onClick.AddListener(OnSteamButtonClicked);
+
+        if (epicButton != null)
+            epicButton.onClick.AddListener(OnEpicButtonClicked);
+
+        // Select Steam by default
+        SelectSteam();
+
         btd6Path = GetBTD6Path();
         StartCoroutine(LoadRemoteConfig());
 
@@ -87,6 +103,61 @@ public class BloonsTD6ManualDL : MonoBehaviour
         if (fullCleanMelonLoaderToggle != null)
             fullCleanMelonLoaderToggle.onValueChanged.AddListener(OnFullCleanChanged);
     }
+
+    // =========================================================
+    // PLATFORM SELECTION
+    // =========================================================
+
+    void OnSteamButtonClicked()
+    {
+        SelectSteam();
+    }
+
+    void OnEpicButtonClicked()
+    {
+        SelectEpic();
+    }
+
+    void SelectSteam()
+    {
+        isEpic = false;
+        btd6Path = GetBTD6Path();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Steam - Path: " + btd6Path);
+    }
+
+    void SelectEpic()
+    {
+        isEpic = true;
+        btd6Path = GetBTD6Path();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Epic - Path: " + btd6Path);
+    }
+
+    void UpdatePlatformStatus()
+    {
+        if (platformStatus != null)
+        {
+            string platform = isEpic ? "Epic Games" : "Steam";
+            string status = string.IsNullOrEmpty(btd6Path) ? "Not Found" : "Found";
+            platformStatus.text = $"Platform: {platform} \n {status}";
+        }
+    }
+
+    // =========================================================
+    // TOGGLE RULE
+    // =========================================================
+
+    void OnFullCleanChanged(bool value)
+    {
+        if (removeAPModsOnlyToggle != null)
+        {
+            removeAPModsOnlyToggle.isOn = false;
+            removeAPModsOnlyToggle.interactable = !value;
+        }
+    }
+
+    // =========================================================
 
     void ApplyBTD6Config()
     {
@@ -150,7 +221,8 @@ public class BloonsTD6ManualDL : MonoBehaviour
     {
         if (string.IsNullOrEmpty(btd6Path))
         {
-            ShowInfo("BTD6 path not found. Please check Steam installation.");
+            string platform = isEpic ? "Epic" : "Steam";
+            ShowInfo("BTD6 path not found. Please check " + platform + " installation.");
             return;
         }
 
@@ -781,15 +853,6 @@ public class BloonsTD6ManualDL : MonoBehaviour
             infoPanel.SetActive(false);
     }
 
-    void OnFullCleanChanged(bool value)
-    {
-        if (removeAPModsOnlyToggle != null)
-        {
-            removeAPModsOnlyToggle.isOn = false;
-            removeAPModsOnlyToggle.interactable = !value;
-        }
-    }
-
     string FindFile(string root, string fileName)
     {
         try
@@ -940,6 +1003,14 @@ public class BloonsTD6ManualDL : MonoBehaviour
 
     string GetBTD6Path()
     {
+        if (isEpic)
+            return GetBTD6EpicPath();
+        else
+            return GetBTD6SteamPath();
+    }
+
+    string GetBTD6SteamPath()
+    {
         string[] quickPaths = new string[]
         {
             Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "BloonsTD6"),
@@ -959,7 +1030,10 @@ public class BloonsTD6ManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found BTD6 (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
@@ -978,33 +1052,149 @@ public class BloonsTD6ManualDL : MonoBehaviour
                     // Cherche Steam\steamapps
                     string btd6Path = Path.Combine(drive.Name, "Steam", "steamapps", "common", "BloonsTD6");
                     if (Directory.Exists(btd6Path))
+                    {
+                        UnityEngine.Debug.Log("Found BTD6 (Steam) at: " + btd6Path);
                         return btd6Path;
+                    }
 
                     // Cherche SteamLibrary\steamapps
                     btd6Path = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "BloonsTD6");
                     if (Directory.Exists(btd6Path))
+                    {
+                        UnityEngine.Debug.Log("Found BTD6 (Steam) at: " + btd6Path);
                         return btd6Path;
+                    }
 
                     // Cherche directement steamapps à la racine du disque
                     btd6Path = Path.Combine(drive.Name, "steamapps", "common", "BloonsTD6");
                     if (Directory.Exists(btd6Path))
+                    {
+                        UnityEngine.Debug.Log("Found BTD6 (Steam) at: " + btd6Path);
                         return btd6Path;
+                    }
 
                     // Cherche dans Program Files (x86)\steamapps
                     btd6Path = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "BloonsTD6");
                     if (Directory.Exists(btd6Path))
+                    {
+                        UnityEngine.Debug.Log("Found BTD6 (Steam) at: " + btd6Path);
                         return btd6Path;
+                    }
 
                     // Cherche dans Program Files\steamapps
                     btd6Path = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "BloonsTD6");
                     if (Directory.Exists(btd6Path))
+                    {
+                        UnityEngine.Debug.Log("Found BTD6 (Steam) at: " + btd6Path);
                         return btd6Path;
+                    }
                 }
                 catch { }
             }
         }
         catch { }
 
+        UnityEngine.Debug.LogWarning("BTD6 (Steam) not found.");
+        return "";
+    }
+
+    string GetBTD6EpicPath()
+    {
+        string[] quickPaths = new string[]
+        {
+            @"C:\Program Files\Epic Games\BloonsTD6",
+            @"D:\Epic Games\BloonsTD6",
+            @"E:\Epic Games\BloonsTD6",
+            @"C:\Games\Epic\BloonsTD6",
+            @"D:\Games\Epic\BloonsTD6",
+            @"E:\Games\Epic\BloonsTD6",
+        };
+
+        foreach (string path in quickPaths)
+        {
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found BTD6 (Epic) at: " + path);
+                    return path;
+                }
+            }
+            catch { }
+        }
+
+        // Cherche dans Epic Games Launcher directory
+        try
+        {
+            string epicBaseDir = Path.Combine(
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonApplicationData),
+                "Epic", "EpicGamesLauncher", "Data", "Manifests"
+            );
+
+            if (Directory.Exists(epicBaseDir))
+            {
+                // Cherche le manifest pour BloonsTD6
+                string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
+                foreach (string manifest in manifests)
+                {
+                    try
+                    {
+                        string content = File.ReadAllText(manifest);
+                        if (content.Contains("BloonsTD6"))
+                        {
+                            // Extract install location from manifest
+                            System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
+                            System.Text.RegularExpressions.Match match = regex.Match(content);
+
+                            if (match.Success)
+                            {
+                                string epicPath = match.Groups[1].Value;
+                                if (Directory.Exists(epicPath))
+                                {
+                                    UnityEngine.Debug.Log("Found BTD6 (Epic) at: " + epicPath);
+                                    return epicPath;
+                                }
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+        }
+        catch { }
+
+        // Scan all drives
+        try
+        {
+            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+            foreach (System.IO.DriveInfo drive in drives)
+            {
+                if (drive.DriveType != System.IO.DriveType.Fixed)
+                    continue;
+
+                try
+                {
+                    string epicPath = Path.Combine(drive.Name, "Epic Games", "BloonsTD6");
+                    if (Directory.Exists(epicPath))
+                    {
+                        UnityEngine.Debug.Log("Found BTD6 (Epic) at: " + epicPath);
+                        return epicPath;
+                    }
+
+                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "BloonsTD6");
+                    if (Directory.Exists(epicPath))
+                    {
+                        UnityEngine.Debug.Log("Found BTD6 (Epic) at: " + epicPath);
+                        return epicPath;
+                    }
+                }
+                catch { }
+            }
+        }
+        catch { }
+
+        UnityEngine.Debug.LogWarning("BTD6 (Epic) not found.");
         return "";
     }
 }

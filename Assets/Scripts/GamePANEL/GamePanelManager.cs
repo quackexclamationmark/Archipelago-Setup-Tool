@@ -32,6 +32,7 @@ public class GamePanelManager : MonoBehaviour
     public GameObject schedulePanel;
     public GameObject hadesPanel;
     public GameObject ultrakillPanel;
+    public GameObject uggPanel;
 
     void Start()
     {
@@ -134,6 +135,9 @@ public class GamePanelManager : MonoBehaviour
             case "ULTRAKILL":
                 ultrakillPanel.SetActive(true);
                 break;
+            case "UGG":
+                uggPanel.SetActive(true);
+                break;
         }
     }
 
@@ -169,5 +173,6 @@ public class GamePanelManager : MonoBehaviour
         if (schedulePanel != null) schedulePanel.SetActive(false);
         if (hadesPanel != null) hadesPanel.SetActive(false);
         if (ultrakillPanel != null) ultrakillPanel.SetActive(false);
+        if (uggPanel != null) uggPanel.SetActive(false);
     }
 }
