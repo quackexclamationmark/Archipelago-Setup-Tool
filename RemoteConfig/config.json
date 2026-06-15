@@ -156,6 +156,10 @@
     "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.3/Archipelago_193.zip",
     "subnauticaBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
+    "ultrakillAP": "https://github.com/TRPG0/ArchipelagoULTRAKILL/releases/download/3.5.3/ArchipelagoULTRAKILL.3.5.3.zip",
+    "ultrakillApworld": "https://github.com/TRPG0/ArchipelagoULTRAKILL/releases/download/3.5.3/ultrakill.apworld",
+    "ultrakillBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+
     "votvUE4SS": "https://github.com/UE4SS-RE/RE-UE4SS/releases/download/experimental-latest/UE4SS_v3.0.1-954-g272ce2f8.zip",
     "votvApworld": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.0.2/votv.apworld",
     "votvAP": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.0.2/votv_ap-main.zip",
