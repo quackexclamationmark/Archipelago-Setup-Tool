@@ -34,15 +34,25 @@ public class VotVInstaller : MonoBehaviour
     private string installPath;
     private bool pathSelected = false;
     private string pendingAction;
+    private VotVConfig remoteConfig;
+    private bool configLoaded = false;
+    private string votvDownloadUrl;
+    private string votvFileName; // Nouvelle variable pour le nom du fichier
 
-    // Fixed URL for VotV download
-    private const string VOTV_DOWNLOAD_URL = "https://r2.votv.dev/archive/votv/090j_0001.7z";
+    [System.Serializable]
+    public class VotVConfig
+    {
+        public string votvDL;
+        public string votvFileName;
+    }
 
     void Start()
     {
         string defaultPath = GetDefaultPath();
         installPath = defaultPath;
-        pathSelected = true; // Le chemin par défaut est valide au démarrage
+        pathSelected = true;
+
+        StartCoroutine(LoadRemoteConfig());
 
         if (dlInfoPanel != null)
             dlInfoPanel.SetActive(false);
@@ -76,9 +86,58 @@ public class VotVInstaller : MonoBehaviour
             directoryPlaceholder.gameObject.SetActive(false);
 
         UnityEngine.Debug.Log("Default path: " + defaultPath);
-        UnityEngine.Debug.Log("VotV Download URL: " + VOTV_DOWNLOAD_URL);
     }
 
+    IEnumerator LoadRemoteConfig()
+    {
+        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
+
+        UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url);
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+        {
+            UnityEngine.Debug.LogWarning("Config load failed (this is OK, config is optional): " + request.error);
+            configLoaded = true;
+            yield break;
+        }
+
+        try
+        {
+            remoteConfig = JsonUtility.FromJson<VotVConfig>(request.downloadHandler.text);
+            UnityEngine.Debug.Log("Remote config loaded successfully");
+            ApplyVotVConfig();
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Config parsing failed (this is OK, config is optional): " + e.Message);
+        }
+
+        configLoaded = true;
+    }
+
+    void ApplyVotVConfig()
+    {
+        if (remoteConfig == null)
+            return;
+
+        if (!string.IsNullOrEmpty(remoteConfig.votvDL))
+        {
+            votvDownloadUrl = remoteConfig.votvDL;
+            UnityEngine.Debug.Log("VotV Download URL from config: " + votvDownloadUrl);
+        }
+
+        if (!string.IsNullOrEmpty(remoteConfig.votvFileName))
+        {
+            votvFileName = remoteConfig.votvFileName + ".7z"; // Ajoute l'extension .7z
+            UnityEngine.Debug.Log("VotV File Name from config: " + votvFileName);
+        }
+        else
+        {
+            // Fallback si votvFileName n'est pas dans le config
+            votvFileName = "Voices Of The Void v0.9.0n.7z";
+        }
+    }
 
     string GetDefaultPath()
     {
@@ -235,6 +294,15 @@ public class VotVInstaller : MonoBehaviour
 
     IEnumerator InstallFlow()
     {
+        while (!configLoaded)
+            yield return new WaitForSeconds(0.5f);
+
+        if (string.IsNullOrEmpty(votvDownloadUrl))
+        {
+            ShowDLInfo("ERROR: VotV download URL not configured!");
+            yield break;
+        }
+
         ShowDLInfo("Downloading VotV...");
         yield return new WaitForSeconds(0.5f);
 
@@ -248,13 +316,12 @@ public class VotVInstaller : MonoBehaviour
 
     IEnumerator DownloadVotV()
     {
-        string fileName = "Voices Of The Void v0.9.0j.7z";
-        string downloadPath = Path.Combine(installPath, fileName);
+        string downloadPath = Path.Combine(installPath, votvFileName);
 
-        UnityEngine.Debug.Log("Downloading VotV from: " + VOTV_DOWNLOAD_URL);
+        UnityEngine.Debug.Log("Downloading VotV from: " + votvDownloadUrl);
         UnityEngine.Debug.Log("Saving to: " + downloadPath);
 
-        yield return DownloadFile(VOTV_DOWNLOAD_URL, downloadPath);
+        yield return DownloadFile(votvDownloadUrl, downloadPath);
 
         if (!File.Exists(downloadPath))
         {

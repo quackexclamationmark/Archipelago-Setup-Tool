@@ -33,6 +33,8 @@ public class GamePanelManager : MonoBehaviour
     public GameObject hadesPanel;
     public GameObject ultrakillPanel;
     public GameObject uggPanel;
+    public GameObject hifiPanel;
+    public GameObject stardewPanel;
 
     void Start()
     {
@@ -138,6 +140,12 @@ public class GamePanelManager : MonoBehaviour
             case "UGG":
                 uggPanel.SetActive(true);
                 break;
+            case "HiFiRUSH":
+                hifiPanel.SetActive(true);
+                break;
+            case "Stardew":
+                stardewPanel.SetActive(true);
+                break;
         }
     }
 
@@ -174,5 +182,7 @@ public class GamePanelManager : MonoBehaviour
         if (hadesPanel != null) hadesPanel.SetActive(false);
         if (ultrakillPanel != null) ultrakillPanel.SetActive(false);
         if (uggPanel != null) uggPanel.SetActive(false);
+        if (hifiPanel != null) hifiPanel.SetActive(false);
+        if (stardewPanel != null) stardewPanel.SetActive(false);
     }
 }
