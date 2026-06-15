@@ -10,6 +10,7 @@ public class HostingPanelManager : MonoBehaviour
     public GameObject optionscreatorPanel;
     public GameObject deathlinkPanel;
     public GameObject aplauncherPanel;
+    public GameObject multiworldPanel;
 
     void Start()
     {
@@ -46,6 +47,9 @@ public class HostingPanelManager : MonoBehaviour
             case "APLauncher":
                 aplauncherPanel.SetActive(true);
                 break;
+            case "Multiworld":
+                multiworldPanel.SetActive(true);
+                break;
         }
     }
 
@@ -59,5 +63,6 @@ public class HostingPanelManager : MonoBehaviour
         if (optionscreatorPanel != null) optionscreatorPanel.SetActive(false);
         if (deathlinkPanel != null) deathlinkPanel.SetActive(false);
         if (aplauncherPanel != null) aplauncherPanel.SetActive(false);
+        if (multiworldPanel != null) multiworldPanel.SetActive(false);
     }
 }

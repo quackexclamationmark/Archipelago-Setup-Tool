@@ -14,6 +14,11 @@ public class SubnauticaManualDL : MonoBehaviour
     public FileDownloader.FileData apMod;
     public FileDownloader.FileData bepInEx;
 
+    [Header("PLATFORM SELECTION")]
+    public Button steamButton;
+    public Button epicButton;
+    public TextMeshProUGUI platformStatus;
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPModToggle;
     public Toggle installBepInExToggle;
@@ -43,6 +48,7 @@ public class SubnauticaManualDL : MonoBehaviour
     private bool pendingFullCleanConfirmation = false;
     private SubnauticaConfig remoteConfig;
     private bool configLoaded = false;
+    private bool isEpic = false;
 
     [System.Serializable]
     public class SubnauticaConfig
@@ -53,6 +59,16 @@ public class SubnauticaManualDL : MonoBehaviour
 
     void Start()
     {
+        // Initialize platform buttons
+        if (steamButton != null)
+            steamButton.onClick.AddListener(OnSteamButtonClicked);
+
+        if (epicButton != null)
+            epicButton.onClick.AddListener(OnEpicButtonClicked);
+
+        // Select Steam by default
+        SelectSteam();
+
         subnauticaPath = GetSubnauticaPath();
         StartCoroutine(LoadRemoteConfig());
 
@@ -77,11 +93,54 @@ public class SubnauticaManualDL : MonoBehaviour
         if (removeAPModsOnlyToggle != null)
             removeAPModsOnlyToggle.isOn = true;
 
+        if (nonVRToggle != null)
+            nonVRToggle.isOn = false;
+
         if (fullCleanBepInExToggle != null)
             fullCleanBepInExToggle.onValueChanged.AddListener(OnFullCleanChanged);
 
         if (infoPanel != null)
             infoPanel.SetActive(false);
+    }
+
+    // =========================================================
+    // PLATFORM SELECTION
+    // =========================================================
+
+    void OnSteamButtonClicked()
+    {
+        SelectSteam();
+    }
+
+    void OnEpicButtonClicked()
+    {
+        SelectEpic();
+    }
+
+    void SelectSteam()
+    {
+        isEpic = false;
+        subnauticaPath = GetSubnauticaPath();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Steam - Path: " + subnauticaPath);
+    }
+
+    void SelectEpic()
+    {
+        isEpic = true;
+        subnauticaPath = GetSubnauticaPath();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Epic - Path: " + subnauticaPath);
+    }
+
+    void UpdatePlatformStatus()
+    {
+        if (platformStatus != null)
+        {
+            string platform = isEpic ? "Epic Games" : "Steam";
+            string status = string.IsNullOrEmpty(subnauticaPath) ? "Not Found" : "Found";
+            platformStatus.text = $"Platform: {platform} - {status}";
+        }
     }
 
     // =========================================================
@@ -162,7 +221,8 @@ public class SubnauticaManualDL : MonoBehaviour
 
         if (string.IsNullOrEmpty(subnauticaPath))
         {
-            ShowInfo("Subnautica not found. Please check Steam/Epic installation.");
+            string platform = isEpic ? "Epic" : "Steam";
+            ShowInfo("Subnautica not found in " + platform + ". Please check installation.");
             return;
         }
 
@@ -734,6 +794,14 @@ public class SubnauticaManualDL : MonoBehaviour
 
     string GetSubnauticaPath()
     {
+        if (isEpic)
+            return GetSubnauticaEpicPath();
+        else
+            return GetSubnauticaSteamPath();
+    }
+
+    string GetSubnauticaSteamPath()
+    {
         string[] quickPaths = new string[]
         {
         Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Subnautica"),
@@ -754,7 +822,7 @@ public class SubnauticaManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Subnautica at: " + path);
+                    UnityEngine.Debug.Log("Found Subnautica (Steam) at: " + path);
                     return path;
                 }
             }
@@ -776,7 +844,7 @@ public class SubnauticaManualDL : MonoBehaviour
                     string subPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Subnautica");
                     if (Directory.Exists(subPath))
                     {
-                        UnityEngine.Debug.Log("Found Subnautica at: " + subPath);
+                        UnityEngine.Debug.Log("Found Subnautica (Steam) at: " + subPath);
                         return subPath;
                     }
 
@@ -784,7 +852,7 @@ public class SubnauticaManualDL : MonoBehaviour
                     subPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Subnautica");
                     if (Directory.Exists(subPath))
                     {
-                        UnityEngine.Debug.Log("Found Subnautica at: " + subPath);
+                        UnityEngine.Debug.Log("Found Subnautica (Steam) at: " + subPath);
                         return subPath;
                     }
 
@@ -792,7 +860,7 @@ public class SubnauticaManualDL : MonoBehaviour
                     subPath = Path.Combine(drive.Name, "steamapps", "common", "Subnautica");
                     if (Directory.Exists(subPath))
                     {
-                        UnityEngine.Debug.Log("Found Subnautica at: " + subPath);
+                        UnityEngine.Debug.Log("Found Subnautica (Steam) at: " + subPath);
                         return subPath;
                     }
 
@@ -800,7 +868,7 @@ public class SubnauticaManualDL : MonoBehaviour
                     subPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Subnautica");
                     if (Directory.Exists(subPath))
                     {
-                        UnityEngine.Debug.Log("Found Subnautica at: " + subPath);
+                        UnityEngine.Debug.Log("Found Subnautica (Steam) at: " + subPath);
                         return subPath;
                     }
 
@@ -808,7 +876,7 @@ public class SubnauticaManualDL : MonoBehaviour
                     subPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Subnautica");
                     if (Directory.Exists(subPath))
                     {
-                        UnityEngine.Debug.Log("Found Subnautica at: " + subPath);
+                        UnityEngine.Debug.Log("Found Subnautica (Steam) at: " + subPath);
                         return subPath;
                     }
                 }
@@ -817,7 +885,107 @@ public class SubnauticaManualDL : MonoBehaviour
         }
         catch { }
 
-        UnityEngine.Debug.LogWarning("Subnautica not found.");
+        UnityEngine.Debug.LogWarning("Subnautica (Steam) not found.");
+        return "";
+    }
+
+    string GetSubnauticaEpicPath()
+    {
+        string[] quickPaths = new string[]
+        {
+        @"C:\Program Files\Epic Games\Subnautica",
+        @"D:\Epic Games\Subnautica",
+        @"E:\Epic Games\Subnautica",
+        @"C:\Games\Epic\Subnautica",
+        @"D:\Games\Epic\Subnautica",
+        @"E:\Games\Epic\Subnautica",
+        };
+
+        foreach (string path in quickPaths)
+        {
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Subnautica (Epic) at: " + path);
+                    return path;
+                }
+            }
+            catch { }
+        }
+
+        // Cherche dans Epic Games Launcher directory
+        try
+        {
+            string epicBaseDir = Path.Combine(
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonApplicationData),
+                "Epic", "EpicGamesLauncher", "Data", "Manifests"
+            );
+
+            if (Directory.Exists(epicBaseDir))
+            {
+                // Cherche le manifest pour Subnautica
+                string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
+                foreach (string manifest in manifests)
+                {
+                    try
+                    {
+                        string content = File.ReadAllText(manifest);
+                        if (content.Contains("Subnautica"))
+                        {
+                            // Extract install location from manifest
+                            System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
+                            System.Text.RegularExpressions.Match match = regex.Match(content);
+
+                            if (match.Success)
+                            {
+                                string epicPath = match.Groups[1].Value;
+                                if (Directory.Exists(epicPath))
+                                {
+                                    UnityEngine.Debug.Log("Found Subnautica (Epic) at: " + epicPath);
+                                    return epicPath;
+                                }
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+        }
+        catch { }
+
+        // Scan all drives
+        try
+        {
+            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+            foreach (System.IO.DriveInfo drive in drives)
+            {
+                if (drive.DriveType != System.IO.DriveType.Fixed)
+                    continue;
+
+                try
+                {
+                    string epicPath = Path.Combine(drive.Name, "Epic Games", "Subnautica");
+                    if (Directory.Exists(epicPath))
+                    {
+                        UnityEngine.Debug.Log("Found Subnautica (Epic) at: " + epicPath);
+                        return epicPath;
+                    }
+
+                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "Subnautica");
+                    if (Directory.Exists(epicPath))
+                    {
+                        UnityEngine.Debug.Log("Found Subnautica (Epic) at: " + epicPath);
+                        return epicPath;
+                    }
+                }
+                catch { }
+            }
+        }
+        catch { }
+
+        UnityEngine.Debug.LogWarning("Subnautica (Epic) not found.");
         return "";
     }
 }

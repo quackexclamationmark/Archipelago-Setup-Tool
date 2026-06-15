@@ -193,7 +193,15 @@ public class SlimeRancher2ManualDL : MonoBehaviour
 
             ShowInfo("Removing AP mods...");
 
+            // Supprimer le dossier SlimeRancher2-AP
             SafeDeleteDirectory(Path.Combine(pluginsPath, "SlimeRancher2-AP"));
+
+            // Supprimer les fichiers DLL du mod
+            SafeDeleteFile(Path.Combine(pluginsPath, "SlimeRancher2-AP.dll"));
+            SafeDeleteFile(Path.Combine(pluginsPath, "SlimeRancher2-AP.deps.json"));
+            SafeDeleteFile(Path.Combine(pluginsPath, "SlimeRancher2-AP.pdb"));
+            SafeDeleteFile(Path.Combine(pluginsPath, "Archipelago.MultiClient.Net.dll"));
+            SafeDeleteFile(Path.Combine(pluginsPath, "Newtonsoft.Json.dll"));
 
             DeleteOldVersionFiles();
 
@@ -257,11 +265,21 @@ public class SlimeRancher2ManualDL : MonoBehaviour
             {
                 string name = Path.GetFileName(file);
 
+                // Whitelist les fichiers du mod SlimeRancher2-AP
                 if (name.StartsWith("Slime Rancher 2 Archipelago Version") && name.EndsWith(".txt"))
                     continue;
+                if (name == "SlimeRancher2-AP.dll")
+                    continue;
+                if (name == "SlimeRancher2-AP.deps.json")
+                    continue;
+                if (name == "SlimeRancher2-AP.pdb")
+                    continue;
+                if (name == "Archipelago.MultiClient.Net.dll")
+                    continue;
+                if (name == "Newtonsoft.Json.dll")
+                    continue;
 
-                if (name != "Slime Rancher 2 Archipelago Version.txt")
-                    return true;
+                return true;
             }
 
             foreach (string dir in dirs)
@@ -490,25 +508,30 @@ public class SlimeRancher2ManualDL : MonoBehaviour
         string pluginsPath = Path.Combine(slimeRancher2Path, "BepInEx", "plugins");
         Directory.CreateDirectory(pluginsPath);
 
-        // Move the entire SlimeRancher2-AP folder from extracted contents to plugins
-        string sourceFolder = Path.Combine(extractPath, "SlimeRancher2-AP");
-        string targetFolder = Path.Combine(pluginsPath, "SlimeRancher2-AP");
-
-        if (Directory.Exists(sourceFolder))
+        // Copie TOUT le contenu du dossier extrait directement dans plugins
+        try
         {
-            // Remove existing folder if it exists
-            if (Directory.Exists(targetFolder))
+            // Copie tous les fichiers du root
+            foreach (string file in Directory.GetFiles(extractPath))
             {
-                SafeDeleteDirectory(targetFolder);
+                string destFile = Path.Combine(pluginsPath, Path.GetFileName(file));
+                File.Copy(file, destFile, true);
+                UnityEngine.Debug.Log("Copied file: " + Path.GetFileName(file));
             }
 
-            // Copy the entire folder
-            CopyDirectory(sourceFolder, targetFolder);
-            UnityEngine.Debug.Log("Copied SlimeRancher2-AP folder to plugins");
+            // Copie tous les dossiers du root
+            foreach (string dir in Directory.GetDirectories(extractPath))
+            {
+                string destDir = Path.Combine(pluginsPath, Path.GetFileName(dir));
+                CopyDirectory(dir, destDir);
+                UnityEngine.Debug.Log("Copied directory: " + Path.GetFileName(dir));
+            }
+
+            UnityEngine.Debug.Log("SlimeRancher2-AP content copied to plugins");
         }
-        else
+        catch (System.Exception e)
         {
-            UnityEngine.Debug.LogWarning("SlimeRancher2-AP source folder not found: " + sourceFolder);
+            UnityEngine.Debug.LogError("Error copying SlimeRancher2-AP: " + e.Message);
         }
 
         SafeDeleteDirectory(extractPath);

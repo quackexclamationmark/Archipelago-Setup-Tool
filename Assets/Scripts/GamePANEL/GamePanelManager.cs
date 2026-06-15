@@ -25,6 +25,13 @@ public class GamePanelManager : MonoBehaviour
     public GameObject celesteOWPanel;
     public GameObject slimerancherPanel;
     public GameObject slimerancher2Panel;
+    public GameObject clustertruckPanel;
+    public GameObject hollowknightPanel;
+    public GameObject cloverpitPanel;
+    public GameObject re7Panel;
+    public GameObject schedulePanel;
+    public GameObject hadesPanel;
+    public GameObject ultrakillPanel;
 
     void Start()
     {
@@ -106,6 +113,27 @@ public class GamePanelManager : MonoBehaviour
             case "SlimeRancher2":
                 slimerancher2Panel.SetActive(true);
                 break;
+            case "Clustertruck":
+                clustertruckPanel.SetActive(true);
+                break;
+            case "HollowKnight":
+                hollowknightPanel.SetActive(true);
+                break;
+            case "CloverPit":
+                cloverpitPanel.SetActive(true);
+                break;
+            case "RE7":
+                re7Panel.SetActive(true);
+                break;
+            case "ScheduleI":
+                schedulePanel.SetActive(true);
+                break;
+            case "Hades":
+                hadesPanel.SetActive(true);
+                break;
+            case "ULTRAKILL":
+                ultrakillPanel.SetActive(true);
+                break;
         }
     }
 
@@ -134,5 +162,12 @@ public class GamePanelManager : MonoBehaviour
         if (celesteOWPanel != null) celesteOWPanel.SetActive(false);
         if (slimerancherPanel != null) slimerancherPanel.SetActive(false);
         if (slimerancher2Panel != null) slimerancher2Panel.SetActive(false);
+        if (clustertruckPanel != null) clustertruckPanel.SetActive(false);
+        if (hollowknightPanel != null) hollowknightPanel.SetActive(false);
+        if (cloverpitPanel != null) cloverpitPanel.SetActive(false);
+        if (re7Panel != null) re7Panel.SetActive(false);
+        if (schedulePanel != null) schedulePanel.SetActive(false);
+        if (hadesPanel != null) hadesPanel.SetActive(false);
+        if (ultrakillPanel != null) ultrakillPanel.SetActive(false);
     }
 }
