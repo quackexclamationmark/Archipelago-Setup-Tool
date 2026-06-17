@@ -11,7 +11,16 @@
     "ultrakillPopTracker": "https://github.com/BowserCrusher/UltrakillPoptracker/releases/download/0.7.5/UltrakillPoptracker.zip",
     "hadesPopTracker": "https://github.com/OmegaZeron/Hades-AP-Poptracker-Pack/releases/download/v2.0.4/hades_ap.zip",
     "stardewPopTracker": "https://github.com/TreySpyre/Stardew-Valley-AP-Poptracker/archive/refs/tags/1.3.0.zip",
+    "tunicPopTracker": "https://github.com/SapphireSapphic/TunicTracker/releases/download/2.1.5/TunicTracker.zip",
+    "cupheadPopTracker": "https://github.com/TheArcticFox42/CupheadPoptracker/releases/download/v1.2.0/CupheadPoptracker-1.2.0.zip",
+    "oriblindPopTracker": "https://github.com/5ully/OriDETracker/releases/download/v0.0.7/OriDE_Tracker.zip",
+    "balatroPopTracker": "https://github.com/graygooglitch/balatroap_poptracker/releases/download/v1.1.0.1/BalatroAP_Tracker_v1.1.0.1.zip",
+    "dredgePopTracker": "https://github.com/Fedjoyd/DREDGE-pack-poptracker/releases/download/v1.0.4/DREDGE-Pack.zip",
+    
 
+    "actAP": "https://github.com/Automagic00/ACT-AP-Client-Plugin/releases/download/0.4.4/ACTAP.dll",
+    "actApworld": "https://github.com/Automagic00/ACT-AP-Client-Plugin/releases/download/0.4.4/another_crab.apworld",
+    "actBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     
     "balatroAP": "https://github.com/BurndiL/BalatroAP/releases/download/v0.1.9f/BalatroAP.zip",
     "balatroApworld": "https://github.com/BurndiL/BalatroAP/releases/download/v0.1.9f/balatro.apworld",
@@ -46,6 +55,9 @@
     "cupheadApworld": "https://github.com/JKLeckr/Archipelago-cuphead/releases/download/alpha03d/cuphead.apworld",
     "cupheadBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
+    "dredgeAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-DREDGE.zip",
+    "dredgeApworld": "https://github.com/alextric234/ArchipelagoDredge/releases/download/dredge_0.5.1/dredge.apworld",
+
     "hadesImporter": "https://github.com/NaixGames/PolycosmosInstaller/releases/download/0.3/Installer.exe",
     "hadesApworld": "https://github.com/NaixGames/Polycosmos/releases/download/0.15.1/hades.apworld",
 
@@ -79,6 +91,12 @@
     "ninesolsBepInExConfiguration": "https://thunderstore.io/package/download/ninesolsmodding/BepinExConfigurationManager/18.3.1/",
     "ninesolsTeleport": "https://thunderstore.io/package/download/Ixrec/TeleportFromAnywhere/1.1.0/",
 
+    "oriblindBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x86_5.4.23.5.zip",
+    "oriblindAP": "https://github.com/c-ostic/OriBFArchipelago/releases/download/v0.4.0/OriBFArchipelago.zip",
+    "oriblindApworld": "https://github.com/c-ostic/Archipelago/releases/download/v0.4.2/oribf.apworld",
+
+    "oriwispsApworld": "https://github.com/Satisha10/APwotw_release/releases/download/v0.5.5/ori_wotw.apworld",
+
     "outerwildsAP": "https://github.com/Ixrec/OuterWildsArchipelagoRandomizer/releases/download/v1.2.1/Ixrec.ArchipelagoRandomizer.zip",
     "outerwildsApworld": "https://github.com/Ixrec/OuterWildsArchipelagoRandomizer/releases/download/v1.2.1/outer_wilds.apworld",
     "outerwildsOWML": "https://github.com/ow-mods/owml/releases/download/2.16.2/OWML.zip",
@@ -109,6 +127,10 @@
     "re7AP": "https://github.com/ElGrenier/RE7_AP_Client/archive/refs/tags/0.4.2.zip",
     "re7Framework": "https://github.com/praydog/REFramework/releases/download/v1.5.9.1/RE7.zip",
     "re7Apworld": "https://github.com/ElGrenier/RE7_AP_World/releases/download/0.4.0/residentevil7biohazard.apworld",
+
+    "rotndAP": "https://github.com/studkid/RiftArchipelago/releases/download/v0.13.0/RiftArchipelago-0.13.0.zip",
+    "rotndBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+    "rotndApworld": "https://github.com/studkid/RiftArchipelago/releases/download/v0.13.0/rotn.apworld",
 
     "ror2BepInEx": "https://thunderstore.io/package/download/bbepis/BepInExPack/5.4.2121/",
     "ror2AP": "https://thunderstore.io/package/download/Sneaki/Archipelago/1.5.3/",
@@ -164,6 +186,9 @@
     
     "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.3/Archipelago_193.zip",
     "subnauticaBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+
+    "tunicAP": "https://github.com/silent-destroyer/tunic-randomizer/releases/download/4.2.7/TunicRandomizer.zip",
+    "tunicBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v6.0.0-pre.1/BepInEx_UnityIL2CPP_x64_6.0.0-pre.1.zip",
 
     "ultrakillAP": "https://github.com/TRPG0/ArchipelagoULTRAKILL/releases/download/3.5.3/ArchipelagoULTRAKILL.3.5.3.zip",
     "ultrakillApworld": "https://github.com/TRPG0/ArchipelagoULTRAKILL/releases/download/3.5.3/ultrakill.apworld",
