@@ -123,9 +123,9 @@
     "re7Framework": "https://github.com/praydog/REFramework/releases/download/v1.5.9.1/RE7.zip",
     "re7Apworld": "https://github.com/ElGrenier/RE7_AP_World/releases/download/0.4.0/residentevil7biohazard.apworld",
 
-    "riftofthenecrodancerAP": "https://github.com/studkid/RiftArchipelago/releases/download/v0.13.0/RiftArchipelago-0.13.0.zip",
-    "riftofthenecrodancerBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
-    "riftofthenecrodancerApworld": "https://github.com/studkid/RiftArchipelago/releases/download/v0.13.0/rotn.apworld",
+    "rotndAP": "https://github.com/studkid/RiftArchipelago/releases/download/v0.13.0/RiftArchipelago-0.13.0.zip",
+    "rotndBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+    "rotndApworld": "https://github.com/studkid/RiftArchipelago/releases/download/v0.13.0/rotn.apworld",
 
     "ror2BepInEx": "https://thunderstore.io/package/download/bbepis/BepInExPack/5.4.2121/",
     "ror2AP": "https://thunderstore.io/package/download/Sneaki/Archipelago/1.5.3/",
