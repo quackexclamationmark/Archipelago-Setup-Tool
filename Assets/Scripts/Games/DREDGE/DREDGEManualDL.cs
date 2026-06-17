@@ -6,14 +6,13 @@ using System.Collections;
 using System.Diagnostics;
 using Microsoft.Win32;
 
-public class SlimeRancherManualDL : MonoBehaviour
+public class DREDGEManualDL : MonoBehaviour
 {
     public FileDownloader downloader;
 
-    [Header("SLIME RANCHER FILES")]
-    public FileDownloader.FileData apworld;
-    public FileDownloader.FileData apMod;
-    public FileDownloader.FileData melonLoader;
+    [Header("DREDGE FILES")]
+    public FileDownloader.FileData dredgeApworld;
+    public FileDownloader.FileData dredgeAP;
 
     [Header("PLATFORM SELECTION")]
     public Button steamButton;
@@ -23,14 +22,13 @@ public class SlimeRancherManualDL : MonoBehaviour
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
-    public Toggle installMelonLoaderToggle;
 
     [Header("LAUNCH OPTIONS")]
     public Toggle secondLaunchToggle;
 
     [Header("REVERT OPTIONS")]
     public Toggle removeAPModsOnlyToggle;
-    public Toggle fullCleanMelonLoaderToggle;
+    public Toggle fullCleanModsToggle;
 
     [Header("CONFIRMATION PANEL")]
     public GameObject confirmationPanel;
@@ -43,20 +41,19 @@ public class SlimeRancherManualDL : MonoBehaviour
     public TextMeshProUGUI infoText;
     public Button infoOkButton;
 
-    private string slimeRancherPath;
+    private string dredgePath;
     private string pendingAction;
     private bool pendingFullCleanConfirmation = false;
-    private SlimeRancherConfig remoteConfig;
+    private DREDGEConfig remoteConfig;
     private bool configLoaded = false;
     private Process gameProcess;
     private bool isEpic = false;
 
     [System.Serializable]
-    public class SlimeRancherConfig
+    public class DREDGEConfig
     {
-        public string slimerancherAP;
-        public string slimerancherMelonLoader;
-        public string slimerancherApworld;
+        public string dredgeApworld;
+        public string dredgeAP;
     }
 
     void Start()
@@ -71,7 +68,7 @@ public class SlimeRancherManualDL : MonoBehaviour
         // Select Steam by default
         SelectSteam();
 
-        slimeRancherPath = GetSlimeRancherPath();
+        dredgePath = GetDREDGEPath();
         StartCoroutine(LoadRemoteConfig());
 
         if (infoPanel != null)
@@ -95,11 +92,11 @@ public class SlimeRancherManualDL : MonoBehaviour
         if (removeAPModsOnlyToggle != null)
             removeAPModsOnlyToggle.isOn = true;
 
-        if (fullCleanMelonLoaderToggle != null)
-            fullCleanMelonLoaderToggle.isOn = false;
+        if (fullCleanModsToggle != null)
+            fullCleanModsToggle.isOn = false;
 
-        if (fullCleanMelonLoaderToggle != null)
-            fullCleanMelonLoaderToggle.onValueChanged.AddListener(OnFullCleanChanged);
+        if (fullCleanModsToggle != null)
+            fullCleanModsToggle.onValueChanged.AddListener(OnFullCleanChanged);
     }
 
     void OnDestroy()
@@ -124,17 +121,17 @@ public class SlimeRancherManualDL : MonoBehaviour
     void SelectSteam()
     {
         isEpic = false;
-        slimeRancherPath = GetSlimeRancherPath();
+        dredgePath = GetDREDGEPath();
         UpdatePlatformStatus();
-        UnityEngine.Debug.Log("Switched to Steam - Path: " + slimeRancherPath);
+        UnityEngine.Debug.Log("Switched to Steam - Path: " + dredgePath);
     }
 
     void SelectEpic()
     {
         isEpic = true;
-        slimeRancherPath = GetSlimeRancherPath();
+        dredgePath = GetDREDGEPath();
         UpdatePlatformStatus();
-        UnityEngine.Debug.Log("Switched to Epic - Path: " + slimeRancherPath);
+        UnityEngine.Debug.Log("Switched to Epic - Path: " + dredgePath);
     }
 
     void UpdatePlatformStatus()
@@ -142,21 +139,29 @@ public class SlimeRancherManualDL : MonoBehaviour
         if (platformStatus != null)
         {
             string platform = isEpic ? "Epic Games" : "Steam";
-            string status = string.IsNullOrEmpty(slimeRancherPath) ? "Not Found" : "Found";
+            string status = string.IsNullOrEmpty(dredgePath) ? "Not Found" : "Found";
             platformStatus.text = $"Platform: {platform} \n {status}";
         }
     }
 
     // =========================================================
 
-    void ApplySlimeRancherConfig()
+    void OnFullCleanChanged(bool value)
+    {
+        if (removeAPModsOnlyToggle != null)
+        {
+            removeAPModsOnlyToggle.isOn = false;
+            removeAPModsOnlyToggle.interactable = !value;
+        }
+    }
+
+    void ApplyDREDGEConfig()
     {
         if (remoteConfig == null)
             return;
 
-        apMod.url = remoteConfig.slimerancherAP;
-        melonLoader.url = remoteConfig.slimerancherMelonLoader;
-        apworld.url = remoteConfig.slimerancherApworld;
+        dredgeApworld.url = remoteConfig.dredgeApworld;
+        dredgeAP.url = remoteConfig.dredgeAP;
     }
 
     public void RunSetup()
@@ -208,33 +213,25 @@ public class SlimeRancherManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        slimeRancherPath = GetSlimeRancherPath();
+        dredgePath = GetDREDGEPath();
 
-        if (string.IsNullOrEmpty(slimeRancherPath))
+        if (string.IsNullOrEmpty(dredgePath))
         {
             string platform = isEpic ? "Epic" : "Steam";
-            ShowInfo("Slime Rancher not found in " + platform + ". Please check installation.");
+            ShowInfo("DREDGE not found in " + platform + ". Please check installation.");
             return;
         }
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
-        bool melonloader = installMelonLoaderToggle != null && installMelonLoaderToggle.isOn;
-        bool apmod = installAPModToggle != null && installAPModToggle.isOn;
+        bool apmod = installAPModToggle == null || installAPModToggle.isOn;
 
         int count =
             (apworld ? 1 : 0) +
-            (melonloader ? 1 : 0) +
             (apmod ? 1 : 0);
 
         if (apworld && count == 1)
         {
             StartCoroutine(APWorldOnlyFlow());
-            return;
-        }
-
-        if (melonloader && count == 1)
-        {
-            StartCoroutine(MelonLoaderOnlyFlow());
             return;
         }
 
@@ -249,15 +246,13 @@ public class SlimeRancherManualDL : MonoBehaviour
 
     private void ExecuteRevert()
     {
-        slimeRancherPath = GetSlimeRancherPath();
+        dredgePath = GetDREDGEPath();
 
-        if (string.IsNullOrEmpty(slimeRancherPath))
+        if (string.IsNullOrEmpty(dredgePath))
             return;
 
-        string modsPath = Path.Combine(slimeRancherPath, "Mods");
-
         bool removeAP = removeAPModsOnlyToggle != null && removeAPModsOnlyToggle.isOn;
-        bool fullClean = fullCleanMelonLoaderToggle != null && fullCleanMelonLoaderToggle.isOn;
+        bool fullClean = fullCleanModsToggle != null && fullCleanModsToggle.isOn;
 
         if (!removeAP && !fullClean)
         {
@@ -268,23 +263,20 @@ public class SlimeRancherManualDL : MonoBehaviour
         if (removeAP)
         {
             ShowInfo("Removing AP mods...");
-
-            SafeDeleteDirectory(Path.Combine(modsPath, "SW_CreeperKing.Slimipelago"));
-            SafeDeleteFile(Path.Combine(modsPath, "Slimipelago.dll"));
-            SafeDeleteDirectory(Path.Combine(slimeRancherPath, "UserLibs"));
-
+            CleanupProcesses();
+            RemoveAPMods();
             ShowInfo("AP mods removed successfully!");
             return;
         }
 
-        bool hasOtherMods = HasOtherMods(modsPath);
+        bool hasOtherMods = HasOtherMods();
 
         if (fullClean && hasOtherMods && !pendingFullCleanConfirmation)
         {
             pendingFullCleanConfirmation = true;
 
             ShowConfirmation(
-                "Other mods were detected.\nDo you REALLY want to fully delete MelonLoader?",
+                "Other mods were detected.\nDo you REALLY want to fully clean all mods?",
                 "ForceFullClean"
             );
             return;
@@ -292,69 +284,154 @@ public class SlimeRancherManualDL : MonoBehaviour
 
         pendingFullCleanConfirmation = false;
 
+        CleanupProcesses();
+
         ShowInfo("Removing mods...");
-
-        SafeDeleteDirectory(Path.Combine(modsPath, "SW_CreeperKing.Slimipelago"));
-        SafeDeleteFile(Path.Combine(modsPath, "Slimipelago.dll"));
-        SafeDeleteDirectory(Path.Combine(slimeRancherPath, "UserLibs"));
-
-        hasOtherMods = HasOtherMods(modsPath);
+        RemoveAPMods();
 
         if (fullClean)
         {
-            ShowInfo("Cleaning MelonLoader...");
-
-            SafeDeleteDirectory(Path.Combine(slimeRancherPath, "MelonLoader"));
-            SafeDeleteDirectory(Path.Combine(slimeRancherPath, "Mods"));
-            SafeDeleteDirectory(Path.Combine(slimeRancherPath, "MusicRando"));
-            SafeDeleteDirectory(Path.Combine(slimeRancherPath, "Plugins"));
-            SafeDeleteDirectory(Path.Combine(slimeRancherPath, "UserData"));
-            SafeDeleteFile(Path.Combine(slimeRancherPath, "version.dll"));
-
+            ShowInfo("Cleaning all mod files...");
+            RemoveAllModFiles();
             ShowInfo("Full clean completed!");
-            return;
         }
-
-        if (!hasOtherMods)
+        else
         {
-            ShowInfo("Cleaning MelonLoader...");
-
-            SafeDeleteDirectory(Path.Combine(slimeRancherPath, "MelonLoader"));
-            SafeDeleteDirectory(Path.Combine(slimeRancherPath, "Mods"));
-            SafeDeleteDirectory(Path.Combine(slimeRancherPath, "MusicRando"));
-            SafeDeleteDirectory(Path.Combine(slimeRancherPath, "Plugins"));
-            SafeDeleteDirectory(Path.Combine(slimeRancherPath, "UserData"));
-            SafeDeleteFile(Path.Combine(slimeRancherPath, "version.dll"));
-
             ShowInfo("Revert completed!");
         }
     }
 
-    bool HasOtherMods(string modsPath)
+    void RemoveAPMods()
     {
-        if (!Directory.Exists(modsPath))
+        DeleteOldVersionFiles();
+    }
+
+    void RemoveAllModFiles()
+    {
+        // Remove all mod-related files and directories
+        SafeDeleteDirectory(Path.Combine(dredgePath, "Mods"));
+        SafeDeleteDirectory(Path.Combine(dredgePath, "Logs"));
+        SafeDeleteFile(Path.Combine(dredgePath, "0Harmony.dll"));
+        SafeDeleteFile(Path.Combine(dredgePath, "0Harmony.xml"));
+        SafeDeleteFile(Path.Combine(dredgePath, "asset_update_date.txt"));
+        SafeDeleteFile(Path.Combine(dredgePath, "doorstop_config.ini"));
+        SafeDeleteFile(Path.Combine(dredgePath, "mod_list.json"));
+        SafeDeleteFile(Path.Combine(dredgePath, "mod_meta.json"));
+        SafeDeleteFile(Path.Combine(dredgePath, "Mono.Cecil.dll"));
+        SafeDeleteFile(Path.Combine(dredgePath, "Mono.Cecil.Mdb.dll"));
+        SafeDeleteFile(Path.Combine(dredgePath, "Mono.Cecil.Pdb.dll"));
+        SafeDeleteFile(Path.Combine(dredgePath, "Mono.Cecil.Rocks.dll"));
+        SafeDeleteFile(Path.Combine(dredgePath, "MonoMod.RuntimeDetour.dll"));
+        SafeDeleteFile(Path.Combine(dredgePath, "MonoMod.RuntimeDetour.xml"));
+        SafeDeleteFile(Path.Combine(dredgePath, "MonoMod.Utils.dll"));
+        SafeDeleteFile(Path.Combine(dredgePath, "MonoMod.Utils.xml"));
+        SafeDeleteFile(Path.Combine(dredgePath, "Newtonsoft.Json.dll"));
+        SafeDeleteFile(Path.Combine(dredgePath, "System.ComponentModel.Annotations.dll"));
+        SafeDeleteFile(Path.Combine(dredgePath, "System.ComponentModel.Annotations.xml"));
+        SafeDeleteFile(Path.Combine(dredgePath, "Winch.dll"));
+        SafeDeleteFile(Path.Combine(dredgePath, "Winch.pdb"));
+        SafeDeleteFile(Path.Combine(dredgePath, "Winch.xml"));
+        SafeDeleteFile(Path.Combine(dredgePath, "WinchCommon.dll"));
+        SafeDeleteFile(Path.Combine(dredgePath, "WinchCommon.pdb"));
+        SafeDeleteFile(Path.Combine(dredgePath, "WinchCommon.xml"));
+        SafeDeleteFile(Path.Combine(dredgePath, "WinchConfig.json"));
+        SafeDeleteFile(Path.Combine(dredgePath, "WinchConsole.exe"));
+        SafeDeleteFile(Path.Combine(dredgePath, "WinchConsole.exe.config"));
+        SafeDeleteFile(Path.Combine(dredgePath, "WinchConsole.pdb"));
+        SafeDeleteFile(Path.Combine(dredgePath, "WinchLauncher.deps.json"));
+        SafeDeleteFile(Path.Combine(dredgePath, "WinchLauncher.dll"));
+        SafeDeleteFile(Path.Combine(dredgePath, "WinchLauncher.exe"));
+        SafeDeleteFile(Path.Combine(dredgePath, "WinchLauncher.pdb"));
+        SafeDeleteFile(Path.Combine(dredgePath, "WinchLauncher.runtimeconfig.json"));
+        SafeDeleteFile(Path.Combine(dredgePath, "winhttp.dll"));
+    }
+
+    // Remplacer la méthode HasOtherMods() par ceci (version whitelist simple)
+    bool HasOtherMods()
+    {
+        try
+        {
+            var allowedFiles = new System.Collections.Generic.HashSet<string>(System.StringComparer.OrdinalIgnoreCase)
+        {
+            "0Harmony.dll",
+            "0Harmony.xml",
+            "asset_update_date.txt",
+            "doorstop_config.ini",
+            "DREDGE Archipelago Version Unknown.txt", // éventuellement d'autres variantes gérées par StartsWith ci-dessous
+            "DREDGE.exe",
+            "EOSBootstrapper.exe",
+            "EOSBootstrapper.ini",
+            "mod_list.json",
+            "mod_meta.json",
+            "Mono.Cecil.dll",
+            "Mono.Cecil.Mdb.dll",
+            "Mono.Cecil.Pdb.dll",
+            "Mono.Cecil.Rocks.dll",
+            "MonoMod.RuntimeDetour.dll",
+            "MonoMod.RuntimeDetour.xml",
+            "MonoMod.Utils.dll",
+            "MonoMod.Utils.xml",
+            "Newtonsoft.Json.dll",
+            "System.ComponentModel.Annotations.dll",
+            "System.ComponentModel.Annotations.xml",
+            "UnityCrashHandler32.exe",
+            "UnityPlayer.dll",
+            "Winch.dll",
+            "Winch.pdb",
+            "Winch.xml",
+            "WinchCommon.dll",
+            "WinchCommon.pdb",
+            "WinchCommon.xml",
+            "WinchConfig.json",
+            "WinchConsole.exe",
+            "WinchConsole.exe.config",
+            "WinchConsole.pdb",
+            "WinchLauncher.deps.json",
+            "WinchLauncher.dll",
+            "WinchLauncher.exe",
+            "WinchLauncher.pdb",
+            "WinchLauncher.runtimeconfig.json",
+            "winhttp.dll"
+        };
+
+            var allowedDirs = new System.Collections.Generic.HashSet<string>(System.StringComparer.OrdinalIgnoreCase)
+        {
+            ".egstore",
+            "DREDGE_Data",
+            "Mods",
+            "MonoBleedingEdge"
+        };
+
+            // Check root files - any unknown file => other mods
+            foreach (string file in Directory.GetFiles(dredgePath))
+            {
+                string name = Path.GetFileName(file);
+                if (allowedFiles.Contains(name)) continue;
+                if (name.StartsWith("DREDGE Archipelago Version", System.StringComparison.OrdinalIgnoreCase) && name.EndsWith(".txt", System.StringComparison.OrdinalIgnoreCase))
+                    continue;
+                return true;
+            }
+
+            // If Mods folder exists and has content -> it's the AP mod (not other mods)
+            string modsPath = Path.Combine(dredgePath, "Mods");
+            if (Directory.Exists(modsPath) && (Directory.GetFiles(modsPath).Length > 0 || Directory.GetDirectories(modsPath).Length > 0))
+                return false;
+
+            // Check root directories - any unknown directory => other mods
+            foreach (string dir in Directory.GetDirectories(dredgePath))
+            {
+                string name = Path.GetFileName(dir);
+                if (allowedDirs.Contains(name)) continue;
+                if (string.Equals(name, "Mods", System.StringComparison.OrdinalIgnoreCase)) continue;
+                return true;
+            }
+
             return false;
-
-        string[] files = Directory.GetFiles(modsPath);
-        string[] dirs = Directory.GetDirectories(modsPath);
-
-        foreach (string dir in dirs)
-        {
-            string name = Path.GetFileName(dir);
-
-            if (name != "SW_CreeperKing.Slimipelago")
-                return true;
         }
-
-        foreach (string file in files)
+        catch
         {
-            string name = Path.GetFileName(file);
-
-            if (name != "Slimipelago.dll")
-                return true;
+            return false;
         }
-
-        return false;
     }
 
     IEnumerator InstallFlow()
@@ -365,21 +442,17 @@ public class SlimeRancherManualDL : MonoBehaviour
             yield return InstallAPWorld();
         }
 
-        if (installMelonLoaderToggle != null && installMelonLoaderToggle.isOn)
-        {
-            ShowInfo("Installing MelonLoader...");
-            yield return InstallMelonLoader();
-        }
-
         if (installAPModToggle == null || installAPModToggle.isOn)
         {
             ShowInfo("Installing AP Mod...");
             yield return InstallAPMod();
         }
 
+        CreateVersionFile(dredgeApworld.url, dredgeAP.url);
+
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
-            ShowInfo("Launching Slime Rancher...");
+            ShowInfo("Launching DREDGE...");
             LaunchGame();
             yield return WaitForGameClose();
             ShowInfo("Installation complete!");
@@ -402,7 +475,7 @@ public class SlimeRancherManualDL : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
         }
 
-        UnityEngine.Debug.Log("Slime Rancher has closed");
+        UnityEngine.Debug.Log("DREDGE has closed");
     }
 
     IEnumerator InstallAPWorld()
@@ -413,19 +486,19 @@ public class SlimeRancherManualDL : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
         }
 
-        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + apworld.url);
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + dredgeApworld.url);
 
-        if (string.IsNullOrEmpty(apworld.url))
+        if (string.IsNullOrEmpty(dredgeApworld.url))
         {
             ShowInfo("ERROR: APWorld URL is empty!");
             UnityEngine.Debug.LogError("APWorld URL not set!");
             yield break;
         }
 
-        string fileName = apworld.fileName;
+        string fileName = dredgeApworld.fileName;
         if (string.IsNullOrEmpty(fileName))
         {
-            fileName = apworld.url.Substring(apworld.url.LastIndexOf('/') + 1);
+            fileName = dredgeApworld.url.Substring(dredgeApworld.url.LastIndexOf('/') + 1);
 
             if (fileName.Contains("?"))
                 fileName = fileName.Substring(0, fileName.IndexOf("?"));
@@ -435,10 +508,10 @@ public class SlimeRancherManualDL : MonoBehaviour
 
         string localPath = Path.Combine(Application.persistentDataPath, fileName);
 
-        UnityEngine.Debug.Log("Downloading APWorld from: " + apworld.url);
+        UnityEngine.Debug.Log("Downloading APWorld from: " + dredgeApworld.url);
         UnityEngine.Debug.Log("Saving to: " + localPath);
 
-        yield return DownloadFile(apworld.url, localPath);
+        yield return DownloadFile(dredgeApworld.url, localPath);
 
         if (!File.Exists(localPath))
         {
@@ -534,56 +607,32 @@ public class SlimeRancherManualDL : MonoBehaviour
         while (!configLoaded)
             yield return null;
 
-        string extractPath = Path.Combine(Application.persistentDataPath, "SlimeRancherAPModTemp");
+        string extractPath = Path.Combine(Application.persistentDataPath, "DREDGEAPTemp");
 
         if (!Directory.Exists(extractPath))
             Directory.CreateDirectory(extractPath);
 
-        yield return downloader.DownloadAndExtract(apMod, Application.persistentDataPath, extractPath);
+        yield return downloader.DownloadAndExtract(dredgeAP, Application.persistentDataPath, extractPath);
 
         try
         {
-            // Cherche le dossier "Slimipelago" dans l'archive
-            string[] modDirs = Directory.GetDirectories(extractPath, "Slimipelago", SearchOption.AllDirectories);
+            // Find the Preloaded-DREDGE folder
+            string[] preloadedDirs = Directory.GetDirectories(extractPath, "Preloaded-DREDGE", SearchOption.AllDirectories);
 
-            if (modDirs.Length > 0)
+            if (preloadedDirs.Length > 0)
             {
-                string modSourcePath = modDirs[0];
+                string preloadedSourcePath = preloadedDirs[0];
 
-                // Copie les dossiers "Mods" et "UserLibs" depuis Slimipelago/
-                string modsSource = Path.Combine(modSourcePath, "Mods");
-                string userLibsSource = Path.Combine(modSourcePath, "UserLibs");
-
-                if (Directory.Exists(modsSource))
-                {
-                    string modsDest = Path.Combine(slimeRancherPath, "Mods");
-                    Directory.CreateDirectory(modsDest);
-                    CopyDirectory(modsSource, modsDest);
-                    UnityEngine.Debug.Log("Mods folder contents copied to: " + modsDest);
-                }
-                else
-                {
-                    UnityEngine.Debug.LogWarning("Mods folder not found in Slimipelago!");
-                }
-
-                if (Directory.Exists(userLibsSource))
-                {
-                    string userLibsDest = Path.Combine(slimeRancherPath, "UserLibs");
-                    Directory.CreateDirectory(userLibsDest);
-                    CopyDirectory(userLibsSource, userLibsDest);
-                    UnityEngine.Debug.Log("UserLibs folder contents copied to: " + userLibsDest);
-                }
-                else
-                {
-                    UnityEngine.Debug.LogWarning("UserLibs folder not found in Slimipelago!");
-                }
+                // Copy all contents from Preloaded-DREDGE directly to the game directory
+                CopyDirectory(preloadedSourcePath, dredgePath);
+                UnityEngine.Debug.Log("Preloaded-DREDGE contents copied to: " + dredgePath);
 
                 ShowInfo("AP Mod installed successfully!");
             }
             else
             {
-                UnityEngine.Debug.LogWarning("Slimipelago folder not found in archive");
-                ShowInfo("ERROR: Slimipelago folder not found in the zip!");
+                UnityEngine.Debug.LogWarning("Preloaded-DREDGE folder not found in archive");
+                ShowInfo("ERROR: Preloaded-DREDGE folder not found in the zip!");
             }
         }
         catch (System.Exception e)
@@ -597,96 +646,32 @@ public class SlimeRancherManualDL : MonoBehaviour
         yield return null;
     }
 
-    IEnumerator InstallMelonLoader()
-    {
-        UnityEngine.Debug.Log("START InstallMelonLoader");
-        ShowInfo("Extracting MelonLoader...");
-
-        while (!configLoaded)
-            yield return null;
-
-        string extractPath = Path.Combine(Application.persistentDataPath, "MelonLoaderTemp");
-
-        if (!Directory.Exists(extractPath))
-            Directory.CreateDirectory(extractPath);
-
-        yield return downloader.DownloadAndExtract(melonLoader, Application.persistentDataPath, extractPath);
-
-        try
-        {
-            // Copie version.dll et MelonLoader folder depuis l'archive
-            string versionDllSource = FindFile(extractPath, "version.dll");
-            if (!string.IsNullOrEmpty(versionDllSource))
-            {
-                string versionDllDest = Path.Combine(slimeRancherPath, "version.dll");
-                File.Copy(versionDllSource, versionDllDest, true);
-                UnityEngine.Debug.Log("version.dll copied");
-            }
-            else
-            {
-                UnityEngine.Debug.LogWarning("version.dll not found!");
-            }
-
-            string melonLoaderFolder = FindDirectory(extractPath, "MelonLoader");
-            if (!string.IsNullOrEmpty(melonLoaderFolder))
-            {
-                string melonLoaderDest = Path.Combine(slimeRancherPath, "MelonLoader");
-                if (Directory.Exists(melonLoaderDest))
-                    SafeDeleteDirectory(melonLoaderDest);
-
-                CopyDirectory(melonLoaderFolder, melonLoaderDest);
-                UnityEngine.Debug.Log("MelonLoader folder copied");
-            }
-            else
-            {
-                UnityEngine.Debug.LogWarning("MelonLoader folder not found!");
-            }
-
-            ShowInfo("MelonLoader installed successfully!");
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogError("Error installing MelonLoader: " + e.Message);
-            ShowInfo("ERROR: Failed to install MelonLoader!\n" + e.Message);
-        }
-
-        SafeDeleteDirectory(extractPath);
-        UnityEngine.Debug.Log("END InstallMelonLoader");
-        yield return null;
-    }
-
     IEnumerator APWorldOnlyFlow()
     {
-        slimeRancherPath = GetSlimeRancherPath();
+        dredgePath = GetDREDGEPath();
 
-        if (string.IsNullOrEmpty(slimeRancherPath))
+        if (string.IsNullOrEmpty(dredgePath))
             yield break;
 
         yield return InstallAPWorld();
         ShowInfo("APWorld installed successfully!");
     }
 
-    IEnumerator MelonLoaderOnlyFlow()
-    {
-        ShowInfo("Installing MelonLoader...");
-        yield return InstallMelonLoader();
-        ShowInfo("MelonLoader installed successfully!");
-        yield break;
-    }
-
     IEnumerator APModOnlyFlow()
     {
-        slimeRancherPath = GetSlimeRancherPath();
+        dredgePath = GetDREDGEPath();
 
-        if (string.IsNullOrEmpty(slimeRancherPath))
+        if (string.IsNullOrEmpty(dredgePath))
             yield break;
 
         ShowInfo("Installing AP Mod...");
         yield return InstallAPMod();
 
+        CreateVersionFile(dredgeApworld.url, dredgeAP.url);
+
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
-            ShowInfo("Launching Slime Rancher...");
+            ShowInfo("Launching DREDGE...");
             LaunchGame();
             yield return WaitForGameClose();
             ShowInfo("Installation complete!");
@@ -699,7 +684,7 @@ public class SlimeRancherManualDL : MonoBehaviour
 
     IEnumerator LoadRemoteConfig()
     {
-        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
+        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/dredge_config.json";
 
         UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url);
         yield return request.SendWebRequest();
@@ -713,9 +698,9 @@ public class SlimeRancherManualDL : MonoBehaviour
 
         try
         {
-            remoteConfig = JsonUtility.FromJson<SlimeRancherConfig>(request.downloadHandler.text);
+            remoteConfig = JsonUtility.FromJson<DREDGEConfig>(request.downloadHandler.text);
             UnityEngine.Debug.Log("Remote config loaded successfully");
-            ApplySlimeRancherConfig();
+            ApplyDREDGEConfig();
         }
         catch (System.Exception e)
         {
@@ -729,23 +714,23 @@ public class SlimeRancherManualDL : MonoBehaviour
     {
         try
         {
-            string exePath = Path.Combine(slimeRancherPath, "SlimeRancher.exe");
+            string exePath = Path.Combine(dredgePath, "DREDGE.exe");
 
             if (File.Exists(exePath))
             {
                 gameProcess = Process.Start(exePath);
-                UnityEngine.Debug.Log("Slime Rancher launched: " + exePath);
+                UnityEngine.Debug.Log("DREDGE launched: " + exePath);
             }
             else
             {
-                UnityEngine.Debug.LogError("SlimeRancher.exe not found at: " + exePath);
-                ShowInfo("ERROR: SlimeRancher.exe not found!");
+                UnityEngine.Debug.LogError("DREDGE.exe not found at: " + exePath);
+                ShowInfo("ERROR: DREDGE.exe not found!");
             }
         }
         catch (System.Exception e)
         {
-            UnityEngine.Debug.LogError("Failed to launch Slime Rancher: " + e.Message);
-            ShowInfo("ERROR: Failed to launch Slime Rancher!");
+            UnityEngine.Debug.LogError("Failed to launch DREDGE: " + e.Message);
+            ShowInfo("ERROR: Failed to launch DREDGE!");
         }
     }
 
@@ -758,6 +743,24 @@ public class SlimeRancherManualDL : MonoBehaviour
                 gameProcess.Kill();
                 gameProcess.Dispose();
                 gameProcess = null;
+            }
+        }
+        catch { }
+    }
+
+    void CleanupProcesses()
+    {
+        // Close DREDGE if it's running
+        try
+        {
+            Process[] processes = Process.GetProcessesByName("DREDGE");
+            foreach (Process p in processes)
+            {
+                try
+                {
+                    p.Kill();
+                }
+                catch { }
             }
         }
         catch { }
@@ -834,56 +837,82 @@ public class SlimeRancherManualDL : MonoBehaviour
             infoPanel.SetActive(false);
     }
 
-    void OnFullCleanChanged(bool value)
-    {
-        if (removeAPModsOnlyToggle != null)
-        {
-            removeAPModsOnlyToggle.isOn = false;
-            removeAPModsOnlyToggle.interactable = !value;
-        }
-    }
-
-    string FindFile(string root, string fileName)
+    void CreateVersionFile(string apworldUrl, string apUrl)
     {
         try
         {
-            foreach (string file in Directory.GetFiles(root, "*", SearchOption.AllDirectories))
-                if (Path.GetFileName(file) == fileName)
-                    return file;
+            string apworldVersion = ExtractVersionFromUrl(apworldUrl);
+            string apVersion = ExtractVersionFromUrl(apUrl);
+
+            string versionFileName = "DREDGE Archipelago Version " + apVersion + ".txt";
+            string content = "Archipelago Setup Tool by quack!\n";
+            content += "https://github.com/quackexclamationmark/Archipelago-Setup-Tool\n";
+            content += "\n";
+            content += "=== APWORLD ===\n";
+            content += "Downloaded from: " + apworldUrl + "\n";
+            content += "Version: " + apworldVersion + "\n";
+            content += "\n";
+            content += "=== DREDGE AP ===\n";
+            content += "Downloaded from: " + apUrl + "\n";
+            content += "Version: " + apVersion + "\n";
+            content += "\n";
+            content += "Downloaded at: " + System.DateTime.Now + "\n";
+
+            DeleteOldVersionFiles();
+
+            string versionPath = Path.Combine(dredgePath, versionFileName);
+            File.WriteAllText(versionPath, content);
+            UnityEngine.Debug.Log("Version file created: " + versionPath);
         }
         catch (System.Exception e)
         {
-            UnityEngine.Debug.LogError("Error finding file: " + e.Message);
+            UnityEngine.Debug.LogError("Error creating version file: " + e.Message);
         }
-
-        return "";
     }
 
-    string FindDirectory(string root, string dirName)
+    void DeleteOldVersionFiles()
     {
         try
         {
-            foreach (string dir in Directory.GetDirectories(root, "*", SearchOption.AllDirectories))
+            System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"DREDGE Archipelago Version .+\.txt");
+
+            string[] files = Directory.GetFiles(dredgePath);
+            foreach (string file in files)
             {
-                if (Path.GetFileName(dir) == dirName)
-                    return dir;
+                string fileName = Path.GetFileName(file);
+                if (pattern.IsMatch(fileName))
+                {
+                    try
+                    {
+                        File.Delete(file);
+                        UnityEngine.Debug.Log("Deleted old version file: " + fileName);
+                    }
+                    catch (System.Exception e)
+                    {
+                        UnityEngine.Debug.LogWarning("Could not delete old version file: " + e.Message);
+                    }
+                }
             }
         }
         catch (System.Exception e)
         {
-            UnityEngine.Debug.LogError("Error finding directory: " + e.Message);
+            UnityEngine.Debug.LogError("Error cleaning up old version files: " + e.Message);
         }
-
-        return "";
     }
 
-    string ExtractVersionFromUrl(string url, string pattern)
+    string ExtractVersionFromUrl(string url)
     {
-        System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(pattern);
-        System.Text.RegularExpressions.Match match = regex.Match(url);
+        System.Text.RegularExpressions.Regex thunderstorePattern = new System.Text.RegularExpressions.Regex(@"thunderstore\.io/package/download/[^/]+/[^/]+/([^/]+)/?$");
+        System.Text.RegularExpressions.Match thunderstoreMatch = thunderstorePattern.Match(url);
 
-        if (match.Success)
-            return match.Groups[1].Value;
+        if (thunderstoreMatch.Success)
+            return thunderstoreMatch.Groups[1].Value;
+
+        System.Text.RegularExpressions.Regex githubPattern = new System.Text.RegularExpressions.Regex(@"/releases/download/([^/]+)/");
+        System.Text.RegularExpressions.Match githubMatch = githubPattern.Match(url);
+
+        if (githubMatch.Success)
+            return githubMatch.Groups[1].Value;
 
         return "Unknown";
     }
@@ -892,28 +921,28 @@ public class SlimeRancherManualDL : MonoBehaviour
     // PATH DETECTION
     // =========================================================
 
-    string GetSlimeRancherPath()
+    string GetDREDGEPath()
     {
         if (isEpic)
-            return GetSlimeRancherEpicPath();
+            return GetDREDGEEpicPath();
         else
-            return GetSlimeRancherSteamPath();
+            return GetDREDGESteamPath();
     }
 
-    string GetSlimeRancherSteamPath()
+    string GetDREDGESteamPath()
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Slime Rancher"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Slime Rancher"),
-            @"D:\Steam\steamapps\common\Slime Rancher",
-            @"D:\SteamLibrary\steamapps\common\Slime Rancher",
-            @"D:\steamapps\common\Slime Rancher",
-            @"E:\Steam\steamapps\common\Slime Rancher",
-            @"E:\SteamLibrary\steamapps\common\Slime Rancher",
-            @"E:\steamapps\common\Slime Rancher",
-            @"E:\Program Files (x86)\steamapps\common\Slime Rancher",
-            @"E:\Program Files\steamapps\common\Slime Rancher",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "DREDGE"),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "DREDGE"),
+            @"D:\Steam\steamapps\common\DREDGE",
+            @"D:\SteamLibrary\steamapps\common\DREDGE",
+            @"D:\steamapps\common\DREDGE",
+            @"E:\Steam\steamapps\common\DREDGE",
+            @"E:\SteamLibrary\steamapps\common\DREDGE",
+            @"E:\steamapps\common\DREDGE",
+            @"E:\Program Files (x86)\steamapps\common\DREDGE",
+            @"E:\Program Files\steamapps\common\DREDGE",
         };
 
         foreach (string path in quickPaths)
@@ -922,7 +951,7 @@ public class SlimeRancherManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Slime Rancher (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found DREDGE (Steam) at: " + path);
                     return path;
                 }
             }
@@ -940,44 +969,39 @@ public class SlimeRancherManualDL : MonoBehaviour
 
                 try
                 {
-                    // Cherche Steam\steamapps
-                    string slimeRancherPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Slime Rancher");
-                    if (Directory.Exists(slimeRancherPath))
+                    string dredgePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "DREDGE");
+                    if (Directory.Exists(dredgePath))
                     {
-                        UnityEngine.Debug.Log("Found Slime Rancher (Steam) at: " + slimeRancherPath);
-                        return slimeRancherPath;
+                        UnityEngine.Debug.Log("Found DREDGE (Steam) at: " + dredgePath);
+                        return dredgePath;
                     }
 
-                    // Cherche SteamLibrary\steamapps
-                    slimeRancherPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Slime Rancher");
-                    if (Directory.Exists(slimeRancherPath))
+                    dredgePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "DREDGE");
+                    if (Directory.Exists(dredgePath))
                     {
-                        UnityEngine.Debug.Log("Found Slime Rancher (Steam) at: " + slimeRancherPath);
-                        return slimeRancherPath;
+                        UnityEngine.Debug.Log("Found DREDGE (Steam) at: " + dredgePath);
+                        return dredgePath;
                     }
 
-                    // Cherche directement steamapps à la racine du disque
-                    slimeRancherPath = Path.Combine(drive.Name, "steamapps", "common", "Slime Rancher");
-                    if (Directory.Exists(slimeRancherPath))
+                    dredgePath = Path.Combine(drive.Name, "steamapps", "common", "DREDGE");
+                    if (Directory.Exists(dredgePath))
                     {
-                        UnityEngine.Debug.Log("Found Slime Rancher (Steam) at: " + slimeRancherPath);
-                        return slimeRancherPath;
+                        UnityEngine.Debug.Log("Found DREDGE (Steam) at: " + dredgePath);
+                        return dredgePath;
                     }
 
-                    // Cherche dans Program Files (x86)\steamapps
-                    slimeRancherPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Slime Rancher");
-                    if (Directory.Exists(slimeRancherPath))
+                    dredgePath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "DREDGE");
+                    if (Directory.Exists(dredgePath))
                     {
-                        UnityEngine.Debug.Log("Found Slime Rancher (Steam) at: " + slimeRancherPath);
-                        return slimeRancherPath;
+                        UnityEngine.Debug.Log("Found DREDGE (Steam) at: " + dredgePath);
+                        return dredgePath;
                     }
 
-                    // Cherche dans Program Files\steamapps
-                    slimeRancherPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Slime Rancher");
-                    if (Directory.Exists(slimeRancherPath))
+                    dredgePath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "DREDGE");
+                    if (Directory.Exists(dredgePath))
                     {
-                        UnityEngine.Debug.Log("Found Slime Rancher (Steam) at: " + slimeRancherPath);
-                        return slimeRancherPath;
+                        UnityEngine.Debug.Log("Found DREDGE (Steam) at: " + dredgePath);
+                        return dredgePath;
                     }
                 }
                 catch { }
@@ -985,20 +1009,23 @@ public class SlimeRancherManualDL : MonoBehaviour
         }
         catch { }
 
-        UnityEngine.Debug.LogWarning("Slime Rancher (Steam) not found.");
+        UnityEngine.Debug.LogWarning("DREDGE (Steam) not found.");
         return "";
     }
 
-    string GetSlimeRancherEpicPath()
+    string GetDREDGEEpicPath()
     {
         string[] quickPaths = new string[]
         {
-            @"C:\Program Files\Epic Games\SlimeRancher",
-            @"D:\Epic Games\SlimeRancher",
-            @"E:\Epic Games\SlimeRancher",
-            @"C:\Games\Epic\SlimeRancher",
-            @"D:\Games\Epic\SlimeRancher",
-            @"E:\Games\Epic\SlimeRancher",
+            @"C:\Program Files\Epic Games\DREDGEmKMzx",
+            @"D:\Epic Games\DREDGEmKMzx",
+            @"E:\Epic Games\DREDGEmKMzx",
+            @"C:\Games\Epic\DREDGEmKMzx",
+            @"D:\Games\Epic\DREDGEmKMzx",
+            @"E:\Games\Epic\DREDGEmKMzx",
+            @"C:\Epic\DREDGEmKMzx",
+            @"D:\Epic\DREDGEmKMzx",
+            @"E:\Epic\DREDGEmKMzx",
         };
 
         foreach (string path in quickPaths)
@@ -1007,14 +1034,14 @@ public class SlimeRancherManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Slime Rancher (Epic) at: " + path);
+                    UnityEngine.Debug.Log("Found DREDGE (Epic) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        // Cherche dans Epic Games Launcher directory
+        // Search in Epic Games Launcher directory
         try
         {
             string epicBaseDir = Path.Combine(
@@ -1024,14 +1051,14 @@ public class SlimeRancherManualDL : MonoBehaviour
 
             if (Directory.Exists(epicBaseDir))
             {
-                // Cherche le manifest pour Slime Rancher
+                // Search for DREDGE manifest
                 string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
                 foreach (string manifest in manifests)
                 {
                     try
                     {
                         string content = File.ReadAllText(manifest);
-                        if (content.Contains("Slime Rancher") || content.Contains("SlimeRancher"))
+                        if (content.Contains("DREDGEmKMzx") || content.Contains("DREDGE"))
                         {
                             // Extract install location from manifest
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
@@ -1042,7 +1069,7 @@ public class SlimeRancherManualDL : MonoBehaviour
                                 string epicPath = match.Groups[1].Value;
                                 if (Directory.Exists(epicPath))
                                 {
-                                    UnityEngine.Debug.Log("Found Slime Rancher (Epic) at: " + epicPath);
+                                    UnityEngine.Debug.Log("Found DREDGE (Epic) at: " + epicPath);
                                     return epicPath;
                                 }
                             }
@@ -1066,17 +1093,17 @@ public class SlimeRancherManualDL : MonoBehaviour
 
                 try
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "Slime Rancher");
+                    string epicPath = Path.Combine(drive.Name, "Epic Games", "DREDGEmKMzx");
                     if (Directory.Exists(epicPath))
                     {
-                        UnityEngine.Debug.Log("Found Slime Rancher (Epic) at: " + epicPath);
+                        UnityEngine.Debug.Log("Found DREDGE (Epic) at: " + epicPath);
                         return epicPath;
                     }
 
-                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "Slime Rancher");
+                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "DREDGEmKMzx");
                     if (Directory.Exists(epicPath))
                     {
-                        UnityEngine.Debug.Log("Found Slime Rancher (Epic) at: " + epicPath);
+                        UnityEngine.Debug.Log("Found DREDGE (Epic) at: " + epicPath);
                         return epicPath;
                     }
                 }
@@ -1085,7 +1112,7 @@ public class SlimeRancherManualDL : MonoBehaviour
         }
         catch { }
 
-        UnityEngine.Debug.LogWarning("Slime Rancher (Epic) not found.");
+        UnityEngine.Debug.LogWarning("DREDGE (Epic) not found.");
         return "";
     }
 }

@@ -48,6 +48,11 @@ public class RoR2ManualDL : MonoBehaviour
     public FileDownloader.FileData ror2APIElites;
     public FileDownloader.FileData ror2APISceneAsset;
 
+    [Header("PLATFORM SELECTION")]
+    public Button steamButton;
+    public Button epicButton;
+    public TextMeshProUGUI platformStatus;
+
     [Header("FEATURE TOGGLES")]
     public Toggle installBepInExToggle;
     public Toggle installArchipelagoToggle;
@@ -81,6 +86,7 @@ public class RoR2ManualDL : MonoBehaviour
     private bool pendingFullCleanConfirmation = false;
     private RoR2Config remoteConfig;
     private bool configLoaded = false;
+    private bool isEpic = false;
 
     // Track which mods were actually installed
     private List<(string name, string url, string version)> installedMods = new List<(string, string, string)>();
@@ -124,6 +130,16 @@ public class RoR2ManualDL : MonoBehaviour
 
     void Start()
     {
+        // Initialize platform buttons
+        if (steamButton != null)
+            steamButton.onClick.AddListener(OnSteamButtonClicked);
+
+        if (epicButton != null)
+            epicButton.onClick.AddListener(OnEpicButtonClicked);
+
+        // Select Steam by default
+        SelectSteam();
+
         ror2Path = GetRoR2Path();
         StartCoroutine(LoadRemoteConfig());
 
@@ -155,6 +171,50 @@ public class RoR2ManualDL : MonoBehaviour
             fullCleanBepInExToggle.onValueChanged.AddListener(OnFullCleanChanged);
     }
 
+    // =========================================================
+    // PLATFORM SELECTION
+    // =========================================================
+
+    void OnSteamButtonClicked()
+    {
+        SelectSteam();
+    }
+
+    void OnEpicButtonClicked()
+    {
+        SelectEpic();
+    }
+
+    void SelectSteam()
+    {
+        isEpic = false;
+        ror2Path = GetRoR2Path();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Steam - Path: " + ror2Path);
+    }
+
+    void SelectEpic()
+    {
+        isEpic = true;
+        ror2Path = GetRoR2Path();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Epic - Path: " + ror2Path);
+    }
+
+    void UpdatePlatformStatus()
+    {
+        if (platformStatus != null)
+        {
+            string platform = isEpic ? "Epic Games" : "Steam";
+            string status = string.IsNullOrEmpty(ror2Path) ? "Not Found" : "Found";
+            platformStatus.text = $"Platform: {platform} \n {status}";
+        }
+    }
+
+    // =========================================================
+    // TOGGLE RULE
+    // =========================================================
+
     void OnFullCleanChanged(bool value)
     {
         if (removeAPModsOnlyToggle != null)
@@ -163,6 +223,8 @@ public class RoR2ManualDL : MonoBehaviour
             removeAPModsOnlyToggle.interactable = !value;
         }
     }
+
+    // =========================================================
 
     void ApplyRoR2Config()
     {
@@ -252,9 +314,12 @@ public class RoR2ManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
+        ror2Path = GetRoR2Path();
+
         if (string.IsNullOrEmpty(ror2Path))
         {
-            ShowInfo("Risk of Rain 2 path not found. Please check Steam installation.");
+            string platform = isEpic ? "Epic" : "Steam";
+            ShowInfo("Risk of Rain 2 not found in " + platform + ". Please check installation.");
             return;
         }
 
@@ -358,45 +423,108 @@ public class RoR2ManualDL : MonoBehaviour
             string[] allowedFiles = new string[]
             {
             "connectbundle",
-            "Newtonsoft.Json.dll",
-            "RoR2BepInExPack.dll",
-            "MiscFixes.dll",
-            "Archipelago.MultiClient.Net.dll",
-            "Archipelago.RiskOfRain2.dll"
+            "newtonsoft.json.dll",
+            "ror2bepinexpack.dll",
+            "miscfixes.dll",
+            "archipelago.multiclient.net.dll",
+            "archipelago.riskofrain2.dll",
+            "archipelago.riskofrain2.deps.json",
+            "archipelago.riskofrain2.pdb",
+            "icon.png",
+            "manifest.json",
+            "changelog.md",
+            "readme.md"
+            };
+
+            string[] allowedDirs = new string[]
+            {
+            "MMHOOK",
+            "R2API.Addressables",
+            "R2API.ArtifactCode",
+            "R2API.CommandHelper",
+            "R2API.ContentManagement",
+            "R2API.Core",
+            "R2API.DamageType",
+            "R2API.Deployable",
+            "R2API.Difficulty",
+            "R2API.Director",
+            "R2API.Dot",
+            "R2API.Elites",
+            "R2API.Items",
+            "R2API.Language",
+            "R2API.Legacy",
+            "R2API.Loadout",
+            "R2API.LobbyConfig",
+            "R2API.Networking",
+            "R2API.Orb",
+            "R2API.Prefab",
+            "R2API.RecalculateStats",
+            "R2API.SceneAsset",
+            "R2API.Sound",
+            "R2API.TempVisualEffect",
+            "R2API.Unlockable",
+            "Sneaki-Archipelago",
+            "Archipelago"
             };
 
             foreach (string file in files)
             {
                 string name = Path.GetFileName(file).ToLower();
 
-                if (name.StartsWith("ror2 archipelago version") && name.EndsWith(".txt"))
+                // Skip version files
+                if (name.StartsWith("risk of rain 2 archipelago version") && name.EndsWith(".txt"))
                     continue;
 
-                if (allowedFiles.Any(f => f.ToLower() == name))
-                    continue;
+                bool isAllowed = false;
+                foreach (string allowed in allowedFiles)
+                {
+                    if (string.Equals(name, allowed, System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        isAllowed = true;
+                        break;
+                    }
+                }
 
-                return true;
+                if (!isAllowed)
+                {
+                    UnityEngine.Debug.LogWarning("Found other mod file: " + name);
+                    return true;
+                }
             }
 
             foreach (string dir in dirs)
             {
                 string dirName = Path.GetFileName(dir);
 
-                if (dirName.StartsWith("R2API") ||
-                    dirName == "Sneaki-Archipelago" ||
-                    dirName == "Archipelago" ||
-                    dirName == "MMHOOK")
-                    continue;
+                bool isAllowed = false;
+                foreach (string allowed in allowedDirs)
+                {
+                    if (string.Equals(dirName, allowed, System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        isAllowed = true;
+                        break;
+                    }
+                }
 
-                return true;
+                if (!isAllowed)
+                {
+                    UnityEngine.Debug.LogWarning("Found other mod directory: " + dirName);
+                    return true;
+                }
             }
 
             return false;
         }
-        catch
+        catch (System.Exception e)
         {
+            UnityEngine.Debug.LogError("Error checking for other mods: " + e.Message);
             return false;
         }
+    }
+
+    public void QuitLauncher()
+    {
+        Application.Quit();
     }
 
     IEnumerator InstallFlow()
@@ -833,18 +961,22 @@ public class RoR2ManualDL : MonoBehaviour
     {
         string exePath = Path.Combine(ror2Path, "Risk of Rain 2.exe");
 
-        if (File.Exists(exePath))
+        if (!File.Exists(exePath))
         {
-            try
-            {
-                ror2Process = Process.Start(exePath);
-                UnityEngine.Debug.Log("Risk of Rain 2 launched successfully!");
-            }
-            catch (System.Exception e)
-            {
-                ShowInfo("Error launching Risk of Rain 2:\n" + e.Message);
-                UnityEngine.Debug.LogError("Launch error: " + e);
-            }
+            ShowInfo("Risk of Rain 2 executable not found!");
+            UnityEngine.Debug.LogError("Executable not found: " + exePath);
+            return;
+        }
+
+        try
+        {
+            ror2Process = Process.Start(exePath);
+            UnityEngine.Debug.Log("Risk of Rain 2 launched successfully!");
+        }
+        catch (System.Exception e)
+        {
+            ShowInfo("Error launching Risk of Rain 2:\n" + e.Message);
+            UnityEngine.Debug.LogError("Launch error: " + e);
         }
     }
 
@@ -996,7 +1128,19 @@ public class RoR2ManualDL : MonoBehaviour
             infoPanel.SetActive(false);
     }
 
+    // =========================================================
+    // PATH DETECTION
+    // =========================================================
+
     string GetRoR2Path()
+    {
+        if (isEpic)
+            return GetRoR2EpicPath();
+        else
+            return GetRoR2SteamPath();
+    }
+
+    string GetRoR2SteamPath()
     {
         string[] quickPaths = new string[]
         {
@@ -1018,7 +1162,7 @@ public class RoR2ManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Risk of Rain 2 at: " + path);
+                    UnityEngine.Debug.Log("Found Risk of Rain 2 (Steam) at: " + path);
                     return path;
                 }
             }
@@ -1038,30 +1182,148 @@ public class RoR2ManualDL : MonoBehaviour
                 {
                     string ror2Path = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Risk of Rain 2");
                     if (Directory.Exists(ror2Path))
+                    {
+                        UnityEngine.Debug.Log("Found Risk of Rain 2 (Steam) at: " + ror2Path);
                         return ror2Path;
+                    }
 
                     ror2Path = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Risk of Rain 2");
                     if (Directory.Exists(ror2Path))
+                    {
+                        UnityEngine.Debug.Log("Found Risk of Rain 2 (Steam) at: " + ror2Path);
                         return ror2Path;
+                    }
 
                     ror2Path = Path.Combine(drive.Name, "steamapps", "common", "Risk of Rain 2");
                     if (Directory.Exists(ror2Path))
+                    {
+                        UnityEngine.Debug.Log("Found Risk of Rain 2 (Steam) at: " + ror2Path);
                         return ror2Path;
+                    }
 
                     ror2Path = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Risk of Rain 2");
                     if (Directory.Exists(ror2Path))
+                    {
+                        UnityEngine.Debug.Log("Found Risk of Rain 2 (Steam) at: " + ror2Path);
                         return ror2Path;
+                    }
 
                     ror2Path = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Risk of Rain 2");
                     if (Directory.Exists(ror2Path))
+                    {
+                        UnityEngine.Debug.Log("Found Risk of Rain 2 (Steam) at: " + ror2Path);
                         return ror2Path;
+                    }
                 }
                 catch { }
             }
         }
         catch { }
 
-        UnityEngine.Debug.LogWarning("Risk of Rain 2 not found.");
+        UnityEngine.Debug.LogWarning("Risk of Rain 2 (Steam) not found.");
+        return "";
+    }
+
+    string GetRoR2EpicPath()
+    {
+        string[] quickPaths = new string[]
+        {
+        @"C:\Program Files\Epic Games\RiskofRain2",
+        @"D:\Epic Games\RiskofRain2",
+        @"E:\Epic Games\RiskofRain2",
+        @"C:\Games\Epic\RiskofRain2",
+        @"D:\Games\Epic\RiskofRain2",
+        @"E:\Games\Epic\RiskofRain2",
+        @"C:\Epic\RiskofRain2",
+        @"D:\Epic\RiskofRain2",
+        @"E:\Epic\RiskofRain2",
+        };
+
+        foreach (string path in quickPaths)
+        {
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Risk of Rain 2 (Epic) at: " + path);
+                    return path;
+                }
+            }
+            catch { }
+        }
+
+        // Cherche dans Epic Games Launcher directory
+        try
+        {
+            string epicBaseDir = Path.Combine(
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonApplicationData),
+                "Epic", "EpicGamesLauncher", "Data", "Manifests"
+            );
+
+            if (Directory.Exists(epicBaseDir))
+            {
+                // Cherche le manifest pour Risk of Rain 2
+                string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
+                foreach (string manifest in manifests)
+                {
+                    try
+                    {
+                        string content = File.ReadAllText(manifest);
+                        if (content.Contains("Risk of Rain 2") || content.Contains("RiskOfRain2"))
+                        {
+                            // Extract install location from manifest
+                            System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
+                            System.Text.RegularExpressions.Match match = regex.Match(content);
+
+                            if (match.Success)
+                            {
+                                string epicPath = match.Groups[1].Value;
+                                if (Directory.Exists(epicPath))
+                                {
+                                    UnityEngine.Debug.Log("Found Risk of Rain 2 (Epic) at: " + epicPath);
+                                    return epicPath;
+                                }
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+        }
+        catch { }
+
+        // Scan all drives
+        try
+        {
+            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+            foreach (System.IO.DriveInfo drive in drives)
+            {
+                if (drive.DriveType != System.IO.DriveType.Fixed)
+                    continue;
+
+                try
+                {
+                    string epicPath = Path.Combine(drive.Name, "Epic Games", "Risk of Rain 2");
+                    if (Directory.Exists(epicPath))
+                    {
+                        UnityEngine.Debug.Log("Found Risk of Rain 2 (Epic) at: " + epicPath);
+                        return epicPath;
+                    }
+
+                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "Risk of Rain 2");
+                    if (Directory.Exists(epicPath))
+                    {
+                        UnityEngine.Debug.Log("Found Risk of Rain 2 (Epic) at: " + epicPath);
+                        return epicPath;
+                    }
+                }
+                catch { }
+            }
+        }
+        catch { }
+
+        UnityEngine.Debug.LogWarning("Risk of Rain 2 (Epic) not found.");
         return "";
     }
 

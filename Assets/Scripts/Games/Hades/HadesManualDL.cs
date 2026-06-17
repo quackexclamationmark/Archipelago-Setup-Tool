@@ -14,6 +14,11 @@ public class HadesManualDL : MonoBehaviour
     public FileDownloader.FileData hadesApworld;
     public FileDownloader.FileData hadesImporter;
 
+    [Header("PLATFORM SELECTION")]
+    public Button steamButton;
+    public Button epicButton;
+    public TextMeshProUGUI platformStatus;
+
     [Header("FEATURE TOGGLES")]
     public Toggle installApworldToggle;
     public Toggle installImporterToggle;
@@ -37,6 +42,7 @@ public class HadesManualDL : MonoBehaviour
     private string pendingAction;
     private HadesConfig remoteConfig;
     private bool configLoaded = false;
+    private bool isEpic = false;
 
     private string backupPath;
     private const string BACKUP_FOLDER = "HadesSetupToolBackup";
@@ -51,6 +57,16 @@ public class HadesManualDL : MonoBehaviour
 
     void Start()
     {
+        // Initialize platform buttons
+        if (steamButton != null)
+            steamButton.onClick.AddListener(OnSteamButtonClicked);
+
+        if (epicButton != null)
+            epicButton.onClick.AddListener(OnEpicButtonClicked);
+
+        // Select Steam by default
+        SelectSteam();
+
         hadesPath = GetHadesPath();
         backupPath = Path.Combine(Application.persistentDataPath, BACKUP_FOLDER);
         StartCoroutine(LoadRemoteConfig());
@@ -83,6 +99,48 @@ public class HadesManualDL : MonoBehaviour
             installImporterToggle.isOn = true;
     }
 
+    // =========================================================
+    // PLATFORM SELECTION
+    // =========================================================
+
+    void OnSteamButtonClicked()
+    {
+        SelectSteam();
+    }
+
+    void OnEpicButtonClicked()
+    {
+        SelectEpic();
+    }
+
+    void SelectSteam()
+    {
+        isEpic = false;
+        hadesPath = GetHadesPath();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Steam - Path: " + hadesPath);
+    }
+
+    void SelectEpic()
+    {
+        isEpic = true;
+        hadesPath = GetHadesPath();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Epic - Path: " + hadesPath);
+    }
+
+    void UpdatePlatformStatus()
+    {
+        if (platformStatus != null)
+        {
+            string platform = isEpic ? "Epic Games" : "Steam";
+            string status = string.IsNullOrEmpty(hadesPath) ? "Not Found" : "Found";
+            platformStatus.text = $"Platform: {platform} \n {status}";
+        }
+    }
+
+    // =========================================================
+
     void ApplyHadesConfig()
     {
         if (remoteConfig == null)
@@ -94,7 +152,7 @@ public class HadesManualDL : MonoBehaviour
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to setup Hades integration?", "Setup");
+        ShowConfirmation("Are you sure you want to setup Hades AP Mod", "Setup");
     }
 
     public void RevertAll()
@@ -142,7 +200,8 @@ public class HadesManualDL : MonoBehaviour
 
         if (string.IsNullOrEmpty(hadesPath))
         {
-            ShowInfo("Hades path not found. Please check Steam installation.");
+            string platform = isEpic ? "Epic" : "Steam";
+            ShowInfo("Hades not found in " + platform + ". Please check installation.");
             return;
         }
 
@@ -727,7 +786,19 @@ public class HadesManualDL : MonoBehaviour
         configLoaded = true;
     }
 
+    // =========================================================
+    // PATH DETECTION
+    // =========================================================
+
     string GetHadesPath()
+    {
+        if (isEpic)
+            return GetHadesEpicPath();
+        else
+            return GetHadesSteamPath();
+    }
+
+    string GetHadesSteamPath()
     {
         string[] quickPaths = new string[]
         {
@@ -748,7 +819,10 @@ public class HadesManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Hades (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
@@ -766,29 +840,148 @@ public class HadesManualDL : MonoBehaviour
                 {
                     string hadesPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Hades");
                     if (Directory.Exists(hadesPath))
+                    {
+                        UnityEngine.Debug.Log("Found Hades (Steam) at: " + hadesPath);
                         return hadesPath;
+                    }
 
                     hadesPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Hades");
                     if (Directory.Exists(hadesPath))
+                    {
+                        UnityEngine.Debug.Log("Found Hades (Steam) at: " + hadesPath);
                         return hadesPath;
+                    }
 
                     hadesPath = Path.Combine(drive.Name, "steamapps", "common", "Hades");
                     if (Directory.Exists(hadesPath))
+                    {
+                        UnityEngine.Debug.Log("Found Hades (Steam) at: " + hadesPath);
                         return hadesPath;
+                    }
 
                     hadesPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Hades");
                     if (Directory.Exists(hadesPath))
+                    {
+                        UnityEngine.Debug.Log("Found Hades (Steam) at: " + hadesPath);
                         return hadesPath;
+                    }
 
                     hadesPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Hades");
                     if (Directory.Exists(hadesPath))
+                    {
+                        UnityEngine.Debug.Log("Found Hades (Steam) at: " + hadesPath);
                         return hadesPath;
+                    }
                 }
                 catch { }
             }
         }
         catch { }
 
+        UnityEngine.Debug.LogWarning("Hades (Steam) not found.");
+        return "";
+    }
+
+    string GetHadesEpicPath()
+    {
+        string[] quickPaths = new string[]
+        {
+        @"C:\Program Files\Epic Games\Hades",
+        @"D:\Epic Games\Hades",      
+        @"E:\Epic Games\Hades",
+        @"C:\Games\Epic\Hades",
+        @"D:\Games\Epic\Hades",
+        @"E:\Games\Epic\Hades",
+        @"C:\Epic\Hades",
+        @"D:\Epic\Hades",
+        @"E:\Epic\Hades",
+        };
+
+        foreach (string path in quickPaths)
+        {
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Hades (Epic) at: " + path);
+                    return path;
+                }
+            }
+            catch { }
+        }
+
+        // Cherche dans Epic Games Launcher directory
+        try
+        {
+            string epicBaseDir = Path.Combine(
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonApplicationData),
+                "Epic", "EpicGamesLauncher", "Data", "Manifests"
+            );
+
+            if (Directory.Exists(epicBaseDir))
+            {
+                // Cherche le manifest pour Hades
+                string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
+                foreach (string manifest in manifests)
+                {
+                    try
+                    {
+                        string content = File.ReadAllText(manifest);
+                        if (content.Contains("Hades") || content.Contains("hades"))
+                        {
+                            // Extract install location from manifest
+                            System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
+                            System.Text.RegularExpressions.Match match = regex.Match(content);
+
+                            if (match.Success)
+                            {
+                                string epicPath = match.Groups[1].Value;
+                                if (Directory.Exists(epicPath))
+                                {
+                                    UnityEngine.Debug.Log("Found Hades (Epic) at: " + epicPath);
+                                    return epicPath;
+                                }
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+        }
+        catch { }
+
+        // Scan all drives
+        try
+        {
+            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+            foreach (System.IO.DriveInfo drive in drives)
+            {
+                if (drive.DriveType != System.IO.DriveType.Fixed)
+                    continue;
+
+                try
+                {
+                    string epicPath = Path.Combine(drive.Name, "Epic Games", "Hades");
+                    if (Directory.Exists(epicPath))
+                    {
+                        UnityEngine.Debug.Log("Found Hades (Epic) at: " + epicPath);
+                        return epicPath;
+                    }
+
+                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "Hades");
+                    if (Directory.Exists(epicPath))
+                    {
+                        UnityEngine.Debug.Log("Found Hades (Epic) at: " + epicPath);
+                        return epicPath;
+                    }
+                }
+                catch { }
+            }
+        }
+        catch { }
+
+        UnityEngine.Debug.LogWarning("Hades (Epic) not found.");
         return "";
     }
 }

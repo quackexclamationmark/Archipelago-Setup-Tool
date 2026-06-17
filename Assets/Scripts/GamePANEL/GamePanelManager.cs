@@ -35,6 +35,12 @@ public class GamePanelManager : MonoBehaviour
     public GameObject uggPanel;
     public GameObject hifiPanel;
     public GameObject stardewPanel;
+    public GameObject tunicPanel;
+    public GameObject actPanel;
+    public GameObject oribfPanel;
+    public GameObject oriwotwPanel;
+    public GameObject rotndPanel;
+    public GameObject dredgePanel;
 
     void Start()
     {
@@ -146,6 +152,24 @@ public class GamePanelManager : MonoBehaviour
             case "Stardew":
                 stardewPanel.SetActive(true);
                 break;
+            case "TUNIC":
+                tunicPanel.SetActive(true);
+                break;
+            case "ACT":
+                actPanel.SetActive(true);
+                break;
+            case "OriBF":
+                oribfPanel.SetActive(true);
+                break;
+            case "OriWotW":
+                oriwotwPanel.SetActive(true);
+                break;
+            case "RotND":
+                rotndPanel.SetActive(true);
+                break;
+            case "DREDGE":
+                dredgePanel.SetActive(true);
+                break;
         }
     }
 
@@ -184,5 +208,11 @@ public class GamePanelManager : MonoBehaviour
         if (uggPanel != null) uggPanel.SetActive(false);
         if (hifiPanel != null) hifiPanel.SetActive(false);
         if (stardewPanel != null) stardewPanel.SetActive(false);
+        if (tunicPanel != null) tunicPanel.SetActive(false);
+        if (actPanel != null) actPanel.SetActive(false);
+        if (oribfPanel != null) oribfPanel.SetActive(false);
+        if (oriwotwPanel != null) oriwotwPanel.SetActive(false);
+        if (rotndPanel != null) rotndPanel.SetActive(false);
+        if (dredgePanel != null) dredgePanel.SetActive(false);
     }
 }

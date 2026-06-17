@@ -1108,6 +1108,9 @@ public class BloonsTD6ManualDL : MonoBehaviour
             @"C:\Games\Epic\BloonsTD6",
             @"D:\Games\Epic\BloonsTD6",
             @"E:\Games\Epic\BloonsTD6",
+            @"C:\Epic\BloonsTD6",
+            @"D:\Epic\BloonsTD6",
+            @"E:\Epic\BloonsTD6",
         };
 
         foreach (string path in quickPaths)
