@@ -42,6 +42,7 @@ public class GamePanelManager : MonoBehaviour
     public GameObject rotndPanel;
     public GameObject dredgePanel;
     public GameObject ds3Panel;
+    public GameObject charlesPanel;
 
     void Start()
     {
@@ -174,6 +175,9 @@ public class GamePanelManager : MonoBehaviour
             case "DS3":
                 ds3Panel.SetActive(true);
                 break;
+            case "CCCharles":
+                charlesPanel.SetActive(true);
+                break;
         }
     }
 
@@ -219,5 +223,6 @@ public class GamePanelManager : MonoBehaviour
         if (rotndPanel != null) rotndPanel.SetActive(false);
         if (dredgePanel != null) dredgePanel.SetActive(false);
         if (ds3Panel != null) ds3Panel.SetActive(false);
+        if (charlesPanel != null) charlesPanel.SetActive(false);
     }
 }
