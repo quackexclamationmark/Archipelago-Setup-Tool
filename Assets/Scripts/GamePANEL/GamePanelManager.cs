@@ -41,6 +41,7 @@ public class GamePanelManager : MonoBehaviour
     public GameObject oriwotwPanel;
     public GameObject rotndPanel;
     public GameObject dredgePanel;
+    public GameObject ds3Panel;
 
     void Start()
     {
@@ -170,6 +171,9 @@ public class GamePanelManager : MonoBehaviour
             case "DREDGE":
                 dredgePanel.SetActive(true);
                 break;
+            case "DS3":
+                ds3Panel.SetActive(true);
+                break;
         }
     }
 
@@ -214,5 +218,6 @@ public class GamePanelManager : MonoBehaviour
         if (oriwotwPanel != null) oriwotwPanel.SetActive(false);
         if (rotndPanel != null) rotndPanel.SetActive(false);
         if (dredgePanel != null) dredgePanel.SetActive(false);
+        if (ds3Panel != null) ds3Panel.SetActive(false);
     }
 }
