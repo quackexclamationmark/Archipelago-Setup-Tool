@@ -16,6 +16,8 @@
     "oriblindPopTracker": "https://github.com/5ully/OriDETracker/releases/download/v0.0.7/OriDE_Tracker.zip",
     "balatroPopTracker": "https://github.com/graygooglitch/balatroap_poptracker/releases/download/v1.1.0.1/BalatroAP_Tracker_v1.1.0.1.zip",
     "dredgePopTracker": "https://github.com/Fedjoyd/DREDGE-pack-poptracker/releases/download/v1.0.4/DREDGE-Pack.zip",
+    "ds3PopTracker": "https://github.com/Br00ty/DS3_AP_Maptracker/releases/download/v4.1.1/ds3_br00ty.zip",
+    "cccharlesPopTracker": "https://github.com/Xgor/choochoo_ap_tracker/releases/download/1.0/choochoo_ap_tracker1.0.zip",
     
 
     "actAP": "https://github.com/Automagic00/ACT-AP-Client-Plugin/releases/download/0.4.4/ACTAP.dll",
@@ -36,6 +38,8 @@
     "bombrushAP": "https://github.com/TRPG0/BRC-Archipelago/releases/download/1.0.6/BRC-Archipelago.1.0.6.zip",
     "bombrushModLocalizer": "https://github.com/TRPG0/BRC-ModLocalizer/releases/download/1.0.1/ModLocalizer.dll",
 
+    "cccharlesAP": "https://github.com/lgbarrere/CCCharles-Random/releases/download/v0.0.3-beta/CCCharles_Random.zip",
+
     "clairobscurAP": "https://github.com/Demorck/ClairObscurArchipelagoRandomizer/releases/download/v0.2.1/COE33_Client_Steam.zip",
     "clairobscurApworld": "https://github.com/Demorck/ClairObscur_APWorld/releases/download/v0.2.0/clair_obscur.apworld",
 
@@ -54,6 +58,8 @@
     "cupheadAP": "https://github.com/JKLeckr/CupheadArchipelagoMod/releases/download/alpha03d/CupheadArchipelago-alpha03d_win64.zip",
     "cupheadApworld": "https://github.com/JKLeckr/Archipelago-cuphead/releases/download/alpha03d/cuphead.apworld",
     "cupheadBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+
+    "ds3AP": "https://github.com/fswap/from-software-archipelago-clients/releases/download/ds3-v4.0.2/DS3.Archipelago.4.0.2-windows.zip",
 
     "dredgeAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-DREDGE.zip",
     "dredgeApworld": "https://github.com/alextric234/ArchipelagoDredge/releases/download/dredge_0.5.1/dredge.apworld",
