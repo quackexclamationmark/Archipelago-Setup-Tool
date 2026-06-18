@@ -43,6 +43,7 @@ public class GamePanelManager : MonoBehaviour
     public GameObject dredgePanel;
     public GameObject ds3Panel;
     public GameObject charlesPanel;
+    public GameObject oc2Panel;
 
     void Start()
     {
@@ -178,6 +179,9 @@ public class GamePanelManager : MonoBehaviour
             case "CCCharles":
                 charlesPanel.SetActive(true);
                 break;
+            case "Overcooked2":
+                oc2Panel.SetActive(true);
+                break;
         }
     }
 
@@ -224,5 +228,6 @@ public class GamePanelManager : MonoBehaviour
         if (dredgePanel != null) dredgePanel.SetActive(false);
         if (ds3Panel != null) ds3Panel.SetActive(false);
         if (charlesPanel != null) charlesPanel.SetActive(false);
+        if (oc2Panel != null) oc2Panel.SetActive(false);
     }
 }
