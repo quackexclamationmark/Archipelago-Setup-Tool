@@ -18,6 +18,7 @@
     "dredgePopTracker": "https://github.com/Fedjoyd/DREDGE-pack-poptracker/releases/download/v1.0.4/DREDGE-Pack.zip",
     "ds3PopTracker": "https://github.com/Br00ty/DS3_AP_Maptracker/releases/download/v4.1.1/ds3_br00ty.zip",
     "cccharlesPopTracker": "https://github.com/Xgor/choochoo_ap_tracker/releases/download/1.0/choochoo_ap_tracker1.0.zip",
+    "hitmanwoaPopTracker": "https://github.com/BenDipp/HitmanPopTracker/releases/download/v0.4.0/HitmanPopTracker_0.4.0.zip",
     
 
     "actAP": "https://github.com/Automagic00/ACT-AP-Client-Plugin/releases/download/0.4.4/ACTAP.dll",
@@ -69,6 +70,10 @@
 
     "hifirushAP": "https://github.com/TRPG0/HbkArchipelago/releases/download/0.3.1/HbkArchipelago_Steam_EGS.0.3.1.zip",
     "hifirushApworld": "https://github.com/TRPG0/HbkArchipelago/releases/download/0.3.1/hi_fi_rush.apworld",
+
+    "hitmanwoaAP": "https://github.com/BenDipp/Archipelago/releases/download/0.8.2/archipelago.plugin.js",
+    "hitmanwoaPeacock": "https://github.com/thepeacockproject/Peacock/releases/download/v8.8.1/Peacock-v8.8.1.zip",
+    "hitmanwoaApworld": "https://github.com/BenDipp/Archipelago/releases/download/0.8.2/hitman_woa.apworld",
 
     "hollowknightAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-Lumafly-HKAP.zip",
 
