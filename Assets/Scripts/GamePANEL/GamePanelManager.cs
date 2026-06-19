@@ -45,6 +45,7 @@ public class GamePanelManager : MonoBehaviour
     public GameObject charlesPanel;
     public GameObject oc2Panel;
     public GameObject hitmanwoaPanel;
+    public GameObject adofaiPanel;
 
     void Start()
     {
@@ -186,6 +187,9 @@ public class GamePanelManager : MonoBehaviour
             case "HitmanWOA":
                 hitmanwoaPanel.SetActive(true);
                 break;
+            case "ADOFAI":
+                adofaiPanel.SetActive(true);
+                break;
         }
     }
 
@@ -234,5 +238,6 @@ public class GamePanelManager : MonoBehaviour
         if (charlesPanel != null) charlesPanel.SetActive(false);
         if (oc2Panel != null) oc2Panel.SetActive(false);
         if (hitmanwoaPanel != null) hitmanwoaPanel.SetActive(false);
+        if (adofaiPanel != null) adofaiPanel.SetActive(false);
     }
 }
