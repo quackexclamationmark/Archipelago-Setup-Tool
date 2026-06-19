@@ -44,6 +44,7 @@ public class GamePanelManager : MonoBehaviour
     public GameObject ds3Panel;
     public GameObject charlesPanel;
     public GameObject oc2Panel;
+    public GameObject hitmanwoaPanel;
 
     void Start()
     {
@@ -182,6 +183,9 @@ public class GamePanelManager : MonoBehaviour
             case "Overcooked2":
                 oc2Panel.SetActive(true);
                 break;
+            case "HitmanWOA":
+                hitmanwoaPanel.SetActive(true);
+                break;
         }
     }
 
@@ -229,5 +233,6 @@ public class GamePanelManager : MonoBehaviour
         if (ds3Panel != null) ds3Panel.SetActive(false);
         if (charlesPanel != null) charlesPanel.SetActive(false);
         if (oc2Panel != null) oc2Panel.SetActive(false);
+        if (hitmanwoaPanel != null) hitmanwoaPanel.SetActive(false);
     }
 }
