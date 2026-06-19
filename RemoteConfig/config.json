@@ -18,8 +18,13 @@
     "dredgePopTracker": "https://github.com/Fedjoyd/DREDGE-pack-poptracker/releases/download/v1.0.4/DREDGE-Pack.zip",
     "ds3PopTracker": "https://github.com/Br00ty/DS3_AP_Maptracker/releases/download/v4.1.1/ds3_br00ty.zip",
     "cccharlesPopTracker": "https://github.com/Xgor/choochoo_ap_tracker/releases/download/1.0/choochoo_ap_tracker1.0.zip",
+    "hitmanwoaPopTracker": "https://github.com/BenDipp/HitmanPopTracker/releases/download/v0.4.0/HitmanPopTracker_0.4.0.zip",
     
 
+    "adofaiBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+    "adofaiAP": "https://github.com/ClaudeChibout/ADOFAI_AP-Mod/releases/download/v1.0.8-pre/ADOFAI_AP-Mod.zip",
+    "adofaiApworld": "https://github.com/ClaudeChibout/Archipelago-ADOFAI/releases/download/v1.2.1/adofai.apworld",
+    
     "actAP": "https://github.com/Automagic00/ACT-AP-Client-Plugin/releases/download/0.4.4/ACTAP.dll",
     "actApworld": "https://github.com/Automagic00/ACT-AP-Client-Plugin/releases/download/0.4.4/another_crab.apworld",
     "actBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
@@ -69,6 +74,10 @@
 
     "hifirushAP": "https://github.com/TRPG0/HbkArchipelago/releases/download/0.3.1/HbkArchipelago_Steam_EGS.0.3.1.zip",
     "hifirushApworld": "https://github.com/TRPG0/HbkArchipelago/releases/download/0.3.1/hi_fi_rush.apworld",
+
+    "hitmanwoaAP": "https://github.com/BenDipp/Archipelago/releases/download/0.8.2/archipelago.plugin.js",
+    "hitmanwoaPeacock": "https://github.com/thepeacockproject/Peacock/releases/download/v8.8.1/Peacock-v8.8.1.zip",
+    "hitmanwoaApworld": "https://github.com/BenDipp/Archipelago/releases/download/0.8.2/hitman_woa.apworld",
 
     "hollowknightAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-Lumafly-HKAP.zip",
 
@@ -207,7 +216,7 @@
     "untitledApworld": "https://github.com/PixelShake92/Untitled-Goose-Game-Archipelago/releases/download/Alpha_2.2/untitled_goose_game.apworld",
     "untitledBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.9/BepInEx_x64_5.4.9.0.zip",
 
-    "votvUE4SS": "https://github.com/UE4SS-RE/RE-UE4SS/releases/download/experimental-latest/UE4SS_v3.0.1-969-gd90375c8.zip",
+    "votvUE4SS": "https://github.com/UE4SS-RE/RE-UE4SS/releases/download/experimental-latest/UE4SS_v3.0.1-971-g9ec5ece7.zip",
     "votvApworld": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.3.1/votv.apworld",
     "votvAP": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.3.1/votv_ap-main.zip",
     "votvDL": "https://r2.votv.dev/archive/votv/090n.7z",
