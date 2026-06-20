@@ -46,6 +46,7 @@ public class GamePanelManager : MonoBehaviour
     public GameObject oc2Panel;
     public GameObject hitmanwoaPanel;
     public GameObject adofaiPanel;
+    public GameObject tcgPanel;
 
     void Start()
     {
@@ -190,6 +191,9 @@ public class GamePanelManager : MonoBehaviour
             case "ADOFAI":
                 adofaiPanel.SetActive(true);
                 break;
+            case "TCG":
+                tcgPanel.SetActive(true);
+                break;
         }
     }
 
@@ -239,5 +243,6 @@ public class GamePanelManager : MonoBehaviour
         if (oc2Panel != null) oc2Panel.SetActive(false);
         if (hitmanwoaPanel != null) hitmanwoaPanel.SetActive(false);
         if (adofaiPanel != null) adofaiPanel.SetActive(false);
+        if (tcgPanel != null) tcgPanel.SetActive(false);
     }
 }

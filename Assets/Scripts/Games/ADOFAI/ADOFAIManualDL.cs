@@ -248,9 +248,9 @@ public class ADOFAIManualDL : MonoBehaviour
             ShowInfo("Clearing BepInEx...");
 
             SafeDeleteDirectory(Path.Combine(adofaiPath, "BepInEx"));
-            SafeDeleteDirectory(Path.Combine(adofaiPath, "mono"));
             SafeDeleteFile(Path.Combine(adofaiPath, "changelog.txt"));
             SafeDeleteFile(Path.Combine(adofaiPath, "doorstop_config.ini"));
+            SafeDeleteFile(Path.Combine(adofaiPath, ".doorstop_version"));
             SafeDeleteFile(Path.Combine(adofaiPath, "winhttp.dll"));
             DeleteOldVersionFiles();
 
@@ -348,7 +348,7 @@ public class ADOFAIManualDL : MonoBehaviour
 
             yield return new WaitForSeconds(1f);
 
-            ShowInfo("Second launch...");
+            ShowInfo("Launching game...");
             LaunchADOFAI();
         }
         else
