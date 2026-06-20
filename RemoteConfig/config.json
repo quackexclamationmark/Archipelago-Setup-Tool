@@ -67,6 +67,8 @@
 
     "ds3AP": "https://github.com/fswap/from-software-archipelago-clients/releases/download/ds3-v4.0.2/DS3.Archipelago.4.0.2-windows.zip",
 
+    "doomAP": "https://github.com/Daivuk/apdoom/releases/download/1.2.0/APDOOM-1_2_0-Win32.zip",
+
     "doom2AP": "https://github.com/Daivuk/apdoom/releases/download/1.2.0/APDOOM-1_2_0-Win32.zip",
 
     "dredgeAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-DREDGE.zip",
