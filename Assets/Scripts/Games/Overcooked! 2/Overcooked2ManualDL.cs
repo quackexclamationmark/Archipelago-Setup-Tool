@@ -43,6 +43,14 @@ public class Overcooked2ManualDL : MonoBehaviour
     private Process gameProcess;
     private Process installerProcess;
     private bool isEpic = false;
+    private Overcooked2Config remoteConfig;
+    private bool configLoaded = false;
+
+    [System.Serializable]
+    public class Overcooked2Config
+    {
+        public string oc2AP;
+    }
 
     void Start()
     {
@@ -90,7 +98,17 @@ public class Overcooked2ManualDL : MonoBehaviour
                     launchGameToggle.interactable = installModdingToggle.isOn && installModdingToggle.interactable;
             });
 
+        StartCoroutine(LoadRemoteConfig());
         UpdateTogglesInteractable();
+    }
+
+    void ApplyOvercooked2Config()
+    {
+        if (remoteConfig == null)
+            return;
+
+        oc2AP.url = remoteConfig.oc2AP;
+        oc2AP.fileName = "oc2-modding.zip";
     }
 
     // -----------------------
@@ -283,6 +301,13 @@ public class Overcooked2ManualDL : MonoBehaviour
         // If user requested to install the package (download+extract)
         if (installPackageToggle != null && installPackageToggle.isOn)
         {
+            // Wait for config to load
+            while (!configLoaded)
+            {
+                UnityEngine.Debug.Log("Waiting for config to load...");
+                yield return new WaitForSeconds(0.5f);
+            }
+
             ShowInfo("Downloading and extracting oc2-modding package...");
             yield return downloader.DownloadAndExtract(oc2AP, Application.persistentDataPath, extractPath);
 
@@ -522,6 +547,34 @@ public class Overcooked2ManualDL : MonoBehaviour
         }
 
         UpdateTogglesInteractable();
+    }
+
+    IEnumerator LoadRemoteConfig()
+    {
+        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
+
+        UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url);
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+        {
+            UnityEngine.Debug.LogWarning("Config load failed (this is OK, config is optional): " + request.error);
+            configLoaded = true;
+            yield break;
+        }
+
+        try
+        {
+            remoteConfig = JsonUtility.FromJson<Overcooked2Config>(request.downloadHandler.text);
+            UnityEngine.Debug.Log("Remote config loaded successfully");
+            ApplyOvercooked2Config();
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Config parsing failed (this is OK, config is optional): " + e.Message);
+        }
+
+        configLoaded = true;
     }
 
     Process RunBatch(string batPath, string workingDirectory)

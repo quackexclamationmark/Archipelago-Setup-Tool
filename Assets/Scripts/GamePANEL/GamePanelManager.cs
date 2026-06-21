@@ -47,6 +47,9 @@ public class GamePanelManager : MonoBehaviour
     public GameObject hitmanwoaPanel;
     public GameObject adofaiPanel;
     public GameObject tcgPanel;
+    public GameObject doom2Panel;
+    public GameObject doomPanel;
+    public GameObject noitaPanel;
 
     void Start()
     {
@@ -194,6 +197,15 @@ public class GamePanelManager : MonoBehaviour
             case "TCG":
                 tcgPanel.SetActive(true);
                 break;
+            case "DOOM2":
+                doom2Panel.SetActive(true);
+                break;
+            case "DOOM":
+                doomPanel.SetActive(true);
+                break;
+            case "Noita":
+                noitaPanel.SetActive(true);
+                break;
         }
     }
 
@@ -244,5 +256,8 @@ public class GamePanelManager : MonoBehaviour
         if (hitmanwoaPanel != null) hitmanwoaPanel.SetActive(false);
         if (adofaiPanel != null) adofaiPanel.SetActive(false);
         if (tcgPanel != null) tcgPanel.SetActive(false);
+        if (doom2Panel != null) doom2Panel.SetActive(false);
+        if (doomPanel != null) doomPanel.SetActive(false);
+        if (noitaPanel != null) noitaPanel.SetActive(false);
     }
 }

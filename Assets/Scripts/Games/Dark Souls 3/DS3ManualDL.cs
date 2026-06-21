@@ -24,6 +24,14 @@ public class DS3ManualDL : MonoBehaviour
 
     private string ds3Path;
     private string pendingAction;
+    private DS3Config remoteConfig;
+    private bool configLoaded = false;
+
+    [System.Serializable]
+    public class DS3Config
+    {
+        public string ds3AP;
+    }
 
     void Start()
     {
@@ -43,6 +51,17 @@ public class DS3ManualDL : MonoBehaviour
 
         if (cancelButton != null)
             cancelButton.onClick.AddListener(OnCancel);
+
+        StartCoroutine(LoadRemoteConfig());
+    }
+
+    void ApplyDS3Config()
+    {
+        if (remoteConfig == null)
+            return;
+
+        ds3AP.url = remoteConfig.ds3AP;
+        ds3AP.fileName = "DS3-Archipelago.zip";
     }
 
     // Kicks off installation (no toggle because DS3AP is the only thing installed)
@@ -138,6 +157,12 @@ public class DS3ManualDL : MonoBehaviour
 
     IEnumerator InstallDS3AP()
     {
+        while (!configLoaded)
+        {
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
+
         string extractPath = Path.Combine(Application.persistentDataPath, "DS3APTemp");
 
         yield return downloader.DownloadAndExtract(ds3AP, Application.persistentDataPath, extractPath);
@@ -179,6 +204,34 @@ public class DS3ManualDL : MonoBehaviour
         }
 
         SafeDeleteDirectory(extractPath);
+    }
+
+    IEnumerator LoadRemoteConfig()
+    {
+        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
+
+        UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url);
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+        {
+            UnityEngine.Debug.LogWarning("Config load failed (this is OK, config is optional): " + request.error);
+            configLoaded = true;
+            yield break;
+        }
+
+        try
+        {
+            remoteConfig = JsonUtility.FromJson<DS3Config>(request.downloadHandler.text);
+            UnityEngine.Debug.Log("Remote config loaded successfully");
+            ApplyDS3Config();
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Config parsing failed (this is OK, config is optional): " + e.Message);
+        }
+
+        configLoaded = true;
     }
 
     void SafeDeleteDirectory(string path)
