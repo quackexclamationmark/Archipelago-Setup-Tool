@@ -244,7 +244,8 @@
         "0.2.4": "obsolete",
         "0.2.4.2": "obsolete",
         "0.2.4.3": "obsolete",
-        "0.3.0": "latest"
+        "0.3.0": "obsolete"
+        "1.0.0": "latest"
     },
     "toolLatestDownloadUrl": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/download/v0.3.0/Archipelago.Setup.Tool.v0.3.0.zip"
 }
