@@ -9,7 +9,7 @@ using System.Diagnostics;
 public class ToolVersionManager : MonoBehaviour
 {
     [Header("VERSION CONFIG")]
-    public string currentToolVersion = "0.3.0"; // À mettre à jour à chaque nouvelle version
+    public string currentToolVersion = "1.0.0"; // À mettre à jour à chaque nouvelle version
 
     [Header("UPDATE PANEL")]
     public GameObject updatePanel;
@@ -286,7 +286,6 @@ public class ToolVersionManager : MonoBehaviour
             string fileName = ExtractFileNameFromUrl(remoteConfig.toolLatestDownloadUrl);
             string tempDownloadPath = Path.Combine(parentFolder, fileName);
             string extractPath = Path.Combine(parentFolder, "ArchipelagoToolUpdate");
-            string tempVersionFolderPath = Path.Combine(extractPath, "temp_version_content");
 
             string batchContent = "@echo off\n";
             batchContent += "setlocal enabledelayedexpansion\n";
@@ -310,10 +309,8 @@ public class ToolVersionManager : MonoBehaviour
             batchContent += "\n";
             batchContent += "echo Finding new version folder (Archipelago Setup Tool v*)...\n";
             batchContent += "set \"NEW_VERSION_FOLDER=\"\n";
-            batchContent += "set \"NEW_VERSION_NAME=\"\n";
             batchContent += "for /d %%A in (\"" + extractPath + "\\Archipelago Setup Tool v*\") do (\n";
             batchContent += "    set \"NEW_VERSION_FOLDER=%%A\"\n";
-            batchContent += "    for %%B in (\"%%A\") do set \"NEW_VERSION_NAME=%%~nxB\"\n";
             batchContent += "    goto :found\n";
             batchContent += ")\n";
             batchContent += ":found\n";
@@ -324,35 +321,16 @@ public class ToolVersionManager : MonoBehaviour
             batchContent += "    exit /b 1\n";
             batchContent += ")\n";
             batchContent += "\n";
-            batchContent += "echo New version folder name: !NEW_VERSION_NAME!\n";
-            batchContent += "\n";
             batchContent += "echo Clearing old version folder content...\n";
             batchContent += "for /d %%D in (\"" + applicationVersionFolder + "\\*\") do rmdir /s /q \"%%D\" >nul 2>&1\n";
             batchContent += "for %%F in (\"" + applicationVersionFolder + "\\*\") do del \"%%F\" >nul 2>&1\n";
             batchContent += "\n";
             batchContent += "echo Copying new version files...\n";
-            batchContent += "xcopy \"!NEW_VERSION_FOLDER!\\*\" \"" + applicationVersionFolder + "\" /E /I /Y >nul 2>&1\n";
+            batchContent += "xcopy \"!NEW_VERSION_FOLDER!\\*\" \"" + applicationVersionFolder + "\" /E /I /Y\n";
             batchContent += "if !ERRORLEVEL! neq 0 (\n";
             batchContent += "    echo Error: Failed to copy new version files\n";
             batchContent += "    pause\n";
             batchContent += "    exit /b 1\n";
-            batchContent += ")\n";
-            batchContent += "\n";
-            batchContent += "echo Renaming version folder...\n";
-            batchContent += "cd /d \"" + parentFolder + "\"\n";
-            batchContent += "set \"OLD_FOLDER_NAME=\"\n";
-            batchContent += "for /d %%A in (\"Archipelago Setup Tool v*\") do (\n";
-            batchContent += "    if \"%%A\" neq \"!NEW_VERSION_NAME!\" (\n";
-            batchContent += "        set \"OLD_FOLDER_NAME=%%A\"\n";
-            batchContent += "        goto :rename_now\n";
-            batchContent += "    )\n";
-            batchContent += ")\n";
-            batchContent += ":rename_now\n";
-            batchContent += "if defined OLD_FOLDER_NAME (\n";
-            batchContent += "    ren \"!OLD_FOLDER_NAME!\" \"!NEW_VERSION_NAME!\"\n";
-            batchContent += "    if !ERRORLEVEL! neq 0 (\n";
-            batchContent += "        echo Warning: Failed to rename folder, but update was successful\n";
-            batchContent += "    )\n";
             batchContent += ")\n";
             batchContent += "\n";
             batchContent += "echo Cleaning up temporary files...\n";
@@ -360,7 +338,8 @@ public class ToolVersionManager : MonoBehaviour
             batchContent += "del \"" + tempDownloadPath + "\" >nul 2>&1\n";
             batchContent += "\n";
             batchContent += "echo Launching new version...\n";
-            batchContent += "start \"\" \"" + parentFolder + "\\!NEW_VERSION_NAME!\\Archipelago Setup Tool.exe\"\n";
+            batchContent += "timeout /t 1 /nobreak\n";
+            batchContent += "start \"\" \"" + applicationVersionFolder + "\\Archipelago Setup Tool.exe\"\n";
             batchContent += "\n";
             batchContent += "echo Update complete\n";
             batchContent += "del \"" + scriptPath + "\" >nul 2>&1\n";
