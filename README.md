@@ -9,7 +9,7 @@ Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could
 
 After setting up a game, all credits can be found in the game's directory, inside the game's directory.
 
-Currently, the following games are supported:
+Currently, the following games are supported (47):
 
 * Clair Obscur: Expedition 33
 * Lethal Company
