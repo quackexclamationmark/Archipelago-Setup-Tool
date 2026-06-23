@@ -51,7 +51,7 @@ Currently, the following games are supported (47):
 * Ori and the Will of the Wisps
 * Rift of the Necrodancer
 * DREDGE
-* Dark Souls 3
+* DARK SOULS III
 * Choo-Choo Charles
 * Overcooked! 2
 * HITMAN: World of Assassination
@@ -60,6 +60,7 @@ Currently, the following games are supported (47):
 * DOOM (1993)
 * DOOM II
 * Noita
+* DARK SOULS II (INCLUDES SCHOLAR OF THE FIRST SIN)
 
 Features to add in the future:
 
