@@ -23,6 +23,7 @@
     "doomPopTracker": "https://github.com/Ozone31/doom-ap-tracker/archive/refs/tags/v1.2.2.zip",
     "noitaPopTracker": "https://github.com/ScipioWright/Noita-poptracker/releases/download/2.1.0/Noita-poptracker.zip",
     "cloverpitPopTracker": "https://github.com/snileaf/CloverPit-poptracker/releases/download/v0.0.1/CloverPit-poptracker-v0.0.1.zip",
+    "ds2PopTracker": "https://github.com/AkagiCritMagnet/Dark-Souls-2-poptracker-for-Archipelago/releases/download/v1.4/DS2.pack.zip",
     
 
     "adofaiBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
@@ -67,6 +68,10 @@
     "cupheadAP": "https://github.com/JKLeckr/CupheadArchipelagoMod/releases/download/alpha03e/CupheadArchipelago-alpha03e_win64.zip",
     "cupheadApworld": "https://github.com/JKLeckr/Archipelago-cuphead/releases/download/alpha03e/cuphead.apworld",
     "cupheadBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+
+    "ds2scholarAP": "https://github.com/WildBunnie/DarkSoulsII-Archipelago/releases/download/v0.5.5-hotfix/dinput8_sotfs.dll",
+    "ds2AP": "https://github.com/WildBunnie/DarkSoulsII-Archipelago/releases/download/v0.5.5-hotfix/dinput8_vanilla.dll",
+    "ds2Apworld": "https://github.com/WildBunnie/DarkSoulsII-Archipelago/releases/download/v0.5.5-hotfix/dark_souls_2.apworld",
 
     "ds3AP": "https://github.com/fswap/from-software-archipelago-clients/releases/download/ds3-v4.0.2/DS3.Archipelago.4.0.2-windows.zip",
 
@@ -244,7 +249,7 @@
         "0.2.4": "obsolete",
         "0.2.4.2": "obsolete",
         "0.2.4.3": "obsolete",
-        "0.3.0": "obsolete"
+        "0.3.0": "obsolete",
         "1.0.0": "latest"
     },
     "toolLatestDownloadUrl": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/download/v1.0.0/Archipelago.Setup.Tool.v1.0.0.zip"

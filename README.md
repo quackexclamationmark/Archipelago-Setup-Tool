@@ -1,13 +1,17 @@
 # If you see a “Windows protected your PC” message, no worries—just click “More info” and then “Run anyway.” This happens because the tool installs mods automatically, which Windows can sometimes flag as suspicious.
 
+[Full Presentation Video](https://youtu.be/6AOrXW-Da3Q)
+
+DOWNLOAD THE INSTALLER, NOT THE .ZIP FILE!
+
 Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could (idk I didn't try it) but it COULD delete everything that is next to the .exe (in the same folder) even tho it's not supposed to. Basically, you can move the folder but probably don't rename it and do not touch what's inside.
 
 # Archipelago Setup Tool
-### [Download latest version | v0.3.0](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v0.3.0)
+### [Download latest version | v1.0.0](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v1.0.0)
 
 After setting up a game, all credits can be found in the game's directory, inside the game's directory.
 
-Currently, the following games are supported:
+Currently, the following games are supported (47):
 
 * Clair Obscur: Expedition 33
 * Lethal Company
@@ -33,15 +37,39 @@ Currently, the following games are supported:
 * Hollow Knight
 * Slime Rancher
 * Slime Rancher 2
+* CloverPit
+* Resident Evil 7: Biohazard
+* Schedule I
+* Hades
+* ULTRAKILL
+* Untitled Goose Game
+* Hi-Fi Rush
+* Stardew Valley
+* TUNIC
+* Another Crab's Treasure
+* Ori and the Blind Forest
+* Ori and the Will of the Wisps
+* Rift of the Necrodancer
+* DREDGE
+* DARK SOULS III
+* Choo-Choo Charles
+* Overcooked! 2
+* HITMAN: World of Assassination
+* A Dance of Fire and Ice
+* TCG Card Shop Simulator
+* DOOM (1993)
+* DOOM II
+* Noita
+* DARK SOULS II (INCLUDES SCHOLAR OF THE FIRST SIN)
 
 Features to add in the future:
 
-* Adding support for games available across multiple platforms.
+* Adding support for Microsoft Store, XBOX launcher!
 * Adding support for other OS (Linux).
 
 I don’t plan to support emulated games like Super Mario Sunshine due to obvious legal concerns, but I might add a detailed setup guide for them later on.
 
-I don't own all the games so some game path can be wrong and lead to a "Path not found" but I'm trying as hard as I can to get the right path name. If you get this error, feel free to report it to me on Discord: quackdub
+I don't own all the games so some game path can be wrong and lead to a "Path not found" but I'm trying as hard as I can to get the right path name. If you get this error, feel free to report it to me on the [Discord server](https://discord.gg/hxsNCmFpcH)!
 
 ## Required Tools
 
