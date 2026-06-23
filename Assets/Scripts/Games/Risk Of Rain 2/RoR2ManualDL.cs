@@ -399,6 +399,7 @@ public class RoR2ManualDL : MonoBehaviour
 
             SafeDeleteDirectory(Path.Combine(ror2Path, "BepInEx"));
             SafeDeleteFile(Path.Combine(ror2Path, "winhttp.dll"));
+            SafeDeleteFile(Path.Combine(ror2Path, "changelog.txt"));
             SafeDeleteFile(Path.Combine(ror2Path, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(ror2Path, ".doorstop_version"));
 

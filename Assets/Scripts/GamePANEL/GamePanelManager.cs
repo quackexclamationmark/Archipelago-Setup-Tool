@@ -50,6 +50,7 @@ public class GamePanelManager : MonoBehaviour
     public GameObject doom2Panel;
     public GameObject doomPanel;
     public GameObject noitaPanel;
+    public GameObject ds2Panel;
 
     void Start()
     {
@@ -206,6 +207,9 @@ public class GamePanelManager : MonoBehaviour
             case "Noita":
                 noitaPanel.SetActive(true);
                 break;
+            case "DS2":
+                ds2Panel.SetActive(true);
+                break;
         }
     }
 
@@ -259,5 +263,6 @@ public class GamePanelManager : MonoBehaviour
         if (doom2Panel != null) doom2Panel.SetActive(false);
         if (doomPanel != null) doomPanel.SetActive(false);
         if (noitaPanel != null) noitaPanel.SetActive(false);
+        if (ds2Panel != null) ds2Panel.SetActive(false);
     }
 }

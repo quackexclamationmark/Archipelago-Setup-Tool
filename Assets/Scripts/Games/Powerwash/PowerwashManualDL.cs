@@ -250,6 +250,7 @@ public class PowerwashManualDL : MonoBehaviour
             SafeDeleteDirectory(Path.Combine(powerwashPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(powerwashPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(powerwashPath, "winhttp.dll"));
+            SafeDeleteFile(Path.Combine(powerwashPath, "changelog.txt"));
             SafeDeleteFile(Path.Combine(powerwashPath, ".doorstop_version"));
             DeleteOldVersionFiles();
 

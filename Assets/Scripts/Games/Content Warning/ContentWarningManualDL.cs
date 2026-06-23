@@ -265,6 +265,7 @@ public class ContentWarningManualDL : MonoBehaviour
             SafeDeleteDirectory(Path.Combine(gamePath, "BepInEx"));
             SafeDeleteFile(Path.Combine(gamePath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(gamePath, "winhttp.dll"));
+            SafeDeleteFile(Path.Combine(gamePath, "changelog.txt"));
             SafeDeleteFile(Path.Combine(gamePath, ".doorstop_version"));
             DeleteOldVersionFiles();
 

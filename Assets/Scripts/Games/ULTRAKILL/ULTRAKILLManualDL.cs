@@ -221,6 +221,7 @@ public class ULTRAKILLManualDL : MonoBehaviour
 
         SafeDeleteDirectory(Path.Combine(ultrakillPath, "BepInEx"));
         SafeDeleteFile(Path.Combine(ultrakillPath, "winhttp.dll"));
+        SafeDeleteFile(Path.Combine(ultrakillPath, "changelog.txt"));
         SafeDeleteFile(Path.Combine(ultrakillPath, "doorstop_config.ini"));
         SafeDeleteFile(Path.Combine(ultrakillPath, ".doorstop_version"));
 

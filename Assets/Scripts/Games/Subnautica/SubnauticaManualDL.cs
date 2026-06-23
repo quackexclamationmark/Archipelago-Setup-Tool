@@ -315,6 +315,7 @@ public class SubnauticaManualDL : MonoBehaviour
             SafeDeleteDirectory(Path.Combine(subnauticaPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(subnauticaPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(subnauticaPath, "winhttp.dll"));
+            SafeDeleteFile(Path.Combine(subnauticaPath, "changelog.txt"));
             SafeDeleteFile(Path.Combine(subnauticaPath, ".doorstop_version"));
 
             ShowInfo("Full clean completed!");

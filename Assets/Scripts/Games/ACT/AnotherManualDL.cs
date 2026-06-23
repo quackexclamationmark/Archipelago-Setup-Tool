@@ -251,6 +251,7 @@ public class AnotherManualDL : MonoBehaviour
 
             SafeDeleteDirectory(bepinexPath);
             SafeDeleteFile(Path.Combine(actPath, "winhttp.dll"));
+            SafeDeleteFile(Path.Combine(actPath, "changelog.txt"));
             SafeDeleteFile(Path.Combine(actPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(actPath, ".doorstop_version"));
 
@@ -264,6 +265,7 @@ public class AnotherManualDL : MonoBehaviour
 
             SafeDeleteDirectory(bepinexPath);
             SafeDeleteFile(Path.Combine(actPath, "winhttp.dll"));
+            SafeDeleteFile(Path.Combine(actPath, "changelog.txt"));
             SafeDeleteFile(Path.Combine(actPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(actPath, ".doorstop_version"));
 

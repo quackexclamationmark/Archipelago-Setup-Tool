@@ -270,6 +270,7 @@ public class LethalCompanyManualDL : MonoBehaviour
 
             SafeDeleteDirectory(Path.Combine(lethalCompanyPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(lethalCompanyPath, "winhttp.dll"));
+            SafeDeleteFile(Path.Combine(lethalCompanyPath, "changelog.txt"));
             SafeDeleteFile(Path.Combine(lethalCompanyPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(lethalCompanyPath, ".doorstop_version"));
 

@@ -205,6 +205,7 @@ public class BombRushManualDL : MonoBehaviour
 
         SafeDeleteDirectory(Path.Combine(bombRushPath, "BepInEx"));
         SafeDeleteFile(Path.Combine(bombRushPath, "winhttp.dll"));
+        SafeDeleteFile(Path.Combine(bombRushPath, "changelog.txt"));
         SafeDeleteFile(Path.Combine(bombRushPath, "doorstop_config.ini"));
         SafeDeleteFile(Path.Combine(bombRushPath, ".doorstop_version"));
 

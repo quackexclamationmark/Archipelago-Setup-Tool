@@ -227,6 +227,7 @@ public class CupheadManualDL : MonoBehaviour
 
             SafeDeleteDirectory(Path.Combine(cupheadPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(cupheadPath, "winhttp.dll"));
+            SafeDeleteFile(Path.Combine(cupheadPath, "changelog.txt"));
             SafeDeleteFile(Path.Combine(cupheadPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(cupheadPath, ".doorstop_version"));
 

@@ -252,6 +252,7 @@ public class PEAKManualDL : MonoBehaviour
 
             SafeDeleteDirectory(Path.Combine(peakPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(peakPath, "winhttp.dll"));
+            SafeDeleteFile(Path.Combine(peakPath, "changelog.txt"));
             SafeDeleteFile(Path.Combine(peakPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(peakPath, ".doorstop_version"));
 
@@ -265,6 +266,7 @@ public class PEAKManualDL : MonoBehaviour
 
             SafeDeleteDirectory(Path.Combine(peakPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(peakPath, "winhttp.dll"));
+            SafeDeleteFile(Path.Combine(peakPath, "changelog.txt"));
             SafeDeleteFile(Path.Combine(peakPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(peakPath, ".doorstop_version"));
 

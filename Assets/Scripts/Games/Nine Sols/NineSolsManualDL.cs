@@ -270,6 +270,7 @@ public class NineSolsManualDL : MonoBehaviour
 
             SafeDeleteDirectory(Path.Combine(ninesolsPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(ninesolsPath, "winhttp.dll"));
+            SafeDeleteFile(Path.Combine(ninesolsPath, "changelog.txt"));
             SafeDeleteFile(Path.Combine(ninesolsPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(ninesolsPath, ".doorstop_version"));
 
@@ -283,6 +284,7 @@ public class NineSolsManualDL : MonoBehaviour
 
             SafeDeleteDirectory(Path.Combine(ninesolsPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(ninesolsPath, "winhttp.dll"));
+            SafeDeleteFile(Path.Combine(ninesolsPath, "changelog.txt"));
             SafeDeleteFile(Path.Combine(ninesolsPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(ninesolsPath, ".doorstop_version"));
 

@@ -215,6 +215,7 @@ public class CloverPitManualDL : MonoBehaviour
 
         SafeDeleteDirectory(Path.Combine(cloverPitPath, "BepInEx"));
         SafeDeleteFile(Path.Combine(cloverPitPath, "winhttp.dll"));
+        SafeDeleteFile(Path.Combine(cloverPitPath, "changelog.txt"));
         SafeDeleteFile(Path.Combine(cloverPitPath, "doorstop_config.ini"));
         SafeDeleteFile(Path.Combine(cloverPitPath, ".doorstop_version"));
 

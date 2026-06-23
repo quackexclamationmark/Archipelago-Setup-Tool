@@ -301,6 +301,7 @@ public class REPOManualDL : MonoBehaviour
 
             SafeDeleteDirectory(Path.Combine(repoPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(repoPath, "winhttp.dll"));
+            SafeDeleteFile(Path.Combine(repoPath, "changelog.txt"));
             SafeDeleteFile(Path.Combine(repoPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(repoPath, ".doorstop_version"));
 
@@ -314,6 +315,7 @@ public class REPOManualDL : MonoBehaviour
 
             SafeDeleteDirectory(Path.Combine(repoPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(repoPath, "winhttp.dll"));
+            SafeDeleteFile(Path.Combine(repoPath, "changelog.txt"));
             SafeDeleteFile(Path.Combine(repoPath, "doorstop_config.ini"));
             SafeDeleteFile(Path.Combine(repoPath, ".doorstop_version"));
 
