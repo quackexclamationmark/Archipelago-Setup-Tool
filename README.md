@@ -1,6 +1,6 @@
 # If you see a “Windows protected your PC” message, no worries—just click “More info” and then “Run anyway.” This happens because the tool installs mods automatically, which Windows can sometimes flag as suspicious.
 
-https://youtu.be/6AOrXW-Da3Q
+[Full Presentation Video](https://youtu.be/6AOrXW-Da3Q)
 
 DOWNLOAD THE INSTALLER, NOT THE .ZIP FILE!
 
