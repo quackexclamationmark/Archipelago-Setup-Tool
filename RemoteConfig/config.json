@@ -219,6 +219,20 @@
     "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.3/Archipelago_193.zip",
     "subnauticaBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
+    "sm64APLauncher": "https://github.com/N00byKing/SM64AP-Launcher/releases/download/rel8/SM64AP-Launcher_windows.zip",
+    "sm64MSYS": "https://github.com/msys2/msys2-installer/releases/download/2026-06-11/msys2-x86_64-20260611.exe",
+    "sm64DefConfig": {
+    "advanced": false,
+    "builds": {},
+    "default_build_root": "_None",
+    "msys_path": "C:/msys64",
+    "rom_paths": {
+        "jp": "_None",
+        "us": "_None"
+    },
+    "version": "5a6b930"
+    },
+
     "tcgBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "tcgApworld": "https://github.com/FyreDay/Archipelago-TCGCardShopSimulator/releases/download/v1.1.0/tcg_card_shop_simulator.apworld",
     "tcgAP": "https://github.com/FyreDay/TCG-CardShop-Sim-APClient/releases/download/v1.1.1/TCG_AP_Client_v1.1.1.zip",
