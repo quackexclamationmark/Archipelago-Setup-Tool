@@ -114,6 +114,13 @@
 
     "minecraftApworld": "https://github.com/qixils/NeoForgeAP/releases/download/v2.1.3/minecraft.apworld",
 
+    "neonwhiteMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.6.1/MelonLoader.x64.zip",
+    "neonwhiteAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/NWArchipelago.dll",
+    "neonwhiteAPMCN": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Archipelago.MultiClient.Net.dll",
+    "neonwhitePrefManager": "https://github.com/Bluscream/MelonPreferencesManager/releases/download/1.3.1/MelonPrefManager.Mono.dll",
+    "neonwhiteUniverseLib": "https://github.com/sinai-dev/UniverseLib/releases/download/1.5.1/UniverseLib.Mono.zip",
+    "neonwhiteNeonLite": "https://github.com/Faustas156/NeonLite/releases/download/3.0.11%2B10/NeonLite.dll",
+
     "ninesolsAP": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.5.5/Ixrec-ArchipelagoRandomizer-0.5.5.zip",
     "ninesolsApworld": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.5.5/nine_sols.apworld",
     "ninesolsAPI": "https://thunderstore.io/package/download/ninesolsmodding/NineSolsAPI/1.3.1/",
