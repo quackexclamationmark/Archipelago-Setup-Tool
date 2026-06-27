@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class SideBarTab : MonoBehaviour
 {
@@ -11,15 +12,27 @@ public class SideBarTab : MonoBehaviour
     public GameObject firstTabPanel;
     public GameObject secondTabPanel;
 
+    [Header("TAB TEXTS")]
+    public TextMeshProUGUI firstTabText;
+    public TextMeshProUGUI secondTabText;
+
+    private ColorBlock firstTabOriginalColors;
+    private ColorBlock secondTabOriginalColors;
+
+    private Color firstTabTextOriginalColor;
+    private Color secondTabTextOriginalColor;
+
     void Start()
     {
-        if (firstTabButton != null)
-            firstTabButton.onClick.AddListener(OnFirstTabClicked);
+        firstTabOriginalColors = firstTabButton.colors;
+        secondTabOriginalColors = secondTabButton.colors;
 
-        if (secondTabButton != null)
-            secondTabButton.onClick.AddListener(OnSecondTabClicked);
+        firstTabTextOriginalColor = firstTabText.color;
+        secondTabTextOriginalColor = secondTabText.color;
 
-        // Sélectionner le premier tab par défaut
+        firstTabButton.onClick.AddListener(OnFirstTabClicked);
+        secondTabButton.onClick.AddListener(OnSecondTabClicked);
+
         SelectFirstTab();
     }
 
@@ -35,39 +48,39 @@ public class SideBarTab : MonoBehaviour
 
     void SelectFirstTab()
     {
-        // Afficher le premier panel
         if (firstTabPanel != null)
             firstTabPanel.SetActive(true);
-
-        // Masquer le second panel
         if (secondTabPanel != null)
             secondTabPanel.SetActive(false);
 
-        // Mettre en avant le bouton du premier tab
-        if (firstTabButton != null)
-            firstTabButton.interactable = false;
-
-        // Rendre clickable le bouton du second tab
-        if (secondTabButton != null)
-            secondTabButton.interactable = true;
+        SetButtonAsActive(firstTabButton, firstTabOriginalColors, firstTabText, firstTabTextOriginalColor);
+        SetButtonAsInactive(secondTabButton, secondTabOriginalColors, secondTabText, secondTabTextOriginalColor);
     }
 
     void SelectSecondTab()
     {
-        // Masquer le premier panel
         if (firstTabPanel != null)
             firstTabPanel.SetActive(false);
-
-        // Afficher le second panel
         if (secondTabPanel != null)
             secondTabPanel.SetActive(true);
 
-        // Rendre clickable le bouton du premier tab
-        if (firstTabButton != null)
-            firstTabButton.interactable = true;
+        SetButtonAsInactive(firstTabButton, firstTabOriginalColors, firstTabText, firstTabTextOriginalColor);
+        SetButtonAsActive(secondTabButton, secondTabOriginalColors, secondTabText, secondTabTextOriginalColor);
+    }
 
-        // Mettre en avant le bouton du second tab
-        if (secondTabButton != null)
-            secondTabButton.interactable = false;
+    void SetButtonAsActive(Button button, ColorBlock originalColors, TextMeshProUGUI text, Color originalTextColor)
+    {
+        button.colors = originalColors;
+        button.interactable = true;
+        text.color = originalTextColor;
+    }
+
+    void SetButtonAsInactive(Button button, ColorBlock originalColors, TextMeshProUGUI text, Color originalTextColor)
+    {
+        ColorBlock colors = originalColors;
+        colors.normalColor = colors.disabledColor;
+        button.colors = colors;
+        button.interactable = true;
+        text.color = new Color(originalTextColor.r, originalTextColor.g, originalTextColor.b, originalTextColor.a * 0.6f);
     }
 }

@@ -463,7 +463,7 @@ public class ADOFAIManualDL : MonoBehaviour
 
     IEnumerator LoadRemoteConfig()
     {
-        string url = "https://raw.githubusercontent.com/yourusername/ADOFAI-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
+        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
 
         UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url);
         yield return request.SendWebRequest();

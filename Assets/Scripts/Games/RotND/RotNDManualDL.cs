@@ -816,16 +816,26 @@ public class RotNDManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Rift of the NecroDancer"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Rift of the NecroDancer"),
-            @"D:\Steam\steamapps\common\Rift of the NecroDancer",
-            @"D:\SteamLibrary\steamapps\common\Rift of the NecroDancer",
-            @"D:\steamapps\common\Rift of the NecroDancer",
-            @"E:\Steam\steamapps\common\Rift of the NecroDancer",
-            @"E:\SteamLibrary\steamapps\common\Rift of the NecroDancer",
-            @"E:\steamapps\common\Rift of the NecroDancer",
-            @"E:\Program Files (x86)\steamapps\common\Rift of the NecroDancer",
-            @"E:\Program Files\steamapps\common\Rift of the NecroDancer",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "RiftOfTheNecroDancerOSTVolume1"),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Rift Of The NecroDancer"),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "RiftOfTheNecroDancerOSTVolume1"),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Rift Of The NecroDancer"),
+            @"D:\Steam\steamapps\common\RiftOfTheNecroDancerOSTVolume1",
+            @"D:\Steam\steamapps\common\Rift Of The NecroDancer",
+            @"D:\SteamLibrary\steamapps\common\RiftOfTheNecroDancerOSTVolume1",
+            @"D:\SteamLibrary\steamapps\common\Rift Of The NecroDancer",
+            @"D:\steamapps\common\RiftOfTheNecroDancerOSTVolume1",
+            @"D:\steamapps\common\Rift Of The NecroDancer",
+            @"E:\Steam\steamapps\common\RiftOfTheNecroDancerOSTVolume1",
+            @"E:\Steam\steamapps\common\Rift Of The NecroDancer",
+            @"E:\SteamLibrary\steamapps\common\RiftOfTheNecroDancerOSTVolume1",
+            @"E:\SteamLibrary\steamapps\common\Rift Of The NecroDancer",
+            @"E:\steamapps\common\RiftOfTheNecroDancerOSTVolume1",
+            @"E:\steamapps\common\Rift Of The NecroDancer",
+            @"E:\Program Files (x86)\steamapps\common\RiftOfTheNecroDancerOSTVolume1",
+            @"E:\Program Files (x86)\steamapps\common\Rift Of The NecroDancer",
+            @"E:\Program Files\steamapps\common\RiftOfTheNecroDancerOSTVolume1",
+            @"E:\Program Files\steamapps\common\Rift Of The NecroDancer",
         };
 
         foreach (string path in quickPaths)
@@ -849,23 +859,43 @@ public class RotNDManualDL : MonoBehaviour
 
                 try
                 {
-                    string rotNDPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Rift of the NecroDancer");
+                    string rotNDPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "RiftOfTheNecroDancerOSTVolume1");
                     if (Directory.Exists(rotNDPath))
                         return rotNDPath;
 
-                    rotNDPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Rift of the NecroDancer");
+                    rotNDPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Rift Of The NecroDancer");
                     if (Directory.Exists(rotNDPath))
                         return rotNDPath;
 
-                    rotNDPath = Path.Combine(drive.Name, "steamapps", "common", "Rift of the NecroDancer");
+                    rotNDPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "RiftOfTheNecroDancerOSTVolume1");
                     if (Directory.Exists(rotNDPath))
                         return rotNDPath;
 
-                    rotNDPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Rift of the NecroDancer");
+                    rotNDPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Rift Of The NecroDancer");
                     if (Directory.Exists(rotNDPath))
                         return rotNDPath;
 
-                    rotNDPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Rift of the NecroDancer");
+                    rotNDPath = Path.Combine(drive.Name, "steamapps", "common", "RiftOfTheNecroDancerOSTVolume1");
+                    if (Directory.Exists(rotNDPath))
+                        return rotNDPath;
+
+                    rotNDPath = Path.Combine(drive.Name, "steamapps", "common", "Rift Of The NecroDancer");
+                    if (Directory.Exists(rotNDPath))
+                        return rotNDPath;
+
+                    rotNDPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "RiftOfTheNecroDancerOSTVolume1");
+                    if (Directory.Exists(rotNDPath))
+                        return rotNDPath;
+
+                    rotNDPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Rift Of The NecroDancer");
+                    if (Directory.Exists(rotNDPath))
+                        return rotNDPath;
+
+                    rotNDPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "RiftOfTheNecroDancerOSTVolume1");
+                    if (Directory.Exists(rotNDPath))
+                        return rotNDPath;
+
+                    rotNDPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Rift Of The NecroDancer");
                     if (Directory.Exists(rotNDPath))
                         return rotNDPath;
                 }

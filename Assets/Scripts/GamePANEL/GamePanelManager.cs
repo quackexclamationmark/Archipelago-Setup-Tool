@@ -51,6 +51,10 @@ public class GamePanelManager : MonoBehaviour
     public GameObject doomPanel;
     public GameObject noitaPanel;
     public GameObject ds2Panel;
+    public GameObject sm64Panel;
+    public GameObject raftPanel;
+    public GameObject witnessPanel;
+    public GameObject neonwhitePanel;
 
     void Start()
     {
@@ -72,13 +76,13 @@ public class GamePanelManager : MonoBehaviour
             case "PowerwashSimulator":
                 powerwashPanel.SetActive(true);
                 break;
-            case "COE33":
+            case "ClairObscurExpedition33":
                 coe33Panel.SetActive(true);
                 break;
             case "LethalCompany":
                 lethalcompanyPanel.SetActive(true);
                 break;
-            case "Slay The Spire 2":
+            case "SlayTheSpire2":
                 sts2Panel.SetActive(true);
                 break;
             case "ContentWarning":
@@ -87,7 +91,7 @@ public class GamePanelManager : MonoBehaviour
             case "PeaksOfYore":
                 peaksofyorePanel.SetActive(true);
                 break;
-            case "BTD6":
+            case "BloonsTD6":
                 btd6Panel.SetActive(true);
                 break;
             case "VoicesOfTheVoid":
@@ -117,7 +121,7 @@ public class GamePanelManager : MonoBehaviour
             case "Portal2":
                 portal2Panel.SetActive(true);
                 break;
-            case "LTUTAL":
+            case "LibrarianTidyUptheArcaneLibrary":
                 ltutalPanel.SetActive(true);
                 break;
             case "Minecraft":
@@ -141,7 +145,7 @@ public class GamePanelManager : MonoBehaviour
             case "CloverPit":
                 cloverpitPanel.SetActive(true);
                 break;
-            case "RE7":
+            case "ResidentEvil7":
                 re7Panel.SetActive(true);
                 break;
             case "ScheduleI":
@@ -153,49 +157,49 @@ public class GamePanelManager : MonoBehaviour
             case "ULTRAKILL":
                 ultrakillPanel.SetActive(true);
                 break;
-            case "UGG":
+            case "UntitledGooseGame":
                 uggPanel.SetActive(true);
                 break;
             case "HiFiRUSH":
                 hifiPanel.SetActive(true);
                 break;
-            case "Stardew":
+            case "StardewValley":
                 stardewPanel.SetActive(true);
                 break;
             case "TUNIC":
                 tunicPanel.SetActive(true);
                 break;
-            case "ACT":
+            case "AnotherCrab'sTreasure":
                 actPanel.SetActive(true);
                 break;
-            case "OriBF":
+            case "OriAndTheBlindForest":
                 oribfPanel.SetActive(true);
                 break;
-            case "OriWotW":
+            case "OriAndTheWillOfTheWisps":
                 oriwotwPanel.SetActive(true);
                 break;
-            case "RotND":
+            case "RiftOfTheNecrodancer":
                 rotndPanel.SetActive(true);
                 break;
             case "DREDGE":
                 dredgePanel.SetActive(true);
                 break;
-            case "DS3":
+            case "DARKSOULS3":
                 ds3Panel.SetActive(true);
                 break;
-            case "CCCharles":
+            case "Choo-ChooCharles":
                 charlesPanel.SetActive(true);
                 break;
             case "Overcooked2":
                 oc2Panel.SetActive(true);
                 break;
-            case "HitmanWOA":
+            case "HitmanWorldOfAssassination":
                 hitmanwoaPanel.SetActive(true);
                 break;
-            case "ADOFAI":
+            case "ADanceofFireandIce":
                 adofaiPanel.SetActive(true);
                 break;
-            case "TCG":
+            case "TCGCardShopSimulator":
                 tcgPanel.SetActive(true);
                 break;
             case "DOOM2":
@@ -207,8 +211,20 @@ public class GamePanelManager : MonoBehaviour
             case "Noita":
                 noitaPanel.SetActive(true);
                 break;
-            case "DS2":
+            case "DARKSOULS2":
                 ds2Panel.SetActive(true);
+                break;
+            case "SuperMario64":
+                sm64Panel.SetActive(true);
+                break;
+            case "Raft":
+                raftPanel.SetActive(true);
+                break;
+            case "TheWitness":
+                witnessPanel.SetActive(true);
+                break;
+            case "NeonWhite":
+                neonwhitePanel.SetActive(true);
                 break;
         }
     }
@@ -264,5 +280,9 @@ public class GamePanelManager : MonoBehaviour
         if (doomPanel != null) doomPanel.SetActive(false);
         if (noitaPanel != null) noitaPanel.SetActive(false);
         if (ds2Panel != null) ds2Panel.SetActive(false);
+        if (sm64Panel != null) sm64Panel.SetActive(false);
+        if (raftPanel != null) raftPanel.SetActive(false);
+        if (witnessPanel != null) witnessPanel.SetActive(false);
+        if (neonwhitePanel != null) neonwhitePanel.SetActive(false);
     }
 }

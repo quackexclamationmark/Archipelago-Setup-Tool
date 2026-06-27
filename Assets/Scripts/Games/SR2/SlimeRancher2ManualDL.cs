@@ -600,7 +600,7 @@ public class SlimeRancher2ManualDL : MonoBehaviour
 
     IEnumerator LoadRemoteConfig()
     {
-        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/slimerancher2_config.json";
+        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
 
         UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url);
         yield return request.SendWebRequest();
