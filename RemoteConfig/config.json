@@ -218,6 +218,10 @@
     "scheduleApworld": "https://github.com/MacH8s/Narcopelago/releases/download/v3.6.3/Schedule_I.apworld",
     "scheduleMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
 
+    "skulApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-Skul/releases/download/1.0.2/skul.apworld",
+    "skulAP": "https://github.com/Jeffdev-Archipelago-Implementations/SkulAPMod/releases/download/1.0.0/SkulAPMod.zip",
+    "skulBepInEx": "https://thunderstore.io/package/download/BepInEx/BepInExPack_Skul/5.4.2100/",
+
     "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/0.5.2-alpha/sts2-client.zip",
     "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/0.5.2-alpha/spire2.apworld",
 
