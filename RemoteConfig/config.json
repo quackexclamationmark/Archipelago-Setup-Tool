@@ -24,6 +24,8 @@
     "noitaPopTracker": "https://github.com/ScipioWright/Noita-poptracker/releases/download/2.1.0/Noita-poptracker.zip",
     "cloverpitPopTracker": "https://github.com/snileaf/CloverPit-poptracker/releases/download/v0.0.1/CloverPit-poptracker-v0.0.1.zip",
     "ds2PopTracker": "https://github.com/AkagiCritMagnet/Dark-Souls-2-poptracker-for-Archipelago/releases/download/v1.4/DS2.pack.zip",
+    "sm64PopTracker": "https://github.com/ThePhar/APSM64TrackerPack/releases/download/1.5.1/pharware-sm64-pack_1.5.1.zip",
+    "raftPopTracker": "https://github.com/PrimePentad/Raft-AP-Poptracker/archive/refs/tags/v0.4.zip",
     
 
     "adofaiBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
@@ -112,6 +114,14 @@
 
     "minecraftApworld": "https://github.com/qixils/NeoForgeAP/releases/download/v2.1.3/minecraft.apworld",
 
+    "neonwhiteMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.6.1/MelonLoader.x64.zip",
+    "neonwhiteAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/NWArchipelago.dll",
+    "neonwhiteAPMCN": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Archipelago.MultiClient.Net.dll",
+    "neonwhitePrefManager": "https://github.com/Bluscream/MelonPreferencesManager/releases/download/1.3.1/MelonPrefManager.Mono.dll",
+    "neonwhiteUniverseLib": "https://github.com/sinai-dev/UniverseLib/releases/download/1.5.1/UniverseLib.Mono.zip",
+    "neonwhiteNeonLite": "https://github.com/Faustas156/NeonLite/releases/download/3.0.11%2B10/NeonLite.dll",
+    "neonwhiteApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/neonwhite.apworld",
+
     "ninesolsAP": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.5.5/Ixrec-ArchipelagoRandomizer-0.5.5.zip",
     "ninesolsApworld": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.5.5/nine_sols.apworld",
     "ninesolsAPI": "https://thunderstore.io/package/download/ninesolsmodding/NineSolsAPI/1.3.1/",
@@ -149,6 +159,8 @@
     "powerwashAP": "https://github.com/SWCreeperKing/PowerwashSimAP/releases/download/v0.5.14/SW_CreeperKing.ArchipelagoMod.zip",
     "powerwashBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v6.0.0-pre.1/BepInEx_UnityIL2CPP_x64_6.0.0-pre.1.zip",
     "powerwashApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/powerwashsimulator.apworld",
+
+    "raftAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-RMLL-Raft.zip",
     
     "repoAP": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.3/RepoAP.zip",
     "repoMenuLib": "https://thunderstore.io/package/download/nickklmao/MenuLib/2.5.4/",
@@ -219,9 +231,25 @@
     "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.3/Archipelago_193.zip",
     "subnauticaBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
+    "sm64APLauncher": "https://github.com/N00byKing/SM64AP-Launcher/releases/download/rel8/SM64AP-Launcher_windows.zip",
+    "sm64MSYS": "https://github.com/msys2/msys2-installer/releases/download/2026-06-11/msys2-x86_64-20260611.exe",
+    "sm64DefConfig": {
+    "advanced": false,
+    "builds": {},
+    "default_build_root": "_None",
+    "msys_path": "C:/msys64",
+    "rom_paths": {
+        "jp": "_None",
+        "us": "_None"
+    },
+    "version": "5a6b930"
+    },
+
     "tcgBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "tcgApworld": "https://github.com/FyreDay/Archipelago-TCGCardShopSimulator/releases/download/v1.1.0/tcg_card_shop_simulator.apworld",
     "tcgAP": "https://github.com/FyreDay/TCG-CardShop-Sim-APClient/releases/download/v1.1.1/TCG_AP_Client_v1.1.1.zip",
+
+    "thewitnessAP": "https://github.com/NewSoupVi/The-Witness-Randomizer-for-Archipelago/releases/download/9.0.0/The.Witness.Randomizer.for.Archipelago.exe",
 
     "tunicAP": "https://github.com/silent-destroyer/tunic-randomizer/releases/download/5.0.0/TunicRandomizer.zip",
     "tunicBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v6.0.0-pre.1/BepInEx_UnityIL2CPP_x64_6.0.0-pre.1.zip",
