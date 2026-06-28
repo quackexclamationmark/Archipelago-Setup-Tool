@@ -28,6 +28,7 @@
     "raftPopTracker": "https://github.com/PrimePentad/Raft-AP-Poptracker/archive/refs/tags/v0.4.zip",
     "witnessPopTracker": "https://github.com/NewSoupVi/witness_archipelago_tracker/releases/download/v0.6.3.0/witness_archipelago_tracker.zip",
     "funiraccoonPopTracker": "https://github.com/Jeffdev-Archipelago-Implementations/FuniRaccoonPopTracker/releases/download/1.1.8/FuniRaccoonPopTracker.zip",
+    "fezPopTracker": "https://github.com/maYayoh/GAT/releases/download/v1.2/FezTracker_1.2.zip",
     
 
     "adofaiBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
@@ -85,6 +86,9 @@
 
     "dredgeAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-DREDGE.zip",
     "dredgeApworld": "https://github.com/alextric234/ArchipelagoDredge/releases/download/dredge_0.5.1/dredge.apworld",
+
+    "fezHAT": "https://github.com/FEZModding/HAT/releases/download/v1.2.1/HAT.zip",
+    "fezAP": "https://github.com/nhyldmar/fez-ap/releases/download/v0.5.0/fezap.zip",
 
     "funiraccoonAP": "https://github.com/Jeffdev-Archipelago-Implementations/FuniRaccoonAP/releases/download/1.5.7/FuniRaccoonAP.zip",
     "funiraccoonApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-Funi/releases/download/1.5.2/funi_raccoon.apworld",
