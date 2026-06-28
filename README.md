@@ -7,11 +7,11 @@ DOWNLOAD THE INSTALLER, NOT THE .ZIP FILE!
 Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could (idk I didn't try it) but it COULD delete everything that is next to the .exe (in the same folder) even tho it's not supposed to. Basically, you can move the folder but probably don't rename it and do not touch what's inside.
 
 # Archipelago Setup Tool
-### [Download latest version | v1.1.0](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v1.1.0)
+### [Download latest version | v1.1.1](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v1.1.1)
 
 After setting up a game, all credits can be found in the game's directory, inside the game's directory.
 
-Currently, the following games are supported (48):
+Currently, the following games are supported (58):
 
 * Clair Obscur: Expedition 33
 * Lethal Company
@@ -65,6 +65,12 @@ Currently, the following games are supported (48):
 * Super Mario 64
 * Neon White
 * The Witness
+* Pikuniku
+* Garfield Kart - Furious Racing
+* Unfair Flips
+* Skul: The Hero Slayer
+* Funi Raccoon Game
+* Fez
 
 Features to add in the future:
 
