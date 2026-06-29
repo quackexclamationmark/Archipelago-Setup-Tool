@@ -27,6 +27,8 @@
     "sm64PopTracker": "https://github.com/ThePhar/APSM64TrackerPack/releases/download/1.5.1/pharware-sm64-pack_1.5.1.zip",
     "raftPopTracker": "https://github.com/PrimePentad/Raft-AP-Poptracker/archive/refs/tags/v0.4.zip",
     "witnessPopTracker": "https://github.com/NewSoupVi/witness_archipelago_tracker/releases/download/v0.6.3.0/witness_archipelago_tracker.zip",
+    "funiraccoonPopTracker": "https://github.com/Jeffdev-Archipelago-Implementations/FuniRaccoonPopTracker/releases/download/1.1.8/FuniRaccoonPopTracker.zip",
+    "fezPopTracker": "https://github.com/maYayoh/GAT/releases/download/v1.2/FezTracker_1.2.zip",
     
 
     "adofaiBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
@@ -84,6 +86,17 @@
 
     "dredgeAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-DREDGE.zip",
     "dredgeApworld": "https://github.com/alextric234/ArchipelagoDredge/releases/download/dredge_0.5.1/dredge.apworld",
+
+    "fezHAT": "https://github.com/FEZModding/HAT/releases/download/v1.2.1/HAT.zip",
+    "fezAP": "https://github.com/nhyldmar/fez-ap/releases/download/v0.5.0/fezap.zip",
+    "fezApworld": "https://github.com/nhyldmar/fez-ap/releases/download/v0.5.0/fez.apworld",
+
+    "funiraccoonAP": "https://github.com/Jeffdev-Archipelago-Implementations/FuniRaccoonAP/releases/download/1.5.7/FuniRaccoonAP.zip",
+    "funiraccoonApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-Funi/releases/download/1.5.2/funi_raccoon.apworld",
+
+    "garfieldkartAP": "https://github.com/robotzurg/GarfieldKartAPMod/releases/download/beta-0.5.8/GarfieldKartAPMod.zip",
+    "garfieldkartApworld": "https://github.com/FeluciaPS/Archipelago/releases/download/0.5.3-beta/garfkart.apworld",
+    "garfieldkartBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
     "hadesImporter": "https://github.com/NaixGames/PolycosmosInstaller/releases/download/0.3/Installer.exe",
     "hadesApworld": "https://github.com/NaixGames/Polycosmos/releases/download/0.15.1/hades.apworld",
@@ -154,6 +167,10 @@
     "peaksofyoreBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "peaksofyoreApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/peaks_of_yore.apworld",
 
+    "pikunikuAP": "https://github.com/Jeffdev-Archipelago-Implementations/PikuAPMod/releases/download/0.3.1/PikunikuAPMod.zip",
+    "pikunikuApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-Piku/releases/download/0.3.1/pikuniku.apworld",
+    "pikunikuBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+
     "portal2AP": "https://github.com/GlassToadstool/Portal2ArchipelagoMod/releases/download/0.7.0/Portal2ArchipelagoMod.zip",
     "portal2Apworld": "https://github.com/GlassToadstool/Archipelago/releases/download/0.7.1/portal2.apworld",
 
@@ -214,6 +231,10 @@
     "scheduleApworld": "https://github.com/MacH8s/Narcopelago/releases/download/v3.6.3/Schedule_I.apworld",
     "scheduleMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
 
+    "skulApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-Skul/releases/download/1.0.2/skul.apworld",
+    "skulAP": "https://github.com/Jeffdev-Archipelago-Implementations/SkulAPMod/releases/download/1.0.0/SkulAPMod.zip",
+    "skulBepInEx": "https://thunderstore.io/package/download/BepInEx/BepInExPack_Skul/5.4.2100/",
+
     "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/0.5.2-alpha/sts2-client.zip",
     "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/0.5.2-alpha/spire2.apworld",
 
@@ -221,8 +242,8 @@
     "slimerancherApworld": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.1/slime_rancher.apworld",
     "slimerancherMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.1/MelonLoader.x64.zip",
 
-    "slimerancher2AP": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.9.0/SlimeRancher2-AP.zip",
-    "slimerancher2Apworld": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.9.0/slime_rancher_2.apworld",
+    "slimerancher2AP": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.9.2/SlimeRancher2-AP.zip",
+    "slimerancher2Apworld": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.9.2/slime_rancher_2.apworld",
     "slimerancher2BepInEx": "https://builds.bepinex.dev/projects/bepinex_be/759/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.759%2B9aedb90.zip",
     "slimerancher2Interop": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/interop.zip",
 
@@ -260,11 +281,15 @@
     "ultrakillBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "ultrakillPluginConfigurator": "https://thunderstore.io/package/download/EternalsTeam/PluginConfigurator/1.10.2/",
 
+    "unfairflipsApworld": "https://github.com/xMcacutt-Archipelago/Archipelago-UnfairFlips/releases/download/1.2.1/unfair_flips.apworld",
+    "unfairflipsAP": "https://github.com/robotzurg/UnfairFlipsAPMod/releases/download/1.4.2/UnfairFlipsAPMod.zip",
+    "unfairflipsBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+
     "untitledAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/UGG-Archipelago.zip",
     "untitledApworld": "https://github.com/PixelShake92/Untitled-Goose-Game-Archipelago/releases/download/Alpha_2.2/untitled_goose_game.apworld",
     "untitledBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.9/BepInEx_x64_5.4.9.0.zip",
 
-    "votvUE4SS": "https://github.com/UE4SS-RE/RE-UE4SS/releases/download/experimental-latest/UE4SS_v3.0.1-988-g2352d15b.zip",
+    "votvUE4SS": "https://github.com/UE4SS-RE/RE-UE4SS/releases/download/experimental-latest/UE4SS_v3.0.1-990-g0c574377.zip",
     "votvApworld": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.3.1/votv.apworld",
     "votvAP": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.3.1/votv_ap-main.zip",
     "votvDL": "https://r2.votv.dev/archive/votv/090n.7z",
@@ -281,7 +306,8 @@
         "0.3.0": "obsolete",
         "1.0.0": "obsolete",        
         "1.0.1": "obsolete",
-        "1.1.0": "latest"
+        "1.1.0": "obsolete",
+        "1.1.1": "latest"
     },
-    "toolLatestDownloadUrl": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/download/v1.1.0/Archipelago.Setup.Tool.v1.1.0.zip"
+    "toolLatestDownloadUrl": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/download/v1.1.1/Archipelago.Setup.Tool.v1.1.1.zip"
 }
