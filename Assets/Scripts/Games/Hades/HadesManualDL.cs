@@ -588,7 +588,7 @@ public class HadesManualDL : MonoBehaviour
             UnityEngine.Debug.LogWarning("Scripts backup not found at: " + backupScriptsPath);
         }
 
-        ShowInfo("Hades revert complete!");
+        ShowInfo("Revert complete!");
         UnityEngine.Debug.Log("END: Hades Revert");
 
         yield return null;

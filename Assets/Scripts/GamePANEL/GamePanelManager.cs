@@ -55,6 +55,12 @@ public class GamePanelManager : MonoBehaviour
     public GameObject raftPanel;
     public GameObject witnessPanel;
     public GameObject neonwhitePanel;
+    public GameObject garfieldkartPanel;
+    public GameObject unfairflipsPanel;
+    public GameObject skulPanel;
+    public GameObject pikunikuPanel;
+    public GameObject funiraccoonPanel;
+    public GameObject fezPanel;
 
     void Start()
     {
@@ -226,6 +232,24 @@ public class GamePanelManager : MonoBehaviour
             case "NeonWhite":
                 neonwhitePanel.SetActive(true);
                 break;
+            case "GarfieldKartFuriousRacing":
+                garfieldkartPanel.SetActive(true);
+                break;
+            case "UnfairFlips":
+                unfairflipsPanel.SetActive(true);
+                break;
+            case "SkulTheHeroSlayer":
+                skulPanel.SetActive(true);
+                break;
+            case "Pikuniku":
+                pikunikuPanel.SetActive(true);
+                break;
+            case "FuniRaccoonGame":
+                funiraccoonPanel.SetActive(true);
+                break;
+            case "FEZ":
+                fezPanel.SetActive(true);
+                break;
         }
     }
 
@@ -284,5 +308,11 @@ public class GamePanelManager : MonoBehaviour
         if (raftPanel != null) raftPanel.SetActive(false);
         if (witnessPanel != null) witnessPanel.SetActive(false);
         if (neonwhitePanel != null) neonwhitePanel.SetActive(false);
+        if (garfieldkartPanel != null) garfieldkartPanel.SetActive(false);
+        if (unfairflipsPanel != null) unfairflipsPanel.SetActive(false);
+        if (skulPanel != null) skulPanel.SetActive(false);
+        if (pikunikuPanel != null) pikunikuPanel.SetActive(false);
+        if (funiraccoonPanel != null) funiraccoonPanel.SetActive(false);
+        if (fezPanel != null) fezPanel.SetActive(false);
     }
 }

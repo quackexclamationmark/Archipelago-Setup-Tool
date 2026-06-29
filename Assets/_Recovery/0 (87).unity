@@ -3606,7 +3606,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1541927450}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.5928545
+  m_Size: 0.45541343
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -7802,7 +7802,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.38431373}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.39215687}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -12397,7 +12397,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 740342147}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.5542536
+  m_Size: 0.43228647
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -38435,7 +38435,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 806343874}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.41269955
+  m_Size: 0.30812976
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -38881,7 +38881,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 300092130}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.501924
+  m_Size: 0.39564922
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -54198,7 +54198,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 55841012}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.35027346
+  m_Size: 0.27194396
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -57200,7 +57200,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 2024012327}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.41947845
+  m_Size: 0.29655993
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -59937,7 +59937,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1723675216}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.4264838
+  m_Size: 0.31574926
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -63019,7 +63019,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1354890804}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.33630696
+  m_Size: 0.2530095
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -69445,7 +69445,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1165781730}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.55728275
+  m_Size: 0.42806283
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -70068,7 +70068,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 778189628}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.32034168
+  m_Size: 0.25355086
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -72596,7 +72596,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 2114605979}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.41269955
+  m_Size: 0.31189296
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -83517,8 +83517,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 535796400}
   m_HandleRect: {fileID: 535796399}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 0.37745592
+  m_Value: 0.99999994
+  m_Size: 0.2848362
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -109667,7 +109667,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1510912499}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.65401465
+  m_Size: 0.51026803
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -140023,8 +140023,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 718506743}
   m_HandleRect: {fileID: 718506742}
   m_Direction: 2
-  m_Value: 0.49999985
-  m_Size: 0.563005
+  m_Value: 0.5
+  m_Size: 0.44795865
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -161629,7 +161629,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1850183717}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.3650149
+  m_Size: 0.27470675
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -171821,7 +171821,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 2043376966}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.49039426
+  m_Size: 0.355138
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -180526,8 +180526,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1806553830}
   m_HandleRect: {fileID: 1806553829}
   m_Direction: 2
-  m_Value: 0.49999994
-  m_Size: 0.35175112
+  m_Value: 0.5
+  m_Size: 0.26006457
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -181096,7 +181096,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -221806,8 +221806,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1594697443}
   m_HandleRect: {fileID: 1594697442}
   m_Direction: 2
-  m_Value: 0.49999994
-  m_Size: 0.36598545
+  m_Value: 0.5
+  m_Size: 0.28596687
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -240885,7 +240885,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 489847934}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.5539196
+  m_Size: 0.41794068
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -267459,7 +267459,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59132eaa0295d0a449c8e12adbfc10c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ToolVersionManager
-  currentToolVersion: 1.1.1
+  currentToolVersion: 1.1.0
   updatePanel: {fileID: 550308499}
   updateMessage: {fileID: 944625233}
   updateDownloadButton: {fileID: 496543453}
@@ -270880,7 +270880,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1248322740}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.44143263
+  m_Size: 0.33229753
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -277425,12 +277425,24 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Once everything is set up, a new \"ARCHIPELAGO\" window should appear.\n\nOnce
-    in-game, press ESCAPE, then, F10 and type \"connect archipelago.gg:XXXXX [slotname]
-    [optional password]\"\n\nXXXXX is the room\u2019s port. You can find this number
-    on the website after creating a new room.\n\n\"[slotname]\" is the name assigned
-    to your yaml file.\n\n\"[optional password]\" is optional.\n\nFinally, press
-    \"Enter\" and you should be able to start playing!"
+  m_text: 'Once everything is set up, a new "ARCHIPELAGO" window should appear.
+
+
+    In
+    the "HOST" field, enter archipelago.gg: followed by the port. This is a 5-digit
+    number that you can find on the website after creating a new room.
+
+
+    In "Slot",
+    enter the name assigned to your YAML file.
+
+
+    The "Password" field is optional.
+    If the host did not set one, leave it blank.
+
+
+    Finally, click "Connect" and
+    then, you can start a new run!'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
   m_sharedMaterial: {fileID: -9134737203265703719, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
@@ -281818,8 +281830,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 961374564}
   m_HandleRect: {fileID: 961374563}
   m_Direction: 2
-  m_Value: 1.0000001
-  m_Size: 0.5783872
+  m_Value: 1
+  m_Size: 0.46286875
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -288845,7 +288857,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 925461809}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.57940364
+  m_Size: 0.43972996
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -292391,8 +292403,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 418051609}
   m_HandleRect: {fileID: 418051608}
   m_Direction: 2
-  m_Value: 0.9999984
-  m_Size: 0.94499105
+  m_Value: 1
+  m_Size: 0.9449912
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -294334,7 +294346,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1369271932}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.5696517
+  m_Size: 0.5696518
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -322789,7 +322801,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1047962450}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.43393195
+  m_Size: 0.33667845
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -323288,7 +323300,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 452647978}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.32596755
+  m_Size: 0.24731208
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -335328,7 +335340,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 998135301}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.42668185
+  m_Size: 0.33229753
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -344309,7 +344321,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 2132530164}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.5415282
+  m_Size: 0.43152812
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -348664,7 +348676,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1860033573}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.34258097
+  m_Size: 0.260027
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -358341,7 +358353,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 225463681}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.6544802
+  m_Size: 0.48166305
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -361711,8 +361723,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 916158824}
   m_HandleRect: {fileID: 916158823}
   m_Direction: 2
-  m_Value: 0.4999999
-  m_Size: 0.41940406
+  m_Value: 0.5
+  m_Size: 0.3289829
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -382906,8 +382918,6 @@ RectTransform:
   - {fileID: 935437868}
   - {fileID: 348151905}
   - {fileID: 1444746457}
-  - {fileID: 2017363338}
-  - {fileID: 1982950952}
   m_Father: {fileID: 789814563}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -384476,7 +384486,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1700876221}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.45496264
+  m_Size: 0.34920263
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -391470,7 +391480,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 491580279}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.53027195
+  m_Size: 0.39293
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -405421,7 +405431,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Full Clear HAT
+  m_text: Full Clear BepInEx
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
   m_sharedMaterial: {fileID: -9134737203265703719, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
@@ -407616,7 +407626,7 @@ GameObject:
   - component: {fileID: 1378990819}
   - component: {fileID: 1378990820}
   m_Layer: 5
-  m_Name: ToggleFullClearhat
+  m_Name: ToggleFullClearBepInEx
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -417613,7 +417623,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 66962880}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.53119606
+  m_Size: 0.40594533
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -426655,8 +426665,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 605334067}
   m_HandleRect: {fileID: 605334066}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 0.37509868
+  m_Value: 1.0000001
+  m_Size: 0.2899288
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -427307,17 +427317,11 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'You have 2 revert options, both can''t be enabled at the same time.
-
-
-    If
-    you use the "Clear AP Mods" option it will only delete the mods that are required
-    for Fez Archipelago.
-
-
-    If you use the "Full Clear HAT" option it will delete
-    everything related to HAT and mods. If other mods are detected an additionnal
-    confirmation will appear.'
+  m_text: "You have 2 revert options, both can't be enabled at the same time.\n\nIf
+    you use the \"Clear AP Mods\" option it will only delete the mods that are required
+    for CloverPit Archipelago.\n\nIf you use the \"Full Clear BepInEx\" option it
+    will delete everything related to BepInEx and mods. If other mods are detected
+    an additionnal confirmation will appear.\n\t"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
   m_sharedMaterial: {fileID: -9134737203265703719, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
@@ -432017,7 +432021,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 850695787}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.562735
+  m_Size: 0.41047648
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -432327,7 +432331,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1530266353}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.54247993
+  m_Size: 0.42627338
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -438429,8 +438433,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 837060527}
   m_HandleRect: {fileID: 837060526}
   m_Direction: 2
-  m_Value: 1.0000002
-  m_Size: 0.65333205
+  m_Value: 1
+  m_Size: 0.54217327
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -456920,7 +456924,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 2112081299}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.75005907
+  m_Size: 0.579775
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -464960,7 +464964,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1103778074}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.56654966
+  m_Size: 0.41927484
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -479836,7 +479840,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1712367192}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.54247993
+  m_Size: 0.42627338
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -487070,7 +487074,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 668723527}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.54247993
+  m_Size: 0.42627338
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -497476,7 +497480,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'GAME SETUP STATUS: FULLY WORKING'
+  m_text: 'GAME SETUP STATUS: WORKING ON STEAM ONLY'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: a339bd6dbf65bbd43abfddbc0ed9fadb, type: 2}
   m_sharedMaterial: {fileID: -1515860736952138493, guid: a339bd6dbf65bbd43abfddbc0ed9fadb, type: 2}
@@ -515263,7 +515267,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 939450732}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.6544802
+  m_Size: 0.51055133
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -521744,7 +521748,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1623367527}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.3502734
+  m_Size: 0.25863242
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -525680,7 +525684,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 244365574}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.41967
+  m_Size: 0.32386914
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -543598,7 +543602,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 2053461177}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.4957599
+  m_Size: 0.39585808
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -551306,7 +551310,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1170916429}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.49196878
+  m_Size: 0.37149766
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -573871,8 +573875,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1085316200}
   m_HandleRect: {fileID: 1085316199}
   m_Direction: 2
-  m_Value: 0.5
-  m_Size: 0.3608938
+  m_Value: 0.49999997
+  m_Size: 0.28861824
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -574304,7 +574308,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1091408534}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.54247993
+  m_Size: 0.4335095
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -593369,156 +593373,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 1
---- !u!1 &1982950951
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1982950952}
-  - component: {fileID: 1982950954}
-  - component: {fileID: 1982950953}
-  m_Layer: 5
-  m_Name: ModsText (12)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1982950952
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1982950951}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1298583986}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1982950953
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1982950951}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_text: "Some games have a PopTracker integration for Archipelago which allows
-    you to track all possible Locations, Items, Upgrades, Zones, Hints and more depending
-    on the game.\n\nFor the setup there are 3 different cases:\n\n\t\u2022 If the
-    selected directory does not contain a PopTracker folder (or any similarly named
-    folder), a new \"poptracker\" folder will be created and the pack will be downloaded
-    to poptracker\\packs.\r\n\n\n\t\u2022 If the selected directory already contains
-    a folder with \"PopTracker\" in its name, the installer will look for a poptracker.exe
-    file. If one is found, the pack will be downloaded to its packs folder. If no
-    poptracker.exe is found, the folder will be renamed to \"poptracker\" and any
-    missing files or folders will be created.\r\n\n\n\t\u2022 If the selected directory
-    is already a PopTracker folder (for example: C:\\Users\\magni\\Documents\\poptracker),
-    its contents will be validated. If everything is present, the pack will simply
-    be downloaded to poptracker\\packs. Otherwise, the folder will be repaired before
-    the pack is installed.\n\t"
-  m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
-  m_sharedMaterial: {fileID: -9134737203265703719, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
-  m_fontSharedMaterials: []
-  m_fontMaterial: {fileID: 0}
-  m_fontMaterials: []
-  m_fontColor32:
-    serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
-  m_enableVertexGradient: 0
-  m_colorMode: 3
-  m_fontColorGradient:
-    topLeft: {r: 1, g: 1, b: 1, a: 1}
-    topRight: {r: 1, g: 1, b: 1, a: 1}
-    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
-    bottomRight: {r: 1, g: 1, b: 1, a: 1}
-  m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
-  m_tintAllSprites: 0
-  m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: -1183493901
-  m_overrideHtmlColors: 0
-  m_faceColor:
-    serializedVersion: 2
-    rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
-  m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
-  m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
-  m_textAlignment: 65535
-  m_characterSpacing: -5
-  m_characterHorizontalScale: 1
-  m_wordSpacing: 0
-  m_lineSpacing: 0
-  m_lineSpacingMax: 0
-  m_paragraphSpacing: 0
-  m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 1
-  m_wordWrappingRatios: 0.4
-  m_overflowMode: 0
-  m_linkedTextComponent: {fileID: 0}
-  parentLinkedComponent: {fileID: 0}
-  m_enableKerning: 0
-  m_ActiveFontFeatures: 6e72656b
-  m_enableExtraPadding: 0
-  checkPaddingRequired: 0
-  m_isRichText: 1
-  m_EmojiFallbackSupport: 1
-  m_parseCtrlCharacters: 1
-  m_isOrthographic: 1
-  m_isCullingEnabled: 0
-  m_horizontalMapping: 0
-  m_verticalMapping: 0
-  m_uvLineOffset: 0
-  m_geometrySortingOrder: 0
-  m_IsTextObjectScaleStatic: 0
-  m_VertexBufferAutoSizeReduction: 0
-  m_useMaxVisibleDescender: 1
-  m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
-  m_isUsingLegacyAnimationComponent: 0
-  m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
-  m_baseMaterial: {fileID: 0}
-  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!222 &1982950954
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1982950951}
-  m_CullTransparentMesh: 1
 --- !u!1 &1983702648
 GameObject:
   m_ObjectHideFlags: 0
@@ -597478,7 +597332,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 497582965}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.56654966
+  m_Size: 0.43972996
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -598376,7 +598230,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1286442052}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.5539196
+  m_Size: 0.41908374
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -603388,143 +603242,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2017209040}
   m_CullTransparentMesh: 1
---- !u!1 &2017363337
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2017363338}
-  - component: {fileID: 2017363340}
-  - component: {fileID: 2017363339}
-  m_Layer: 5
-  m_Name: ModsText (11)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &2017363338
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2017363337}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1298583986}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &2017363339
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2017363337}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_text: PopTracker Infos
-  m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
-  m_sharedMaterial: {fileID: -9134737203265703719, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
-  m_fontSharedMaterials: []
-  m_fontMaterial: {fileID: 0}
-  m_fontMaterials: []
-  m_fontColor32:
-    serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
-  m_enableVertexGradient: 0
-  m_colorMode: 3
-  m_fontColorGradient:
-    topLeft: {r: 1, g: 1, b: 1, a: 1}
-    topRight: {r: 1, g: 1, b: 1, a: 1}
-    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
-    bottomRight: {r: 1, g: 1, b: 1, a: 1}
-  m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
-  m_tintAllSprites: 0
-  m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: -1183493901
-  m_overrideHtmlColors: 0
-  m_faceColor:
-    serializedVersion: 2
-    rgba: 4294967295
-  m_fontSize: 34
-  m_fontSizeBase: 34
-  m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
-  m_fontStyle: 1
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 512
-  m_textAlignment: 65535
-  m_characterSpacing: -7
-  m_characterHorizontalScale: 1
-  m_wordSpacing: 0
-  m_lineSpacing: 0
-  m_lineSpacingMax: 0
-  m_paragraphSpacing: 0
-  m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 1
-  m_wordWrappingRatios: 0.4
-  m_overflowMode: 0
-  m_linkedTextComponent: {fileID: 0}
-  parentLinkedComponent: {fileID: 0}
-  m_enableKerning: 0
-  m_ActiveFontFeatures: 6e72656b
-  m_enableExtraPadding: 0
-  checkPaddingRequired: 0
-  m_isRichText: 1
-  m_EmojiFallbackSupport: 1
-  m_parseCtrlCharacters: 1
-  m_isOrthographic: 1
-  m_isCullingEnabled: 0
-  m_horizontalMapping: 0
-  m_verticalMapping: 0
-  m_uvLineOffset: 0
-  m_geometrySortingOrder: 0
-  m_IsTextObjectScaleStatic: 0
-  m_VertexBufferAutoSizeReduction: 0
-  m_useMaxVisibleDescender: 1
-  m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
-  m_isUsingLegacyAnimationComponent: 0
-  m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
-  m_baseMaterial: {fileID: 0}
-  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!222 &2017363340
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2017363337}
-  m_CullTransparentMesh: 1
 --- !u!1 &2017557228
 GameObject:
   m_ObjectHideFlags: 0
@@ -604482,7 +604199,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 520930222}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.52784127
+  m_Size: 0.39059553
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -604910,7 +604627,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 188964422}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.39995223
+  m_Size: 0.3119988
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -607987,13 +607704,15 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Once everything is set up, select a fresh new save with no Archipelago
-    data and once you press 'Accept' a new Archipelago connection window should appear.\n\nEnter
-    archipelago.gg:XXXXX in the \"Server\" field, where XXXXX is the room\u2019s
-    port. You can find this number on the website after creating a new room.\n\nIn
-    \"Slot Name\", enter the name assigned to your YAML file.\n\nThe \"Password\"
-    field is optional. If the host did not set one, leave it blank.\n\nFinally, click
-    \"Connect\" and then, you can start playing!"
+  m_text: "THE TOOL DOES IT FOR YOU IF YOU ARE USING THE LAUNCH AFTER SETUP TOGGLE
+    BUT IF YOU DON'T YOU WILL NEED TO USE THE LAUNCH OPTION: \n--override-cfg \"%STEAMAPPS%\\common\\Funi
+    Raccoon Game\\override.cfg\"\n\nOnce everything is set up, select a fresh new
+    save with no Archipelago data and once you press 'Accept' a new Archipelago connection
+    window should appear.\n\nEnter archipelago.gg:XXXXX in the \"Server\" field,
+    where XXXXX is the room\u2019s port. You can find this number on the website
+    after creating a new room.\n\nIn \"Slot Name\", enter the name assigned to your
+    YAML file.\n\nThe \"Password\" field is optional. If the host did not set one,
+    leave it blank.\n\nFinally, click \"Connect\" and then, you can start playing!"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
   m_sharedMaterial: {fileID: -9134737203265703719, guid: ba3e8b9dcf9de2d42a10ea892d87cb9d, type: 2}
@@ -608156,7 +607875,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 949511371}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.35514456
+  m_Size: 0.26907864
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -612549,7 +612268,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 610514684}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.56654966
+  m_Size: 0.41927484
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -617483,7 +617202,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1855919747}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.49999556
+  m_Size: 0.36099482
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -629294,7 +629013,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1000630917}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.34411144
+  m_Size: 0.26542738
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -631493,7 +631212,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1582857894}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.40613618
+  m_Size: 0.29736596
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -631769,7 +631488,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 2065113355}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.36015314
+  m_Size: 0.43972996
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -634402,7 +634121,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1161324631}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.4662424
+  m_Size: 0.35663784
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
