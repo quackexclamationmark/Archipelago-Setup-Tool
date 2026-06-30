@@ -44,6 +44,10 @@
     "balatroLovely": "https://github.com/ethangreen-dev/lovely-injector/releases/download/v0.9.0/lovely-x86_64-pc-windows-msvc.zip",
     "balatroSteamodded": "https://github.com/Steamodded/smods/archive/refs/tags/1.0.0-beta-1620a.zip",
 
+    "bo3Apworld": "https://github.com/colin969/bo3_archipelago/releases/download/0.5.6/cod_bo3.apworld",
+    "bo3AP": "https://github.com/colin969/bo3_archipelago/releases/download/0.5.6/BO3APMod-CurrentPatch.zip",
+    "bo3APDownpatch": "https://github.com/colin969/bo3_archipelago/releases/download/0.5.6/BO3APMod-Downgraded.zip",
+
     "btd6AP": "https://github.com/Matt41321/BloonsArchipelago/releases/download/0.9.0/BloonsArchipelago.dll",
     "btd6MelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
     "btd6Apworld": "https://github.com/Matt41321/Archipelago/releases/download/v0.7.0/bloonstd6.apworld",
