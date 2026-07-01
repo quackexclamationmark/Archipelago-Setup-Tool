@@ -29,6 +29,7 @@
     "witnessPopTracker": "https://github.com/NewSoupVi/witness_archipelago_tracker/releases/download/v0.6.3.0/witness_archipelago_tracker.zip",
     "funiraccoonPopTracker": "https://github.com/Jeffdev-Archipelago-Implementations/FuniRaccoonPopTracker/releases/download/1.1.8/FuniRaccoonPopTracker.zip",
     "fezPopTracker": "https://github.com/maYayoh/GAT/releases/download/v1.2/FezTracker_1.2.zip",
+    "sharPopTracker": "https://github.com/Tommaygun/SHAR-Poptracker/releases/download/v0.1.1/SHAR-Poptracker-v0.1.1.zip",
     
 
     "adofaiBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
@@ -245,6 +246,11 @@
     "scheduleAP": "https://thunderstore.io/package/download/Narcopelago/Narcopelago/1.5.4/",
     "scheduleApworld": "https://github.com/MacH8s/Narcopelago/releases/download/v3.6.3/Schedule_I.apworld",
     "scheduleMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
+
+    "sharAPMod": "https://github.com/nmize1/AP-SHARRandomizer/releases/download/v0.5.3-b/SHARAP.lmlm",
+    "sharAP": "https://github.com/nmize1/AP-SHARRandomizer/releases/download/v0.5.3-b/SHARRandomizer.zip",
+    "sharApworld": "https://github.com/nmize1/Archipelago/releases/download/v0.5.4b/simpsonshitnrun.apworld",
+    "sharModLauncher": "https://modbakery.donutteam.com/project-branch-version-files/download/6/46/529/580",
 
     "skulApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-Skul/releases/download/1.0.2/skul.apworld",
     "skulAP": "https://github.com/Jeffdev-Archipelago-Implementations/SkulAPMod/releases/download/1.0.0/SkulAPMod.zip",
