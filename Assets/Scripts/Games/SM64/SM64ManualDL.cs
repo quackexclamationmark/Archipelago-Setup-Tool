@@ -12,7 +12,7 @@ using System.IO.Compression;
 public class SM64ManualDL : MonoBehaviour
 {
     [Header("FILEDOWNLOADER (optionnel)")]
-    public FileDownloader downloader; // assigne ton FileDownloader (comme dans Balatro)
+    public FileDownloader downloader;
     public FileDownloader.FileData sm64APLauncherFile; // fichier ZIP du launcher (optionnel, utilisé si downloader assigné)
 
     [Header("PANELS")]
@@ -63,11 +63,9 @@ public class SM64ManualDL : MonoBehaviour
     private bool msysLaunched = false;
     private bool launcherLaunched = false;
 
-    // Installation cancellation
     private bool installationCancelled = false;
     private System.Collections.Generic.List<Process> launchedProcesses = new System.Collections.Generic.List<Process>();
 
-    // Track installation completion
     private bool installationComplete = false;
 
     // Helper state class for threaded tasks
@@ -132,13 +130,11 @@ public class SM64ManualDL : MonoBehaviour
 
         UpdateNextButtonInteractable();
 
-        // store default font size (if TMP text assigned)
         if (infoText != null) infoDefaultFontSize = infoText.fontSize;
 
         StartCoroutine(LoadRemoteConfig());
     }
 
-    // Met à jour l'interactable du bouton Next sans afficher un message d'erreur
     void UpdateNextButtonInteractable()
     {
         if (nextPanelButton == null) return;

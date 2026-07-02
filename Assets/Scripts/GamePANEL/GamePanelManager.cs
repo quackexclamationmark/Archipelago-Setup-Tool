@@ -61,6 +61,11 @@ public class GamePanelManager : MonoBehaviour
     public GameObject pikunikuPanel;
     public GameObject funiraccoonPanel;
     public GameObject fezPanel;
+    public GameObject rl2Panel;
+    public GameObject pvzrPanel;
+    public GameObject pvzgotyPanel;
+    public GameObject bo3Panel;
+    public GameObject simpsonsPanel;
 
     void Start()
     {
@@ -250,6 +255,21 @@ public class GamePanelManager : MonoBehaviour
             case "FEZ":
                 fezPanel.SetActive(true);
                 break;
+            case "RogueLegacy2":
+                rl2Panel.SetActive(true);
+                break;
+            case "PlantsVsZombiesReplanted":
+                pvzrPanel.SetActive(true);
+                break;
+            case "PlantsVsZombiesGOTY":
+                pvzgotyPanel.SetActive(true);
+                break;
+            case "BlackOps3":
+                bo3Panel.SetActive(true);
+                break;
+            case "TheSimpsonsHit&Run":
+                simpsonsPanel.SetActive(true);
+                break;
         }
     }
 
@@ -314,5 +334,10 @@ public class GamePanelManager : MonoBehaviour
         if (pikunikuPanel != null) pikunikuPanel.SetActive(false);
         if (funiraccoonPanel != null) funiraccoonPanel.SetActive(false);
         if (fezPanel != null) fezPanel.SetActive(false);
+        if (rl2Panel != null) rl2Panel.SetActive(false);
+        if (pvzrPanel != null) pvzrPanel.SetActive(false);
+        if (pvzgotyPanel != null) pvzgotyPanel.SetActive(false);
+        if (bo3Panel != null) bo3Panel.SetActive(false);
+        if (simpsonsPanel != null) simpsonsPanel.SetActive(false);
     }
 }

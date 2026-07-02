@@ -1,0 +1,243 @@
+[2026-07-02 13:39:15] <Main> SHARRandomizer.exe version: Beta 0.5.3
+[2026-07-02 13:40:48] <LocationTranslations::LoadFromJson> Error loading JSON: System.IO.DirectoryNotFoundException: Could not find a part of the path 'C:\Users\magni\Archipelago Setup Tool\Configs\Vanilla.json'.
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Int32 bufferSize)
+   at System.IO.File.ReadAllText(String path, Encoding encoding)
+   at System.IO.File.ReadAllText(String path)
+   at LocationTranslations.LoadFromJson(String jsonFilePath) in C:\Users\Nick\source\repos\SHARMemory\SHARMemory\SHARRandomizer\Classes\LocationTranslations.cs:line 79
+[2026-07-02 13:40:48] <LocationTranslations::LoadFromJson> Error loading JSON: System.IO.DirectoryNotFoundException: Could not find a part of the path 'C:\Users\magni\Archipelago Setup Tool\Configs\Vanilla.json'.
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Int32 bufferSize)
+   at System.IO.File.ReadAllText(String path, Encoding encoding)
+   at System.IO.File.ReadAllText(String path)
+   at LocationTranslations.LoadFromJson(String jsonFilePath) in C:\Users\Nick\source\repos\SHARMemory\SHARMemory\SHARRandomizer\Classes\LocationTranslations.cs:line 79
+[2026-07-02 13:40:48] <RewardTranslations::LoadFromJson> Error loading JSON: Could not find a part of the path 'C:\Users\magni\Archipelago Setup Tool\Configs\Rewards.json'.
+[2026-07-02 13:40:48] <UITranslations::LoadFromJson> Error loading JSON: Could not find a part of the path 'C:\Users\magni\Archipelago Setup Tool\Configs\UITranslations.json'.
+[2026-07-02 13:40:48] <MemoryStart> Waiting for SHAR process...
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect> Successfully connected to archipelago.gg:50957 as quack!
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect> Slot Data:
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   version: 0.5.4
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Itchy_And_Scratchy_Ticket_Requirement: 0
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Wasp_Amount: 70
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Card_Amount: 25
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Required_Mission_Levels: [
+  "All"
+]
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Car_Amount: 50
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Lock_Levels: 1
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Early_Level: 1
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Shuffle_Levels: 1
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Starting_Car_Shuffle: 1
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Shuffle_Attack: [
+  "All"
+]
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Shuffle_Jump: [
+  "All"
+]
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Start_Jump_Level: 1
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Shuffle_Gagfinder: [
+  "All"
+]
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Shuffle_Checkered_Flags: [
+  "All"
+]
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Shuffle_EBrakes: [
+  "All"
+]
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Shuffle_Bumpers: [
+  "None"
+]
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Start_With_Bumpers: 0
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Shuffle_Forward: [
+  "None"
+]
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Early_Forward: [
+  "All"
+]
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Shuffle_Cards: 1
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Mission_Locks: 0
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Mission_Timers: 0
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Min_Shop_Price: 100
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Max_Shop_Price: 300
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Shop_Scale_Modifier: 2
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Start_Wallet_Level: 1
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Shop_Hint_Policy: 0
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Extra_Hint_Policy: 1
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Filler_Wrench_Efficiency: 10
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Filler_HitNRun_Reset_Efficiency: 10
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Shuffle_Traffic: 1
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Traffic_Blacklist: []
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Filler_Traps: 0
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Enable_Eject_Traps: 1
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Enable_Duff_Traps: 1
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Enable_Launch_Traps: 1
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Enable_HitNRun_Traps: 1
+[2026-07-02 13:40:49] <ArchipelagoClient::Session_ItemReceived> Received item #0: 121869 - Apu Progressive Jump
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   Enable_Traffic_Traps: 1
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   card_locations: [
+  122743,
+  122721,
+  122727,
+  122750,
+  122703,
+  122698,
+  122742,
+  122811,
+  122807,
+  122771,
+  122773,
+  122805,
+  122804,
+  122817,
+  122880,
+  122853,
+  122848,
+  122861,
+  122828,
+  122830,
+  122847,
+  122923,
+  122901,
+  122891,
+  122933,
+  122939,
+  122909,
+  122912,
+  122996,
+  122960,
+  123016,
+  122993,
+  122970,
+  122982,
+  122988,
+  123061,
+  123025,
+  123083,
+  123026,
+  123069,
+  123032,
+  123050,
+  123120,
+  123138,
+  123137,
+  123103,
+  123140,
+  123127,
+  123121
+]
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   missionlockdic: {}
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   progcars: [
+  "Cell Phone Car",
+  "Limo",
+  "Cell Phone Car",
+  "Nuclear Waste Truck",
+  "Milk Truck",
+  "Armored Truck",
+  "Hearse",
+  "Electaurus",
+  "Pizza Van",
+  "Garbage Truck"
+]
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   VerifyID: AP-94777635299488325815-P1-quack!
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   ingamehints: {
+  "121921": [
+    122329,
+    1
+  ],
+  "121817": [
+    122691,
+    1
+  ],
+  "121908": [
+    122742,
+    1
+  ],
+  "121922": [
+    122398,
+    1
+  ],
+  "121837": [
+    122516,
+    1
+  ],
+  "121842": [
+    122576,
+    1
+  ],
+  "121815": [
+    122393,
+    1
+  ],
+  "121903": [
+    122416,
+    1
+  ],
+  "121907": [
+    122511,
+    1
+  ]
+}
+[2026-07-02 13:40:49] <ArchipelagoClient::TryConnect>   costs: [
+  285,
+  295,
+  162,
+  188,
+  167,
+  174,
+  414,
+  1064,
+  825,
+  890,
+  432,
+  1005,
+  817,
+  647,
+  653,
+  1225,
+  934,
+  898,
+  1288,
+  1944,
+  1628,
+  2302,
+  2321,
+  1166,
+  1732,
+  2372,
+  2710,
+  1371,
+  1218,
+  2450,
+  2934,
+  3338,
+  2177,
+  3272,
+  2116,
+  3062,
+  3581,
+  3676,
+  1565,
+  2459,
+  2849,
+  3109
+]
+[2026-07-02 13:40:49] <ArchipelagoClient::Session_ItemReceived> Received item #1: 121866 - Bart Progressive Jump
+[2026-07-02 13:40:49] <ArchipelagoClient::Session_ItemReceived> Received item #2: 121865 - Homer Progressive Jump
+[2026-07-02 13:40:49] <ArchipelagoClient::Session_ItemReceived> Received item #3: 121867 - Lisa Progressive Jump
+[2026-07-02 13:40:49] <ArchipelagoClient::Session_ItemReceived> Received item #4: 121868 - Marge Progressive Jump
+[2026-07-02 13:40:49] <ArchipelagoClient::Session_ItemReceived> Received item #5: 121939 - Homer Forward
+[2026-07-02 13:40:49] <ArchipelagoClient::Session_ItemReceived> Received item #6: 121940 - Bart Forward
+[2026-07-02 13:40:49] <ArchipelagoClient::Session_ItemReceived> Received item #7: 121941 - Lisa Forward
+[2026-07-02 13:40:49] <ArchipelagoClient::Session_ItemReceived> Received item #8: 121942 - Marge Forward
+[2026-07-02 13:40:49] <ArchipelagoClient::Session_ItemReceived> Received item #9: 121943 - Apu Forward
+[2026-07-02 13:40:49] <ArchipelagoClient::Session_ItemReceived> Received item #10: 121858 - Level 6
+[2026-07-02 13:40:49] <ArchipelagoClient::Session_ItemReceived> Received item #11: 121917 - Sedan A
+[2026-07-02 13:40:49] <ArchipelagoClient::Session_ItemReceived> Received item #12: 121887 - Progressive Wallet Upgrade
+[2026-07-02 13:40:49] <ArchipelagoClient::Session_OnMessageReceived> quack! (Team #1) playing Simpsons Hit and Run has joined. Client(0.6.0), [].
+[2026-07-02 13:40:49] <ArchipelagoClient::Session_OnMessageReceived> Now that you are connected, you can use !help to list commands to run via the server. If your client supports it, you may have additional local commands you can list with /help.
