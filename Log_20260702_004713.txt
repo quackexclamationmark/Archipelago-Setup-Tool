@@ -1,1 +1,0 @@
-[2026-07-02 00:47:13] <Main> SHARRandomizer.exe version: Beta 0.5.3
