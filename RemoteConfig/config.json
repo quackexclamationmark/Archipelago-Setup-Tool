@@ -31,6 +31,7 @@
     "fezPopTracker": "https://github.com/maYayoh/GAT/releases/download/v1.2/FezTracker_1.2.zip",
     "sharPopTracker": "https://github.com/Tommaygun/SHAR-Poptracker/releases/download/v0.1.1/SHAR-Poptracker-v0.1.1.zip",
     "pokemonemeraldPopTracker": "https://github.com/seto10987/Archipelago-Emerald-AP-Tracker/archive/refs/tags/v.2.1.0.zip",
+    "tlozwwPopTracker": "https://github.com/Mysteryem/ww-poptracker/archive/refs/tags/v1.3.0.zip",
     
 
     "adofaiBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
@@ -294,6 +295,9 @@
     "tcgBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "tcgApworld": "https://github.com/FyreDay/Archipelago-TCGCardShopSimulator/releases/download/v1.1.0/tcg_card_shop_simulator.apworld",
     "tcgAP": "https://github.com/FyreDay/TCG-CardShop-Sim-APClient/releases/download/v1.1.1/TCG_AP_Client_v1.1.1.zip",
+
+    "tlozwwAP": "https://github.com/tanjo3/wwrando/releases/download/ap_2.5.1/wwrando_ap-2.5.1-windows.zip",
+    "tlozwwDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "thewitnessAP": "https://github.com/NewSoupVi/The-Witness-Randomizer-for-Archipelago/releases/download/9.0.0/The.Witness.Randomizer.for.Archipelago.exe",
 
