@@ -58,7 +58,7 @@
     "btd6AP": "https://github.com/Matt41321/BloonsArchipelago/releases/download/0.9.0/BloonsArchipelago.dll",
     "btd6MelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
     "btd6Apworld": "https://github.com/Matt41321/Archipelago/releases/download/v0.7.0/bloonstd6.apworld",
-    "btd6ModHelper": "https://github.com/gurrenm3/BTD-Mod-Helper/releases/download/3.6.5/Btd6ModHelper.dll",
+    "btd6ModHelper": "https://github.com/gurrenm3/BTD-Mod-Helper/releases/download/3.6.6/Btd6ModHelper.dll",
 
     "bombrushBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "bombrushAP": "https://github.com/TRPG0/BRC-Archipelago/releases/download/1.0.6/BRC-Archipelago.1.0.6.zip",
@@ -102,8 +102,8 @@
     "fezAP": "https://github.com/nhyldmar/fez-ap/releases/download/v0.5.0/fezap.zip",
     "fezApworld": "https://github.com/nhyldmar/fez-ap/releases/download/v0.5.0/fez.apworld",
 
-    "funiraccoonAP": "https://github.com/Jeffdev-Archipelago-Implementations/FuniRaccoonAP/releases/download/1.5.7/FuniRaccoonAP.zip",
-    "funiraccoonApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-Funi/releases/download/1.5.2/funi_raccoon.apworld",
+    "funiraccoonAP": "https://github.com/Jeffdev-Archipelago-Implementations/FuniRaccoonAP/releases/download/1.6.1/FuniRaccoonAP.zip",
+    "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-Funi/releases/download/1.6.1/funi_raccoon.apworld",
 
     "garfieldkartAP": "https://github.com/robotzurg/GarfieldKartAPMod/releases/download/beta-0.5.8/GarfieldKartAPMod.zip",
     "garfieldkartApworld": "https://github.com/FeluciaPS/Archipelago/releases/download/0.5.3-beta/garfkart.apworld",
@@ -126,7 +126,7 @@
     "lethalcompanyApworld": "https://github.com/T0r1nn/APLC/releases/download/v0.7.12-beta/lethal_company.apworld",
     "lethalcompanyLethalAPI": "https://thunderstore.io/package/download/LethalAPI/LethalAPI_Terminal/1.0.1/",
     "lethalcompanyAPScrap": "https://thunderstore.io/package/download/Caigan/Archipelago_Scrap/4.0.3/",
-    "lethalcompanyLevelLoader": "https://thunderstore.io/package/download/IAmBatby/LethalLevelLoader/1.7.7/",
+    "lethalcompanyLevelLoader": "https://thunderstore.io/package/download/IAmBatby/LethalLevelLoader/1.7.8/",
     "lethalcompanyLethalLib": "https://thunderstore.io/package/download/Evaisa/LethalLib/1.2.0/",
     "lethalcompanyFixSerialize": "https://thunderstore.io/package/download/Evaisa/FixPluginTypesSerialization/1.1.4/",
     "lethalcompanyModData": "https://thunderstore.io/package/download/MaxWasUnavailable/LethalModDataLib/1.2.2/",
@@ -147,8 +147,8 @@
     "neonwhiteNeonLite": "https://github.com/Faustas156/NeonLite/releases/download/3.0.11%2B10/NeonLite.dll",
     "neonwhiteApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/neonwhite.apworld",
 
-    "ninesolsAP": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.5.5/Ixrec-ArchipelagoRandomizer-0.5.5.zip",
-    "ninesolsApworld": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.5.5/nine_sols.apworld",
+    "ninesolsAP": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.6.0/Ixrec-ArchipelagoRandomizer-0.6.0.zip",
+    "ninesolsApworld": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.6.0/nine_sols.apworld",
     "ninesolsAPI": "https://thunderstore.io/package/download/ninesolsmodding/NineSolsAPI/1.3.1/",
     "ninesolsBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "ninesolsBepInExConfiguration": "https://thunderstore.io/package/download/ninesolsmodding/BepinExConfigurationManager/18.3.1/",
@@ -215,7 +215,7 @@
     "rotndApworld": "https://github.com/studkid/RiftArchipelago/releases/download/v0.14.0/rotn.apworld",
 
     "ror2BepInEx": "https://thunderstore.io/package/download/bbepis/BepInExPack/5.4.2121/",
-    "ror2AP": "https://thunderstore.io/package/download/Sneaki/Archipelago/1.5.3/",
+    "ror2AP": "https://thunderstore.io/package/download/Sneaki/Archipelago/1.5.4/",
     "ror2HookGenPatcher": "https://thunderstore.io/package/download/RiskofThunder/HookGenPatcher/1.2.9/",
     "ror2API": "https://thunderstore.io/package/download/tristanmcpherson/R2API/5.0.5/",
     "ror2APIContentManagement": "https://thunderstore.io/package/download/RiskofThunder/R2API_ContentManagement/1.0.11/",
@@ -271,12 +271,12 @@
     "slimerancherApworld": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.1/slime_rancher.apworld",
     "slimerancherMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.1/MelonLoader.x64.zip",
 
-    "slimerancher2AP": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.9.2/SlimeRancher2-AP.zip",
-    "slimerancher2Apworld": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.9.2/slime_rancher_2.apworld",
+    "slimerancher2AP": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.9.3/SlimeRancher2-AP.zip",
+    "slimerancher2Apworld": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.9.3/slime_rancher_2.apworld",
     "slimerancher2BepInEx": "https://builds.bepinex.dev/projects/bepinex_be/759/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.759%2B9aedb90.zip",
     "slimerancher2Interop": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/interop.zip",
 
-    "stardewvalleyAP": "https://github.com/agilbert1412/StardewArchipelago/releases/download/7.4.23/StardewArchipelago.7.4.23.zip",
+    "stardewvalleyAP": "https://github.com/agilbert1412/StardewArchipelago/releases/download/8.0.9/StardewArchipelago.8.0.9.zip",
     "stardewvalleyPreloaded": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-SV-Archipelago.zip",
     
     "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.3/Archipelago_193.zip",
