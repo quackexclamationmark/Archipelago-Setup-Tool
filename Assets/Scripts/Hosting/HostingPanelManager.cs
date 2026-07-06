@@ -13,6 +13,7 @@ public class HostingPanelManager : MonoBehaviour
     public GameObject multiworldPanel;
     public GameObject connectionPanel;
     public GameObject serverPanel;
+    public GameObject patchPanel;
 
     void Start()
     {
@@ -58,6 +59,9 @@ public class HostingPanelManager : MonoBehaviour
             case "Address":
                 serverPanel.SetActive(true);
                 break;
+            case "PatchFile":
+                patchPanel.SetActive(true);
+                break;
         }
     }
 
@@ -74,5 +78,6 @@ public class HostingPanelManager : MonoBehaviour
         if (multiworldPanel != null) multiworldPanel.SetActive(false);
         if (connectionPanel != null) connectionPanel.SetActive(false);
         if (serverPanel != null) serverPanel.SetActive(false);
+        if (patchPanel != null) patchPanel.SetActive(false);
     }
 }

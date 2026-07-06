@@ -13,7 +13,7 @@ public class SM64ManualDL : MonoBehaviour
 {
     [Header("FILEDOWNLOADER (optionnel)")]
     public FileDownloader downloader;
-    public FileDownloader.FileData sm64APLauncherFile; // fichier ZIP du launcher (optionnel, utilisé si downloader assigné)
+    public FileDownloader.FileData sm64APLauncherFile;
 
     [Header("PANELS")]
     public GameObject romSelectionPanel;
@@ -23,7 +23,7 @@ public class SM64ManualDL : MonoBehaviour
     public Button selectRomButton;
     public TMP_InputField romPathInputField;
     public TextMeshProUGUI romPathPlaceholder;
-    public Button nextPanelButton; // bouton de validation
+    public Button nextPanelButton;
 
     [Header("INSTALLATION UI")]
     public Toggle installMsysToggle;
@@ -31,10 +31,10 @@ public class SM64ManualDL : MonoBehaviour
     public Toggle launchAppsToggle;
     public Button installButton;
     public Button cancelButton;
-    public Button installDependenciesButton; // Nouveau bouton pour installer les dépendances
+    public Button installDependenciesButton;
 
     [Header("CONFIRMATION PANEL")]
-    public GameObject confirmPanel; // Panel with OK / No
+    public GameObject confirmPanel;
     public TextMeshProUGUI confirmText;
     public Button confirmOkButton;
     public Button confirmNoButton;
@@ -68,7 +68,6 @@ public class SM64ManualDL : MonoBehaviour
 
     private bool installationComplete = false;
 
-    // Helper state class for threaded tasks
     private class ThreadTask
     {
         public volatile bool Complete = false;
@@ -102,7 +101,6 @@ public class SM64ManualDL : MonoBehaviour
 
     void Start()
     {
-        // Listeners
         if (selectRomButton != null) selectRomButton.onClick.AddListener(SelectRom);
         if (nextPanelButton != null) nextPanelButton.onClick.AddListener(ValidateAndShowNextMessage);
         if (romPathInputField != null) romPathInputField.onValueChanged.AddListener(OnRomPathInputChanged);
@@ -266,7 +264,6 @@ public class SM64ManualDL : MonoBehaviour
         return true;
     }
 
-    // Next button behaviour: validate + show info (no panel swap)
     void ValidateAndShowNextMessage()
     {
         if (!IsValidRom(selectedRomPath)) return;
@@ -290,7 +287,6 @@ public class SM64ManualDL : MonoBehaviour
         installationCancelled = true;
         ShowInfo("Installation cancelled. Killing processes...");
 
-        // Tuer tous les processus lancés
         foreach (Process proc in launchedProcesses)
         {
             try
@@ -323,7 +319,6 @@ public class SM64ManualDL : MonoBehaviour
         string tempDirPath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "SM64APTemp");
         string tempScriptPath = Path.Combine(tempDirPath, "install_deps.sh");
 
-        // script robuste (utilise une fonction on_error pour éviter les problèmes de quoting)
         string scriptContent = @"#!/usr/bin/env bash
 #!/bin/bash
 # install_deps.sh — Installs SM64AP dependencies via pacman (MSYS2)
@@ -385,22 +380,18 @@ exec /usr/bin/bash --login
         {
             if (!Directory.Exists(tempDirPath)) Directory.CreateDirectory(tempDirPath);
 
-            // write the temporary copy in Documents for reference (CRLF/LF doesn't matter here)
             File.WriteAllText(tempScriptPath, scriptContent);
 
             ShowInfo("Preparing MSYS script and launching MSYS (will try common locations)...");
 
-            // Detect common msysRoot locations (adjust or add more if needed)
             string[] commonRoots = new string[] { @"C:\msys64", @"D:\msys64", @"C:\MSYS2", @"C:\msys" };
             string msysRoot = null;
             foreach (var r in commonRoots) if (Directory.Exists(r)) { msysRoot = r; break; }
-            if (msysRoot == null) msysRoot = @"C:\msys64"; // fallback, may not exist
+            if (msysRoot == null) msysRoot = @"C:\msys64";
 
-            // Ensure MSYS home exists
             string msysHomeWin = Path.Combine(msysRoot, "home", System.Environment.UserName);
             try { if (!Directory.Exists(msysHomeWin)) Directory.CreateDirectory(msysHomeWin); } catch { }
 
-            // Write a unix-line-ending copy into MSYS home so bash can read it reliably
             string msysScriptWinPath = Path.Combine(msysHomeWin, "install_deps.sh");
             try
             {
@@ -414,17 +405,14 @@ exec /usr/bin/bash --login
                 yield break;
             }
 
-            // Convert that MSYS-home path to MSYS style (/c/...)
             string msysScriptPath = ConvertWindowsPathToMSys(msysScriptWinPath);
 
-            // For debug: run an ls to show whether the file is visible to MSYS, then execute it and keep shell open
             string mintty = Path.Combine(msysRoot, "usr", "bin", "mintty.exe");
             string bash = Path.Combine(msysRoot, "usr", "bin", "bash.exe");
             string msys2cmd = Path.Combine(msysRoot, "msys2_shell.cmd");
 
             ProcessStartInfo psi = null;
 
-            // NOTE: We avoid Verb = "runas" by default to prevent UAC popups; enable it only if you need elevation.
             if (File.Exists(mintty))
             {
                 psi = new ProcessStartInfo
@@ -496,7 +484,6 @@ exec /usr/bin/bash --login
         }
         finally
         {
-            // Keep the temp script in Documents for reference but remove the msys home copy if you want (optional)
             try { /* File.Delete(tempScriptPath); */ } catch { }
         }
 
@@ -505,13 +492,12 @@ exec /usr/bin/bash --login
 
     string ConvertWindowsPathToMSys(string winPath)
     {
-        // Retourne un chemin que bash/MSYS comprend : C:\Users\Name -> /c/Users/Name
         if (string.IsNullOrEmpty(winPath)) return winPath;
-        string full = Path.GetFullPath(winPath).Replace('\\', '/'); // "C:/Users/..."
+        string full = Path.GetFullPath(winPath).Replace('\\', '/');
         if (full.Length >= 2 && full[1] == ':')
         {
             char drive = char.ToLower(full[0]);
-            string rest = full.Substring(2); // skip "C:"
+            string rest = full.Substring(2);
             if (!rest.StartsWith("/")) rest = "/" + rest;
             return $"/{drive}{rest}";
         }
@@ -552,7 +538,6 @@ exec /usr/bin/bash --login
         bool installSM64AP = installSM64APLauncherToggle != null && installSM64APLauncherToggle.isOn;
         bool launchApps = launchAppsToggle != null && launchAppsToggle.isOn;
 
-        // Documents paths (request)
         string documentsPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
         string installPath = Path.Combine(documentsPath, "SM64AP");
         string tempDownloadPath = Path.Combine(documentsPath, "SM64APTemp");
@@ -560,13 +545,11 @@ exec /usr/bin/bash --login
         if (!Directory.Exists(tempDownloadPath)) Directory.CreateDirectory(tempDownloadPath);
         if (!Directory.Exists(installPath)) Directory.CreateDirectory(installPath);
 
-        // reset flags
         msysInstalled = false;
         launcherInstalled = false;
         msysLaunched = false;
         launcherLaunched = false;
 
-        // Lance les deux installations EN PARALLELE (sans yield return)
         if (installMsys && !installationCancelled)
         {
             ShowInfo("Installing MSYS...");
@@ -593,14 +576,12 @@ exec /usr/bin/bash --login
             yield break;
         }
 
-        // Si l'utilisateur a demandé de lancer les apps et que MSYS n'a pas été lancé yet, tente de lancer MSYS
         if (launchApps && installMsys && !msysLaunched)
         {
             ShowInfo("Launching MSYS...");
             LaunchMSYS(installPath);
         }
 
-        // small delay to allow both to start
         yield return new WaitForSeconds(1.5f);
 
         ShowInfo(specialCompleteMessage);
@@ -617,7 +598,7 @@ exec /usr/bin/bash --login
 
     IEnumerator InstallMSYS(string installPath, string tempPath)
     {
-        msysInstalled = false; // reset
+        msysInstalled = false;
 
         if (string.IsNullOrEmpty(sm64MSYSDownloadUrl))
         {
@@ -640,8 +621,6 @@ exec /usr/bin/bash --login
 
         ShowInfo("Running MSYS installer...");
 
-        // background process to avoid freezing UI
-        // Lancer sans attendre la fin: waitForExit = false, et signaler msysLaunched via onStarted
         ThreadTask procTask = StartProcessTask(exePath, installPath, false, proc => { msysLaunched = true; });
         while (!procTask.Complete && !installationCancelled) yield return new WaitForSeconds(0.2f);
 
@@ -652,8 +631,6 @@ exec /usr/bin/bash --login
             msysInstalled = false;
             yield break;
         }
-
-        // Optionally: check for some installed files here to be more robust
 
         msysInstalled = true;
 
@@ -668,7 +645,6 @@ exec /usr/bin/bash --login
 
         if (launcherInstalled && !installationCancelled)
         {
-            // Crée la config
             try
             {
                 ShowInfo("Creating configuration...");
@@ -679,7 +655,6 @@ exec /usr/bin/bash --login
                 UnityEngine.Debug.LogError("Config creation failed: " + e.Message);
             }
 
-            // Lance le launcher IMMEDIATEMENT après installation ET config
             if (launchApps)
             {
                 ShowInfo("Launching SM64AP Launcher...");
@@ -688,27 +663,22 @@ exec /usr/bin/bash --login
         }
     }
 
-    // Install launcher: if downloader assigned & sm64APLauncherFile.url set -> use downloader.DownloadAndExtract
     IEnumerator InstallSM64APLauncher(string installPath, string tempPath)
     {
-        launcherInstalled = false; // reset
+        launcherInstalled = false;
 
-        // If downloader available and file data provided -> use it
         if (downloader != null && sm64APLauncherFile != null && !string.IsNullOrEmpty(sm64APLauncherFile.url))
         {
             ShowInfo("Downloading and extracting SM64AP Launcher (via FileDownloader)...");
             string extractPath = Path.Combine(tempPath, "launcher_extracted");
 
-            // Ensure clean extractPath
             if (Directory.Exists(extractPath)) Directory.Delete(extractPath, true);
             Directory.CreateDirectory(extractPath);
 
-            // NOTE: FileDownloader.DownloadAndExtract signature must match your FileDownloader implementation (as in Balatro)
             yield return downloader.DownloadAndExtract(sm64APLauncherFile, tempPath, extractPath);
 
             if (installationCancelled) yield break;
 
-            // After extraction, copy to installPath/SM64APLauncher
             string launcherPath = Path.Combine(installPath, "SM64APLauncher");
             if (!Directory.Exists(launcherPath)) Directory.CreateDirectory(launcherPath);
 
@@ -721,7 +691,6 @@ exec /usr/bin/bash --login
             yield break;
         }
 
-        // Fallback: use direct download of ZIP via UnityWebRequest and extract
         if (string.IsNullOrEmpty(sm64APLauncherDownloadUrl))
         {
             ShowInfo("ERROR: SM64AP Launcher download URL not loaded!");
@@ -839,7 +808,7 @@ exec /usr/bin/bash --login
                 if (proc != null)
                 {
                     launchedProcesses.Add(proc);
-                    launcherLaunched = true; // marque comme lancé immédiatement
+                    launcherLaunched = true;
                 }
                 UnityEngine.Debug.Log("SM64AP Launcher launched!");
             }
@@ -848,7 +817,6 @@ exec /usr/bin/bash --login
         else UnityEngine.Debug.LogWarning("SM64AP Launcher executable not found at: " + launcherPath);
     }
 
-    // Try to launch MSYS after installation. We try multiple plausible locations.
     void LaunchMSYS(string installPath)
     {
         try
@@ -892,7 +860,7 @@ exec /usr/bin/bash --login
 
             Process proc = Process.Start(psi);
             if (proc != null) launchedProcesses.Add(proc);
-            // Marque MSYS comme lancé si on a démarré un processus
+
             if (proc != null) msysLaunched = true;
             UnityEngine.Debug.Log("MSYS launched: " + found);
         }
@@ -978,8 +946,6 @@ exec /usr/bin/bash --login
         }
     }
 
-    // Background process starter (pour ne pas bloquer l'UI)
-    // Ajout de waitForExit et callback onStarted pour permettre le mode non-blocking
     private ThreadTask StartProcessTask(string exePath, string workingDirectory = null, bool waitForExit = true, System.Action<System.Diagnostics.Process> onStarted = null)
     {
         var task = new ThreadTask();
@@ -1002,7 +968,6 @@ exec /usr/bin/bash --login
                     try { onStarted?.Invoke(proc); } catch { }
                     if (waitForExit)
                     {
-                        // comportement d'origine : attendre que le processus se termine
                         proc.WaitForExit();
                     }
                 }
@@ -1023,10 +988,8 @@ exec /usr/bin/bash --login
     {
         if (infoText != null)
         {
-            // Assure qu'on a bien la valeur par défaut
             if (infoDefaultFontSize == 0f) infoDefaultFontSize = infoText.fontSize;
 
-            // If message matches the special message exactly, set font size to 28, else restore
             if (message == specialCompleteMessage) infoText.fontSize = 28f;
             else if (infoDefaultFontSize != 0f) infoText.fontSize = infoDefaultFontSize;
 

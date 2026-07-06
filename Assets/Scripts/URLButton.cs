@@ -16,6 +16,9 @@ public class URLButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     [Header("BUTTON SWITCH (si linkType = 1)")]
     public Button targetButton;
     public Button buttonToDeactivate;
+    // 2ème paire optionnelle
+    public Button targetButton2;
+    public Button buttonToDeactivate2;
 
     [Header("TEXT TRIGGER (si linkType = 2)")]
     public string triggerText = "";
@@ -71,22 +74,49 @@ public class URLButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
 
     void SwitchButton()
     {
-        if (targetButton != null && buttonToDeactivate != null)
+        // Gère la première paire si assignée
+        bool anyAssigned = false;
+
+        if (targetButton != null)
         {
-            // Les deux restent toujours interactifs
+            anyAssigned = true;
             targetButton.interactable = true;
-            buttonToDeactivate.interactable = true;
-
             UnityEngine.Debug.Log("Activated: " + targetButton.gameObject.name);
-            UnityEngine.Debug.Log("Kept active: " + buttonToDeactivate.gameObject.name);
-
             // Simuler un vrai clic sur le bouton cible
             targetButton.onClick.Invoke();
             UnityEngine.Debug.Log("Clicked: " + targetButton.gameObject.name);
         }
-        else
+
+        if (buttonToDeactivate != null)
         {
-            UnityEngine.Debug.LogWarning("Target Button or Button To Deactivate is not assigned!");
+            anyAssigned = true;
+            // Conserver le comportement existant : le bouton reste interactif
+            buttonToDeactivate.interactable = true;
+            UnityEngine.Debug.Log("Kept active: " + buttonToDeactivate.gameObject.name);
+        }
+
+        // Gère la 2ème paire optionnelle si assignée
+        if (targetButton2 != null)
+        {
+            anyAssigned = true;
+            targetButton2.interactable = true;
+            UnityEngine.Debug.Log("Activated (2): " + targetButton2.gameObject.name);
+            // Simuler un vrai clic sur le 2ème bouton cible
+            targetButton2.onClick.Invoke();
+            UnityEngine.Debug.Log("Clicked (2): " + targetButton2.gameObject.name);
+        }
+
+        if (buttonToDeactivate2 != null)
+        {
+            anyAssigned = true;
+            // Conserver le comportement existant : le bouton reste interactif
+            buttonToDeactivate2.interactable = true;
+            UnityEngine.Debug.Log("Kept active (2): " + buttonToDeactivate2.gameObject.name);
+        }
+
+        if (!anyAssigned)
+        {
+            UnityEngine.Debug.LogWarning("No target or buttonToDeactivate assigned for SwitchButton!");
         }
     }
 

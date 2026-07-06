@@ -66,6 +66,10 @@ public class GamePanelManager : MonoBehaviour
     public GameObject pvzgotyPanel;
     public GameObject bo3Panel;
     public GameObject simpsonsPanel;
+    public GameObject pokemonemeraldPanel;
+    public GameObject windwakerPanel;
+    public GameObject ashorthikePanel;
+    public GameObject twilightprincessPanel;
 
     void Start()
     {
@@ -207,7 +211,7 @@ public class GamePanelManager : MonoBehaviour
             case "HitmanWorldOfAssassination":
                 hitmanwoaPanel.SetActive(true);
                 break;
-            case "ADanceofFireandIce":
+            case "A DanceofFireandIce":
                 adofaiPanel.SetActive(true);
                 break;
             case "TCGCardShopSimulator":
@@ -269,6 +273,18 @@ public class GamePanelManager : MonoBehaviour
                 break;
             case "TheSimpsonsHit&Run":
                 simpsonsPanel.SetActive(true);
+                break;
+            case "PokémonEmerald":
+                pokemonemeraldPanel.SetActive(true);
+                break;
+            case "TheLegendOfZeldaTheWindWaker":
+                windwakerPanel.SetActive(true);
+                break;
+            case "A ShortHike":
+                ashorthikePanel.SetActive(true);
+                break;
+            case "TheLegendOfZeldaTwilightPrincess":
+                twilightprincessPanel.SetActive(true);
                 break;
         }
     }
@@ -339,5 +355,9 @@ public class GamePanelManager : MonoBehaviour
         if (pvzgotyPanel != null) pvzgotyPanel.SetActive(false);
         if (bo3Panel != null) bo3Panel.SetActive(false);
         if (simpsonsPanel != null) simpsonsPanel.SetActive(false);
+        if (pokemonemeraldPanel != null) pokemonemeraldPanel.SetActive(false);
+        if (windwakerPanel != null) windwakerPanel.SetActive(false);
+        if (ashorthikePanel != null) ashorthikePanel.SetActive(false);
+        if (twilightprincessPanel != null) twilightprincessPanel.SetActive(false);
     }
 }

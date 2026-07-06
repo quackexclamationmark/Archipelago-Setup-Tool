@@ -1,0 +1,130 @@
+clean_iso_path: ''
+output_folder: ''
+plando_file: ''
+progression_dungeons:
+progression_tingle_chests:
+progression_dungeon_secrets:
+progression_puzzle_secret_caves:
+progression_combat_secret_caves:
+progression_savage_labyrinth:
+progression_great_fairies:
+progression_short_sidequests:
+progression_long_sidequests:
+progression_spoils_trading:
+progression_minigames:
+progression_battlesquid:
+progression_free_gifts:
+progression_mail:
+progression_platforms_rafts:
+progression_submarines:
+progression_eye_reef_chests:
+progression_big_octos_gunboats:
+progression_triforce_charts:
+progression_treasure_charts:
+progression_expensive_purchases:
+progression_island_puzzles:
+progression_misc:
+randomize_mapcompass:
+randomize_smallkeys:
+randomize_bigkeys:
+sword_mode:
+required_bosses:
+num_required_bosses:
+chest_type_matches_contents:
+trap_chests:
+hero_mode:
+logic_obscurity:
+logic_precision:
+randomize_dungeon_entrances:
+randomize_secret_cave_entrances:
+randomize_miniboss_entrances:
+randomize_boss_entrances:
+randomize_secret_cave_inner_entrances:
+randomize_fairy_fountain_entrances:
+mix_entrances:
+randomize_enemies:
+randomize_enemy_palettes: false
+randomize_starting_island:
+randomize_charts:
+hoho_hints:
+fishmen_hints:
+korl_hints:
+num_item_hints:
+num_location_hints:
+num_barren_hints:
+num_path_hints:
+cryptic_hints:
+prioritize_remote_hints:
+hint_importance:
+swift_sail:
+instant_text_boxes:
+reveal_full_sea_chart:
+add_shortcut_warps_between_dungeons:
+skip_rematch_bosses:
+invert_camera_x_axis: false
+invert_sea_compass_x_axis: false
+remove_title_and_ending_videos: true
+remove_music:
+switch_targeting_mode: false
+randomized_gear:
+starting_gear:
+num_starting_triforce_shards:
+starting_pohs:
+starting_hcs:
+num_extra_starting_items:
+custom_player_model: Link
+player_in_casual_clothes: false
+disable_custom_player_voice: false
+disable_custom_player_items: false
+custom_color_preset: Default
+custom_colors:
+  Hair:
+  - 255
+  - 239
+  - 16
+  Skin:
+  - 247
+  - 219
+  - 156
+  Mouth:
+  - 247
+  - 73
+  - 99
+  Eyes:
+  - 16
+  - 81
+  - 74
+  Sclera:
+  - 255
+  - 255
+  - 255
+  Hat:
+  - 90
+  - 178
+  - 74
+  Tunic:
+  - 90
+  - 178
+  - 74
+  Undershirt:
+  - 173
+  - 227
+  - 66
+  Pants:
+  - 255
+  - 255
+  - 255
+  Boots:
+  - 148
+  - 73
+  - 8
+  Belt:
+  - 99
+  - 48
+  - 8
+  Belt Buckle:
+  - 255
+  - 239
+  - 16
+do_not_generate_spoiler_log:
+dry_run:
