@@ -386,26 +386,67 @@ public class ULTRAKILLManualDL : MonoBehaviour
         while (!configLoaded)
             yield return null;
 
-        string apWorldsPath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "worlds");
-        Directory.CreateDirectory(apWorldsPath);
+        string fileName = "ultrakill.apworld";
 
         string tempDownloadPath = Path.Combine(Application.persistentDataPath, "APWorldTemp");
+        Directory.CreateDirectory(tempDownloadPath);
 
-        // Download the .apworld
         yield return downloader.DownloadToFolder(ultrakillAPWorld, tempDownloadPath);
 
-        // Find the .apworld file
         string[] apWorldFiles = Directory.GetFiles(tempDownloadPath, "*.apworld");
 
-        if (apWorldFiles.Length > 0)
-        {
-            string targetPath = Path.Combine(apWorldsPath, "ultrakill.apworld");
-            File.Copy(apWorldFiles[0], targetPath, true);
-            UnityEngine.Debug.Log("Copied ultrakill.apworld to Archipelago worlds");
-        }
-        else
+        if (apWorldFiles.Length == 0)
         {
             UnityEngine.Debug.LogWarning("ultrakill.apworld not found in download");
+            SafeDeleteDirectory(tempDownloadPath);
+            yield break;
+        }
+
+        string sourceFile = apWorldFiles[0];
+
+        string[] targetPaths = new string[]
+        {
+        Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
+        };
+
+        string target = "";
+        foreach (string path in targetPaths)
+        {
+            try
+            {
+                string dir = Path.GetDirectoryName(path);
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+                target = path;
+                UnityEngine.Debug.Log("Using target path: " + target);
+                break;
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
+            }
+        }
+
+        if (string.IsNullOrEmpty(target))
+        {
+            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
+            UnityEngine.Debug.LogError("No valid target directory found!");
+            SafeDeleteDirectory(tempDownloadPath);
+            yield break;
+        }
+
+        try
+        {
+            File.Copy(sourceFile, target, true);
+            UnityEngine.Debug.Log("APWorld file copied to: " + target);
+            ShowInfo("APWorld installed successfully!");
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
+            ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
         }
 
         SafeDeleteDirectory(tempDownloadPath);
