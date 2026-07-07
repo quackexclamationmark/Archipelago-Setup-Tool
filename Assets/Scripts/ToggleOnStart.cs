@@ -9,7 +9,7 @@ public class ToggleOnStart : MonoBehaviour
     [SerializeField] private Button activeButton;
     [SerializeField] private Button inactiveButton;
     [Tooltip("Référence au ButtonSorter (ton script)")]
-    [SerializeField] private ButtonSorter buttonSorter;
+    /*[SerializeField] private ButtonSorter buttonSorter;*/
     [SerializeField] private IntEvent selectionChanged;
 
     private ColorBlock activeButtonOriginalColors;
