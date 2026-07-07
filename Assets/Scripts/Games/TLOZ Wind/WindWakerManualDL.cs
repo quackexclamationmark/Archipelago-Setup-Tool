@@ -68,16 +68,16 @@ public class WindWakerManualDL : MonoBehaviour
     private RemoteConfig remoteConfig;
     private bool configLoaded = false;
 
-    private bool wwapInstalled = false;
-    private bool dolphinInstalled = false;
+    public bool wwapInstalled { get; private set; } = false;
+    public bool dolphinInstalled { get; private set; } = false;
 
-    private bool wwapLaunched = false;
-    private bool dolphinLaunched = false;
+    public bool wwapLaunched { get; private set; } = false;
+    public bool dolphinLaunched { get; private set; } = false;
 
-    private bool installationCancelled = false;
+    public bool installationCancelled { get; private set; } = false;
     private System.Collections.Generic.List<Process> launchedProcesses = new System.Collections.Generic.List<Process>();
 
-    private bool installationComplete = false;
+    public bool installationComplete { get; private set; } = false;
 
     private class ThreadTask
     {

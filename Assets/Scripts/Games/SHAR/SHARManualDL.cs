@@ -62,7 +62,7 @@ public class SHARManualDL : MonoBehaviour
     private string selectedGamePath = "";
     private RemoteConfig remoteConfig;
     private bool configLoaded = false;
-    private bool haveGame = false;
+    public bool haveGame = false;
     private System.Collections.Generic.List<Process> launchedProcesses = new System.Collections.Generic.List<Process>();
     private Coroutine currentSetupCoroutine;
     private bool isSetupRunning = false;

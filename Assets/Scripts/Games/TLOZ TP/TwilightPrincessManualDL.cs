@@ -63,16 +63,16 @@ public class TwilightPrincessManualDL : MonoBehaviour
     private RemoteConfig remoteConfig;
     private bool configLoaded = false;
 
-    private bool apworldInstalled = false;
-    private bool apworldGciInstalled = false;
-    private bool apInstalled = false;
-    private bool relInstalled = false;
-    private bool dolphinInstalled = false;
+    public bool apworldInstalled { get; private set; } = false;
+    public bool apworldGciInstalled { get; private set; } = false;
+    public bool apInstalled { get; private set; } = false;
+    public bool relInstalled { get; private set; } = false;
+    public bool dolphinInstalled { get; private set; } = false;
 
     private bool installationCancelled = false;
     private System.Collections.Generic.List<Process> launchedProcesses = new System.Collections.Generic.List<Process>();
 
-    private bool installationComplete = false;
+    public bool installationComplete { get; private set; } = false;
 
     private class ThreadTask
     {

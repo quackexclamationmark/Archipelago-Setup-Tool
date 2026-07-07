@@ -57,7 +57,7 @@ public class SM64ManualDL : MonoBehaviour
     private RemoteConfig remoteConfig;
     private bool configLoaded = false;
 
-    private bool msysInstalled = false;
+    public bool msysInstalled { get; private set; } = false;
     private bool launcherInstalled = false;
 
     private bool msysLaunched = false;
@@ -66,7 +66,7 @@ public class SM64ManualDL : MonoBehaviour
     private bool installationCancelled = false;
     private System.Collections.Generic.List<Process> launchedProcesses = new System.Collections.Generic.List<Process>();
 
-    private bool installationComplete = false;
+    public bool installationComplete = false;
 
     private class ThreadTask
     {
