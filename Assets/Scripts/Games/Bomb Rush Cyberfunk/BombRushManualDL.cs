@@ -516,12 +516,12 @@ public class BombRushManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Bomb Rush Cyberfunk"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Bomb Rush Cyberfunk"),
-            @"D:\Steam\steamapps\common\Bomb Rush Cyberfunk",
-            @"D:\SteamLibrary\steamapps\common\Bomb Rush Cyberfunk",
-            @"E:\Steam\steamapps\common\Bomb Rush Cyberfunk",
-            @"E:\SteamLibrary\steamapps\common\Bomb Rush Cyberfunk",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "BombRushCyberfunk"),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "BombRushCyberfunk"),
+            @"D:\Steam\steamapps\common\BombRushCyberfunk",
+            @"D:\SteamLibrary\steamapps\common\BombRushCyberfunk",
+            @"E:\Steam\steamapps\common\BombRushCyberfunk",
+            @"E:\SteamLibrary\steamapps\common\BombRushCyberfunk",
         };
 
         foreach (string path in quickPaths)
@@ -548,15 +548,15 @@ public class BombRushManualDL : MonoBehaviour
 
                 try
                 {
-                    string brcPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Bomb Rush Cyberfunk");
+                    string brcPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "BombRushCyberfunk");
                     if (Directory.Exists(brcPath))
                         return brcPath;
 
-                    brcPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Bomb Rush Cyberfunk");
+                    brcPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "BombRushCyberfunk");
                     if (Directory.Exists(brcPath))
                         return brcPath;
 
-                    brcPath = Path.Combine(drive.Name, "steamapps", "common", "Bomb Rush Cyberfunk");
+                    brcPath = Path.Combine(drive.Name, "steamapps", "common", "BombRushCyberfunk");
                     if (Directory.Exists(brcPath))
                         return brcPath;
                 }
