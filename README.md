@@ -7,11 +7,11 @@ DOWNLOAD THE INSTALLER, NOT THE .ZIP FILE!
 Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could (idk I didn't try it) but it COULD delete everything that is next to the .exe (in the same folder) even tho it's not supposed to. Basically, you can move the folder but probably don't rename it and do not touch what's inside.
 
 # Archipelago Setup Tool
-### [Download latest version | v1.1.1](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v1.1.1)
+### [Download latest version | v1.2.0](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v1.2.0)
 
 After setting up a game, all credits can be found in the game's directory, inside the game's directory.
 
-Currently, the following games are supported (58):
+Currently, the following games are supported (67):
 
 * Clair Obscur: Expedition 33
 * Lethal Company
@@ -71,6 +71,15 @@ Currently, the following games are supported (58):
 * Skul: The Hero Slayer
 * Funi Raccoon Game
 * Fez
+* The Legend of Zelda: The Wind Waker
+* The Legend of Zelda: Twilight Princess
+* A Short Hike
+* Pokémon Emerald
+* The Simpsons Hit & Run
+* Call of Duty: Black Ops III
+* Plants Vs. Zombies GOTY
+* Plants Vs. Zombies Replanted
+* Rogue Legacy 2
 
 Features to add in the future:
 
@@ -82,3 +91,9 @@ I don't own all the games so some game path can be wrong and lead to a "Path not
 ## Required Tools
 
 * Latest version of [Archipelago Launcher](https://github.com/ArchipelagoMW/Archipelago/releases/download/0.6.7/Setup.Archipelago.0.6.7.exe)
+
+## Special Thanks
+
+[UnitySimpleFileBrowser | by **yasirkula**](https://github.com/yasirkula/UnitySimpleFileBrowser)
+
+My friends *AquaBolt, Unlucky_Lynx, RealMim, TheInfectedDuckii, Mikkel* for testing some of my setups!
