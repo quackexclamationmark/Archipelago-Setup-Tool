@@ -43,7 +43,8 @@
     "ashorthikeBepInEx": "https://github.com/BrandenEK/AShortHike.ModdingTools/raw/main/win32.zip",
     "ashorthikeAP": "https://github.com/BrandenEK/AShortHike.Randomizer/releases/download/1.5.1/Randomizer.zip",
     "ashorthikeModdingAPI": "https://github.com/BrandenEK/AShortHike.ModdingAPI/releases/download/1.0.1/ModdingAPI.zip",
-    
+
+    "actPathName": "Another Crab's Treasure",
     "actAP": "https://github.com/Automagic00/ACT-AP-Client-Plugin/releases/download/0.4.4/ACTAP.dll",
     "actApworld": "https://github.com/Automagic00/ACT-AP-Client-Plugin/releases/download/0.4.4/another_crab.apworld",
     "actBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
