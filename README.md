@@ -97,3 +97,8 @@ I don't own all the games so some game path can be wrong and lead to a "Path not
 [UnitySimpleFileBrowser | by **yasirkula**](https://github.com/yasirkula/UnitySimpleFileBrowser)
 
 My friends *AquaBolt, Unlucky_Lynx, RealMim, TheInfectedDuckii, Mikkel* for testing some of my setups!
+
+## Test Releases (don't update them if you download, it's useless)
+
+https://github.com/quackexclamationTesting/Setup-Tool-Test-Releases
+Small fork where I'll post test releases!
