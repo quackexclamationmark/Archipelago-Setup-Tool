@@ -63,6 +63,7 @@
     "btd6MelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
     "btd6Apworld": "https://github.com/Matt41321/Archipelago/releases/download/v0.7.0/bloonstd6.apworld",
     "btd6ModHelper": "https://github.com/gurrenm3/BTD-Mod-Helper/releases/download/3.6.6/Btd6ModHelper.dll",
+    "btd6Updater": "https://github.com/gurrenm3/BTD-Mod-Helper/releases/download/3.6.6/UpdaterPlugin.dll",
 
     "bombrushBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "bombrushAP": "https://github.com/TRPG0/BRC-Archipelago/releases/download/1.0.6/BRC-Archipelago.1.0.6.zip",
@@ -138,8 +139,8 @@
     "lethalcompanyMonoDetourBep5": "https://thunderstore.io/package/download/MonoDetour/MonoDetour_BepInEx_5/0.7.15/",
     "lethalcompanyMonoDetour": "https://thunderstore.io/package/download/MonoDetour/MonoDetour/0.7.15/",
     
-    "librarianAP": "https://github.com/Str8UpWHITE64/Librarian-AP/releases/download/1.1.0-rc4/Librarian-AP_v1.1.0-rc4.zip",
-    "librarianApworld": "https://github.com/Str8UpWHITE64/Librarian-AP/releases/download/1.1.0-rc4/librarian.apworld",
+    "librarianAP": "https://github.com/Str8UpWHITE64/Librarian-AP/releases/download/1.1.0/Librarian-AP_v1.1.0.zip",
+    "librarianApworld": "https://github.com/Str8UpWHITE64/Librarian-AP/releases/download/1.1.0/librarian.apworld",
 
     "minecraftApworld": "https://github.com/qixils/NeoForgeAP/releases/download/v2.1.3/minecraft.apworld",
 
@@ -182,7 +183,7 @@
     "peaksofyoreBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "peaksofyoreApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/peaks_of_yore.apworld",
 
-    "pikunikuAP": "https://github.com/Jeffdev-Archipelago-Implementations/PikuAPMod/releases/download/0.3.3/PikunikuAPMod.zip",
+    "pikunikuAP": "https://github.com/Jeffdev-Archipelago-Implementations/PikuAPMod/releases/download/0.3.4/PikuAPMod.zip",
     "pikunikuApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-Piku/releases/download/0.3.1/pikuniku.apworld",
     "pikunikuBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
@@ -203,6 +204,9 @@
     "powerwashApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/powerwashsimulator.apworld",
 
     "raftAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-RMLL-Raft.zip",
+
+    "refunctAP": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.2.2a/practice-windows.zip",
+    "refunctApworld": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.2.2a/refunct.apworld",
 
     "repoPathName": "REPO",
     "repoAP": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.3/RepoAP.zip",
@@ -269,19 +273,19 @@
     "skulAP": "https://github.com/Jeffdev-Archipelago-Implementations/SkulAPMod/releases/download/1.0.0/SkulAPMod.zip",
     "skulBepInEx": "https://thunderstore.io/package/download/BepInEx/BepInExPack_Skul/5.4.2100/",
 
-    "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/0.5.2-alpha/sts2-client.zip",
-    "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/0.5.2-alpha/spire2.apworld",
+    "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/0.5.3-alpha/sts2-client.zip",
+    "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/0.5.3-alpha/spire2.apworld",
 
     "slimerancherAP": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.1/Slimipelago.zip",
     "slimerancherApworld": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.1/slime_rancher.apworld",
     "slimerancherMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.1/MelonLoader.x64.zip",
 
     "slimerancher2AP": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.10.0/SlimeRancher2-AP.zip",
-    "slimerancher2Apworld": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.9.3/slime_rancher_2.apworld",
+    "slimerancher2Apworld": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.10.0/slime_rancher_2.apworld",
     "slimerancher2BepInEx": "https://builds.bepinex.dev/projects/bepinex_be/759/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.759%2B9aedb90.zip",
     "slimerancher2Interop": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/interop.zip",
 
-    "stardewvalleyAP": "https://github.com/agilbert1412/StardewArchipelago/releases/download/8.0.9/StardewArchipelago.8.0.9.zip",
+    "stardewvalleyAP": "https://github.com/agilbert1412/StardewArchipelago/releases/download/8.0.13/stardew_valley.apworld",
     "stardewvalleyPreloaded": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-SV-Archipelago.zip",
     
     "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.3/Archipelago_193.zip",
@@ -313,7 +317,7 @@
     "tlozwwAP": "https://github.com/tanjo3/wwrando/releases/download/ap_2.5.1/wwrando_ap-2.5.1-windows.zip",
     "tlozwwDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
-    "thewitnessAP": "https://github.com/NewSoupVi/The-Witness-Randomizer-for-Archipelago/releases/download/9.0.0/The.Witness.Randomizer.for.Archipelago.exe",
+    "thewitnessAP": "https://github.com/NewSoupVi/The-Witness-Randomizer-for-Archipelago/releases/download/9.1.0/The.Witness.Randomizer.for.Archipelago.exe",
 
     "tunicAP": "https://github.com/silent-destroyer/tunic-randomizer/releases/download/5.0.0/TunicRandomizer.zip",
     "tunicBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v6.0.0-pre.1/BepInEx_UnityIL2CPP_x64_6.0.0-pre.1.zip",
