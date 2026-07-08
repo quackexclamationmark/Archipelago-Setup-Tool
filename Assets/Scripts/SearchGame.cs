@@ -201,7 +201,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Ori and the Blind Forest", new List<string> { "Ori", "Blind", "Forest", "OBF", "OATBF" }));
         games.Add(CreateGame("Ori and the Will of the Wisps", new List<string> { "Ori", "Will", "Wisps", "OWW", "OATWOTW", "OWOW" }));
         games.Add(CreateGame("Outer Wilds", new List<string> { "Outer", "Wilds", "OW" }));
-        games.Add(CreateGame("Overcooked! 2", new List<string> { "Overcooked", "Overcooked!", "!", "2" }));
+        games.Add(CreateGame("Overcooked! 2", new List<string> { "Overcooked", "Overcooked!", "!", "2", "Overcooked2", "Overcooked 2" }));
         games.Add(CreateGame("PEAK", new List<string> { "Peak" }));
         games.Add(CreateGame("Peaks Of Yore", new List<string> { "Peaks", "Yore", "POY" }));
         games.Add(CreateGame("Pikuniku", new List<string> { "Pikuniku" }));
@@ -211,6 +211,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Portal 2", new List<string> { "Portal", "2", "II" }));
         games.Add(CreateGame("PowerWash Simulator", new List<string> { "PowerWash", "Wash", "Simulator", "PWS" }));
         games.Add(CreateGame("Raft", new List<string> { "Raft" }));
+        games.Add(CreateGame("Refunct", new List<string> { "Refunct" }));
         games.Add(CreateGame("R.E.P.O.", new List<string> { "REPO", "R.E.P.O." }));
         games.Add(CreateGame("Resident Evil 7: Biohazard", new List<string> { "Resident", "Evil", "7", "Biohazard", "RE7", "RE" }));
         games.Add(CreateGame("Rift of the Necrodancer", new List<string> { "Rift", "Necrodancer", "ROtnD", "ROtN" }));

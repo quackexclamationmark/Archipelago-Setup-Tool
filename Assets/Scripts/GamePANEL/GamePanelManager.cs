@@ -70,6 +70,7 @@ public class GamePanelManager : MonoBehaviour
     public GameObject windwakerPanel;
     public GameObject ashorthikePanel;
     public GameObject twilightprincessPanel;
+    public GameObject refunctPanel;
 
     void Start()
     {
@@ -286,6 +287,9 @@ public class GamePanelManager : MonoBehaviour
             case "TheLegendOfZeldaTwilightPrincess":
                 twilightprincessPanel.SetActive(true);
                 break;
+            case "Refunct":
+                refunctPanel.SetActive(true);
+                break;
         }
     }
 
@@ -359,5 +363,6 @@ public class GamePanelManager : MonoBehaviour
         if (windwakerPanel != null) windwakerPanel.SetActive(false);
         if (ashorthikePanel != null) ashorthikePanel.SetActive(false);
         if (twilightprincessPanel != null) twilightprincessPanel.SetActive(false);
+        if (refunctPanel != null) refunctPanel.SetActive(false);
     }
 }
