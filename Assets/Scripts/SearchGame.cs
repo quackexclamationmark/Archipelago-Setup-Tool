@@ -29,7 +29,6 @@ public class SearchGame : MonoBehaviour
 
     private void Awake()
     {
-        // Initialiser les chemins
         string appDataRoaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         settingsFolder = Path.Combine(appDataRoaming, "Archipelago Setup Tool");
         settingsFile = Path.Combine(settingsFolder, "buttonsort.json");
@@ -42,7 +41,6 @@ public class SearchGame : MonoBehaviour
             AutoFillGames();
         }
 
-        // Charger le sorting depuis le JSON
         ApplySortFromSettings();
 
         foreach (var gameConfig in games)
