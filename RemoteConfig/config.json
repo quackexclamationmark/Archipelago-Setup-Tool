@@ -204,6 +204,9 @@
 
     "raftAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-RMLL-Raft.zip",
 
+    "refunctAP": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.2.2a/practice-windows.zip",
+    "refunctApworld": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.2.2a/refunct.apworld",
+
     "repoPathName": "REPO",
     "repoAP": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.3/RepoAP.zip",
     "repoMenuLib": "https://thunderstore.io/package/download/nickklmao/MenuLib/2.5.4/",
