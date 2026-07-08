@@ -58,7 +58,7 @@ public class RefunctManualDL : MonoBehaviour
             infoOkButton.onClick.AddListener(CloseInfoPanel);
 
         if (launchGameToggle != null)
-            launchGameToggle.isOn = false;
+            launchGameToggle.isOn = true;
 
         if (installApworldToggle != null)
             installApworldToggle.isOn = true;
