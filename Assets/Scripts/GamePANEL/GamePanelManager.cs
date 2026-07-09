@@ -71,6 +71,9 @@ public class GamePanelManager : MonoBehaviour
     public GameObject ashorthikePanel;
     public GameObject twilightprincessPanel;
     public GameObject refunctPanel;
+    public GameObject spel2Panel;
+    public GameObject edcPanel;
+    public GameObject pokemonfrlgPanel;
 
     void Start()
     {
@@ -290,6 +293,15 @@ public class GamePanelManager : MonoBehaviour
             case "Refunct":
                 refunctPanel.SetActive(true);
                 break;
+            case "Spelunky2":
+                spel2Panel.SetActive(true);
+                break;
+            case "EasyDeliveryCo":
+                edcPanel.SetActive(true);
+                break;
+            case "PokemonFireRedandLeafGreen":
+                pokemonfrlgPanel.SetActive(true);
+                break;
         }
     }
 
@@ -364,5 +376,8 @@ public class GamePanelManager : MonoBehaviour
         if (ashorthikePanel != null) ashorthikePanel.SetActive(false);
         if (twilightprincessPanel != null) twilightprincessPanel.SetActive(false);
         if (refunctPanel != null) refunctPanel.SetActive(false);
+        if (spel2Panel != null) spel2Panel.SetActive(false);
+        if (edcPanel != null) edcPanel.SetActive(false);
+        if (pokemonfrlgPanel != null) pokemonfrlgPanel.SetActive(false);
     }
 }

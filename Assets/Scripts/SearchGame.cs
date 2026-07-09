@@ -185,6 +185,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("DOOM (1993)", new List<string> { "Doom", "1", "I", "1993", "(1993)" }));
         games.Add(CreateGame("DOOM II", new List<string> { "Doom", "II", "2" }));
         games.Add(CreateGame("DREDGE", new List<string> { "Dredge" }));
+        games.Add(CreateGame("Easy Delivery Co.", new List<string> { "Easy", "Delivery", "Co", "Co.", "EDC" }));
         games.Add(CreateGame("Fez", new List<string> { "Fez" }));
         games.Add(CreateGame("Funi Raccoon Game", new List<string> { "Funi", "Raccoon", "Racoon", "Game", "FRG" }));
         games.Add(CreateGame("Garfield Kart - Furious Racing", new List<string> { "Garfield", "Kart", "Furious", "Racing" }));
@@ -208,6 +209,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Plants Vs. Zombies GOTY", new List<string> { "Plants", "vs", "Zombies", "GOTY", "Game", "Year", "PVZ" }));
         games.Add(CreateGame("Plants Vs. Zombies Replanted", new List<string> { "Plants", "vs", "Zombies", "Replanted", "Remake", "PVZ" }));
         games.Add(CreateGame("Pokémon Emerald", new List<string> { "Pokemon", "Pokémon", "Emerald" }));
+        games.Add(CreateGame("Pokémon FireRed and LeafGreen", new List<string> { "Pokemon", "Pokémon", "FireRed", "Fire", "Red", "LeafGreen", "Leaf", "Green", "and" }));
         games.Add(CreateGame("Portal 2", new List<string> { "Portal", "2", "II" }));
         games.Add(CreateGame("PowerWash Simulator", new List<string> { "PowerWash", "Wash", "Simulator", "PWS" }));
         games.Add(CreateGame("Raft", new List<string> { "Raft" }));
@@ -222,6 +224,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Slay The Spire 2", new List<string> { "Slay", "Spire", "2", "STS", "STS2" }));
         games.Add(CreateGame("Slime Rancher", new List<string> { "Slime", "Rancher", "SR" }));
         games.Add(CreateGame("Slime Rancher 2", new List<string> { "Slime", "Rancher", "2", "II", "SR", "SR2", "SR 2" }));
+        games.Add(CreateGame("Spelunky 2", new List<string> { "Spelunky", "Spel", "spel2", "Spel 2", "2" }));
         games.Add(CreateGame("Stardew Valley", new List<string> { "Stardew", "Valley", "SV" }));
         games.Add(CreateGame("Subnautica", new List<string> { "Subnautica" }));
         games.Add(CreateGame("Super Mario 64", new List<string> { "Super", "Mario", "64", "SM", "SM64" }));
