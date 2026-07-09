@@ -33,6 +33,7 @@
     "pokemonemeraldPopTracker": "https://github.com/seto10987/Archipelago-Emerald-AP-Tracker/archive/refs/tags/v.2.1.0.zip",
     "tlozwwPopTracker": "https://github.com/Mysteryem/ww-poptracker/archive/refs/tags/v1.3.0.zip",
     "tloztpPopTracker": "https://github.com/Kizugaya/TPRAP_poptracker/releases/download/v0.10.2/TPRAP_poptracker_v0.10.2.zip",
+    "spelunky2PopTracker": "https://github.com/Bogdan1000pink/Spelunky-2-Tracker/releases/download/Release_4.1/Spelunky2_AP_Tracker_4.1.zip",
     
 
     "adofaiPathName": "A Dance of Fire and Ice",
@@ -284,6 +285,10 @@
     "slimerancher2Apworld": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.10.0/slime_rancher_2.apworld",
     "slimerancher2BepInEx": "https://builds.bepinex.dev/projects/bepinex_be/759/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.759%2B9aedb90.zip",
     "slimerancher2Interop": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/interop.zip",
+
+    "spelunky2AP": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.4.0/Spelunky2-Archipelago.zip",
+    "spelunky2Apworld": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.4.0/spelunky2.apworld",
+    "spelunky2Playlunky": "https://github.com/spelunky-fyi/Playlunky/releases/download/nightly/playlunky_nightly_63FB520.zip",
 
     "stardewvalleyAP": "https://github.com/agilbert1412/StardewArchipelago/releases/download/8.0.13/stardew_valley.apworld",
     "stardewvalleyPreloaded": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-SV-Archipelago.zip",
