@@ -33,6 +33,8 @@
     "pokemonemeraldPopTracker": "https://github.com/seto10987/Archipelago-Emerald-AP-Tracker/archive/refs/tags/v.2.1.0.zip",
     "tlozwwPopTracker": "https://github.com/Mysteryem/ww-poptracker/archive/refs/tags/v1.3.0.zip",
     "tloztpPopTracker": "https://github.com/Kizugaya/TPRAP_poptracker/releases/download/v0.10.2/TPRAP_poptracker_v0.10.2.zip",
+    "spelunky2PopTracker": "https://github.com/Bogdan1000pink/Spelunky-2-Tracker/releases/download/Release_4.1/Spelunky2_AP_Tracker_4.1.zip",
+    "pokemonfrlgPopTracker": "https://github.com/vyneras/pokemon-frlg-tracker/releases/download/4.0.4/pokemon-frlg-tracker.zip",
     
 
     "adofaiPathName": "A Dance of Fire and Ice",
@@ -102,6 +104,11 @@
 
     "dredgeAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-DREDGE.zip",
     "dredgeApworld": "https://github.com/alextric234/ArchipelagoDredge/releases/download/dredge_0.5.1/dredge.apworld",
+
+    "easydeliverycoBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+    "easydeliverycoAP": "https://github.com/Aeromaze/Archipelago/releases/download/v0.1.2/EasyDeliveryAP-0.1.2.zip",
+    "easydeliverycoApworld": "https://github.com/Aeromaze/Archipelago/releases/download/v0.1.2/easy_delivery_co.apworld",
+    "easydeliverycoAPI": "https://github.com/foxfoxfoxgay/EasyDeliveryAPI/releases/download/1.0.0/EasyDeliveryAPI.zip.zip",
 
     "fezHAT": "https://github.com/FEZModding/HAT/releases/download/v1.2.1/HAT.zip",
     "fezAP": "https://github.com/nhyldmar/fez-ap/releases/download/v0.5.0/fezap.zip",
@@ -196,6 +203,9 @@
 
     "pokemonemeraldBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
+    "pokemonfrlgBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
+    "pokemonfrlgApworld": "https://github.com/vyneras/Archipelago/releases/download/1.0.4/pokemon_frlg.apworld",
+
     "portal2AP": "https://github.com/GlassToadstool/Portal2ArchipelagoMod/releases/download/0.7.0/Portal2ArchipelagoMod.zip",
     "portal2Apworld": "https://github.com/GlassToadstool/Archipelago/releases/download/0.7.1/portal2.apworld",
 
@@ -284,6 +294,10 @@
     "slimerancher2Apworld": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.10.0/slime_rancher_2.apworld",
     "slimerancher2BepInEx": "https://builds.bepinex.dev/projects/bepinex_be/759/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.759%2B9aedb90.zip",
     "slimerancher2Interop": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/interop.zip",
+
+    "spelunky2AP": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.4.0/Spelunky2-Archipelago.zip",
+    "spelunky2Apworld": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.4.0/spelunky2.apworld",
+    "spelunky2Playlunky": "https://github.com/spelunky-fyi/Playlunky/releases/download/nightly/playlunky_nightly_63FB520.zip",
 
     "stardewvalleyAP": "https://github.com/agilbert1412/StardewArchipelago/releases/download/8.0.13/stardew_valley.apworld",
     "stardewvalleyPreloaded": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-SV-Archipelago.zip",
