@@ -319,6 +319,10 @@
     "version": "5a6b930"
     },
 
+    "ssbbMinus": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Minus%20Launcher.elf",
+    "ssbbApworld": "https://github.com/kenniky/ArchipelagoSSE/releases/download/v0.2.4/ssbb_sse.apworld",
+    "ssbbDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
+
     "tcgBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "tcgApworld": "https://github.com/FyreDay/Archipelago-TCGCardShopSimulator/releases/download/v1.1.0/tcg_card_shop_simulator.apworld",
     "tcgAP": "https://github.com/FyreDay/TCG-CardShop-Sim-APClient/releases/download/v1.1.1/TCG_AP_Client_v1.1.1.zip",
