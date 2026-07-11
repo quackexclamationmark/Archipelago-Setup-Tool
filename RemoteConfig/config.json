@@ -35,6 +35,7 @@
     "tloztpPopTracker": "https://github.com/Kizugaya/TPRAP_poptracker/releases/download/v0.10.2/TPRAP_poptracker_v0.10.2.zip",
     "spelunky2PopTracker": "https://github.com/Bogdan1000pink/Spelunky-2-Tracker/releases/download/Release_4.1/Spelunky2_AP_Tracker_4.1.zip",
     "pokemonfrlgPopTracker": "https://github.com/vyneras/pokemon-frlg-tracker/releases/download/4.0.4/pokemon-frlg-tracker.zip",
+    "pikmin2PopTracker": "https://github.com/Vinaigre1/Pikmin2-PopTracker/releases/download/v0.2.1/Pikmin2-PopTracker.zip",
     
 
     "adofaiPathName": "A Dance of Fire and Ice",
@@ -189,6 +190,10 @@
     "peaksofyoreAP": "https://thunderstore.io/package/download/c0der23/PeaksOfArchipelago/2.2.1/",
     "peaksofyoreBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "peaksofyoreApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/peaks_of_yore.apworld",
+
+    "pikmin2Apworld": "https://github.com/chpas0/Pikmin2Archipelago/releases/download/v0.7.2/pikmin2.apworld",
+    "pikmin2AP": "https://github.com/chpas0/Pikmin2Archipelago/releases/download/v0.7.2/archipelago-pikmin2-universal-v0.7.2.zip",
+    "pikmin2Dolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "pikunikuAP": "https://github.com/Jeffdev-Archipelago-Implementations/PikuAPMod/releases/download/0.3.4/PikuAPMod.zip",
     "pikunikuApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-Piku/releases/download/0.3.1/pikuniku.apworld",
