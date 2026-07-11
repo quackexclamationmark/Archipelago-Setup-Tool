@@ -74,6 +74,8 @@ public class GamePanelManager : MonoBehaviour
     public GameObject spel2Panel;
     public GameObject edcPanel;
     public GameObject pokemonfrlgPanel;
+    public GameObject ssbbPanel;
+    public GameObject pikmin2Panel;
 
     void Start()
     {
@@ -302,6 +304,12 @@ public class GamePanelManager : MonoBehaviour
             case "PokemonFireRedandLeafGreen":
                 pokemonfrlgPanel.SetActive(true);
                 break;
+            case "SuperSmashBrosBrawlTheSubspaceEmissary":
+                ssbbPanel.SetActive(true);
+                break;
+            case "Pikmin2":
+                pikmin2Panel.SetActive(true);
+                break;
         }
     }
 
@@ -379,5 +387,7 @@ public class GamePanelManager : MonoBehaviour
         if (spel2Panel != null) spel2Panel.SetActive(false);
         if (edcPanel != null) edcPanel.SetActive(false);
         if (pokemonfrlgPanel != null) pokemonfrlgPanel.SetActive(false);
+        if (ssbbPanel != null) ssbbPanel.SetActive(false);
+        if (pikmin2Panel != null) pikmin2Panel.SetActive(false);
     }
 }

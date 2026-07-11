@@ -205,6 +205,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Overcooked! 2", new List<string> { "Overcooked", "Overcooked!", "!", "2", "Overcooked2", "Overcooked 2" }));
         games.Add(CreateGame("PEAK", new List<string> { "Peak" }));
         games.Add(CreateGame("Peaks Of Yore", new List<string> { "Peaks", "Yore", "POY" }));
+        games.Add(CreateGame("Pikmin 2", new List<string> { "Pikmin", "2", "Pikmin2" }));
         games.Add(CreateGame("Pikuniku", new List<string> { "Pikuniku" }));
         games.Add(CreateGame("Plants Vs. Zombies GOTY", new List<string> { "Plants", "vs", "Zombies", "GOTY", "Game", "Year", "PVZ" }));
         games.Add(CreateGame("Plants Vs. Zombies Replanted", new List<string> { "Plants", "vs", "Zombies", "Replanted", "Remake", "PVZ" }));
@@ -228,6 +229,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Stardew Valley", new List<string> { "Stardew", "Valley", "SV" }));
         games.Add(CreateGame("Subnautica", new List<string> { "Subnautica" }));
         games.Add(CreateGame("Super Mario 64", new List<string> { "Super", "Mario", "64", "SM", "SM64" }));
+        games.Add(CreateGame("Super Smash Bros. Brawl - The Subspace Emissary", new List<string> { "Super", "Smash", "Bros", "Bros.", "Brawl", "Subspace", "Emissary", "The" }));
         games.Add(CreateGame("TCG Card Shop Simulator", new List<string> { "TCG", "Card", "Shop", "Simulator", "Trading", "TCGCSS" }));
         games.Add(CreateGame("The Legend of Zelda: The Wind Waker", new List<string> { "Legend", "Zelda", "Wind", "Waker", "TLOZ", "WW", "TLOZWW" }));
         games.Add(CreateGame("The Legend of Zelda: Twilight Princess", new List<string> { "Legend", "Zelda", "Twilight", "Princess", "TLOZ", "TP", "TLOZTP" }));
