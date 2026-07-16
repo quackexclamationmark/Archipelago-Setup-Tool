@@ -7,11 +7,11 @@ DOWNLOAD THE INSTALLER, NOT THE .ZIP FILE!
 Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could (idk I didn't try it) but it COULD delete everything that is next to the .exe (in the same folder) even tho it's not supposed to. Basically, you can move the folder but probably don't rename it and do not touch what's inside.
 
 # Archipelago Setup Tool
-### [Download latest version | v1.2.0](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v1.2.0)
+### [Download latest version | v1.3.0](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v1.3.0)
 
 After setting up a game, all credits can be found in the game's directory, inside the game's directory.
 
-Currently, the following games are supported (67):
+Currently, the following games are supported (76):
 
 * Clair Obscur: Expedition 33
 * Lethal Company
@@ -80,6 +80,15 @@ Currently, the following games are supported (67):
 * Plants Vs. Zombies GOTY
 * Plants Vs. Zombies Replanted
 * Rogue Legacy 2
+* Refunct
+* Spelunky 2
+* Easy Delivery Co.
+* Pokémon FireRed and LeafGreen
+* Super Smash Bros. Brawl - The Subspace Emissary
+* Pikmin 2
+* Mario Kart Wii
+* Okami HD
+* DOOM Eternal
 
 Features to add in the future:
 
@@ -94,11 +103,6 @@ I don't own all the games so some game path can be wrong and lead to a "Path not
 
 ## Special Thanks
 
-[UnitySimpleFileBrowser | by **yasirkula**](https://github.com/yasirkula/UnitySimpleFileBrowser)
+[UnitySimpleFileBrowser](https://github.com/yasirkula/UnitySimpleFileBrowser) | by **yasirkula**
 
 My friends *AquaBolt, Unlucky_Lynx, RealMim, TheInfectedDuckii, Mikkel* for testing some of my setups!
-
-## Test Releases (don't update them if you download, it's useless)
-
-https://github.com/quackexclamationTesting/Setup-Tool-Test-Releases
-Small fork where I'll post test releases!
