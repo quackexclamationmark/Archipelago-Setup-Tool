@@ -76,6 +76,10 @@ public class GamePanelManager : MonoBehaviour
     public GameObject pokemonfrlgPanel;
     public GameObject ssbbPanel;
     public GameObject pikmin2Panel;
+    public GameObject mkwiiPanel;
+    public GameObject okamihdPanel;
+    public GameObject doometernalPanel;
+    public GameObject fnafucnPanel;
 
     void Start()
     {
@@ -310,6 +314,18 @@ public class GamePanelManager : MonoBehaviour
             case "Pikmin2":
                 pikmin2Panel.SetActive(true);
                 break;
+            case "MarioKartWii":
+                mkwiiPanel.SetActive(true);
+                break;
+            case "OkamiHD":
+                okamihdPanel.SetActive(true);
+                break;
+            case "DOOMEternal":
+                doometernalPanel.SetActive(true);
+                break;
+            case "UltimateCustomNight":
+                fnafucnPanel.SetActive(true);
+                break;
         }
     }
 
@@ -389,5 +405,9 @@ public class GamePanelManager : MonoBehaviour
         if (pokemonfrlgPanel != null) pokemonfrlgPanel.SetActive(false);
         if (ssbbPanel != null) ssbbPanel.SetActive(false);
         if (pikmin2Panel != null) pikmin2Panel.SetActive(false);
+        if (mkwiiPanel != null) mkwiiPanel.SetActive(false);
+        if (okamihdPanel != null) okamihdPanel.SetActive(false);
+        if (doometernalPanel != null) doometernalPanel.SetActive(false);
+        if (fnafucnPanel != null) fnafucnPanel.SetActive(false);
     }
 }

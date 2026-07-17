@@ -327,7 +327,7 @@ public class CelesteOWPopTrackerInstaller : MonoBehaviour
         if (!Directory.Exists(packsPath))
             Directory.CreateDirectory(packsPath);
 
-        string packDestZipPath = Path.Combine(packsPath, "CelestePopTracker.zip");
+        string packDestZipPath = Path.Combine(packsPath, "CelesteOWPopTracker.zip");
         File.Copy(gamepackZipPath, packDestZipPath, true);
         Debug.Log("Pack copied to: " + packDestZipPath);
 

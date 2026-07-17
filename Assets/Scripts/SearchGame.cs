@@ -180,10 +180,11 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Clustertruck", new List<string> { "Cluster", "Truck", "ClusterTruck", "CT" }));
         games.Add(CreateGame("Content Warning", new List<string> { "Content", "Warning", "CW" }));
         games.Add(CreateGame("Cuphead", new List<string> { "Cup", "Head", "Cuphead" }));
-        games.Add(CreateGame("DARK SOULS II", new List<string> { "Dark", "Souls", "II", "2", "Scholar", "First", "Sin", "DS", "DS2", "DS 2" }));
-        games.Add(CreateGame("DARK SOULS III", new List<string> { "Dark", "Souls", "III", "3", "DS", "DS3", "DS 3" }));
+        games.Add(CreateGame("DARK SOULS II", new List<string> { "Dark", "Souls", "II", "2", "Scholar", "First", "Sin", "DS", "DS2", "DS 2", "DarkSouls", "DarkSouls2" }));
+        games.Add(CreateGame("DARK SOULS III", new List<string> { "Dark", "Souls", "III", "3", "DS", "DS3", "DS 3", "DarkSouls", "DarkSouls3" }));
         games.Add(CreateGame("DOOM (1993)", new List<string> { "Doom", "1", "I", "1993", "(1993)" }));
         games.Add(CreateGame("DOOM II", new List<string> { "Doom", "II", "2" }));
+        games.Add(CreateGame("DOOM Eternal", new List<string> { "Doom", "Eternal", "DoomEternal" }));
         games.Add(CreateGame("DREDGE", new List<string> { "Dredge" }));
         games.Add(CreateGame("Easy Delivery Co.", new List<string> { "Easy", "Delivery", "Co", "Co.", "EDC" }));
         games.Add(CreateGame("Fez", new List<string> { "Fez" }));
@@ -195,10 +196,12 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Hollow Knight", new List<string> { "Hollow", "Knight", "HK" }));
         games.Add(CreateGame("Lethal Company", new List<string> { "Lethal", "Company", "LC" }));
         games.Add(CreateGame("Librarian Tidy Up the Arcane Library", new List<string> { "Librarian", "Tidy", "Up", "Arcane", "Library", "LTUTAL" }));
+        games.Add(CreateGame("Mario Kart Wii", new List<string> { "Mario", "Kart", "Wii", "MK", "MKWii", "M K Wii", "M KWii" }));
         games.Add(CreateGame("Minecraft", new List<string> { "Minecraft", "Mine", "Craft", "MC" }));
         games.Add(CreateGame("Neon White", new List<string> { "Neon", "White" }));
         games.Add(CreateGame("Nine Sols", new List<string> { "Nine", "Sols" }));
         games.Add(CreateGame("Noita", new List<string> { "Noita" }));
+        games.Add(CreateGame("Okami HD", new List<string> { "Okami", "OkamiHD", "HD" }));
         games.Add(CreateGame("Ori and the Blind Forest", new List<string> { "Ori", "Blind", "Forest", "OBF", "OATBF" }));
         games.Add(CreateGame("Ori and the Will of the Wisps", new List<string> { "Ori", "Will", "Wisps", "OWW", "OATWOTW", "OWOW" }));
         games.Add(CreateGame("Outer Wilds", new List<string> { "Outer", "Wilds", "OW" }));

@@ -12,9 +12,9 @@ public class HitmanWoAManualDL : MonoBehaviour
     public FileDownloader downloader;
 
     [Header("GAME FILES")]
-    public FileDownloader.FileData hitmanPeacock;    // Peacock-v8.8.1.zip
-    public FileDownloader.FileData hitmanwoaApworld; // hitman_woa.apworld
-    public FileDownloader.FileData hitmanwoaAP;     // archipelago.plugin.js file data
+    public FileDownloader.FileData hitmanPeacock;
+    public FileDownloader.FileData hitmanwoaApworld;
+    public FileDownloader.FileData hitmanwoaAP;
 
     [Header("PLATFORM SELECTION")]
     public Button steamButton;
@@ -22,15 +22,15 @@ public class HitmanWoAManualDL : MonoBehaviour
     public TextMeshProUGUI platformStatus;
 
     [Header("FEATURE TOGGLES")]
-    public Toggle installPeacockToggle;              // install Peacock folder
-    public Toggle installAPWorldToggle;              // install apworld
-    public Toggle installPluginToggle;               // install archipelago.plugin.js into Peacock\plugins
-    public Toggle runPeacockServicesToggle;          // starts PeacockPatcher.exe then Start Server.cmd
-    public Toggle launchGameAfterPeacockToggle;      // only enabled when runPeacockServicesToggle is on, launches game after 10s
+    public Toggle installPeacockToggle;
+    public Toggle installAPWorldToggle;
+    public Toggle installPluginToggle;
+    public Toggle runPeacockServicesToggle;
+    public Toggle launchGameAfterPeacockToggle;
 
     [Header("REVERT OPTIONS")]
-    public Toggle removePluginOnlyToggle;            // remove only archipelago.plugin.js from Peacock\plugins
-    public Toggle fullCleanToggle;                   // remove entire Peacock folder and related files
+    public Toggle removePluginOnlyToggle;
+    public Toggle fullCleanToggle;
 
     [Header("CONFIRMATION PANEL")]
     public GameObject confirmationPanel;

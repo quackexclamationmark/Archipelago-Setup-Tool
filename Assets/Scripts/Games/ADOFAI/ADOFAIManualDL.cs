@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Collections;
 using System.Diagnostics;
+using System.Security.Principal;
 
 public class ADOFAIManualDL : MonoBehaviour
 {

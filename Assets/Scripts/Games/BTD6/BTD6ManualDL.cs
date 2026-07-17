@@ -15,6 +15,7 @@ public class BloonsTD6ManualDL : MonoBehaviour
     public FileDownloader.FileData apMod;
     public FileDownloader.FileData melonLoader;
     public FileDownloader.FileData modHelper;
+    public FileDownloader.FileData updater;
 
     [Header("PLATFORM SELECTION")]
     public Button steamButton;
@@ -59,18 +60,17 @@ public class BloonsTD6ManualDL : MonoBehaviour
         public string btd6MelonLoader;
         public string btd6Apworld;
         public string btd6ModHelper;
+        public string btd6Updater;
     }
 
     void Start()
     {
-        // Initialize platform buttons
         if (steamButton != null)
             steamButton.onClick.AddListener(OnSteamButtonClicked);
 
         if (epicButton != null)
             epicButton.onClick.AddListener(OnEpicButtonClicked);
 
-        // Select Steam by default
         SelectSteam();
 
         btd6Path = GetBTD6Path();
@@ -168,6 +168,7 @@ public class BloonsTD6ManualDL : MonoBehaviour
         melonLoader.url = remoteConfig.btd6MelonLoader;
         apworld.url = remoteConfig.btd6Apworld;
         modHelper.url = remoteConfig.btd6ModHelper;
+        updater.url = remoteConfig.btd6Updater;
     }
 
     public void RunSetup()
@@ -291,6 +292,7 @@ public class BloonsTD6ManualDL : MonoBehaviour
 
             SafeDeleteFile(Path.Combine(modsPath, "BloonsArchipelago.dll"));
             SafeDeleteFile(Path.Combine(modsPath, "Btd6ModHelper.dll"));
+            SafeDeleteFile(Path.Combine(modsPath, "UpdaterPlugin.dll"));
 
             DeleteOldVersionFiles();
 
@@ -317,6 +319,7 @@ public class BloonsTD6ManualDL : MonoBehaviour
 
         SafeDeleteFile(Path.Combine(modsPath, "BloonsArchipelago.dll"));
         SafeDeleteFile(Path.Combine(modsPath, "Btd6ModHelper.dll"));
+        SafeDeleteFile(Path.Combine(modsPath, "UpdaterPlugin.dll"));
 
         DeleteOldVersionFiles();
 
@@ -367,7 +370,7 @@ public class BloonsTD6ManualDL : MonoBehaviour
             if (name.StartsWith("BTD6 APMod Version") && name.EndsWith(".txt"))
                 continue;
 
-            if (name != "BloonsArchipelago.dll" && name != "Btd6ModHelper.dll")
+            if (name != "BloonsArchipelago.dll" && name != "Btd6ModHelper.dll" && name != "UpdaterPlugin.dll")
                 return true;
         }
 
@@ -401,6 +404,7 @@ public class BloonsTD6ManualDL : MonoBehaviour
         {
             ShowInfo("Installing Mod Helper...");
             yield return InstallModHelper();
+            yield return InstallUpdater();
         }
 
         CreateVersionFile(apMod.url, melonLoader.url, modHelper.url, apworld.url);
@@ -662,6 +666,36 @@ public class BloonsTD6ManualDL : MonoBehaviour
         yield return null;
     }
 
+    IEnumerator InstallUpdater()
+    {
+        UnityEngine.Debug.Log("START InstallUpdater");
+        ShowInfo("Downloading Updater Plugin...");
+
+        string modsPath = Path.Combine(btd6Path, "Mods");
+        Directory.CreateDirectory(modsPath);
+
+        string dllPath = Path.Combine(modsPath, "UpdaterPlugin.dll");
+
+        UnityEngine.Debug.Log("Downloading from: " + updater.url);
+        UnityEngine.Debug.Log("Saving to: " + dllPath);
+
+        yield return DownloadFile(updater.url, dllPath);
+
+        if (File.Exists(dllPath))
+        {
+            UnityEngine.Debug.Log("UpdaterPlugin.dll downloaded successfully");
+            ShowInfo("Updater Plugin installed successfully!");
+        }
+        else
+        {
+            UnityEngine.Debug.LogError("UpdaterPlugin.dll download failed!");
+            ShowInfo("ERROR: Updater Plugin download failed!");
+        }
+
+        UnityEngine.Debug.Log("END InstallUpdater");
+        yield return null;
+    }
+
     IEnumerator APWorldOnlyFlow()
     {
         btd6Path = GetBTD6Path();
@@ -717,6 +751,7 @@ public class BloonsTD6ManualDL : MonoBehaviour
 
         ShowInfo("Installing Mod Helper...");
         yield return InstallModHelper();
+        yield return InstallUpdater();
 
         CreateVersionFile(apMod.url, melonLoader.url, modHelper.url, apworld.url);
 
@@ -1049,7 +1084,6 @@ public class BloonsTD6ManualDL : MonoBehaviour
 
                 try
                 {
-                    // Cherche Steam\steamapps
                     string btd6Path = Path.Combine(drive.Name, "Steam", "steamapps", "common", "BloonsTD6");
                     if (Directory.Exists(btd6Path))
                     {
@@ -1057,7 +1091,6 @@ public class BloonsTD6ManualDL : MonoBehaviour
                         return btd6Path;
                     }
 
-                    // Cherche SteamLibrary\steamapps
                     btd6Path = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "BloonsTD6");
                     if (Directory.Exists(btd6Path))
                     {
@@ -1065,7 +1098,6 @@ public class BloonsTD6ManualDL : MonoBehaviour
                         return btd6Path;
                     }
 
-                    // Cherche directement steamapps à la racine du disque
                     btd6Path = Path.Combine(drive.Name, "steamapps", "common", "BloonsTD6");
                     if (Directory.Exists(btd6Path))
                     {
@@ -1073,7 +1105,6 @@ public class BloonsTD6ManualDL : MonoBehaviour
                         return btd6Path;
                     }
 
-                    // Cherche dans Program Files (x86)\steamapps
                     btd6Path = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "BloonsTD6");
                     if (Directory.Exists(btd6Path))
                     {
@@ -1081,7 +1112,6 @@ public class BloonsTD6ManualDL : MonoBehaviour
                         return btd6Path;
                     }
 
-                    // Cherche dans Program Files\steamapps
                     btd6Path = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "BloonsTD6");
                     if (Directory.Exists(btd6Path))
                     {
@@ -1126,7 +1156,6 @@ public class BloonsTD6ManualDL : MonoBehaviour
             catch { }
         }
 
-        // Cherche dans Epic Games Launcher directory
         try
         {
             string epicBaseDir = Path.Combine(
@@ -1136,7 +1165,6 @@ public class BloonsTD6ManualDL : MonoBehaviour
 
             if (Directory.Exists(epicBaseDir))
             {
-                // Cherche le manifest pour BloonsTD6
                 string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
                 foreach (string manifest in manifests)
                 {
@@ -1145,7 +1173,6 @@ public class BloonsTD6ManualDL : MonoBehaviour
                         string content = File.ReadAllText(manifest);
                         if (content.Contains("BloonsTD6"))
                         {
-                            // Extract install location from manifest
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
                             System.Text.RegularExpressions.Match match = regex.Match(content);
 
@@ -1166,7 +1193,6 @@ public class BloonsTD6ManualDL : MonoBehaviour
         }
         catch { }
 
-        // Scan all drives
         try
         {
             System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
