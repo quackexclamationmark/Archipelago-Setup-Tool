@@ -320,7 +320,7 @@
 
     "slimerancher2AP": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.11.0/SlimeRancher2-AP.zip",
     "slimerancher2Apworld": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.11.0/slime_rancher_2.apworld",
-    "slimerancher2BepInEx": "https://builds.bepinex.dev/projects/bepinex_be/759/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.759%2B9aedb90.zip",
+    "slimerancher2BepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
     "slimerancher2Interop": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/interop.zip",
 
     "spelunky2AP": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.4.0/Spelunky2-Archipelago.zip",
@@ -364,6 +364,10 @@
     "tlozwwDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "thewitnessAP": "https://github.com/NewSoupVi/The-Witness-Randomizer-for-Archipelago/releases/download/9.1.0/The.Witness.Randomizer.for.Archipelago.exe",
+
+    "toemBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
+    "toemAP": "https://github.com/bbernardoni/Archipelago.TOEM/releases/download/2.0.6/ToemArchipelagoMod.zip",
+    "toemApworld": "https://github.com/bbernardoni/Archipelago.TOEM/releases/download/2.0.6/toem.apworld",
 
     "tunicAP": "https://github.com/silent-destroyer/tunic-randomizer/releases/download/5.0.0/TunicRandomizer.zip",
     "tunicBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v6.0.0-pre.1/BepInEx_UnityIL2CPP_x64_6.0.0-pre.1.zip",
