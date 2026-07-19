@@ -40,6 +40,7 @@
     "celesteowPopTracker": "https://github.com/Zeeveez/CelesteOpenWorldPoptracker/archive/refs/tags/v2.0.2.zip",
     "huniepopPopTracker": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V2.3.1/Hunie.Pop.PopTracker.V2.3.0.zip",
     "huniepop2PopTracker": "https://github.com/DotsofdarknessArchipelago/HuniePop2Archipelago/releases/download/v3.1.0/Hunie.Pop.2.Archipelago.PopTracker.V3.1.0.-.HOTFIX.zip",
+    "pokeparkwiiPopTracker": "https://github.com/Mekurushi/pokepark_ap_poptracker/releases/download/1.2.4/pokepark_ap_poptracker.zip",
     
 
     "adofaiPathName": "A Dance of Fire and Ice",
@@ -246,6 +247,10 @@
 
     "pokemonfrlgBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
     "pokemonfrlgApworld": "https://github.com/vyneras/Archipelago/releases/download/1.0.4/pokemon_frlg.apworld",
+
+    "pokeparkwiiAP": "https://github.com/Mekurushi/pokeparkrando/releases/download/1.2.3/windows-x64.zip",
+    "pokeparkwiiApworld": "https://github.com/Mekurushi/Archipelago_Pokepark/releases/download/1.2.4/pokepark.apworld",
+    "pokeparkwiiDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "portal2AP": "https://github.com/GlassToadstool/Portal2ArchipelagoMod/releases/download/0.7.0/Portal2ArchipelagoMod.zip",
     "portal2Apworld": "https://github.com/GlassToadstool/Archipelago/releases/download/0.7.2/portal2.apworld",
