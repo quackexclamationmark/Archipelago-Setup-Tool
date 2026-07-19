@@ -38,6 +38,7 @@
     "pikmin2PopTracker": "https://github.com/Vinaigre1/Pikmin2-PopTracker/releases/download/v0.2.1/Pikmin2-PopTracker.zip",
     "okamihdPopTracker": "https://github.com/Ragmoa/Okami-HD-AP-Tracker/archive/refs/heads/main.zip",
     "celesteowPopTracker": "https://github.com/Zeeveez/CelesteOpenWorldPoptracker/archive/refs/tags/v2.0.2.zip",
+    "huniepopPopTracker": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V2.3.1/Hunie.Pop.PopTracker.V2.3.0.zip",
     
 
     "adofaiPathName": "A Dance of Fire and Ice",
@@ -149,6 +150,9 @@
     "hitmanwoaApworld": "https://github.com/BenDipp/Archipelago/releases/download/0.8.2/hitman_woa.apworld",
 
     "hollowknightAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-Lumafly-HKAP.zip",
+
+    "huniepopAP": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V2.3.1/Hunie.Pop.Archipelago.plugin.v2.3.1.zip",
+    "huniepopApworld": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V2.3.1/huniepop.apworld",
 
     "lethalcompanyAP": "https://thunderstore.io/package/download/APLC/APLC/0.7.12/",
     "lethalcompanyBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
