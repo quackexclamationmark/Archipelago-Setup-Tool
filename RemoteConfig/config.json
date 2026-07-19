@@ -96,7 +96,7 @@
     "contentwarningMycelium": "https://github.com/RugbugRedfern/Mycelium-Networking-For-Content-Warning/releases/download/v1.0.14/MyceliumNetworkingForCW-Debug.dll",
 
     "cupheadAP": "https://github.com/JKLeckr/CupheadArchipelagoMod/releases/download/alpha03e/CupheadArchipelago-alpha03e_win64.zip",
-    "cupheadApworld": "https://github.com/JKLeckr/Archipelago-cuphead/releases/download/alpha03f/cuphead.apworld",
+    "cupheadApworld": "https://github.com/JKLeckr/Archipelago-cuphead/releases/download/alpha03h/cuphead.apworld",
     "cupheadBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
     "ds2scholarAP": "https://github.com/WildBunnie/DarkSoulsII-Archipelago/releases/download/v0.5.5-hotfix/dinput8_sotfs.dll",
@@ -109,7 +109,7 @@
 
     "doom2AP": "https://github.com/Daivuk/apdoom/releases/download/1.2.0/APDOOM-1_2_0-Win32.zip",
 
-    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.2.1/DoomEternalArchipelago-v0.2.1-pre-alpha.zip",
+    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.3.0/DoomEternalArchipelago-v0.3.0-alpha.zip",
     "doometernalMeathook": "https://github.com/brongo/m3337ho0o0ok/releases/download/v7.2/XINPUT1_3.dll",
     "doometernalModInjector": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/eternalmodinjector_b20ec.zip",
     "doometernalApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/doometernal.apworld",
@@ -374,7 +374,7 @@
     "toemAP": "https://github.com/bbernardoni/Archipelago.TOEM/releases/download/2.0.6/ToemArchipelagoMod.zip",
     "toemApworld": "https://github.com/bbernardoni/Archipelago.TOEM/releases/download/2.0.6/toem.apworld",
 
-    "tunicAP": "https://github.com/silent-destroyer/tunic-randomizer/releases/download/5.0.0/TunicRandomizer.zip",
+    "tunicAP": "https://github.com/silent-destroyer/tunic-randomizer/releases/download/5.0.1/TunicRandomizer.zip",
     "tunicBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v6.0.0-pre.1/BepInEx_UnityIL2CPP_x64_6.0.0-pre.1.zip",
 
     "ucnApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/ucn.apworld",
