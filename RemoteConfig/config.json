@@ -221,6 +221,9 @@
 
     "oc2AP": "https://github.com/toasterparty/oc2-modding/releases/download/v1.9.9/oc2-modding-v1.9.9.zip",
 
+    "pmttydApworld": "https://github.com/jamesbrq/ArchipelagoTTYD/releases/download/v0.11.0/ttyd.apworld",
+    "pmttydDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
+
     "peakAP": "https://github.com/Mickemoose/peak-archipelago/releases/download/0.6.0/peakpelago_0.6.0.zip",
     "peakBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "peakApworld": "https://github.com/Mickemoose/peak-archipelago/releases/download/0.6.0/peak.apworld",
