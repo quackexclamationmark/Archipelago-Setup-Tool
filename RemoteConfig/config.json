@@ -370,7 +370,7 @@
     },
 
     "ssbbMinus": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Minus%20Launcher.elf",
-    "ssbbApworld": "https://github.com/kenniky/ArchipelagoSSE/releases/download/v0.2.4/ssbb_sse.apworld",
+    "ssbbApworld": "https://github.com/kenniky/ArchipelagoSSE/releases/download/v0.2.5/ssbb_sse.apworld",
     "ssbbDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "tcgBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
