@@ -120,7 +120,7 @@
 
     "doom2AP": "https://github.com/Daivuk/apdoom/releases/download/1.2.0/APDOOM-1_2_0-Win32.zip",
 
-    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.3.0/DoomEternalArchipelago-v0.3.0-alpha.zip",
+    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.3.1/DoomEternalArchipelagoPlayableTest-v0.3.1-alpha.zip",
     "doometernalMeathook": "https://github.com/brongo/m3337ho0o0ok/releases/download/v7.2/XINPUT1_3.dll",
     "doometernalModInjector": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/eternalmodinjector_b20ec.zip",
     "doometernalApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/doometernal.apworld",
@@ -250,8 +250,8 @@
     "ppdsAP": "https://github.com/SWCreeperKing/PPDSArchipelago/releases/download/v0.3.2/Duckipelago.zip",
     "ppdsApworld": "https://github.com/SWCreeperKing/PPDSArchipelago/releases/download/v0.3.2/placidplasticducksim.apworld",
 
-    "pvzgotyAP": "https://github.com/vicr123/PvZ-Stable-Decompile-AP/releases/download/v1.9.0/PlantsVsZombies-GOTY-AP-x64.zip",
-    "pvzgotyApworld": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.8.0/pvzr.apworld",
+    "pvzgotyAP": "https://github.com/vicr123/PvZ-Stable-Decompile-AP/releases/download/v1.9.1/PlantsVsZombies-GOTY-AP-x64.zip",
+    "pvzgotyApworld": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.9.0/pvzr.apworld",
     
     "pvzreplantedAP": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.9.0/replanted_archipelago_v1.9.0.zip",
     "pvzreplantedApworld": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.9.0/replanted_archipelago_v1.9.0.zip",
