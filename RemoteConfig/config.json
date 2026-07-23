@@ -381,6 +381,10 @@
     "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.3/Archipelago_193.zip",
     "subnauticaBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
+    "sulfurAP": "https://github.com/FrederikRasmussen/APWorldSULFUR/releases/download/alpha2.0.0/SULFUR.AP.Plugin.Alpha.2.Hotfix.1.zip",
+    "sulfurApworld": "https://github.com/FrederikRasmussen/APWorldSULFUR/releases/download/alpha2.0.0/sulfur.apworld",
+    "sulfurBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+
     "sm64APLauncher": "https://github.com/N00byKing/SM64AP-Launcher/releases/download/rel8/SM64AP-Launcher_windows.zip",
     "sm64MSYS": "https://github.com/msys2/msys2-installer/releases/download/2026-06-11/msys2-x86_64-20260611.exe",
     "sm64DefConfig": {
