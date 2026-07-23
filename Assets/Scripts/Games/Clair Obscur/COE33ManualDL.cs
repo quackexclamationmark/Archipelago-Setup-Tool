@@ -149,14 +149,14 @@ public class COE33ManualDL : MonoBehaviour
             return;
         }
 
-        if (string.IsNullOrEmpty(gamePath))
+        bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
+
+        if (!apworld && string.IsNullOrEmpty(gamePath))
         {
-            ShowInfo("Game path not found. Please check Steam installation.");
+            ShowInfo("Game path not found. Please check your installation.");
             return;
         }
 
-        // ✅ FLOWS individuels
-        bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool mods = installModsToggle == null || installModsToggle.isOn;
 
         int count = (apworld ? 1 : 0) + (mods ? 1 : 0);

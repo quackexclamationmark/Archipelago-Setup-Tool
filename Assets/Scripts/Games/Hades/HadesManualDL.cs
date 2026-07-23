@@ -910,7 +910,6 @@ public class HadesManualDL : MonoBehaviour
             catch { }
         }
 
-        // Cherche dans Epic Games Launcher directory
         try
         {
             string epicBaseDir = Path.Combine(
@@ -929,7 +928,6 @@ public class HadesManualDL : MonoBehaviour
                         string content = File.ReadAllText(manifest);
                         if (content.Contains("Hades") || content.Contains("hades"))
                         {
-                            // Extract install location from manifest
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
                             System.Text.RegularExpressions.Match match = regex.Match(content);
 
@@ -950,7 +948,6 @@ public class HadesManualDL : MonoBehaviour
         }
         catch { }
 
-        // Scan all drives
         try
         {
             System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();

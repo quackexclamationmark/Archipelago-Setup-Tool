@@ -80,6 +80,22 @@ public class GamePanelManager : MonoBehaviour
     public GameObject okamihdPanel;
     public GameObject doometernalPanel;
     public GameObject fnafucnPanel;
+    public GameObject ppdsPanel;
+    public GameObject toemPanel;
+    public GameObject gtasaPanel;
+    public GameObject huniepopPanel;
+    public GameObject huniepop2Panel;
+    public GameObject pokeparkwiiPanel;
+    public GameObject pokemoncrystalPanel;
+    public GameObject bendyinkPanel;
+    public GameObject pmttydPanel;
+    public GameObject luigismansionPanel;
+    public GameObject tloztmcPanel;
+    public GameObject scritchyPanel;
+    public GameObject iamyourbeastPanel;
+    public GameObject ksp1Panel;
+    public GameObject oniPanel;
+    public GameObject sulfurPanel;
 
     void Start()
     {
@@ -326,6 +342,54 @@ public class GamePanelManager : MonoBehaviour
             case "UltimateCustomNight":
                 fnafucnPanel.SetActive(true);
                 break;
+            case "PlacidPlasticDuckSimulator":
+                ppdsPanel.SetActive(true);
+                break;
+            case "TOEMAPhotoAdventure":
+                toemPanel.SetActive(true);
+                break;
+            case "GrandTheftAutoSanAndreas":
+                gtasaPanel.SetActive(true);
+                break;
+            case "HuniePop":
+                huniepopPanel.SetActive(true);
+                break;
+            case "HuniePop2":
+                huniepop2Panel.SetActive(true);
+                break;
+            case "PokéParkWii":
+                pokeparkwiiPanel.SetActive(true);
+                break;
+            case "PokémonCrystal":
+                pokemoncrystalPanel.SetActive(true);
+                break;
+            case "BendyAndTheInkMachine":
+                bendyinkPanel.SetActive(true);
+                break;
+            case "PaperMarioTheThousandYearDoor":
+                pmttydPanel.SetActive(true);
+                break;
+            case "LuigisMansion":
+                luigismansionPanel.SetActive(true);
+                break;
+            case "TheLegendOfZeldaTheMinishCap":
+                tloztmcPanel.SetActive(true);
+                break;
+            case "ScritchyScratchy":
+                scritchyPanel.SetActive(true);
+                break;
+            case "IAmYourBeast":
+                iamyourbeastPanel.SetActive(true);
+                break;
+            case "KerbalSpaceProgram":
+                ksp1Panel.SetActive(true);
+                break;
+            case "OxygenNotIncluded":
+                oniPanel.SetActive(true);
+                break;
+            case "SULFUR":
+                sulfurPanel.SetActive(true);
+                break;
         }
     }
 
@@ -409,5 +473,21 @@ public class GamePanelManager : MonoBehaviour
         if (okamihdPanel != null) okamihdPanel.SetActive(false);
         if (doometernalPanel != null) doometernalPanel.SetActive(false);
         if (fnafucnPanel != null) fnafucnPanel.SetActive(false);
+        if (ppdsPanel != null) ppdsPanel.SetActive(false);
+        if (toemPanel != null) toemPanel.SetActive(false);
+        if (gtasaPanel != null) gtasaPanel.SetActive(false);
+        if (huniepopPanel != null) huniepopPanel.SetActive(false);
+        if (huniepop2Panel != null) huniepop2Panel.SetActive(false);
+        if (pokeparkwiiPanel != null) pokeparkwiiPanel.SetActive(false);
+        if (pokemoncrystalPanel != null) pokemoncrystalPanel.SetActive(false);
+        if (bendyinkPanel != null) bendyinkPanel.SetActive(false);
+        if (pmttydPanel != null) pmttydPanel.SetActive(false);
+        if (luigismansionPanel != null) luigismansionPanel.SetActive(false);
+        if (tloztmcPanel != null) tloztmcPanel.SetActive(false);
+        if (scritchyPanel != null) scritchyPanel.SetActive(false);
+        if (iamyourbeastPanel != null) iamyourbeastPanel.SetActive(false);
+        if (ksp1Panel != null) ksp1Panel.SetActive(false);
+        if (oniPanel != null) oniPanel.SetActive(false);
+        if (sulfurPanel != null) sulfurPanel.SetActive(false);
     }
 }

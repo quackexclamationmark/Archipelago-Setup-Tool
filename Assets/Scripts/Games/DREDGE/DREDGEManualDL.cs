@@ -1081,7 +1081,6 @@ public class DREDGEManualDL : MonoBehaviour
         }
         catch { }
 
-        // Scan all drives
         try
         {
             System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();

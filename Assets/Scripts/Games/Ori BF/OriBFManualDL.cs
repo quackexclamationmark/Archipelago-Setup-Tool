@@ -1,10 +1,11 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.IO;
+using Microsoft.Win32;
 using System.Collections;
 using System.Diagnostics;
-using Microsoft.Win32;
+using System.IO;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class OriBFManualDL : MonoBehaviour
 {
@@ -149,15 +150,21 @@ public class OriBFManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(oriBFPath))
-        {
-            ShowInfo("Ori and the Blind Forest path not found. Please check Steam installation.");
-            return;
-        }
-
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
         bool apmod = installAPModToggle != null && installAPModToggle.isOn;
+
+        if (!apworld && !bep && !apmod)
+        {
+            ShowInfo("Please select at least one option to install.");
+            return;
+        }
+
+        if ((bep || apmod) && string.IsNullOrEmpty(oriBFPath))
+        {
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
 
         int count =
             (apworld ? 1 : 0) +
@@ -529,11 +536,6 @@ public class OriBFManualDL : MonoBehaviour
 
     IEnumerator APWorldOnlyFlow()
     {
-        oriBFPath = GetOriBFPath();
-
-        if (string.IsNullOrEmpty(oriBFPath))
-            yield break;
-
         yield return InstallAPWorld();
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)

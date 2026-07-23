@@ -260,11 +260,8 @@ public class PokeFRLGManualDL : MonoBehaviour
         if (topDirs.Length == 1 && topFiles.Length == 0)
             sourcePath = topDirs[0];
 
-        // Target path in Documents
         string docs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        string targetFolderName = Path.GetFileNameWithoutExtension(fileName);
-        if (string.IsNullOrEmpty(targetFolderName))
-            targetFolderName = "BizHawk";
+        string targetFolderName = "BizHawk Latest Version";
         string targetPath = Path.Combine(docs, targetFolderName);
 
         // Remove old target if exists

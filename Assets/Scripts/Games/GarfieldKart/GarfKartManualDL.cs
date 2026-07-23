@@ -194,13 +194,14 @@ public class GarfKartManualDL : MonoBehaviour
             return;
         }
 
-        if (string.IsNullOrEmpty(gamePath))
+        bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
+
+        if (!apworld && string.IsNullOrEmpty(gamePath))
         {
-            ShowInfo("Game path not found. Please check Steam installation.");
+            ShowInfo("Game path not found. Please check your installation.");
             return;
         }
 
-        bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool apmod = installAPModToggle == null || installAPModToggle.isOn;
         bool bepinex = installBepInExToggle == null || installBepInExToggle.isOn;
 
