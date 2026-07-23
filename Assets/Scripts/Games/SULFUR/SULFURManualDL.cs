@@ -1,10 +1,11 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.IO;
+using System;
 using System.Collections;
 using System.Diagnostics;
-using Microsoft.Win32;
+using System.IO;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class SULFURManualDL : MonoBehaviour
 {
@@ -16,13 +17,13 @@ public class SULFURManualDL : MonoBehaviour
     public FileDownloader.FileData sulfurAP;
 
     [Header("FEATURE TOGGLES")]
-    public Toggle installSulfurApworldToggle;
+    public Toggle installAPWorldToggle;
     public Toggle installBepInExToggle;
     public Toggle installUILibToggle;
     public Toggle installAPModToggle;
 
     [Header("LAUNCH OPTIONS")]
-    public Toggle launchAfterSetupToggle;
+    public Toggle secondLaunchToggle;
 
     [Header("REVERT OPTIONS")]
     public Toggle clearAPModsToggle;
@@ -40,8 +41,7 @@ public class SULFURManualDL : MonoBehaviour
     public Button infoOkButton;
 
     private Process sulfurProcess;
-    private string sulfurGamePath;
-    private string sulfurBepInExPath;
+    private string sulfurPath;
     private string pendingAction;
     private bool pendingFullClearConfirmation = false;
     private SULFURConfig remoteConfig;
@@ -57,19 +57,11 @@ public class SULFURManualDL : MonoBehaviour
 
     void Start()
     {
-        sulfurGamePath = GetSulfurPath();
-        if (!string.IsNullOrEmpty(sulfurGamePath))
-            sulfurBepInExPath = Path.Combine(sulfurGamePath, "BepInEx");
+        sulfurPath = GetSULFURPath();
         StartCoroutine(LoadRemoteConfig());
 
-        if (infoPanel != null)
-            infoPanel.SetActive(false);
-
-        if (infoOkButton != null)
-            infoOkButton.onClick.AddListener(CloseInfoPanel);
-
-        if (launchAfterSetupToggle != null)
-            launchAfterSetupToggle.isOn = false;
+        if (secondLaunchToggle != null)
+            secondLaunchToggle.isOn = false;
 
         if (confirmationPanel != null)
             confirmationPanel.SetActive(false);
@@ -80,6 +72,12 @@ public class SULFURManualDL : MonoBehaviour
         if (cancelButton != null)
             cancelButton.onClick.AddListener(OnCancel);
 
+        if (infoPanel != null)
+            infoPanel.SetActive(false);
+
+        if (infoOkButton != null)
+            infoOkButton.onClick.AddListener(CloseInfoPanel);
+
         if (clearAPModsToggle != null)
             clearAPModsToggle.isOn = true;
 
@@ -89,22 +87,29 @@ public class SULFURManualDL : MonoBehaviour
         if (fullClearBepInExToggle != null)
             fullClearBepInExToggle.onValueChanged.AddListener(OnFullClearChanged);
 
+        if (installAPWorldToggle != null)
+            installAPWorldToggle.isOn = true;
+
+        if (installBepInExToggle != null)
+            installBepInExToggle.isOn = true;
+
         if (installUILibToggle != null)
             installUILibToggle.isOn = true;
 
         if (installAPModToggle != null)
             installAPModToggle.isOn = true;
-
-        if (installBepInExToggle != null)
-            installBepInExToggle.isOn = true;
     }
 
-    void CleanupProcesses()
+    void OnFullClearChanged(bool value)
     {
-        CloseSulfur();
+        if (clearAPModsToggle != null)
+        {
+            clearAPModsToggle.isOn = false;
+            clearAPModsToggle.interactable = !value;
+        }
     }
 
-    void ApplySulfurConfig()
+    void ApplySULFURConfig()
     {
         if (remoteConfig == null)
             return;
@@ -127,27 +132,25 @@ public class SULFURManualDL : MonoBehaviour
     private void ShowConfirmation(string message, string action)
     {
         pendingAction = action;
-        confirmationMessage.text = message;
-        confirmationPanel.SetActive(true);
+        if (confirmationMessage != null)
+            confirmationMessage.text = message;
+        if (confirmationPanel != null)
+            confirmationPanel.SetActive(true);
     }
 
     private void OnConfirm()
     {
-        confirmationPanel.SetActive(false);
-
-        if (string.IsNullOrEmpty(pendingAction))
-            return;
+        if (confirmationPanel != null)
+            confirmationPanel.SetActive(false);
 
         switch (pendingAction)
         {
             case "Setup":
                 ExecuteSetup();
                 break;
-
             case "Revert":
                 ExecuteRevert();
                 break;
-
             case "ForceFullClear":
                 ExecuteRevert();
                 break;
@@ -156,65 +159,86 @@ public class SULFURManualDL : MonoBehaviour
 
     private void OnCancel()
     {
-        confirmationPanel.SetActive(false);
+        if (confirmationPanel != null)
+            confirmationPanel.SetActive(false);
         pendingFullClearConfirmation = false;
         pendingAction = "";
     }
 
     private void ExecuteSetup()
     {
-        bool installApworld = installSulfurApworldToggle != null && installSulfurApworldToggle.isOn;
-        bool installBepInEx = installBepInExToggle != null && installBepInExToggle.isOn;
-        bool installUILib = installUILibToggle != null && installUILibToggle.isOn;
-        bool installAPMod = installAPModToggle != null && installAPModToggle.isOn;
+        sulfurPath = GetSULFURPath();
 
-        if (!installApworld && !installBepInEx && !installUILib && !installAPMod)
+        bool bepinex = installBepInExToggle != null && installBepInExToggle.isOn;
+        bool uilib = installUILibToggle != null && installUILibToggle.isOn;
+        bool apmod = installAPModToggle != null && installAPModToggle.isOn;
+        bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
+
+        bool apworldOnly = apworld && !bepinex && !uilib && !apmod;
+
+        if (!apworldOnly && string.IsNullOrEmpty(sulfurPath))
         {
-            ShowInfo("Please select at least one option to install.");
+            ShowInfo("SULFUR not found. Please check installation.");
             return;
         }
 
-        StartCoroutine(InstallFlow(installApworld, installBepInEx, installUILib, installAPMod));
+        if (apworldOnly)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
+
+        StartCoroutine(InstallFlow());
     }
 
     private void ExecuteRevert()
     {
-        sulfurGamePath = GetSulfurPath();
+        sulfurPath = GetSULFURPath();
 
-        bool clearAPMods = clearAPModsToggle != null && clearAPModsToggle.isOn;
+        if (string.IsNullOrEmpty(sulfurPath))
+            return;
+
+        string pluginsPath = Path.Combine(sulfurPath, "BepInEx", "plugins");
+
+        bool clearAP = clearAPModsToggle != null && clearAPModsToggle.isOn;
         bool fullClear = fullClearBepInExToggle != null && fullClearBepInExToggle.isOn;
 
-        if (!clearAPMods && !fullClear)
+        if (!clearAP && !fullClear)
         {
             ShowInfo("Please select at least one revert option.");
             return;
         }
 
-        if (clearAPMods && !fullClear)
+        if (clearAP)
         {
             CleanupProcesses();
 
-            ShowInfo("Clearing AP mods...");
+            ShowInfo("Removing AP mods...");
 
-            if (!string.IsNullOrEmpty(sulfurGamePath))
-            {
-                sulfurBepInExPath = Path.Combine(sulfurGamePath, "BepInEx");
-                SafeDeleteDirectory(Path.Combine(sulfurBepInExPath, "plugins", "Archipelago"));
-                SafeDeleteDirectory(Path.Combine(sulfurBepInExPath, "plugins", "SULFURNativeUILib"));
-            }
+            // Remove Archipelago plugin folder
+            string archipelagoDir = Path.Combine(pluginsPath, "Archipelago");
+            SafeDeleteDirectory(archipelagoDir);
 
-            ShowInfo("AP mods cleared successfully!");
+            // Remove SULFURNativeUILib plugin folder
+            string uilibDir = Path.Combine(pluginsPath, "SULFURNativeUILib");
+            SafeDeleteDirectory(uilibDir);
+
+            DeleteOldVersionFiles();
+
+            ShowInfo("AP mods removed successfully!");
             return;
         }
 
-        bool hasOtherMods = HasOtherMods();
+        bool hasOtherMods = HasOtherMods(pluginsPath);
 
-        if (fullClear && hasOtherMods && !pendingFullClearConfirmation)
+        if (fullClear &&
+            hasOtherMods &&
+            !pendingFullClearConfirmation)
         {
             pendingFullClearConfirmation = true;
 
             ShowConfirmation(
-                "Other mods were detected.\nDo you REALLY want to fully clear BepInEx?",
+                "Other mods were detected.\nDo you REALLY want to fully delete BepInEx?",
                 "ForceFullClear"
             );
             return;
@@ -224,36 +248,41 @@ public class SULFURManualDL : MonoBehaviour
 
         CleanupProcesses();
 
-        ShowInfo("Clearing BepInEx...");
-
-        if (!string.IsNullOrEmpty(sulfurGamePath))
+        if (fullClear)
         {
-            sulfurBepInExPath = Path.Combine(sulfurGamePath, "BepInEx");
+            ShowInfo("Clearing BepInEx...");
 
-            // Delete BepInEx folder
-            SafeDeleteDirectory(sulfurBepInExPath);
+            SafeDeleteDirectory(Path.Combine(sulfurPath, "BepInEx"));
+            SafeDeleteFile(Path.Combine(sulfurPath, "winhttp.dll"));
+            SafeDeleteFile(Path.Combine(sulfurPath, "doorstop_config.ini"));
+            SafeDeleteFile(Path.Combine(sulfurPath, "changelog.txt"));
+            SafeDeleteFile(Path.Combine(sulfurPath, ".doorstop_version"));
+            DeleteOldVersionFiles();
 
-            // Delete BepInEx related files
-            SafeDeleteFile(Path.Combine(sulfurGamePath, "winhttp.dll"));
-            SafeDeleteFile(Path.Combine(sulfurGamePath, "doorstop_config.ini"));
-            SafeDeleteFile(Path.Combine(sulfurGamePath, "changelog.txt"));
-            SafeDeleteFile(Path.Combine(sulfurGamePath, ".doorstop_version"));
-
-            ShowInfo("Full BepInEx clear completed!");
+            ShowInfo("Full clear completed!");
             return;
         }
 
         ShowInfo("Revert completed!");
     }
 
-    bool HasOtherMods()
+    void ShowInfo(string message)
     {
-        if (string.IsNullOrEmpty(sulfurGamePath))
-            return false;
+        if (infoPanel == null || infoText == null)
+            return;
 
-        string bepinexPath = Path.Combine(sulfurGamePath, "BepInEx");
-        string pluginsPath = Path.Combine(bepinexPath, "plugins");
+        infoText.text = message;
+        infoPanel.SetActive(true);
+    }
 
+    void CloseInfoPanel()
+    {
+        if (infoPanel != null)
+            infoPanel.SetActive(false);
+    }
+
+    bool HasOtherMods(string pluginsPath)
+    {
         if (!Directory.Exists(pluginsPath))
             return false;
 
@@ -267,51 +296,122 @@ public class SULFURManualDL : MonoBehaviour
                 return true;
         }
 
+        string[] files = Directory.GetFiles(pluginsPath);
+
+        foreach (string file in files)
+        {
+            string fileName = Path.GetFileName(file);
+
+            if (fileName.StartsWith("SULFUR AP Version") && fileName.EndsWith(".txt"))
+                continue;
+
+            return true;
+        }
+
         return false;
     }
 
-    IEnumerator InstallFlow(bool installApworld, bool installBepInEx, bool installUILib, bool installAPMod)
+    public void QuitLauncher()
     {
-        if (installApworld)
-        {
-            ShowInfo("Installing SULFUR APWorld...");
-            yield return InstallSulfurAPWorld();
-        }
+        Application.Quit();
+    }
 
-        if (installBepInEx)
+    IEnumerator InstallFlow()
+    {
+        while (!configLoaded)
+            yield return null;
+
+        bool bepinex = installBepInExToggle != null && installBepInExToggle.isOn;
+        bool uilib = installUILibToggle != null && installUILibToggle.isOn;
+        bool apmod = installAPModToggle != null && installAPModToggle.isOn;
+        bool apworld = installAPWorldToggle != null && installAPWorldToggle.isOn;
+
+        string extractPath = Path.Combine(Application.persistentDataPath, "SULFURTemp");
+
+        if (bepinex)
         {
             ShowInfo("Installing BepInEx...");
-            yield return InstallBepInEx();
+            yield return downloader.DownloadAndExtract(sulfurBepInEx, Application.persistentDataPath, extractPath);
 
-            // Install sulfurAP after BepInEx only if requested
-            ShowInfo("Installing SULFUR AP...");
-            yield return InstallSulfurAPToGameDirectory();
+            MoveDirectory(extractPath, sulfurPath);
+
+            UnityEngine.Debug.Log("BepInEx installed successfully!");
         }
 
-        if (installUILib && !installBepInEx)
+        if (uilib || apmod)
         {
-            ShowInfo("Installing UILib...");
-            yield return InstallUILib();
+            ShowInfo("Installing AP plugins...");
+            string apExtractPath = Path.Combine(Application.persistentDataPath, "SULFURAPTemp");
+            yield return downloader.DownloadAndExtract(sulfurAP, Application.persistentDataPath, apExtractPath);
+
+            string targetPluginsPath = Path.Combine(sulfurPath, "BepInEx", "plugins");
+            Directory.CreateDirectory(targetPluginsPath);
+
+            if (uilib)
+            {
+                string uilibSource = Path.Combine(apExtractPath, "BepInEx", "plugins", "SULFURNativeUILib");
+                if (Directory.Exists(uilibSource))
+                {
+                    string uilibTarget = Path.Combine(targetPluginsPath, "SULFURNativeUILib");
+                    SafeDeleteDirectory(uilibTarget);
+                    CopyDirectory(uilibSource, uilibTarget);
+                    UnityEngine.Debug.Log("SULFURNativeUILib installed successfully!");
+                }
+            }
+
+            if (apmod)
+            {
+                string apmodSource = Path.Combine(apExtractPath, "BepInEx", "plugins", "Archipelago");
+                if (Directory.Exists(apmodSource))
+                {
+                    string apmodTarget = Path.Combine(targetPluginsPath, "Archipelago");
+                    SafeDeleteDirectory(apmodTarget);
+                    CopyDirectory(apmodSource, apmodTarget);
+                    UnityEngine.Debug.Log("Archipelago AP mod installed successfully!");
+                }
+            }
+
+            SafeDeleteDirectory(apExtractPath);
+            CreateVersionFile(sulfurAP.url);
         }
 
-        if (installAPMod && !installBepInEx)
+        SafeDeleteDirectory(extractPath);
+
+        if (apworld)
         {
-            ShowInfo("Installing SULFUR AP Mod...");
-            yield return InstallSulfurAPMod();
+            ShowInfo("Installing APWorld...");
+            yield return InstallAPWorld();
         }
 
-        if (launchAfterSetupToggle == null || launchAfterSetupToggle.isOn)
+        if (secondLaunchToggle != null && secondLaunchToggle.isOn)
         {
             ShowInfo("Launching SULFUR...");
-            LaunchSulfur();
-            yield return new WaitForSeconds(2f);
-        }
+            LaunchSULFUR();
 
+            yield return new WaitForSeconds(2f);
+
+            CloseSULFUR();
+
+            yield return new WaitForSeconds(1f);
+
+            ShowInfo("Launching game...");
+            LaunchSULFUR();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        ShowInfo("Installing APWorld...");
+        yield return InstallAPWorld();
         ShowInfo("Installation complete!");
         yield break;
     }
 
-    IEnumerator InstallSulfurAPWorld()
+    IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
         {
@@ -319,7 +419,7 @@ public class SULFURManualDL : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
         }
 
-        UnityEngine.Debug.Log("Config loaded. SULFUR APWorld URL: " + sulfurApworld.url);
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + sulfurApworld.url);
 
         if (string.IsNullOrEmpty(sulfurApworld.url))
         {
@@ -387,6 +487,8 @@ public class SULFURManualDL : MonoBehaviour
             yield break;
         }
 
+        UnityEngine.Debug.Log("Target path: " + target);
+
         if (File.Exists(target))
         {
             try
@@ -434,233 +536,22 @@ public class SULFURManualDL : MonoBehaviour
         }
     }
 
-    IEnumerator InstallBepInEx()
+    void LaunchSULFUR()
     {
-        while (!configLoaded)
-            yield return null;
-
-        if (string.IsNullOrEmpty(sulfurGamePath))
-        {
-            ShowInfo("ERROR: SULFUR game path not found!");
-            yield break;
-        }
-
-        string extractPath = Path.Combine(Application.persistentDataPath, "BepInExTemp");
-
-        yield return downloader.DownloadAndExtract(sulfurBepInEx, Application.persistentDataPath, extractPath);
+        string exePath = Path.Combine(sulfurPath, "Sulfur.exe");
 
         try
         {
-            // Extract all content from the zip into the game directory
-            foreach (string file in Directory.GetFiles(extractPath, "*", SearchOption.AllDirectories))
-            {
-                string relativePath = file.Substring(extractPath.Length + 1);
-                string dest = Path.Combine(sulfurGamePath, relativePath);
-
-                Directory.CreateDirectory(Path.GetDirectoryName(dest));
-
-                if (File.Exists(dest))
-                    File.Delete(dest);
-
-                File.Move(file, dest);
-                UnityEngine.Debug.Log("Moved file to: " + dest);
-            }
-
-            UnityEngine.Debug.Log("BepInEx installed to game directory");
+            if (File.Exists(exePath))
+                sulfurProcess = Process.Start(exePath);
         }
         catch (System.Exception e)
         {
-            UnityEngine.Debug.LogError("Failed to install BepInEx: " + e.Message);
-            ShowInfo("ERROR: Failed to install BepInEx\n" + e.Message);
+            UnityEngine.Debug.LogWarning("Failed to launch SULFUR: " + e.Message);
         }
-
-        SafeDeleteDirectory(extractPath);
     }
 
-    IEnumerator InstallSulfurAPToGameDirectory()
-    {
-        while (!configLoaded)
-            yield return null;
-
-        if (string.IsNullOrEmpty(sulfurGamePath))
-        {
-            ShowInfo("ERROR: SULFUR game path not found!");
-            yield break;
-        }
-
-        string extractPath = Path.Combine(Application.persistentDataPath, "SulfurAPGameTemp");
-
-        yield return downloader.DownloadAndExtract(sulfurAP, Application.persistentDataPath, extractPath);
-
-        try
-        {
-            // Extract all content from the zip into the game directory
-            foreach (string file in Directory.GetFiles(extractPath, "*", SearchOption.AllDirectories))
-            {
-                string relativePath = file.Substring(extractPath.Length + 1);
-                string dest = Path.Combine(sulfurGamePath, relativePath);
-
-                Directory.CreateDirectory(Path.GetDirectoryName(dest));
-
-                if (File.Exists(dest))
-                    File.Delete(dest);
-
-                File.Move(file, dest);
-                UnityEngine.Debug.Log("Moved file to: " + dest);
-            }
-
-            UnityEngine.Debug.Log("SULFUR AP content installed to game directory");
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogError("Failed to install SULFUR AP: " + e.Message);
-            ShowInfo("ERROR: Failed to install SULFUR AP\n" + e.Message);
-        }
-
-        SafeDeleteDirectory(extractPath);
-    }
-
-    IEnumerator InstallUILib()
-    {
-        while (!configLoaded)
-            yield return null;
-
-        if (string.IsNullOrEmpty(sulfurGamePath))
-        {
-            ShowInfo("ERROR: SULFUR game path not found!");
-            yield break;
-        }
-
-        string extractPath = Path.Combine(Application.persistentDataPath, "UILibTemp");
-
-        yield return downloader.DownloadAndExtract(sulfurAP, Application.persistentDataPath, extractPath);
-
-        try
-        {
-            string uilLibFolder = FindUILibFolder(extractPath);
-
-            if (string.IsNullOrEmpty(uilLibFolder))
-            {
-                UnityEngine.Debug.LogError("SULFURNativeUILib folder not found in package!");
-                ShowInfo("ERROR: SULFURNativeUILib folder not found in package!");
-                SafeDeleteDirectory(extractPath);
-                yield break;
-            }
-
-            sulfurBepInExPath = Path.Combine(sulfurGamePath, "BepInEx");
-            Directory.CreateDirectory(sulfurBepInExPath);
-
-            string targetPath = Path.Combine(sulfurBepInExPath, "plugins", "SULFURNativeUILib");
-
-            // Remove old UILib if it exists
-            if (Directory.Exists(targetPath))
-                SafeDeleteDirectory(targetPath);
-
-            MoveDirectory(uilLibFolder, targetPath);
-            UnityEngine.Debug.Log("UILib installed to: " + targetPath);
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogError("Failed to install UILib: " + e.Message);
-            ShowInfo("ERROR: Failed to install UILib\n" + e.Message);
-        }
-
-        SafeDeleteDirectory(extractPath);
-    }
-
-    IEnumerator InstallSulfurAPMod()
-    {
-        while (!configLoaded)
-            yield return null;
-
-        if (string.IsNullOrEmpty(sulfurGamePath))
-        {
-            ShowInfo("ERROR: SULFUR game path not found!");
-            yield break;
-        }
-
-        string extractPath = Path.Combine(Application.persistentDataPath, "SulfurAPTemp");
-
-        yield return downloader.DownloadAndExtract(sulfurAP, Application.persistentDataPath, extractPath);
-
-        try
-        {
-            string archipelagoFolder = FindArchipelagoFolder(extractPath);
-
-            if (string.IsNullOrEmpty(archipelagoFolder))
-            {
-                UnityEngine.Debug.LogError("Archipelago folder not found in package!");
-                ShowInfo("ERROR: Archipelago folder not found in package!");
-                SafeDeleteDirectory(extractPath);
-                yield break;
-            }
-
-            sulfurBepInExPath = Path.Combine(sulfurGamePath, "BepInEx");
-            Directory.CreateDirectory(sulfurBepInExPath);
-
-            string targetPath = Path.Combine(sulfurBepInExPath, "plugins", "Archipelago");
-
-            // Remove old Archipelago if it exists
-            if (Directory.Exists(targetPath))
-                SafeDeleteDirectory(targetPath);
-
-            MoveDirectory(archipelagoFolder, targetPath);
-            UnityEngine.Debug.Log("SULFUR AP Mod installed to: " + targetPath);
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogError("Failed to install SULFUR AP Mod: " + e.Message);
-            ShowInfo("ERROR: Failed to install SULFUR AP Mod\n" + e.Message);
-        }
-
-        SafeDeleteDirectory(extractPath);
-    }
-
-    IEnumerator LoadRemoteConfig()
-    {
-        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
-
-        UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url);
-        yield return request.SendWebRequest();
-
-        if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
-        {
-            UnityEngine.Debug.LogWarning("Config load failed (this is OK, config is optional): " + request.error);
-            configLoaded = true;
-            yield break;
-        }
-
-        try
-        {
-            remoteConfig = JsonUtility.FromJson<SULFURConfig>(request.downloadHandler.text);
-            UnityEngine.Debug.Log("Remote config loaded successfully");
-            ApplySulfurConfig();
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogWarning("Config parsing failed (this is OK, config is optional): " + e.Message);
-        }
-
-        configLoaded = true;
-    }
-
-    void LaunchSulfur()
-    {
-        if (string.IsNullOrEmpty(sulfurGamePath))
-        {
-            ShowInfo("ERROR: SULFUR game path not found. Cannot launch.");
-            return;
-        }
-
-        string exePath = Path.Combine(sulfurGamePath, "Sulfur.exe");
-
-        if (File.Exists(exePath))
-            sulfurProcess = Process.Start(exePath);
-        else
-            ShowInfo("ERROR: Sulfur.exe not found at: " + exePath);
-    }
-
-    void CloseSulfur()
+    void CloseSULFUR()
     {
         try
         {
@@ -672,6 +563,11 @@ public class SULFURManualDL : MonoBehaviour
             }
         }
         catch { }
+    }
+
+    void CleanupProcesses()
+    {
+        CloseSULFUR();
     }
 
     void SafeDeleteFile(string path)
@@ -710,6 +606,20 @@ public class SULFURManualDL : MonoBehaviour
         catch { }
     }
 
+    void CopyDirectory(string source, string target)
+    {
+        Directory.CreateDirectory(target);
+
+        foreach (string dir in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
+            Directory.CreateDirectory(dir.Replace(source, target));
+
+        foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
+        {
+            string destination = file.Replace(source, target);
+            File.Copy(file, destination, true);
+        }
+    }
+
     void MoveDirectory(string source, string target)
     {
         if (!Directory.Exists(source))
@@ -717,10 +627,12 @@ public class SULFURManualDL : MonoBehaviour
 
         Directory.CreateDirectory(target);
 
+        foreach (string dir in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
+            Directory.CreateDirectory(dir.Replace(source, target));
+
         foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
         {
-            string relativePath = file.Substring(source.Length + 1);
-            string dest = Path.Combine(target, relativePath);
+            string dest = file.Replace(source, target);
 
             Directory.CreateDirectory(Path.GetDirectoryName(dest));
 
@@ -729,78 +641,131 @@ public class SULFURManualDL : MonoBehaviour
 
             File.Move(file, dest);
         }
-    }
 
-    void ShowInfo(string message)
-    {
-        if (infoPanel == null || infoText == null)
-            return;
-
-        infoText.text = message;
-        infoPanel.SetActive(true);
-    }
-
-    void CloseInfoPanel()
-    {
-        if (infoPanel != null)
-            infoPanel.SetActive(false);
-    }
-
-    void OnFullClearChanged(bool value)
-    {
-        if (clearAPModsToggle != null)
+        try
         {
-            clearAPModsToggle.isOn = false;
-            clearAPModsToggle.interactable = !value;
+            Directory.Delete(source, true);
+        }
+        catch { }
+    }
+
+    void CreateVersionFile(string apUrl)
+    {
+        try
+        {
+            string apVersion = ExtractVersionFromUrl(apUrl, @"/releases/download/([^/]+)/");
+
+            string versionFileName = "SULFUR AP Version " + apVersion + ".txt";
+            string content = "SULFUR AP Setup Tool\n";
+            content += "https://github.com/quackexclamationmark/Archipelago-Setup-Tool\n";
+            content += "\n";
+            content += "=== AP MOD ===\n";
+            content += "Downloaded from: " + apUrl + "\n";
+            content += "Version: " + apVersion + "\n";
+            content += "\n";
+            content += "Downloaded at: " + System.DateTime.Now + "\n";
+
+            DeleteOldVersionFiles();
+
+            string rootVersionPath = Path.Combine(sulfurPath, versionFileName);
+            File.WriteAllText(rootVersionPath, content);
+            UnityEngine.Debug.Log("Version file created in root: " + rootVersionPath);
+
+            string pluginsPath = Path.Combine(sulfurPath, "BepInEx", "plugins");
+            if (Directory.Exists(pluginsPath))
+            {
+                string pluginsVersionPath = Path.Combine(pluginsPath, versionFileName);
+                File.WriteAllText(pluginsVersionPath, content);
+                UnityEngine.Debug.Log("Version file created in plugins: " + pluginsVersionPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error creating version file: " + e.Message);
         }
     }
 
-    string FindFile(string root, string fileName)
+    void DeleteOldVersionFiles()
     {
-        foreach (string file in Directory.GetFiles(root, "*", SearchOption.AllDirectories))
-            if (Path.GetFileName(file) == fileName)
-                return file;
+        try
+        {
+            System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"SULFUR AP Version .+\.txt");
 
-        return "";
+            if (Directory.Exists(sulfurPath))
+            {
+                string[] rootFiles = Directory.GetFiles(sulfurPath);
+                foreach (string file in rootFiles)
+                {
+                    string fileName = Path.GetFileName(file);
+                    if (pattern.IsMatch(fileName))
+                    {
+                        try
+                        {
+                            File.Delete(file);
+                            UnityEngine.Debug.Log("Deleted old version file in root: " + fileName);
+                        }
+                        catch (System.Exception e)
+                        {
+                            UnityEngine.Debug.LogWarning("Could not delete old version file in root: " + e.Message);
+                        }
+                    }
+                }
+            }
+
+            string pluginsPath = Path.Combine(sulfurPath, "BepInEx", "plugins");
+            if (Directory.Exists(pluginsPath))
+            {
+                string[] pluginsFiles = Directory.GetFiles(pluginsPath);
+                foreach (string file in pluginsFiles)
+                {
+                    string fileName = Path.GetFileName(file);
+                    if (pattern.IsMatch(fileName))
+                    {
+                        try
+                        {
+                            File.Delete(file);
+                            UnityEngine.Debug.Log("Deleted old version file in plugins: " + fileName);
+                        }
+                        catch (System.Exception e)
+                        {
+                            UnityEngine.Debug.LogWarning("Could not delete old version file in plugins: " + e.Message);
+                        }
+                    }
+                }
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error cleaning up old version files: " + e.Message);
+        }
     }
 
-    string FindBepInExFolder(string root)
+    string ExtractVersionFromUrl(string url, string pattern)
     {
-        foreach (string dir in Directory.GetDirectories(root, "*", SearchOption.AllDirectories))
+        try
         {
-            string name = Path.GetFileName(dir);
-            if (name == "BepInEx")
-                return dir;
+            System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(pattern);
+            System.Text.RegularExpressions.Match match = regex.Match(url);
+
+            if (match.Success)
+                return match.Groups[1].Value;
+        }
+        catch { }
+
+        if (!string.IsNullOrEmpty(url))
+        {
+            int idx = url.LastIndexOf('/');
+            if (idx >= 0 && idx + 1 < url.Length)
+            {
+                string candidate = url.Substring(idx + 1);
+                return candidate;
+            }
         }
 
-        return "";
+        return "Unknown";
     }
 
-    string FindUILibFolder(string root)
-    {
-        foreach (string dir in Directory.GetDirectories(root, "*", SearchOption.AllDirectories))
-        {
-            string name = Path.GetFileName(dir);
-            if (name == "SULFURNativeUILib")
-                return dir;
-        }
-
-        return "";
-    }
-
-    string FindArchipelagoFolder(string root)
-    {
-        foreach (string dir in Directory.GetDirectories(root, "*", SearchOption.AllDirectories))
-        {
-            string name = Path.GetFileName(dir);
-            if (name == "Archipelago")
-                return dir;
-        }
-
-        return "";
-    }
-
-    string GetSulfurPath()
+    string GetSULFURPath()
     {
         string[] quickPaths = new string[]
         {
@@ -821,7 +786,10 @@ public class SULFURManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found SULFUR (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
@@ -837,36 +805,80 @@ public class SULFURManualDL : MonoBehaviour
 
                 try
                 {
-                    // Search Steam\steamapps
-                    string sulfurPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "SULFUR");
-                    if (Directory.Exists(sulfurPath))
-                        return sulfurPath;
+                    // Look for Steam\steamapps
+                    string subPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "SULFUR");
+                    if (Directory.Exists(subPath))
+                    {
+                        UnityEngine.Debug.Log("Found SULFUR (Steam) at: " + subPath);
+                        return subPath;
+                    }
 
-                    // Search SteamLibrary\steamapps
-                    sulfurPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "SULFUR");
-                    if (Directory.Exists(sulfurPath))
-                        return sulfurPath;
+                    // Look for SteamLibrary\steamapps
+                    subPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "SULFUR");
+                    if (Directory.Exists(subPath))
+                    {
+                        UnityEngine.Debug.Log("Found SULFUR (Steam) at: " + subPath);
+                        return subPath;
+                    }
 
-                    // Search steamapps at root
-                    sulfurPath = Path.Combine(drive.Name, "steamapps", "common", "SULFUR");
-                    if (Directory.Exists(sulfurPath))
-                        return sulfurPath;
+                    // Look for steamapps at the root of the drive
+                    subPath = Path.Combine(drive.Name, "steamapps", "common", "SULFUR");
+                    if (Directory.Exists(subPath))
+                    {
+                        UnityEngine.Debug.Log("Found SULFUR (Steam) at: " + subPath);
+                        return subPath;
+                    }
 
-                    // Search Program Files (x86)\steamapps
-                    sulfurPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "SULFUR");
-                    if (Directory.Exists(sulfurPath))
-                        return sulfurPath;
+                    // Look in Program Files (x86)\steamapps
+                    subPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "SULFUR");
+                    if (Directory.Exists(subPath))
+                    {
+                        UnityEngine.Debug.Log("Found SULFUR (Steam) at: " + subPath);
+                        return subPath;
+                    }
 
-                    // Search Program Files\steamapps
-                    sulfurPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "SULFUR");
-                    if (Directory.Exists(sulfurPath))
-                        return sulfurPath;
+                    // Look in Program Files\steamapps
+                    subPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "SULFUR");
+                    if (Directory.Exists(subPath))
+                    {
+                        UnityEngine.Debug.Log("Found SULFUR (Steam) at: " + subPath);
+                        return subPath;
+                    }
                 }
                 catch { }
             }
         }
         catch { }
 
+        UnityEngine.Debug.LogWarning("SULFUR (Steam) not found.");
         return "";
+    }
+
+    IEnumerator LoadRemoteConfig()
+    {
+        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
+
+        UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url);
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+        {
+            UnityEngine.Debug.LogWarning("Config load failed (this is OK, config is optional): " + request.error);
+            configLoaded = true;
+            yield break;
+        }
+
+        try
+        {
+            remoteConfig = JsonUtility.FromJson<SULFURConfig>(request.downloadHandler.text);
+            UnityEngine.Debug.Log("Remote config loaded successfully");
+            ApplySULFURConfig();
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Config parsing failed (this is OK, config is optional): " + e.Message);
+        }
+
+        configLoaded = true;
     }
 }
