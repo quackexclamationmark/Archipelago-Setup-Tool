@@ -9,7 +9,7 @@ Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could
 # Archipelago Setup Tool
 ### [Download latest version | v1.3.0](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v1.3.0)
 
-After setting up a game, all credits can be found in the game's directory, inside the game's directory.
+After setting up a game, all credits can be found inside the game's directory.
 
 Currently, the following games are supported (76):
 
