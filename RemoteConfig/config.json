@@ -376,6 +376,10 @@
     "slimerancher2BepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
     "slimerancher2Interop": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/interop.zip",
 
+    "sadxAP": "https://github.com/ClassicSpeed/sadx-classic-randomizer/releases/download/v1.2.2b/SADX_Archipelago_v1.2.2.zip",
+    "sadxApworld": "https://github.com/ClassicSpeed/sadx-classic-randomizer/releases/download/v1.2.2b/sadx.apworld",
+    "sadxModManager": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-SAModManager.zip",
+
     "spelunky2AP": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.4.0/Spelunky2-Archipelago.zip",
     "spelunky2Apworld": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.4.0/spelunky2.apworld",
     "spelunky2Playlunky": "https://github.com/spelunky-fyi/Playlunky/releases/download/nightly/playlunky_nightly_63FB520.zip",
