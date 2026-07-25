@@ -209,6 +209,9 @@
     "neonwhiteNeonLite": "https://github.com/Faustas156/NeonLite/releases/download/3.0.11%2B10/NeonLite.dll",
     "neonwhiteApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/neonwhite.apworld",
 
+    "nsmbwApworld": "https://github.com/Miiroun/Archipelago-NewSuperMarioBrosWii/releases/download/V0.2.2/nsmbw.apworld",
+    "nsmbwDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
+
     "ninesolsAP": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.6.1/Ixrec-ArchipelagoRandomizer-0.6.1.zip",
     "ninesolsApworld": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.6.1/nine_sols.apworld",
     "ninesolsAPI": "https://thunderstore.io/package/download/ninesolsmodding/NineSolsAPI/1.3.1/",
