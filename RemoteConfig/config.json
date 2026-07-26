@@ -122,7 +122,7 @@
 
     "doom2AP": "https://github.com/Daivuk/apdoom/releases/download/1.2.0/APDOOM-1_2_0-Win32.zip",
 
-    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.3.2/DoomEternalArchipelagoPlayableTest-v0.3.2-alpha.zip",
+    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.3.3/DoomEternalArchipelagoPlayableTest-v0.3.3-alpha.zip",
     "doometernalMeathook": "https://github.com/brongo/m3337ho0o0ok/releases/download/v7.2/XINPUT1_3.dll",
     "doometernalModInjector": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/eternalmodinjector_b20ec.zip",
     "doometernalApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/doometernal.apworld",
@@ -189,8 +189,8 @@
     "lethalcompanyMonoDetourBep5": "https://thunderstore.io/package/download/MonoDetour/MonoDetour_BepInEx_5/0.7.15/",
     "lethalcompanyMonoDetour": "https://thunderstore.io/package/download/MonoDetour/MonoDetour/0.7.15/",
     
-    "librarianAP": "https://github.com/Str8UpWHITE64/Librarian-AP/releases/download/1.1.2/Librarian-AP_v1.1.2.zip",
-    "librarianApworld": "https://github.com/Str8UpWHITE64/Librarian-AP/releases/download/1.1.2/librarian.apworld",
+    "librarianAP": "https://github.com/Str8UpWHITE64/Librarian-AP/releases/download/1.1.3/Librarian-AP_v1.1.3.zip",
+    "librarianApworld": "https://github.com/Str8UpWHITE64/Librarian-AP/releases/download/1.1.3/librarian.apworld",
 
     "luigismansionApworld": "https://github.com/BootsinSoots/Archipelago/releases/download/V0.6.4/luigismansion.apworld",
     "luigismansionDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
@@ -375,8 +375,8 @@
     "slimerancherApworld": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.1/slime_rancher.apworld",
     "slimerancherMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.1/MelonLoader.x64.zip",
 
-    "slimerancher2AP": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.11.0/SlimeRancher2-AP.zip",
-    "slimerancher2Apworld": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.11.0/slime_rancher_2.apworld",
+    "slimerancher2AP": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.12.0/SlimeRancher2-AP.zip",
+    "slimerancher2Apworld": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.12.0/slime_rancher_2.apworld",
     "slimerancher2BepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
     "slimerancher2Interop": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/interop.zip",
 
