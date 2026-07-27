@@ -47,6 +47,7 @@
     "tloztmcPopTracker": "https://github.com/deoxis9001/tmcrando_maptracker_deoxis/releases/download/beta_v1.0.0.16/BetaTmcrTrackerDeoxis.zip",
     "psychonautsPopTracker": "https://github.com/Mysteryem/Psychonauts_AP_PopTracker/archive/refs/tags/v2.0.1.zip",
     "sadxPopTracker": "https://github.com/RaceProUK/SADX-APTracker/releases/download/v1.112.11/sadx_rando_raceprouk.zip",
+    "pokemonplatinumPopTracker": "https://github.com/palex00/platinum-ap-tracker/archive/refs/tags/1.2.3.zip",
     
 
     "adofaiPathName": "A Dance of Fire and Ice",
@@ -279,6 +280,9 @@
 
     "pokemonfrlgBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
     "pokemonfrlgApworld": "https://github.com/vyneras/Archipelago/releases/download/1.0.4/pokemon_frlg.apworld",
+
+    "pokemonplatinumApworld": "https://github.com/ljtpetersen/platinum_archipelago/releases/download/v0.1.8/pokemon_platinum.apworld",
+    "pokemonplatinumBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
     "pokemonsnapApworld": "https://github.com/nielrenned/PokemonSnap_Archipelago/releases/download/v0.3.1/pokemon_snap.apworld",
     "pokemonsnapProject64": "https://www.pj64-emu.com/file/setup-project64-3-0-1-5664-2df3434/",
