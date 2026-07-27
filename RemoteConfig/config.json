@@ -438,6 +438,10 @@
     "tlozwwAP": "https://github.com/tanjo3/wwrando/releases/download/ap_2.5.1/wwrando_ap-2.5.1-windows.zip",
     "tlozwwDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
+    "thewerecleanerMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.1/MelonLoader.x64.zip",
+    "thewerecleanerAP": "https://github.com/SWCreeperKing/Werepelago/releases/download/v0.1.2/SW_CreeperKing.Werepelago.zip",
+    "thewerecleanerApworld": "https://github.com/SWCreeperKing/Werepelago/releases/download/v0.1.2/the_werecleaner.apworld",
+
     "thewitnessAP": "https://github.com/NewSoupVi/The-Witness-Randomizer-for-Archipelago/releases/download/9.1.0/The.Witness.Randomizer.for.Archipelago.exe",
 
     "toemBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
