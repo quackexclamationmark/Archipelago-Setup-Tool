@@ -280,6 +280,9 @@
     "pokemonfrlgBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
     "pokemonfrlgApworld": "https://github.com/vyneras/Archipelago/releases/download/1.0.4/pokemon_frlg.apworld",
 
+    "pokemonsnapApworld": "https://github.com/nielrenned/PokemonSnap_Archipelago/releases/download/v0.3.1/pokemon_snap.apworld",
+    "pokemonsnapProject64": "https://www.pj64-emu.com/download/project64-3-0-1-zip",
+
     "pokeparkwiiAP": "https://github.com/Mekurushi/pokeparkrando/releases/download/1.2.3/windows-x64.zip",
     "pokeparkwiiApworld": "https://github.com/Mekurushi/Archipelago_Pokepark/releases/download/1.2.5/pokepark.apworld",
     "pokeparkwiiDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
@@ -388,7 +391,7 @@
     "spelunky2Apworld": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.4.0/spelunky2.apworld",
     "spelunky2Playlunky": "https://github.com/spelunky-fyi/Playlunky/releases/download/nightly/playlunky_nightly_63FB520.zip",
 
-    "stardewvalleyAP": "https://github.com/agilbert1412/StardewArchipelago/releases/download/8.0.24/StardewArchipelago.8.0.24.zip",
+    "stardewvalleyAP": "https://github.com/agilbert1412/StardewArchipelago/releases/download/8.0.25/StardewArchipelago.8.0.25.zip",
     "stardewvalleyPreloaded": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-SV-Archipelago.zip",
     
     "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.3/Archipelago_193.zip",
@@ -442,8 +445,8 @@
 
     "ucnApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/ucn.apworld",
 
-    "ultrakillAP": "https://github.com/TRPG0/ArchipelagoULTRAKILL/releases/download/3.5.3/ArchipelagoULTRAKILL.3.5.3.zip",
-    "ultrakillApworld": "https://github.com/TRPG0/ArchipelagoULTRAKILL/releases/download/3.5.3/ultrakill.apworld",
+    "ultrakillAP": "https://github.com/TRPG0/ArchipelagoULTRAKILL/releases/download/3.5.4/ArchipelagoULTRAKILL.3.5.4.zip",
+    "ultrakillApworld": "https://github.com/TRPG0/ArchipelagoULTRAKILL/releases/download/3.5.4/ultrakill.apworld",
     "ultrakillBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "ultrakillPluginConfigurator": "https://thunderstore.io/package/download/EternalsTeam/PluginConfigurator/1.10.2/",
 
