@@ -1,4 +1,25 @@
 {
+    "steamSearchPaths": [
+        "SteamLibrary\\steamapps\\common",
+        "Steam\\steamapps\\common",
+        "Games\\Steam\\steamapps\\common",
+        "Program Files (x86)\\Steam\\steamapps\\common",
+        "Program Files\\Steam\\steamapps\\common",
+        "steamapps\\common",
+        "Programs\\Steam\\steamapps\\common",
+        "Program Files (x86)\\steamapps\\common",
+        "Program Files\\steamapps\\common",
+        "Programs\\steamapps\\common",
+        "Games\\steamapps\\common"
+    ],
+
+    "epicSearchPaths": [
+        "Epic Games",
+        "Games\\Epic Games",
+        "SteamLibrary\\Epic Games",
+        "EpicGames"
+    ],
+    
     "r2modmanDL": "https://thunderstore.io/c/lethal-company/p/ebkr/r2modman/",
 
     "poptrackerDL": "https://github.com/black-sliver/PopTracker/releases/download/v0.35.3/poptracker_0-35-3_win64.zip",
