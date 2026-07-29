@@ -14,6 +14,7 @@
     ],
 
     "epicSearchPaths": [
+        "Epic",
         "Epic Games",
         "Games\\Epic Games",
         "SteamLibrary\\Epic Games",
