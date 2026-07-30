@@ -141,8 +141,8 @@
 
     "ds3AP": "https://github.com/fswap/from-software-archipelago-clients/releases/download/ds3-v4.0.2/DS3.Archipelago.4.0.2-windows.zip",
 
-    "drdrApworld": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.0.2/drdr.apworld",
-    "drdrAP": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.0.2/DRAP.zip",
+    "drdrApworld": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.0/drdr.apworld",
+    "drdrAP": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.0/DRAP_1.1.0.zip",
     "drdrREFramework": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/dinput8.dll",
     "drdrLuaAPClient": "https://github.com/TheRealSolidusSnake/RE3R_AP_Client/raw/refs/heads/main/lua-apclientpp.dll",
 
@@ -150,7 +150,7 @@
 
     "doom2AP": "https://github.com/Daivuk/apdoom/releases/download/1.2.0/APDOOM-1_2_0-Win32.zip",
 
-    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.3.4/DoomEternalArchipelagoPlayableTest-v0.3.4-alpha.zip",
+    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.3.6/DoomEternalArchipelagoPlayableTest-v0.3.6-alpha.2.zip",
     "doometernalMeathook": "https://github.com/brongo/m3337ho0o0ok/releases/download/v7.2/XINPUT1_3.dll",
     "doometernalModInjector": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/eternalmodinjector_b20ec.zip",
     "doometernalApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/doometernal.apworld",
