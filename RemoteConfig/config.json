@@ -516,7 +516,8 @@
         "1.3.0": "obsolete",
         "1.4.0": "obsolete",
         "2.0.0": "obsolete",
-        "2.0.1": "latest"
+        "2.0.1": "obsolete",
+        "2.0.2": "latest"
     },
-    "toolLatestDownloadUrl": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/download/v2.0.1/Archipelago.Setup.Tool.v2.0.1.zip"
+    "toolLatestDownloadUrl": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/download/v2.0.2/Archipelago.Setup.Tool.v2.0.2.zip"
 }
