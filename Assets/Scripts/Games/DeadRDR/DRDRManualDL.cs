@@ -141,34 +141,12 @@ public class DRDRManualDL : MonoBehaviour
 
     void OnDestroy()
     {
-        // Intentionally NOT killing drdrProcess here: if the user launched the
-        // game via "Launch after setup" and then closes the installer, the
-        // game must keep running. Killing on install teardown is only needed
-        // before a revert (to release file locks), handled in CleanupProcesses().
+        CleanupProcesses();
     }
 
     void CleanupProcesses()
     {
-        // Kill any running instance of the game so its files aren't locked
-        // during a revert/uninstall. This intentionally looks up the process
-        // by name rather than only relying on drdrProcess, since the game may
-        // have been launched outside this tool or the reference may be stale.
-        try
-        {
-            Process[] running = Process.GetProcessesByName("DRDR");
-            foreach (Process p in running)
-            {
-                try
-                {
-                    p.Kill();
-                    p.Dispose();
-                }
-                catch { }
-            }
-        }
-        catch { }
-
-        drdrProcess = null;
+        CloseDRDR();
     }
 
     void ApplyDRDRConfig()
@@ -384,6 +362,7 @@ public class DRDRManualDL : MonoBehaviour
 
         if (secondLaunchToggle != null && secondLaunchToggle.isOn)
         {
+            CreateSteamAppIdFile();
             ShowInfo("Launching DRDR...");
             LaunchDRDR();
             yield return new WaitForSeconds(2f);
@@ -624,12 +603,71 @@ public class DRDRManualDL : MonoBehaviour
         drdrPath = GetDRDRPath();
     }
 
+    void CreateSteamAppIdFile()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(drdrPath) || !Directory.Exists(drdrPath))
+                return;
+
+            string appIdPath = Path.Combine(drdrPath, "steam_appid.txt");
+            File.WriteAllText(appIdPath, "2527390");
+            UnityEngine.Debug.Log("steam_appid.txt created at: " + appIdPath);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not create steam_appid.txt: " + e.Message);
+        }
+    }
+
     void LaunchDRDR()
     {
         string exePath = Path.Combine(drdrPath, "DRDR.exe");
 
-        if (File.Exists(exePath))
-            drdrProcess = Process.Start(exePath);
+        if (!File.Exists(exePath))
+        {
+            ShowInfo("DRDR.exe not found at:\n" + exePath);
+            UnityEngine.Debug.LogError("DRDR.exe not found!");
+            return;
+        }
+
+        try
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = exePath,
+                WorkingDirectory = drdrPath,
+                UseShellExecute = true,
+                Verb = "runas" // launch elevated (as admin)
+            };
+            drdrProcess = Process.Start(startInfo);
+            UnityEngine.Debug.Log("DRDR launched (elevated) from: " + exePath);
+        }
+        catch (System.ComponentModel.Win32Exception e)
+        {
+            // Thrown if the UAC prompt is declined (error code 1223)
+            UnityEngine.Debug.LogWarning("Elevated launch was cancelled or failed: " + e.Message);
+            ShowInfo("Launch cancelled: admin permission was not granted.");
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Launch error: " + e.Message);
+            ShowInfo("Error launching DRDR:\n" + e.Message);
+        }
+    }
+
+    void CloseDRDR()
+    {
+        try
+        {
+            if (drdrProcess != null && !drdrProcess.HasExited)
+            {
+                drdrProcess.Kill();
+                drdrProcess.Dispose();
+                drdrProcess = null;
+            }
+        }
+        catch { }
     }
 
     void SafeDeleteFileImmediate(string path)
