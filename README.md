@@ -7,11 +7,21 @@ DOWNLOAD THE INSTALLER, NOT THE .ZIP FILE!
 Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could (idk I didn't try it) but it COULD delete everything that is next to the .exe (in the same folder) even tho it's not supposed to. Basically, you can move the folder but probably don't rename it and do not touch what's inside.
 
 # Archipelago Setup Tool
-### [Download latest version | v1.4.0](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v1.4.0)
+### [Download latest version | v2.0.0 - THE 100 GAMES UPDATE!](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v2.0.0)
+---
+
+## Features
+
+- Automatic setups for Archipelago games with fully detailed guides for each of them. Includes AP Mods, APWorlds, required apps and even PopTracker packs!
+- Download APWorlds from any supported non-core game even without having the game!
+- One click setup for PopTracker. Downloads the app + packs.
+- 'Hosting' section, kinda like a small wiki where you can see informations on required/useful resources and step by step guides on hosting your AP sessions!
+
+---
 
 After setting up a game, all credits can be found in the game's directory, inside the game's directory.
 
-Currently, the following games are supported (94):
+Currently, the following games are supported (100):
 
 * Clair Obscur: Expedition 33
 * Lethal Company
@@ -107,8 +117,14 @@ Currently, the following games are supported (94):
 * TOEM: A Photo Adventure
 * Placid Plastic Duck Simulator
 * Five Nights At Freddy's Ultimate Custom Night
+* Pokémon Platinum
+* Psychonauts
+* Sonic Adventure DX
+* New Super Mario Bros. Wii
+* Pokémon Snap
+* The WereCleaner
 
-Features to add in the future:
+Features to (maybe) add in the future:
 
 * Adding support for Microsoft Store, XBOX launcher!
 * Adding support for other OS (Linux).
