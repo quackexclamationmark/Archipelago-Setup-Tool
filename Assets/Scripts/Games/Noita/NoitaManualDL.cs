@@ -14,6 +14,9 @@ public class NoitaManualDL : MonoBehaviour
     [Header("GAME FILES")]
     public FileDownloader.FileData noitaAP;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Noita";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installNoitaAPToggle;
 
@@ -42,6 +45,7 @@ public class NoitaManualDL : MonoBehaviour
     public class GameConfig
     {
         public string noitaAP;
+        public string[] steamSearchPaths;
     }
 
     [System.Serializable]
@@ -136,6 +140,8 @@ public class NoitaManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
+        gamePath = GetGamePath();
+
         if (!configLoaded)
         {
             ShowInfo("Loading configuration, please wait...");
@@ -172,6 +178,8 @@ public class NoitaManualDL : MonoBehaviour
 
     private void ExecuteRevert()
     {
+        gamePath = GetGamePath();
+
         CleanupProcesses();
         StartCoroutine(RemoveInstalledFilesAsync());
     }
@@ -435,7 +443,8 @@ public class NoitaManualDL : MonoBehaviour
         }
 
         configLoaded = true;
-        UnityEngine.Debug.Log("Config marked as loaded");
+
+        gamePath = GetGamePath();
     }
 
     void LaunchGame()
@@ -535,16 +544,8 @@ public class NoitaManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Noita"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Noita"),
-            @"D:\Steam\steamapps\common\Noita",
-            @"D:\SteamLibrary\steamapps\common\Noita",
-            @"D:\steamapps\common\Noita",
-            @"E:\Steam\steamapps\common\Noita",
-            @"E:\SteamLibrary\steamapps\common\Noita",
-            @"E:\steamapps\common\Noita",
-            @"E:\Program Files (x86)\steamapps\common\Noita",
-            @"E:\Program Files\steamapps\common\Noita",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -552,52 +553,47 @@ public class NoitaManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Search for Steam\steamapps
-                    string gamePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Noita");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Search for SteamLibrary\steamapps
-                    gamePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Noita");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Search for steamapps at drive root
-                    gamePath = Path.Combine(drive.Name, "steamapps", "common", "Noita");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    // Search in Program Files (x86)\steamapps
-                    gamePath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Noita");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    // Search in Program Files\steamapps
-                    gamePath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Noita");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 

@@ -1,10 +1,11 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using System;
-using System.IO;
 using System.Collections;
 using System.Diagnostics;
+using System.IO;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class ScritchyManualDL : MonoBehaviour
 {
@@ -13,6 +14,9 @@ public class ScritchyManualDL : MonoBehaviour
     [Header("SCRITCHY FILES")]
     public FileDownloader.FileData scritchyApworld;
     public FileDownloader.FileData scritchyAP;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Scritchy Scratchy";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installBepInExToggle;
@@ -73,6 +77,7 @@ public class ScritchyManualDL : MonoBehaviour
     {
         public string scritchyApworld;
         public string scritchyAP;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -183,20 +188,17 @@ public class ScritchyManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
+        scritchyPath = GetScritchyPath();
+
         bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
         bool ap = installAPToggle != null && installAPToggle.isOn;
         bool apworld = installAPWorldToggle != null && installAPWorldToggle.isOn;
 
-        if (!apworld && !bep && !ap)
-        {
-            ShowInfo("Please select at least one option to install.");
-            return;
-        }
+        bool needsGamePath = bep || ap;
 
-        if ((bep || ap) && string.IsNullOrEmpty(scritchyPath))
-            if (string.IsNullOrEmpty(scritchyPath))
+        if (needsGamePath && (string.IsNullOrEmpty(scritchyPath) || !Directory.Exists(scritchyPath)))
         {
-            ShowInfo("Scritchy Scratchy not found. Please check installation.");
+            ShowInfo("Game path not found. Please check your installation.");
             return;
         }
 
@@ -225,10 +227,20 @@ public class ScritchyManualDL : MonoBehaviour
 
     IEnumerator APWorldOnlyFlow()
     {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
         yield return InstallAPWorld();
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
             LaunchScritchy();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -633,6 +645,20 @@ public class ScritchyManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -983,14 +1009,13 @@ public class ScritchyManualDL : MonoBehaviour
     {
         try
         {
-            // Try to extract version from filename pattern like "ScritchyScratchyAP-v0.1.2-hotfix.2.zip"
             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"ScritchyScratchyAP[^/]*");
             System.Text.RegularExpressions.Match match = regex.Match(url);
 
             if (match.Success)
             {
                 string matched = match.Groups[0].Value;
-                // Remove .zip extension if present
+
                 if (matched.EndsWith(".zip"))
                     matched = matched.Substring(0, matched.Length - 4);
                 return matched;
@@ -1016,18 +1041,10 @@ public class ScritchyManualDL : MonoBehaviour
     string GetScritchyPath()
     {
         string[] quickPaths = new string[]
-        {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Scritchy Scratchy"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Scritchy Scratchy"),
-            @"D:\Steam\steamapps\common\Scritchy Scratchy",
-            @"D:\SteamLibrary\steamapps\common\Scritchy Scratchy",
-            @"D:\steamapps\common\Scritchy Scratchy",
-            @"E:\Steam\steamapps\common\Scritchy Scratchy",
-            @"E:\SteamLibrary\steamapps\common\Scritchy Scratchy",
-            @"E:\steamapps\common\Scritchy Scratchy",
-            @"E:\Program Files (x86)\steamapps\common\Scritchy Scratchy",
-            @"E:\Program Files\steamapps\common\Scritchy Scratchy",
-        };
+                {
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
+                };
 
         foreach (string path in quickPaths)
         {
@@ -1035,70 +1052,46 @@ public class ScritchyManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Scritchy Scratchy (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Look for Steam\steamapps
-                    string subPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Scritchy Scratchy");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Scritchy Scratchy (Steam) at: " + subPath);
-                        return subPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Look for SteamLibrary\steamapps
-                    subPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Scritchy Scratchy");
-                    if (Directory.Exists(subPath))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Scritchy Scratchy (Steam) at: " + subPath);
-                        return subPath;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Look for steamapps at the root of the drive
-                    subPath = Path.Combine(drive.Name, "steamapps", "common", "Scritchy Scratchy");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Scritchy Scratchy (Steam) at: " + subPath);
-                        return subPath;
-                    }
-
-                    // Look in Program Files (x86)\steamapps
-                    subPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Scritchy Scratchy");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Scritchy Scratchy (Steam) at: " + subPath);
-                        return subPath;
-                    }
-
-                    // Look in Program Files\steamapps
-                    subPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Scritchy Scratchy");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Scritchy Scratchy (Steam) at: " + subPath);
-                        return subPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Scritchy Scratchy (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
@@ -1128,5 +1121,7 @@ public class ScritchyManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        scritchyPath = GetScritchyPath();
     }
 }

@@ -21,6 +21,10 @@ public class PikunikuManualDL : MonoBehaviour
     public Button epicButton;
     public TextMeshProUGUI platformStatus;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Pikuniku";
+    public string epicGameFolderName = "Pikuniku";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
@@ -58,6 +62,8 @@ public class PikunikuManualDL : MonoBehaviour
         public string pikunikuAP;
         public string pikunikuApworld;
         public string pikunikuBepInEx;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     [System.Serializable]
@@ -70,14 +76,12 @@ public class PikunikuManualDL : MonoBehaviour
 
     void Start()
     {
-        // Initialize platform buttons
         if (steamButton != null)
             steamButton.onClick.AddListener(OnSteamButtonClicked);
 
         if (epicButton != null)
             epicButton.onClick.AddListener(OnEpicButtonClicked);
 
-        // Select Steam by default
         SelectSteam();
 
         gamePath = GetGamePath();
@@ -173,11 +177,6 @@ public class PikunikuManualDL : MonoBehaviour
         }
     }
 
-    void CleanupProcesses()
-    {
-        CloseGame();
-    }
-
     void ApplyGameConfig()
     {
         if (remoteConfig == null)
@@ -246,29 +245,53 @@ public class PikunikuManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (!configLoaded)
-        {
-            ShowInfo("Loading configuration, please wait...");
-            StartCoroutine(WaitForConfigThenSetup());
-            return;
-        }
-
         gamePath = GetGamePath();
-
-        if (string.IsNullOrEmpty(gamePath))
-        {
-            string platform = isEpic ? "Epic Games" : "Steam";
-            ShowInfo("Pikuniku not found in " + platform + ". Please check installation.");
-            return;
-        }
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool apmod = installAPModToggle == null || installAPModToggle.isOn;
         bool bepinex = installBepInExToggle == null || installBepInExToggle.isOn;
+        bool needsGamePath = apmod || !apworld;
+
+        if (needsGamePath && string.IsNullOrEmpty(gamePath))
+        {
+            string platform = isEpic ? "Epic" : "Steam";
+            ShowInfo("Game not found on " + platform + ". Please check installation.");
+            return;
+        }
 
         int count = (apworld ? 1 : 0) + (apmod ? 1 : 0) + (bepinex ? 1 : 0);
 
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
+        if (apworld && count == 1)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
+
         StartCoroutine(SetupWithTracking(apworld, apmod, bepinex));
+    }
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            ShowInfo("Launching Pikuniku...");
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     IEnumerator SetupWithTracking(bool installAPWorld, bool installAPMod, bool installBepInEx)
@@ -561,7 +584,6 @@ public class PikunikuManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        // Target paths
         string[] targetPaths = new string[]
         {
             Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
@@ -621,6 +643,20 @@ public class PikunikuManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -698,6 +734,9 @@ public class PikunikuManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        gamePath = GetGamePath();
+        UpdatePlatformStatus();
     }
 
     void LaunchGame()
@@ -740,23 +779,6 @@ public class PikunikuManualDL : MonoBehaviour
             ShowInfo("Error launching game:\n" + e.Message);
             UnityEngine.Debug.LogError("Launch error: " + e);
         }
-    }
-
-    void CloseGame()
-    {
-        try
-        {
-            Process[] processes = Process.GetProcessesByName("Pikuniku");
-            foreach (Process p in processes)
-            {
-                if (!p.HasExited)
-                {
-                    p.Kill();
-                    p.Dispose();
-                }
-            }
-        }
-        catch { }
     }
 
     void SafeDeleteDirectory(string path)
@@ -882,15 +904,6 @@ public class PikunikuManualDL : MonoBehaviour
             infoPanel.SetActive(false);
     }
 
-    IEnumerator WaitForConfigThenSetup()
-    {
-        while (!configLoaded)
-            yield return new WaitForSeconds(0.1f);
-
-        CloseInfoPanel();
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
-    }
-
     // =========================================================
     // PATH DETECTION
     // =========================================================
@@ -905,20 +918,10 @@ public class PikunikuManualDL : MonoBehaviour
 
     string GetGameSteamPath()
     {
-        string gameName = "Pikuniku";
-
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", gameName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", gameName),
-            Path.Combine(@"D:\Steam", "steamapps", "common", gameName),
-            Path.Combine(@"D:\SteamLibrary", "steamapps", "common", gameName),
-            Path.Combine(@"D:\steamapps", "common", gameName),
-            Path.Combine(@"E:\Steam", "steamapps", "common", gameName),
-            Path.Combine(@"E:\SteamLibrary", "steamapps", "common", gameName),
-            Path.Combine(@"E:\steamapps", "common", gameName),
-            Path.Combine(@"E:\Program Files (x86)", "steamapps", "common", gameName),
-            Path.Combine(@"E:\Program Files", "steamapps", "common", gameName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -927,82 +930,56 @@ public class PikunikuManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Pikuniku (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string currentGamePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", gameName);
-                    if (Directory.Exists(currentGamePath))
-                    {
-                        UnityEngine.Debug.Log("Found Pikuniku (Steam) at: " + currentGamePath);
-                        return currentGamePath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    currentGamePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", gameName);
-                    if (Directory.Exists(currentGamePath))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Pikuniku (Steam) at: " + currentGamePath);
-                        return currentGamePath;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    currentGamePath = Path.Combine(drive.Name, "steamapps", "common", gameName);
-                    if (Directory.Exists(currentGamePath))
-                    {
-                        UnityEngine.Debug.Log("Found Pikuniku (Steam) at: " + currentGamePath);
-                        return currentGamePath;
-                    }
-
-                    currentGamePath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", gameName);
-                    if (Directory.Exists(currentGamePath))
-                    {
-                        UnityEngine.Debug.Log("Found Pikuniku (Steam) at: " + currentGamePath);
-                        return currentGamePath;
-                    }
-
-                    currentGamePath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", gameName);
-                    if (Directory.Exists(currentGamePath))
-                    {
-                        UnityEngine.Debug.Log("Found Pikuniku (Steam) at: " + currentGamePath);
-                        return currentGamePath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Pikuniku (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
     string GetGameEpicPath()
     {
         string[] quickPaths = new string[]
-        {
+       {
             @"C:\Program Files\Epic Games\Pikuniku",
-            @"D:\Epic Games\Pikuniku",
-            @"E:\Epic Games\Pikuniku",
             @"C:\Games\Epic\Pikuniku",
-            @"D:\Games\Epic\Pikuniku",
-            @"E:\Games\Epic\Pikuniku",
-            @"C:\Epic\Pikuniku",
-            @"D:\Epic\Pikuniku",
-            @"E:\Epic\Pikuniku",
-        };
+       };
 
         foreach (string path in quickPaths)
         {
@@ -1010,14 +987,13 @@ public class PikunikuManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Pikuniku (Epic) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        // Search in Epic Games Launcher directory
         try
         {
             string epicBaseDir = Path.Combine(
@@ -1027,16 +1003,14 @@ public class PikunikuManualDL : MonoBehaviour
 
             if (Directory.Exists(epicBaseDir))
             {
-                // Search for Pikuniku manifest
                 string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
                 foreach (string manifest in manifests)
                 {
                     try
                     {
                         string content = File.ReadAllText(manifest);
-                        if (content.Contains("Pikuniku"))
+                        if (content.Contains("Pikuniku") || content.Contains("Pikuniku"))
                         {
-                            // Extract install location from manifest
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
                             System.Text.RegularExpressions.Match match = regex.Match(content);
 
@@ -1045,7 +1019,7 @@ public class PikunikuManualDL : MonoBehaviour
                                 string epicPath = match.Groups[1].Value;
                                 if (Directory.Exists(epicPath))
                                 {
-                                    UnityEngine.Debug.Log("Found Pikuniku (Epic) at: " + epicPath);
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
                                     return epicPath;
                                 }
                             }
@@ -1057,38 +1031,39 @@ public class PikunikuManualDL : MonoBehaviour
         }
         catch { }
 
-        // Scan all drives
-        try
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "Pikuniku");
-                    if (Directory.Exists(epicPath))
-                    {
-                        UnityEngine.Debug.Log("Found Pikuniku (Epic) at: " + epicPath);
-                        return epicPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "Pikuniku");
-                    if (Directory.Exists(epicPath))
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Pikuniku (Epic) at: " + epicPath);
-                        return epicPath;
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Pikuniku (Epic) not found.");
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 
@@ -1176,7 +1151,6 @@ public class PikunikuManualDL : MonoBehaviour
         if (thunderstoreMatch.Success)
             return thunderstoreMatch.Groups[1].Value;
 
-        // GitHub releases pattern: /releases/download/VERSION/
         System.Text.RegularExpressions.Regex githubPattern = new System.Text.RegularExpressions.Regex(@"/releases/download/([^/]+)/");
         System.Text.RegularExpressions.Match githubMatch = githubPattern.Match(url);
 

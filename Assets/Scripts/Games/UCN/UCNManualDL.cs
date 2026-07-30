@@ -1,10 +1,11 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.IO;
+using System;
 using System.Collections;
 using System.Diagnostics;
-using System;
+using System.IO;
+using TMPro;
+using UnityEngine;
+/*using UnityEngine.LightTransport;*/
+using UnityEngine.UI;
 
 public class UCNManualDL : MonoBehaviour
 {
@@ -12,6 +13,9 @@ public class UCNManualDL : MonoBehaviour
 
     [Header("UCN FILES")]
     public FileDownloader.FileData ucnApworld;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Ultimate Custom Night";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installApworldToggle;
@@ -32,11 +36,26 @@ public class UCNManualDL : MonoBehaviour
     public TextMeshProUGUI infoText;
     public Button infoOkButton;
 
+    private string ucnPath;
     private string pendingAction;
     private const string UCN_FOLDER_NAME = "UCN";
 
+    private UCNConfig remoteConfig;
+    private bool configLoaded = false;
+
+    [System.Serializable]
+    public class UCNConfig
+    {
+        public string ucnApworld;
+        public string[] steamSearchPaths;
+    }
+
     void Start()
     {
+        ucnPath = GetUCNSteamPath();
+
+        StartCoroutine(LoadRemoteConfig());
+
         if (setupButton != null)
             setupButton.onClick.AddListener(RunSetup);
 
@@ -64,6 +83,50 @@ public class UCNManualDL : MonoBehaviour
         if (gameCopyToggle != null)
             gameCopyToggle.isOn = true;
     }
+
+    // =========================================================
+    // REMOTE CONFIG
+    // =========================================================
+
+    void ApplyUCNConfig()
+    {
+        if (remoteConfig == null)
+            return;
+
+        ucnApworld.url = remoteConfig.ucnApworld;
+    }
+
+    IEnumerator LoadRemoteConfig()
+    {
+        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
+
+        UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url);
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+        {
+            UnityEngine.Debug.LogWarning("Config load failed (this is OK, config is optional): " + request.error);
+            configLoaded = true;
+            yield break;
+        }
+
+        try
+        {
+            remoteConfig = JsonUtility.FromJson<UCNConfig>(request.downloadHandler.text);
+            UnityEngine.Debug.Log("Remote config loaded successfully");
+            ApplyUCNConfig();
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Config parsing failed (this is OK, config is optional): " + e.Message);
+        }
+
+        configLoaded = true;
+
+        ucnPath = GetUCNSteamPath();
+    }
+
+    // =========================================================
 
     public void RunSetup()
     {
@@ -112,37 +175,94 @@ public class UCNManualDL : MonoBehaviour
         pendingAction = "";
     }
 
+    // =========================================================
+    // SETUP
+    // =========================================================
+
     private IEnumerator ExecuteSetup()
     {
-        ShowInfo("Starting UCN installation...");
-        UnityEngine.Debug.Log("START: UCN Setup");
+        ucnPath = GetUCNSteamPath();
 
         bool doApworld = installApworldToggle == null || installApworldToggle.isOn;
         bool doGameCopy = gameCopyToggle == null || gameCopyToggle.isOn;
 
-        if (!doApworld && !doGameCopy)
+        bool needsGamePath = doGameCopy;
+
+        if (needsGamePath && (string.IsNullOrEmpty(ucnPath) || !Directory.Exists(ucnPath)))
         {
-            ShowInfo("Please select at least one option to install.");
+            ShowInfo("Game path not found. Please check your installation.");
             yield break;
         }
 
-        if (doApworld)
+        int count =
+            (doApworld ? 1 : 0) +
+            (doGameCopy ? 1 : 0);
+
+        if (count == 0)
         {
-            yield return InstallUCNApworld();
+            ShowInfo("Please select at least one component to install.");
+            yield break;
         }
 
-        if (doGameCopy)
+        if (doApworld && count == 1)
+        {
+            yield return APWorldOnlyFlow();
+            yield break;
+        }
+
+        if (doGameCopy && count == 1)
+        {
+            yield return GameCopyOnlyFlow();
+            yield break;
+        }
+
+        yield return InstallFlow();
+    }
+
+    IEnumerator InstallFlow()
+    {
+        if (gameCopyToggle == null || gameCopyToggle.isOn)
         {
             yield return CopyGameExeToArchipelago();
         }
 
-        ShowInfo("UCN setup complete!");
+        if (installApworldToggle == null || installApworldToggle.isOn)
+        {
+            ShowInfo("Installing APWorld...");
+            yield return InstallAPWorld();
+        }
+
         UnityEngine.Debug.Log("END: UCN Setup");
-        yield return null;
+        ShowInfo("Installation complete!");
     }
 
-    private IEnumerator InstallUCNApworld()
+    IEnumerator GameCopyOnlyFlow()
     {
+        yield return CopyGameExeToArchipelago();
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        ShowInfo("Installation complete!");
+    }
+
+    private IEnumerator InstallAPWorld()
+    {
+        while (!configLoaded)
+        {
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        UnityEngine.Debug.Log("Config loaded. UCN APWorld URL: " + ucnApworld.url);
+
         if (ucnApworld == null || string.IsNullOrEmpty(ucnApworld.url))
         {
             ShowInfo("ERROR: UCN APWorld URL is empty!");
@@ -229,6 +349,20 @@ public class UCNManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy UCN APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install UCN APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -349,7 +483,7 @@ public class UCNManualDL : MonoBehaviour
 
     private IEnumerator ExecuteRevert()
     {
-        UnityEngine.Debug.Log("START: UCN Revert");
+        string ucnPath = GetUCNSteamPath();
 
         ShowInfo("Removing Archipelago\\UCN folder...");
 
@@ -521,21 +655,12 @@ public class UCNManualDL : MonoBehaviour
     // PATH DETECTION
     // =========================================================
 
-    // Tries common Steam install locations for "Ultimate Custom Night"
     string GetUCNSteamPath()
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Ultimate Custom Night"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Ultimate Custom Night"),
-            @"D:\Steam\steamapps\common\Ultimate Custom Night",
-            @"D:\SteamLibrary\steamapps\common\Ultimate Custom Night",
-            @"D:\steamapps\common\Ultimate Custom Night",
-            @"E:\Steam\steamapps\common\Ultimate Custom Night",
-            @"E:\SteamLibrary\steamapps\common\Ultimate Custom Night",
-            @"E:\steamapps\common\Ultimate Custom Night",
-            @"E:\Program Files (x86)\steamapps\common\Ultimate Custom Night",
-            @"E:\Program Files\steamapps\common\Ultimate Custom Night",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -544,65 +669,46 @@ public class UCNManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found UCN (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string ucnPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Ultimate Custom Night");
-                    if (Directory.Exists(ucnPath))
-                    {
-                        UnityEngine.Debug.Log("Found UCN (Steam) at: " + ucnPath);
-                        return ucnPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    ucnPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Ultimate Custom Night");
-                    if (Directory.Exists(ucnPath))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found UCN (Steam) at: " + ucnPath);
-                        return ucnPath;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    ucnPath = Path.Combine(drive.Name, "steamapps", "common", "Ultimate Custom Night");
-                    if (Directory.Exists(ucnPath))
-                    {
-                        UnityEngine.Debug.Log("Found UCN (Steam) at: " + ucnPath);
-                        return ucnPath;
-                    }
-
-                    ucnPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Ultimate Custom Night");
-                    if (Directory.Exists(ucnPath))
-                    {
-                        UnityEngine.Debug.Log("Found UCN (Steam) at: " + ucnPath);
-                        return ucnPath;
-                    }
-
-                    ucnPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Ultimate Custom Night");
-                    if (Directory.Exists(ucnPath))
-                    {
-                        UnityEngine.Debug.Log("Found UCN (Steam) at: " + ucnPath);
-                        return ucnPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Ultimate Custom Night (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

@@ -14,6 +14,9 @@ public class CCCharlesManualDL : MonoBehaviour
     [Header("GAME FILES")]
     public FileDownloader.FileData cccharlesAP;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Choo-Choo Charles";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPModToggle;
 
@@ -42,6 +45,7 @@ public class CCCharlesManualDL : MonoBehaviour
     public class GameConfig
     {
         public string cccharlesAP;
+        public string[] steamSearchPaths;
     }
 
     [System.Serializable]
@@ -135,6 +139,8 @@ public class CCCharlesManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
+        gamePath = GetGamePath();
+
         if (!configLoaded)
         {
             ShowInfo("Loading configuration, please wait...");
@@ -148,7 +154,6 @@ public class CCCharlesManualDL : MonoBehaviour
             return;
         }
 
-        // ✅ Vérification si au moins une option est sélectionnée
         bool installAPMod = installAPModToggle == null || installAPModToggle.isOn;
 
         if (!installAPMod)
@@ -180,6 +185,8 @@ public class CCCharlesManualDL : MonoBehaviour
 
     private void ExecuteRevert()
     {
+        gamePath = GetGamePath();
+
         string manifestPath = Path.Combine(Application.persistentDataPath, "CCCharlesInstalledFilesManifest.json");
 
         if (!File.Exists(manifestPath))
@@ -303,7 +310,6 @@ public class CCCharlesManualDL : MonoBehaviour
 
         yield return downloader.DownloadAndExtract(cccharlesAP, Application.persistentDataPath, extractPath);
 
-        // Cherche le dossier "Obscure" dans l'extraction
         string obscurePath = Path.Combine(extractPath, "Obscure");
 
         if (!Directory.Exists(obscurePath))
@@ -313,7 +319,6 @@ public class CCCharlesManualDL : MonoBehaviour
             yield break;
         }
 
-        // Installe Content
         string contentSource = Path.Combine(obscurePath, "Content");
         if (Directory.Exists(contentSource))
         {
@@ -326,7 +331,6 @@ public class CCCharlesManualDL : MonoBehaviour
             }
         }
 
-        // Installe Binaries
         string binariesSource = Path.Combine(obscurePath, "Binaries");
         if (Directory.Exists(binariesSource))
         {
@@ -527,70 +531,57 @@ public class CCCharlesManualDL : MonoBehaviour
     string GetGamePath()
     {
         string[] quickPaths = new string[]
-        {
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Choo-Choo Charles"),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Choo-Choo Charles"),
-        @"D:\Steam\steamapps\common\Choo-Choo Charles",
-        @"D:\SteamLibrary\steamapps\common\Choo-Choo Charles",
-        @"D:\steamapps\common\Choo-Choo Charles",
-        @"E:\Steam\steamapps\common\Choo-Choo Charles",
-        @"E:\SteamLibrary\steamapps\common\Choo-Choo Charles",
-        @"E:\steamapps\common\Choo-Choo Charles",
-        @"E:\Program Files (x86)\steamapps\common\Choo-Choo Charles",
-        @"E:\Program Files\steamapps\common\Choo-Choo Charles",
-        };
+                {
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
+                };
 
         foreach (string path in quickPaths)
         {
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Cherche Steam\steamapps
-                    string gamePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Choo-Choo Charles");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Cherche SteamLibrary\steamapps
-                    gamePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Choo-Choo Charles");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Cherche directement steamapps à la racine du disque
-                    gamePath = Path.Combine(drive.Name, "steamapps", "common", "Choo-Choo Charles");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    // Cherche dans Program Files (x86)\steamapps
-                    gamePath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Choo-Choo Charles");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    // Cherche dans Program Files\steamapps
-                    gamePath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Choo-Choo Charles");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
@@ -668,7 +659,6 @@ public class CCCharlesManualDL : MonoBehaviour
         if (thunderstoreMatch.Success)
             return thunderstoreMatch.Groups[1].Value;
 
-        // Pattern pour GitHub releases: /releases/download/VERSION/
         System.Text.RegularExpressions.Regex githubPattern = new System.Text.RegularExpressions.Regex(@"/releases/download/([^/]+)/");
         System.Text.RegularExpressions.Match githubMatch = githubPattern.Match(url);
 
@@ -704,6 +694,7 @@ public class CCCharlesManualDL : MonoBehaviour
         }
 
         configLoaded = true;
-        UnityEngine.Debug.Log("Config marked as loaded");
+
+        gamePath = GetGamePath();
     }
 }

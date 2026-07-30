@@ -1,10 +1,11 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.IO;
+using Microsoft.Win32;
 using System.Collections;
 using System.Diagnostics;
-using Microsoft.Win32;
+using System.IO;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class BalatroManualDL : MonoBehaviour
 {
@@ -15,6 +16,9 @@ public class BalatroManualDL : MonoBehaviour
     public FileDownloader.FileData lovely;
     public FileDownloader.FileData steamodded;
     public FileDownloader.FileData balatroapMod;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Balatro";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installBalatroapworldToggle;
@@ -40,8 +44,8 @@ public class BalatroManualDL : MonoBehaviour
     public TextMeshProUGUI infoText;
     public Button infoOkButton;
 
-    private Process balatraProcess;
-    private string balatraPath;
+    private Process balatroProcess;
+    private string balatroPath;
     private string modsPath;
     private string pendingAction;
     private bool pendingFullCleanConfirmation = false;
@@ -55,11 +59,12 @@ public class BalatroManualDL : MonoBehaviour
         public string balatroLovely;
         public string balatroSteamodded;
         public string balatroAP;
+        public string[] steamSearchPaths;
     }
 
     void Start()
     {
-        balatraPath = GetBalatraPath();
+        balatroPath = GetBalatroPath();
         modsPath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Balatro", "Mods");
         StartCoroutine(LoadRemoteConfig());
 
@@ -156,36 +161,40 @@ public class BalatroManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(balatraPath))
+        balatroPath = GetBalatroPath();
+
+        bool apworld = installBalatroapworldToggle == null || installBalatroapworldToggle.isOn;
+        bool lovely = installLovelyToggle != null && installLovelyToggle.isOn;
+        bool steamodded = installSteamoddedToggle != null && installSteamoddedToggle.isOn;
+        bool apmod = installBalatroapModToggle != null && installBalatroapModToggle.isOn;
+
+        bool needsGamePath = lovely || apmod || steamodded;
+
+        if (needsGamePath && (string.IsNullOrEmpty(balatroPath) || !Directory.Exists(balatroPath)))
         {
-            ShowInfo("Balatro path not found. Please check Steam installation.");
+            ShowInfo("Game path not found. Please check your installation.");
             return;
         }
 
-        bool apworld = installBalatroapworldToggle == null || installBalatroapworldToggle.isOn;
-        bool lovely_install = installLovelyToggle != null && installLovelyToggle.isOn;
-        bool steamodded_install = installSteamoddedToggle != null && installSteamoddedToggle.isOn;
-        bool apmod = installBalatroapModToggle != null && installBalatroapModToggle.isOn;
-
         int count =
             (apworld ? 1 : 0) +
-            (lovely_install ? 1 : 0) +
-            (steamodded_install ? 1 : 0) +
+            (lovely ? 1 : 0) +
+            (steamodded ? 1 : 0) +
             (apmod ? 1 : 0);
 
         if (apworld && count == 1)
         {
-            StartCoroutine(ApWorldOnlyFlow());
+            StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
-        if (lovely_install && count == 1)
+        if (lovely && count == 1)
         {
             StartCoroutine(LovelyOnlyFlow());
             return;
         }
 
-        if (steamodded_install && count == 1)
+        if (steamodded && count == 1)
         {
             StartCoroutine(SteamoddedOnlyFlow());
             return;
@@ -197,15 +206,39 @@ public class BalatroManualDL : MonoBehaviour
             return;
         }
 
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            LaunchBalatro();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
     {
-        balatraPath = GetBalatraPath();
+        balatroPath = GetBalatroPath();
         modsPath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Balatro", "Mods");
 
-        if (string.IsNullOrEmpty(balatraPath))
+        if (string.IsNullOrEmpty(balatroPath))
             return;
 
         bool removeAP = removeBalatroapModsOnlyToggle != null && removeBalatroapModsOnlyToggle.isOn;
@@ -257,7 +290,7 @@ public class BalatroManualDL : MonoBehaviour
         SafeDeleteDirectory(Path.Combine(modsPath, "BalatroAP"));
         SafeDeleteDirectory(Path.Combine(modsPath, "steamodded"));
 
-        SafeDeleteFile(Path.Combine(balatraPath, "version.dll"));
+        SafeDeleteFile(Path.Combine(balatroPath, "version.dll"));
 
         DeleteOldVersionFiles();
 
@@ -309,7 +342,7 @@ public class BalatroManualDL : MonoBehaviour
         if (installBalatroapworldToggle == null || installBalatroapworldToggle.isOn)
         {
             ShowInfo("Installing APWorld...");
-            yield return InstallBalatraAPWorld();
+            yield return InstallAPWorld();
         }
 
         if (installLovelyToggle != null && installLovelyToggle.isOn)
@@ -343,7 +376,7 @@ public class BalatroManualDL : MonoBehaviour
         yield break;
     }
 
-    IEnumerator InstallBalatraAPWorld()
+    IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
         {
@@ -441,6 +474,20 @@ public class BalatroManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -475,7 +522,6 @@ public class BalatroManualDL : MonoBehaviour
 
         yield return downloader.DownloadAndExtract(lovely, Application.persistentDataPath, extractPath);
 
-        // Find version.dll in the extracted content
         string versionDllPath = FindFile(extractPath, "version.dll");
 
         if (string.IsNullOrEmpty(versionDllPath))
@@ -486,10 +532,9 @@ public class BalatroManualDL : MonoBehaviour
             yield break;
         }
 
-        // Copy to Balatro root directory
         try
         {
-            string targetPath = Path.Combine(balatraPath, "version.dll");
+            string targetPath = Path.Combine(balatroPath, "version.dll");
             File.Copy(versionDllPath, targetPath, true);
             UnityEngine.Debug.Log("version.dll copied to: " + targetPath);
         }
@@ -511,7 +556,6 @@ public class BalatroManualDL : MonoBehaviour
 
         yield return downloader.DownloadAndExtract(steamodded, Application.persistentDataPath, extractPath);
 
-        // Find the smods folder (e.g., smods-1.0.0-beta-1620a)
         string smodsFolder = FindSmodsFolder(extractPath);
 
         if (string.IsNullOrEmpty(smodsFolder))
@@ -522,10 +566,8 @@ public class BalatroManualDL : MonoBehaviour
             yield break;
         }
 
-        // Create mods directory if it doesn't exist
         Directory.CreateDirectory(modsPath);
 
-        // Copy steamodded folder to Mods directory (rename to "steamodded")
         try
         {
             string targetPath = Path.Combine(modsPath, "steamodded");
@@ -590,24 +632,6 @@ public class BalatroManualDL : MonoBehaviour
         SafeDeleteDirectory(extractPath);
     }
 
-    IEnumerator ApWorldOnlyFlow()
-    {
-        balatraPath = GetBalatraPath();
-
-        if (string.IsNullOrEmpty(balatraPath))
-            yield break;
-
-        yield return InstallBalatraAPWorld();
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-        {
-            LaunchBalatro();
-            yield return new WaitForSeconds(2f);
-        }
-
-        ShowInfo("Installation complete!");
-    }
-
     IEnumerator LovelyOnlyFlow()
     {
         ShowInfo("Installing Lovely...");
@@ -644,9 +668,9 @@ public class BalatroManualDL : MonoBehaviour
 
     IEnumerator BalatroapModOnlyFlow()
     {
-        balatraPath = GetBalatraPath();
+        balatroPath = GetBalatroPath();
 
-        if (string.IsNullOrEmpty(balatraPath))
+        if (string.IsNullOrEmpty(balatroPath))
             yield break;
 
         ShowInfo("Installing BalatroAP Mod...");
@@ -689,25 +713,27 @@ public class BalatroManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        balatroPath = GetBalatroPath();
     }
 
     void LaunchBalatro()
     {
-        string exePath = Path.Combine(balatraPath, "Balatro.exe");
+        string exePath = Path.Combine(balatroPath, "Balatro.exe");
 
         if (File.Exists(exePath))
-            balatraProcess = Process.Start(exePath);
+            balatroProcess = Process.Start(exePath);
     }
 
     void CloseBalatro()
     {
         try
         {
-            if (balatraProcess != null && !balatraProcess.HasExited)
+            if (balatroProcess != null && !balatroProcess.HasExited)
             {
-                balatraProcess.Kill();
-                balatraProcess.Dispose();
-                balatraProcess = null;
+                balatroProcess.Kill();
+                balatroProcess.Dispose();
+                balatroProcess = null;
             }
         }
         catch { }
@@ -916,73 +942,60 @@ public class BalatroManualDL : MonoBehaviour
         return "Unknown";
     }
 
-    string GetBalatraPath()
+    string GetBalatroPath()
     {
         string[] quickPaths = new string[]
-        {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Balatro"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Balatro"),
-            @"D:\Steam\steamapps\common\Balatro",
-            @"D:\SteamLibrary\steamapps\common\Balatro",
-            @"D:\steamapps\common\Balatro",
-            @"E:\Steam\steamapps\common\Balatro",
-            @"E:\SteamLibrary\steamapps\common\Balatro",
-            @"E:\steamapps\common\Balatro",
-            @"E:\Program Files (x86)\steamapps\common\Balatro",
-            @"E:\Program Files\steamapps\common\Balatro",
-        };
+                {
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
+                };
 
         foreach (string path in quickPaths)
         {
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Search Steam\steamapps
-                    string balatraPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Balatro");
-                    if (Directory.Exists(balatraPath))
-                        return balatraPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Search SteamLibrary\steamapps
-                    balatraPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Balatro");
-                    if (Directory.Exists(balatraPath))
-                        return balatraPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Search steamapps at root
-                    balatraPath = Path.Combine(drive.Name, "steamapps", "common", "Balatro");
-                    if (Directory.Exists(balatraPath))
-                        return balatraPath;
-
-                    // Search Program Files (x86)\steamapps
-                    balatraPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Balatro");
-                    if (Directory.Exists(balatraPath))
-                        return balatraPath;
-
-                    // Search Program Files\steamapps
-                    balatraPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Balatro");
-                    if (Directory.Exists(balatraPath))
-                        return balatraPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

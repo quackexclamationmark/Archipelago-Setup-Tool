@@ -22,6 +22,15 @@ public class BloonsTD6ManualDL : MonoBehaviour
     public Button epicButton;
     public TextMeshProUGUI platformStatus;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "BloonsTD6";
+    public string[] epicGameFolderNames = new string[]
+    {
+    "BloonsTD6",
+    "BloonsTD64782b",
+    "BloonsTD6e960b"
+    };
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
@@ -61,6 +70,8 @@ public class BloonsTD6ManualDL : MonoBehaviour
         public string btd6Apworld;
         public string btd6ModHelper;
         public string btd6Updater;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     void Start()
@@ -220,17 +231,21 @@ public class BloonsTD6ManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(btd6Path))
-        {
-            string platform = isEpic ? "Epic" : "Steam";
-            ShowInfo("BTD6 path not found. Please check " + platform + " installation.");
-            return;
-        }
+        btd6Path = GetBTD6Path();
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool melonloader = installMelonLoaderToggle != null && installMelonLoaderToggle.isOn;
         bool apmod = installAPModToggle != null && installAPModToggle.isOn;
         bool modhelper = installModHelperToggle != null && installModHelperToggle.isOn;
+
+        bool needsGamePath = apmod || !apworld;
+
+        if (needsGamePath && string.IsNullOrEmpty(btd6Path))
+        {
+            string platform = isEpic ? "Epic" : "Steam";
+            ShowInfo("Game not found on " + platform + ". Please check installation.");
+            return;
+        }
 
         int count =
             (apworld ? 1 : 0) +
@@ -263,6 +278,24 @@ public class BloonsTD6ManualDL : MonoBehaviour
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            LaunchBTD6();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -521,6 +554,20 @@ public class BloonsTD6ManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -696,18 +743,6 @@ public class BloonsTD6ManualDL : MonoBehaviour
         yield return null;
     }
 
-    IEnumerator APWorldOnlyFlow()
-    {
-        btd6Path = GetBTD6Path();
-
-        if (string.IsNullOrEmpty(btd6Path))
-            yield break;
-
-        yield return InstallAPWorld();
-
-        ShowInfo("APWorld installed successfully!");
-    }
-
     IEnumerator MelonLoaderOnlyFlow()
     {
         ShowInfo("Installing MelonLoader...");
@@ -793,6 +828,9 @@ public class BloonsTD6ManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        btd6Path = GetBTD6Path();
+        UpdatePlatformStatus();
     }
 
     void LaunchBTD6()
@@ -1048,16 +1086,8 @@ public class BloonsTD6ManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "BloonsTD6"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "BloonsTD6"),
-            @"D:\Steam\steamapps\common\BloonsTD6",
-            @"D:\SteamLibrary\steamapps\common\BloonsTD6",
-            @"D:\steamapps\common\BloonsTD6",
-            @"E:\Steam\steamapps\common\BloonsTD6",
-            @"E:\SteamLibrary\steamapps\common\BloonsTD6",
-            @"E:\steamapps\common\BloonsTD6",
-            @"E:\Program Files (x86)\steamapps\common\BloonsTD6",
-            @"E:\Program Files\steamapps\common\BloonsTD6",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -1066,94 +1096,72 @@ public class BloonsTD6ManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found BTD6 (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string btd6Path = Path.Combine(drive.Name, "Steam", "steamapps", "common", "BloonsTD6");
-                    if (Directory.Exists(btd6Path))
-                    {
-                        UnityEngine.Debug.Log("Found BTD6 (Steam) at: " + btd6Path);
-                        return btd6Path;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    btd6Path = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "BloonsTD6");
-                    if (Directory.Exists(btd6Path))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found BTD6 (Steam) at: " + btd6Path);
-                        return btd6Path;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    btd6Path = Path.Combine(drive.Name, "steamapps", "common", "BloonsTD6");
-                    if (Directory.Exists(btd6Path))
-                    {
-                        UnityEngine.Debug.Log("Found BTD6 (Steam) at: " + btd6Path);
-                        return btd6Path;
-                    }
-
-                    btd6Path = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "BloonsTD6");
-                    if (Directory.Exists(btd6Path))
-                    {
-                        UnityEngine.Debug.Log("Found BTD6 (Steam) at: " + btd6Path);
-                        return btd6Path;
-                    }
-
-                    btd6Path = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "BloonsTD6");
-                    if (Directory.Exists(btd6Path))
-                    {
-                        UnityEngine.Debug.Log("Found BTD6 (Steam) at: " + btd6Path);
-                        return btd6Path;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("BTD6 (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
     string GetBTD6EpicPath()
     {
-        string[] quickPaths = new string[]
+        string[] quickBases = new string[]
         {
-            @"C:\Program Files\Epic Games\BloonsTD6",
-            @"D:\Epic Games\BloonsTD6",
-            @"E:\Epic Games\BloonsTD6",
-            @"C:\Games\Epic\BloonsTD6",
-            @"D:\Games\Epic\BloonsTD6",
-            @"E:\Games\Epic\BloonsTD6",
-            @"C:\Epic\BloonsTD6",
-            @"D:\Epic\BloonsTD6",
-            @"E:\Epic\BloonsTD6",
+            @"C:\Program Files\Epic Games",
+            @"C:\Games\Epic",
         };
 
-        foreach (string path in quickPaths)
+        foreach (string basePath in quickBases)
         {
-            try
+            foreach (string folderName in epicGameFolderNames)
             {
-                if (Directory.Exists(path))
+                try
                 {
-                    UnityEngine.Debug.Log("Found BTD6 (Epic) at: " + path);
-                    return path;
+                    string path = Path.Combine(basePath, folderName);
+                    if (Directory.Exists(path))
+                    {
+                        UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
+                        return path;
+                    }
                 }
+                catch { }
             }
-            catch { }
         }
 
         try
@@ -1171,17 +1179,28 @@ public class BloonsTD6ManualDL : MonoBehaviour
                     try
                     {
                         string content = File.ReadAllText(manifest);
-                        if (content.Contains("BloonsTD6"))
+
+                        bool matchesBTD6 = false;
+                        foreach (string folderName in epicGameFolderNames)
+                        {
+                            if (content.Contains(folderName))
+                            {
+                                matchesBTD6 = true;
+                                break;
+                            }
+                        }
+
+                        if (matchesBTD6)
                         {
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
                             System.Text.RegularExpressions.Match match = regex.Match(content);
 
                             if (match.Success)
                             {
-                                string epicPath = match.Groups[1].Value;
+                                string epicPath = match.Groups[1].Value.Replace(@"\\", @"\");
                                 if (Directory.Exists(epicPath))
                                 {
-                                    UnityEngine.Debug.Log("Found BTD6 (Epic) at: " + epicPath);
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
                                     return epicPath;
                                 }
                             }
@@ -1193,37 +1212,42 @@ public class BloonsTD6ManualDL : MonoBehaviour
         }
         catch { }
 
-        try
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "BloonsTD6");
-                    if (Directory.Exists(epicPath))
-                    {
-                        UnityEngine.Debug.Log("Found BTD6 (Epic) at: " + epicPath);
-                        return epicPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "BloonsTD6");
-                    if (Directory.Exists(epicPath))
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found BTD6 (Epic) at: " + epicPath);
-                        return epicPath;
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        foreach (string folderName in epicGameFolderNames)
+                        {
+                            try
+                            {
+                                string epicPath = Path.Combine(drive.Name, relativePath, folderName);
+                                if (Directory.Exists(epicPath))
+                                {
+                                    UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                    return epicPath;
+                                }
+                            }
+                            catch { }
+                        }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("BTD6 (Epic) not found.");
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 }

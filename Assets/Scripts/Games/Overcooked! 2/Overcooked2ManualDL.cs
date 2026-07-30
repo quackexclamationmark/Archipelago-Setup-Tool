@@ -11,17 +11,21 @@ public class Overcooked2ManualDL : MonoBehaviour
     public FileDownloader downloader;
 
     [Header("OVERCOOKED2 FILE")]
-    public FileDownloader.FileData oc2AP; // ex: oc2-modding-v1.9.9.zip
+    public FileDownloader.FileData oc2AP;
 
     [Header("PLATFORM SELECTION")]
     public Button steamButton;
     public Button epicButton;
     public TextMeshProUGUI platformStatus;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Overcooked! 2";
+    public string epicGameFolderName = "Overcooked2";
+
     [Header("FEATURE TOGGLES")]
-    public Toggle installPackageToggle; // controls downloading/extracting the zip
-    public Toggle installModdingToggle; // runs oc2-modding-install.bat when enabled
-    public Toggle launchGameToggle;     // launches Overcooked2.exe after winhttp.dll appears (only interactable if installModdingToggle is enabled)
+    public Toggle installPackageToggle;
+    public Toggle installModdingToggle;
+    public Toggle launchGameToggle;
 
     [Header("CONFIRMATION PANEL")]
     public GameObject confirmationPanel;
@@ -38,7 +42,7 @@ public class Overcooked2ManualDL : MonoBehaviour
     public float installWaitForWinhttpTimeout = 120f;
     public float uninstallTimeout = 120f;
 
-    private string gameCorePath; // folder containing Overcooked2.exe
+    private string gameCorePath;
     private string pendingAction;
     private Process gameProcess;
     private Process installerProcess;
@@ -50,6 +54,8 @@ public class Overcooked2ManualDL : MonoBehaviour
     public class Overcooked2Config
     {
         public string oc2AP;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     void Start()
@@ -230,9 +236,6 @@ public class Overcooked2ManualDL : MonoBehaviour
         StartCoroutine(InstallFlow());
     }
 
-    // Revert requirements:
-    // - Always search the game core (gameCorePath) for oc2-modding-uninstall.bat and run it if found.
-    // - If oc2-modding-v1.9.9 exists, delete it (bonus), but its presence is NOT required to run the uninstaller.
     private void ExecuteRevert()
     {
         gameCorePath = GetOvercooked2Path();
@@ -245,12 +248,11 @@ public class Overcooked2ManualDL : MonoBehaviour
 
         string target = Path.Combine(gameCorePath, "oc2-modding-v1.9.9");
 
-        // Search for .bat with priority: game root, then mod folder, then nested
         string[] possibleUninstallPaths = new string[]
         {
-            Path.Combine(gameCorePath, "oc2-modding-uninstall.bat"), // primary: game core
-            Path.Combine(target, "oc2-modding-uninstall.bat"),       // mod folder
-            Path.Combine(target, "oc2-modding-v1.9.9", "oc2-modding-uninstall.bat") // nested fallback
+            Path.Combine(gameCorePath, "oc2-modding-uninstall.bat"),
+            Path.Combine(target, "oc2-modding-uninstall.bat"),
+            Path.Combine(target, "oc2-modding-v1.9.9", "oc2-modding-uninstall.bat")
         };
 
         string foundBat = null;
@@ -536,10 +538,8 @@ public class Overcooked2ManualDL : MonoBehaviour
                 UnityEngine.Debug.LogWarning("Could not delete mod folder after uninstall: " + targetFolder);
                 ShowInfo("Uninstaller finished but could not remove mod folder. Please remove it manually.");
             }
-            // if deleted, keep silent
         }
 
-        // After cleanup attempts, if winhttp.dll existed before and is now gone => show "Revert complete!"
         bool winhttpExistsNow = File.Exists(winhttpPath);
         if (winhttpExistedBefore && !winhttpExistsNow)
         {
@@ -575,6 +575,9 @@ public class Overcooked2ManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        gameCorePath = GetOvercooked2Path();
+        UpdatePlatformStatus();
     }
 
     Process RunBatch(string batPath, string workingDirectory)
@@ -584,7 +587,7 @@ public class Overcooked2ManualDL : MonoBehaviour
             ProcessStartInfo psi = new ProcessStartInfo();
             psi.FileName = batPath;
             psi.WorkingDirectory = workingDirectory;
-            psi.UseShellExecute = true; // let the .bat run with default shell
+            psi.UseShellExecute = true;
             psi.CreateNoWindow = false;
             return Process.Start(psi);
         }
@@ -694,12 +697,8 @@ public class Overcooked2ManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Overcooked! 2"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Overcooked! 2"),
-            @"D:\Steam\steamapps\common\Overcooked! 2",
-            @"D:\SteamLibrary\steamapps\common\Overcooked! 2",
-            @"E:\Steam\steamapps\common\Overcooked! 2",
-            @"E:\SteamLibrary\steamapps\common\Overcooked! 2",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -708,67 +707,56 @@ public class Overcooked2ManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Overcooked! 2 (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string subPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Overcooked! 2");
-                    if (Directory.Exists(subPath))
-                        return subPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    subPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Overcooked! 2");
-                    if (Directory.Exists(subPath))
-                        return subPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    subPath = Path.Combine(drive.Name, "steamapps", "common", "Overcooked! 2");
-                    if (Directory.Exists(subPath))
-                        return subPath;
-
-                    subPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Overcooked! 2");
-                    if (Directory.Exists(subPath))
-                        return subPath;
-
-                    subPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Overcooked! 2");
-                    if (Directory.Exists(subPath))
-                        return subPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Overcooked! 2 (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
     string GetOvercooked2EpicPath()
     {
         string[] quickPaths = new string[]
-        {
+       {
             @"C:\Program Files\Epic Games\Overcooked2",
-            @"D:\Epic Games\Overcooked2",
-            @"E:\Epic Games\Overcooked2",
             @"C:\Games\Epic\Overcooked2",
-            @"D:\Games\Epic\Overcooked2",
-            @"E:\Games\Epic\Overcooked2",
-            @"C:\Epic\Overcooked2",
-            @"D:\Epic\Overcooked2",
-            @"E:\Epic\Overcooked2",
-        };
+       };
 
         foreach (string path in quickPaths)
         {
@@ -776,14 +764,13 @@ public class Overcooked2ManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Overcooked2 (Epic) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        // Search Epic manifests for install location
         try
         {
             string epicBaseDir = Path.Combine(
@@ -799,7 +786,7 @@ public class Overcooked2ManualDL : MonoBehaviour
                     try
                     {
                         string content = File.ReadAllText(manifest);
-                        if (content.Contains("Overcooked") || content.Contains("Overcooked2"))
+                        if (content.Contains("Overcooked2") || content.Contains("Overcooked2"))
                         {
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
                             System.Text.RegularExpressions.Match match = regex.Match(content);
@@ -809,7 +796,7 @@ public class Overcooked2ManualDL : MonoBehaviour
                                 string epicPath = match.Groups[1].Value;
                                 if (Directory.Exists(epicPath))
                                 {
-                                    UnityEngine.Debug.Log("Found Overcooked2 (Epic) via manifest at: " + epicPath);
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
                                     return epicPath;
                                 }
                             }
@@ -821,32 +808,39 @@ public class Overcooked2ManualDL : MonoBehaviour
         }
         catch { }
 
-        // Scan drives
-        try
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "Overcooked2");
-                    if (Directory.Exists(epicPath))
-                        return epicPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "Overcooked2");
-                    if (Directory.Exists(epicPath))
-                        return epicPath;
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Overcooked2 (Epic) not found.");
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 }

@@ -15,6 +15,9 @@ public class PowerwashManualDL : MonoBehaviour
     public FileDownloader.FileData apMod;
     public FileDownloader.FileData bepInEx;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "PowerWash Simulator";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
@@ -51,6 +54,7 @@ public class PowerwashManualDL : MonoBehaviour
         public string powerwashAP;
         public string powerwashBepInEx;
         public string powerwashApworld;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -156,15 +160,18 @@ public class PowerwashManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(powerwashPath))
-        {
-            ShowInfo("PowerWash Simulator path not found. Please check Steam installation.");
-            return;
-        }
+        powerwashPath = GetPowerwashPath();
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
         bool apmod = installAPModToggle != null && installAPModToggle.isOn;
+        bool needsGamePath = bep || apmod;
+
+        if (needsGamePath && (string.IsNullOrEmpty(powerwashPath) || !Directory.Exists(powerwashPath)))
+        {
+            ShowInfo("Game path not found. Please check Steam installation.");
+            return;
+        }
 
         int count =
             (apworld ? 1 : 0) +
@@ -190,6 +197,25 @@ public class PowerwashManualDL : MonoBehaviour
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Peaks of Yore...");
+            LaunchPowerwash();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -479,6 +505,19 @@ public class PowerwashManualDL : MonoBehaviour
             ShowInfo("Failed to install APWorld.");
             yield break;
         }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
+        }
     }
 
     IEnumerator DownloadFile(string url, string savePath)
@@ -544,12 +583,6 @@ public class PowerwashManualDL : MonoBehaviour
         UnityEngine.Debug.Log("BepInEx installed successfully!");
 
         SafeDeleteDirectory(extractPath);
-    }
-
-    IEnumerator APWorldOnlyFlow()
-    {
-        yield return InstallAPWorld();
-        yield break;
     }
 
     IEnumerator APModOnlyFlow()
@@ -629,6 +662,8 @@ public class PowerwashManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        powerwashPath = GetPowerwashPath();
     }
 
     void LaunchPowerwash()
@@ -737,16 +772,8 @@ public class PowerwashManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "PowerWash Simulator"),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "PowerWash Simulator"),
-        @"D:\Steam\steamapps\common\PowerWash Simulator",
-        @"D:\SteamLibrary\steamapps\common\PowerWash Simulator",
-        @"D:\steamapps\common\PowerWash Simulator",
-        @"E:\Steam\steamapps\common\PowerWash Simulator",
-        @"E:\SteamLibrary\steamapps\common\PowerWash Simulator",
-        @"E:\steamapps\common\PowerWash Simulator",
-        @"E:\Program Files (x86)\steamapps\common\PowerWash Simulator",
-        @"E:\Program Files\steamapps\common\PowerWash Simulator",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -754,49 +781,47 @@ public class PowerwashManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            DriveInfo[] drives = DriveInfo.GetDrives();
-
-            foreach (DriveInfo drive in drives)
+            try
             {
-                try
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Cherche Steam\steamapps
-                    string path = Path.Combine(drive.RootDirectory.FullName, "Steam", "steamapps", "common", "PowerWash Simulator");
-                    if (Directory.Exists(path))
-                        return path;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Cherche SteamLibrary\steamapps
-                    path = Path.Combine(drive.RootDirectory.FullName, "SteamLibrary", "steamapps", "common", "PowerWash Simulator");
-                    if (Directory.Exists(path))
-                        return path;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Cherche directement steamapps à la racine du disque
-                    path = Path.Combine(drive.RootDirectory.FullName, "steamapps", "common", "PowerWash Simulator");
-                    if (Directory.Exists(path))
-                        return path;
-
-                    // Cherche dans Program Files (x86)\steamapps
-                    path = Path.Combine(drive.RootDirectory.FullName, "Program Files (x86)", "steamapps", "common", "PowerWash Simulator");
-                    if (Directory.Exists(path))
-                        return path;
-
-                    // Cherche dans Program Files\steamapps
-                    path = Path.Combine(drive.RootDirectory.FullName, "Program Files", "steamapps", "common", "PowerWash Simulator");
-                    if (Directory.Exists(path))
-                        return path;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 

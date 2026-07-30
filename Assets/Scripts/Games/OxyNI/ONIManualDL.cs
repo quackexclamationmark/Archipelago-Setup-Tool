@@ -19,6 +19,10 @@ public class ONIManualDL : MonoBehaviour
     public Button epicButton;
     public TextMeshProUGUI platformStatus;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Oxygen Not Included";
+    public string epicGameFolderName = "OxygenNotIncluded";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
@@ -50,18 +54,18 @@ public class ONIManualDL : MonoBehaviour
     {
         public string oniApworld;
         public string oniAP;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     void Start()
     {
-        // Initialize platform buttons
         if (steamButton != null)
             steamButton.onClick.AddListener(OnSteamButtonClicked);
 
         if (epicButton != null)
             epicButton.onClick.AddListener(OnEpicButtonClicked);
 
-        // Select Steam by default
         SelectSteam();
 
         oniPath = GetONIPath();
@@ -189,31 +193,30 @@ public class ONIManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
+        oniPath = GetONIPath();
+        modPath = GetModPath();
+
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool apmod = installAPModToggle == null || installAPModToggle.isOn;
 
-        // APWorld can be installed without game path
-        if (apworld && !apmod)
-        {
-            StartCoroutine(APWorldOnlyFlow());
-            return;
-        }
+        bool needsGamePath = apmod || !apworld;
 
-        // For APMod, we need the game path
-        oniPath = GetONIPath();
-
-        if ((apmod || (!apworld && !apmod)) && string.IsNullOrEmpty(oniPath))
+        if (needsGamePath && string.IsNullOrEmpty(oniPath))
         {
             string platform = isEpic ? "Epic" : "Steam";
-            ShowInfo("ONI not found on " + platform + ". Please check installation.");
+            ShowInfo("Game not found on " + platform + ". Please check installation.");
             return;
         }
-
-        modPath = GetModPath();
 
         int count =
             (apworld ? 1 : 0) +
             (apmod ? 1 : 0);
+
+        if (apworld && count == 1)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
 
         if (apmod && count == 1)
         {
@@ -221,7 +224,31 @@ public class ONIManualDL : MonoBehaviour
             return;
         }
 
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -386,6 +413,20 @@ public class ONIManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -396,7 +437,7 @@ public class ONIManualDL : MonoBehaviour
     using (UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url))
     {
         request.downloadHandler = new UnityEngine.Networking.DownloadHandlerFile(savePath);
-        request.redirectLimit = 10; // Augmente les redirections autorisées
+        request.redirectLimit = 10;
 
         yield return request.SendWebRequest();
 
@@ -455,11 +496,9 @@ public class ONIManualDL : MonoBehaviour
 
         try
         {
-            // Extract ZIP
             System.IO.Compression.ZipFile.ExtractToDirectory(downloadPath, extractPath, true);
             UnityEngine.Debug.Log("Extracted ZIP file successfully");
 
-            // Find the ArchipelagoNotIncluded folder
             string sourceModPath = Path.Combine(extractPath, "ArchipelagoNotIncluded");
 
             if (!Directory.Exists(sourceModPath))
@@ -478,23 +517,19 @@ public class ONIManualDL : MonoBehaviour
                 yield break;
             }
 
-            // Ensure mod directory exists
             if (!Directory.Exists(modPath))
             {
                 Directory.CreateDirectory(modPath);
                 UnityEngine.Debug.Log("Created mod directory: " + modPath);
             }
 
-            // Target path for the mod
             string targetModPath = Path.Combine(modPath, "ArchipelagoNotIncluded");
 
-            // Delete old version if exists
             if (Directory.Exists(targetModPath))
             {
                 SafeDeleteDirectory(targetModPath);
             }
 
-            // Copy the mod folder
             CopyDirectory(sourceModPath, targetModPath);
             UnityEngine.Debug.Log("AP Mod copied to: " + targetModPath);
 
@@ -506,7 +541,6 @@ public class ONIManualDL : MonoBehaviour
             ShowInfo("ERROR: Failed to install AP Mod!\n" + e.Message);
         }
 
-        // Cleanup
         try
         {
             SafeDeleteDirectory(extractPath);
@@ -516,12 +550,6 @@ public class ONIManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("END InstallAPMod");
         yield return null;
-    }
-
-    IEnumerator APWorldOnlyFlow()
-    {
-        yield return InstallAPWorld();
-        ShowInfo("APWorld installed successfully!");
     }
 
     IEnumerator APModOnlyFlow()
@@ -577,6 +605,9 @@ public class ONIManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        oniPath = GetONIPath();
+        UpdatePlatformStatus();
     }
 
     void LaunchGame()
@@ -619,7 +650,6 @@ public class ONIManualDL : MonoBehaviour
 
     void CleanupProcesses()
     {
-        // Close ONI if it's running
         try
         {
             Process[] processes = Process.GetProcessesByName("OxygenNotIncluded");
@@ -806,7 +836,6 @@ public class ONIManualDL : MonoBehaviour
     {
         string userName = System.Environment.UserName;
 
-        // Primary path: Documents/Klei/OxygenNotIncluded/mods/Local
         string primaryPath = Path.Combine(
             System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments),
             "Klei", "OxygenNotIncluded", "mods", "Local"
@@ -826,7 +855,6 @@ public class ONIManualDL : MonoBehaviour
             UnityEngine.Debug.LogWarning("Cannot use primary mod path: " + e.Message);
         }
 
-        // Fallback: OneDrive/Documents/Klei/OxygenNotIncluded/mods/Local
         string oneDrivePath = Path.Combine(
             System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile),
             "OneDrive", "Documents", "Klei", "OxygenNotIncluded", "mods", "Local"
@@ -838,7 +866,6 @@ public class ONIManualDL : MonoBehaviour
             return oneDrivePath;
         }
 
-        // If OneDrive doesn't exist, try to create primary path anyway
         try
         {
             Directory.CreateDirectory(primaryPath);
@@ -856,14 +883,8 @@ public class ONIManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "OxygenNotIncluded"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "OxygenNotIncluded"),
-            @"D:\Steam\steamapps\common\OxygenNotIncluded",
-            @"D:\SteamLibrary\steamapps\common\OxygenNotIncluded",
-            @"D:\steamapps\common\OxygenNotIncluded",
-            @"E:\Steam\steamapps\common\OxygenNotIncluded",
-            @"E:\SteamLibrary\steamapps\common\OxygenNotIncluded",
-            @"E:\steamapps\common\OxygenNotIncluded",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -872,65 +893,56 @@ public class ONIManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found ONI (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string oniPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "OxygenNotIncluded");
-                    if (Directory.Exists(oniPath))
-                    {
-                        UnityEngine.Debug.Log("Found ONI (Steam) at: " + oniPath);
-                        return oniPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    oniPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "OxygenNotIncluded");
-                    if (Directory.Exists(oniPath))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found ONI (Steam) at: " + oniPath);
-                        return oniPath;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    oniPath = Path.Combine(drive.Name, "steamapps", "common", "OxygenNotIncluded");
-                    if (Directory.Exists(oniPath))
-                    {
-                        UnityEngine.Debug.Log("Found ONI (Steam) at: " + oniPath);
-                        return oniPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("ONI (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
     string GetONIEpicPath()
     {
         string[] quickPaths = new string[]
-        {
+       {
             @"C:\Program Files\Epic Games\OxygenNotIncluded",
-            @"D:\Epic Games\OxygenNotIncluded",
-            @"E:\Epic Games\OxygenNotIncluded",
             @"C:\Games\Epic\OxygenNotIncluded",
-            @"D:\Games\Epic\OxygenNotIncluded",
-            @"E:\Games\Epic\OxygenNotIncluded",
-        };
+       };
 
         foreach (string path in quickPaths)
         {
@@ -938,45 +950,83 @@ public class ONIManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found ONI (Epic) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        // Scan all drives
         try
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+            string epicBaseDir = Path.Combine(
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonApplicationData),
+                "Epic", "EpicGamesLauncher", "Data", "Manifests"
+            );
 
-            foreach (System.IO.DriveInfo drive in drives)
+            if (Directory.Exists(epicBaseDir))
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
-
-                try
+                string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
+                foreach (string manifest in manifests)
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "OxygenNotIncluded");
-                    if (Directory.Exists(epicPath))
+                    try
                     {
-                        UnityEngine.Debug.Log("Found ONI (Epic) at: " + epicPath);
-                        return epicPath;
-                    }
+                        string content = File.ReadAllText(manifest);
+                        if (content.Contains("OxygenNotIncluded") || content.Contains("OxygenNotIncluded"))
+                        {
+                            System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
+                            System.Text.RegularExpressions.Match match = regex.Match(content);
 
-                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "OxygenNotIncluded");
-                    if (Directory.Exists(epicPath))
-                    {
-                        UnityEngine.Debug.Log("Found ONI (Epic) at: " + epicPath);
-                        return epicPath;
+                            if (match.Success)
+                            {
+                                string epicPath = match.Groups[1].Value;
+                                if (Directory.Exists(epicPath))
+                                {
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
+                                    return epicPath;
+                                }
+                            }
+                        }
                     }
+                    catch { }
                 }
-                catch { }
             }
         }
         catch { }
 
-        UnityEngine.Debug.LogWarning("ONI (Epic) not found.");
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 }

@@ -17,6 +17,9 @@ public class OuterWildsManualDL : MonoBehaviour
     public FileDownloader.FileData customShipLogModes;
     public FileDownloader.FileData enableMeditation;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Outer Wilds";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installOuterWildsapworldToggle;
     public Toggle installOWMLToggle;
@@ -60,6 +63,7 @@ public class OuterWildsManualDL : MonoBehaviour
         public string outerwildsEnableMeditation;
         public string poptrackerDL;
         public string outerwildsPopTracker;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -162,32 +166,41 @@ public class OuterWildsManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(outerWildsPath))
-        {
-            ShowInfo("Outer Wilds path not found. Please check Steam installation.");
-            return;
-        }
+        outerWildsPath = GetOuterWildsPath();
 
         bool apworld = installOuterWildsapworldToggle == null || installOuterWildsapworldToggle.isOn;
-        bool owmlInstall = installOWMLToggle != null && installOWMLToggle.isOn;
-        bool archipelago = installArchipelagoRandomizerToggle != null && installArchipelagoRandomizerToggle.isOn;
+        bool owml = installOWMLToggle != null && installOWMLToggle.isOn;
+        bool ap = installArchipelagoRandomizerToggle != null && installArchipelagoRandomizerToggle.isOn;
         bool customShipLog = installCustomShipLogModesToggle != null && installCustomShipLogModesToggle.isOn;
         bool meditate = installEnableMeditationToggle != null && installEnableMeditationToggle.isOn;
+        bool needsGamePath = ap || owml || customShipLog || meditate;
+
+        if (needsGamePath && (string.IsNullOrEmpty(outerWildsPath) || !Directory.Exists(outerWildsPath)))
+        {
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
 
         int count =
             (apworld ? 1 : 0) +
-            (owmlInstall ? 1 : 0) +
-            (archipelago ? 1 : 0) +
+            (owml ? 1 : 0) +
+            (ap ? 1 : 0) +
             (customShipLog ? 1 : 0) +
             (meditate ? 1 : 0);
 
-        if (apworld && count == 1)
+        if (count == 0)
         {
-            StartCoroutine(ApWorldOnlyFlow());
+            ShowInfo("Please select at least one component to install.");
             return;
         }
 
-        if (owmlInstall && count == 1)
+        if (apworld && count == 1)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
+
+        if (owml && count == 1)
         {
             StartCoroutine(OWMLOnlyFlow());
             return;
@@ -196,9 +209,29 @@ public class OuterWildsManualDL : MonoBehaviour
         StartCoroutine(InstallFlow());
     }
 
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Outer Wilds...");
+            LaunchOuterWilds();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
+    }
+
     private void ExecuteRevert()
     {
         outerWildsPath = GetOuterWildsPath();
+
         owmlPath = Path.Combine(outerWildsPath, "OWML");
 
         if (string.IsNullOrEmpty(outerWildsPath))
@@ -306,7 +339,7 @@ public class OuterWildsManualDL : MonoBehaviour
         if (installOuterWildsapworldToggle == null || installOuterWildsapworldToggle.isOn)
         {
             ShowInfo("Installing APWorld...");
-            yield return InstallOuterWildsAPWorld();
+            yield return InstallAPWorld();
         }
 
         if (installOWMLToggle != null && installOWMLToggle.isOn)
@@ -350,7 +383,7 @@ public class OuterWildsManualDL : MonoBehaviour
         yield break;
     }
 
-    IEnumerator InstallOuterWildsAPWorld()
+    IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
         {
@@ -448,6 +481,20 @@ public class OuterWildsManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -654,24 +701,6 @@ public class OuterWildsManualDL : MonoBehaviour
         SafeDeleteDirectory(extractPath);
     }
 
-    IEnumerator ApWorldOnlyFlow()
-    {
-        outerWildsPath = GetOuterWildsPath();
-
-        if (string.IsNullOrEmpty(outerWildsPath))
-            yield break;
-
-        yield return InstallOuterWildsAPWorld();
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-        {
-            LaunchOuterWilds();
-            yield return new WaitForSeconds(2f);
-        }
-
-        ShowInfo("Installation complete!");
-    }
-
     IEnumerator OWMLOnlyFlow()
     {
         ShowInfo("Installing OWML...");
@@ -717,6 +746,8 @@ public class OuterWildsManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        outerWildsPath = GetOuterWildsPath();
     }
 
     void LaunchOuterWilds()
@@ -978,16 +1009,8 @@ public class OuterWildsManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Outer Wilds"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Outer Wilds"),
-            @"D:\Steam\steamapps\common\Outer Wilds",
-            @"D:\SteamLibrary\steamapps\common\Outer Wilds",
-            @"D:\steamapps\common\Outer Wilds",
-            @"E:\Steam\steamapps\common\Outer Wilds",
-            @"E:\SteamLibrary\steamapps\common\Outer Wilds",
-            @"E:\steamapps\common\Outer Wilds",
-            @"E:\Program Files (x86)\steamapps\common\Outer Wilds",
-            @"E:\Program Files\steamapps\common\Outer Wilds",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -995,47 +1018,47 @@ public class OuterWildsManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string outerWildsPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Outer Wilds");
-                    if (Directory.Exists(outerWildsPath))
-                        return outerWildsPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    outerWildsPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Outer Wilds");
-                    if (Directory.Exists(outerWildsPath))
-                        return outerWildsPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    outerWildsPath = Path.Combine(drive.Name, "steamapps", "common", "Outer Wilds");
-                    if (Directory.Exists(outerWildsPath))
-                        return outerWildsPath;
-
-                    outerWildsPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Outer Wilds");
-                    if (Directory.Exists(outerWildsPath))
-                        return outerWildsPath;
-
-                    outerWildsPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Outer Wilds");
-                    if (Directory.Exists(outerWildsPath))
-                        return outerWildsPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

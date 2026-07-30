@@ -1,10 +1,12 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using System;
-using System.IO;
 using System.Collections;
 using System.Diagnostics;
+using System.IO;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.Tilemaps;
+using UnityEngine.UI;
 
 public class OkamiHDManualDL : MonoBehaviour
 {
@@ -14,6 +16,9 @@ public class OkamiHDManualDL : MonoBehaviour
     public FileDownloader.FileData okamihdApworld;
     public FileDownloader.FileData okamihdWOLF;
     public FileDownloader.FileData okamihdAP;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Okami";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installWOLFToggle;
@@ -51,6 +56,7 @@ public class OkamiHDManualDL : MonoBehaviour
         public string okamihdApworld;
         public string okamihdWOLF;
         public string okamihdAP;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -158,20 +164,28 @@ public class OkamiHDManualDL : MonoBehaviour
     {
         okamiPath = GetOkamiPath();
 
-        if (string.IsNullOrEmpty(okamiPath))
-        {
-            ShowInfo("Okami not found in Steam. Please check installation.");
-            return;
-        }
-
         bool wolf = installWOLFToggle != null && installWOLFToggle.isOn;
         bool ap = installAPToggle != null && installAPToggle.isOn;
         bool apworld = installAPWorldToggle != null && installAPWorldToggle.isOn;
+
+        bool needsGamePath = wolf || ap;
+
+        if (needsGamePath && (string.IsNullOrEmpty(okamiPath) || !Directory.Exists(okamiPath)))
+        {
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
 
         int count =
             (wolf ? 1 : 0) +
             (ap ? 1 : 0) +
             (apworld ? 1 : 0);
+
+        if (apworld && count == 1)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
 
         if (wolf && count == 1)
         {
@@ -185,7 +199,32 @@ public class OkamiHDManualDL : MonoBehaviour
             return;
         }
 
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Okami HD...");
+            LaunchOkami();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -516,19 +555,21 @@ public class OkamiHDManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
         }
-    }
 
-    int adofaiApworldIndexSafe(FileDownloader.FileData fd)
-    {
         try
         {
-            string url = fd.url ?? "";
-            int idx = url.LastIndexOf('/');
-            if (idx >= 0 && idx + 1 < url.Length) return idx + 1;
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
         }
-        catch { }
-        return 0;
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
+        }
     }
 
     IEnumerator DownloadFile(string url, string savePath)
@@ -625,6 +666,8 @@ public class OkamiHDManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        okamiPath = GetOkamiPath();
     }
 
     Process LaunchOkami()
@@ -786,20 +829,6 @@ public class OkamiHDManualDL : MonoBehaviour
         catch { }
     }
 
-    void CopyDirectory(string source, string target)
-    {
-        Directory.CreateDirectory(target);
-
-        foreach (string dir in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
-            Directory.CreateDirectory(dir.Replace(source, target));
-
-        foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
-        {
-            string destination = file.Replace(source, target);
-            File.Copy(file, destination, true);
-        }
-    }
-
     void MoveDirectory(string source, string target)
     {
         if (!Directory.Exists(source))
@@ -957,18 +986,8 @@ public class OkamiHDManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Okami"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Okami"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Okami HD"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Okami HD"),
-            @"D:\Steam\steamapps\common\Okami",
-            @"D:\SteamLibrary\steamapps\common\Okami",
-            @"D:\steamapps\common\Okami",
-            @"E:\Steam\steamapps\common\Okami",
-            @"E:\SteamLibrary\steamapps\common\Okami",
-            @"E:\steamapps\common\Okami",
-            @"E:\Program Files (x86)\steamapps\common\Okami",
-            @"E:\Program Files\steamapps\common\Okami",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -977,72 +996,46 @@ public class OkamiHDManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Okami (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string subPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Okami");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Okami (Steam) at: " + subPath);
-                        return subPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    subPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Okami HD");
-                    if (Directory.Exists(subPath))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Okami (Steam) at: " + subPath);
-                        return subPath;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    subPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Okami");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Okami (Steam) at: " + subPath);
-                        return subPath;
-                    }
-
-                    subPath = Path.Combine(drive.Name, "steamapps", "common", "Okami");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Okami (Steam) at: " + subPath);
-                        return subPath;
-                    }
-
-                    subPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Okami");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Okami (Steam) at: " + subPath);
-                        return subPath;
-                    }
-
-                    subPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Okami");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Okami (Steam) at: " + subPath);
-                        return subPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Okami (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

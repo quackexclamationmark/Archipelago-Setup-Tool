@@ -1,12 +1,13 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.IO;
+using System;
 using System.Collections;
 using System.Diagnostics;
-using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class TOEMManualDL : MonoBehaviour
 {
@@ -21,6 +22,10 @@ public class TOEMManualDL : MonoBehaviour
     public Button steamButton;
     public Button epicButton;
     public TextMeshProUGUI platformStatus;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "TOEM";
+    public string epicGameFolderName = "TOEM";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installTOEMApworldToggle;
@@ -60,6 +65,8 @@ public class TOEMManualDL : MonoBehaviour
         public string toemAP;
         public string toemBepInEx;
         public string toemApworld;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     void Start()
@@ -181,24 +188,20 @@ public class TOEMManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        // wait for remote config if necessary
-        if (!configLoaded)
-        {
-            ShowInfo("Loading configuration, please wait...");
-            StartCoroutine(WaitForConfigThenSetup());
-            return;
-        }
-
-        if (string.IsNullOrEmpty(toemPath))
-        {
-            string platform = isEpic ? "Epic" : "Steam";
-            ShowInfo("TOEM path not found. Please check " + platform + " installation.");
-            return;
-        }
+        toemPath = GetTOEMPath();
 
         bool apworld = installTOEMApworldToggle == null || installTOEMApworldToggle.isOn;
         bool bepinex = installTOEMBepInExToggle != null && installTOEMBepInExToggle.isOn;
         bool apmod = installTOEMAPToggle != null && installTOEMAPToggle.isOn;
+
+        bool needsGamePath = bepinex || apmod;
+
+        if (needsGamePath && string.IsNullOrEmpty(toemPath))
+        {
+            string platform = isEpic ? "Epic" : "Steam";
+            ShowInfo("Game not found on " + platform + ". Please check installation.");
+            return;
+        }
 
         int count = (apworld ? 1 : 0) + (bepinex ? 1 : 0) + (apmod ? 1 : 0);
 
@@ -206,16 +209,31 @@ public class TOEMManualDL : MonoBehaviour
         if (bepinex && count == 1) { StartCoroutine(BepInExOnlyFlow()); return; }
         if (apmod && count == 1) { StartCoroutine(APModOnlyFlow()); return; }
 
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
         StartCoroutine(InstallFlow());
     }
 
-    IEnumerator WaitForConfigThenSetup()
+    IEnumerator APWorldOnlyFlow()
     {
-        while (!configLoaded)
-            yield return new WaitForSeconds(0.1f);
+        yield return new WaitUntil(() => configLoaded);
 
-        CloseInfoPanel();
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            LaunchTOEM();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -292,7 +310,6 @@ public class TOEMManualDL : MonoBehaviour
 
     IEnumerator InstallFlow()
     {
-        // wait for config loaded
         yield return new WaitUntil(() => configLoaded);
 
         ShowInfo("Starting installation...");
@@ -327,7 +344,6 @@ public class TOEMManualDL : MonoBehaviour
             string extractPath = Path.Combine(Application.persistentDataPath, "TOEMAPTemp");
             yield return downloader.DownloadAndExtract(toemAP, Application.persistentDataPath, extractPath);
 
-            // Handle archive that creates a single top folder
             string sourceRoot = extractPath;
             try
             {
@@ -338,7 +354,6 @@ public class TOEMManualDL : MonoBehaviour
             }
             catch { }
 
-            // Move content to plugins and rename to TOEMArchipelago
             string targetDir = Path.Combine(pluginsPath, "TOEMArchipelago");
             Directory.CreateDirectory(targetDir);
             MoveDirectory(sourceRoot, targetDir);
@@ -355,19 +370,6 @@ public class TOEMManualDL : MonoBehaviour
         }
     }
 
-    IEnumerator APWorldOnlyFlow()
-    {
-        yield return new WaitUntil(() => configLoaded);
-
-        ShowInfo("Installing AP World...");
-        yield return new WaitForSeconds(1f);
-        CloseInfoPanel();
-
-        yield return InstallAPWorld();
-
-        CreateVersionFile(toemAP.url, toemBepInEx.url, toemApworld.url);
-        ShowInfo("AP World installed successfully!");
-    }
 
     IEnumerator BepInExOnlyFlow()
     {
@@ -425,7 +427,6 @@ public class TOEMManualDL : MonoBehaviour
         ShowInfo("TOEM AP Client installed successfully!");
     }
 
-    // Installs the .apworld into Archipelago/custom_worlds (not into plugins)
     IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
@@ -506,6 +507,20 @@ public class TOEMManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -527,7 +542,6 @@ public class TOEMManualDL : MonoBehaviour
         }
     }
 
-    // LaunchTOEM: accepts asHelper flag to mark the process as killable by CloseTOEM()
     void LaunchTOEM(bool asHelper = false)
     {
         string exePath = Path.Combine(toemPath, "TOEM.exe");
@@ -767,6 +781,9 @@ public class TOEMManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        toemPath = GetTOEMPath();
+        UpdatePlatformStatus();
     }
 
     string GetTOEMPath()
@@ -781,56 +798,8 @@ public class TOEMManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "TOEM"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "TOEM"),
-            @"D:\Steam\steamapps\common\TOEM",
-            @"D:\SteamLibrary\steamapps\common\TOEM",
-            @"C:\Program Files (x86)\steamapps\common\TOEM",
-            @"C:\Program Files\steamapps\common\TOEM",
-        };
-
-        foreach (string p in quickPaths)
-        {
-            try { if (Directory.Exists(p)) return p; } catch { }
-        }
-
-        try
-        {
-            var drives = System.IO.DriveInfo.GetDrives();
-            foreach (var drive in drives)
-            {
-                if (drive.DriveType != System.IO.DriveType.Fixed) continue;
-                try
-                {
-                    string tryPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "TOEM");
-                    if (Directory.Exists(tryPath)) return tryPath;
-                    tryPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "TOEM");
-                    if (Directory.Exists(tryPath)) return tryPath;
-                    tryPath = Path.Combine(drive.Name, "steamapps", "common", "TOEM");
-                    if (Directory.Exists(tryPath)) return tryPath;
-                }
-                catch { }
-            }
-        }
-        catch { }
-
-        UnityEngine.Debug.LogWarning("TOEM (Steam) not found.");
-        return "";
-    }
-
-    string GetTOEMEpicPath()
-    {
-        string[] quickPaths = new string[]
-        {
-            @"C:\Program Files\Epic Games\TOEM",
-            @"D:\Epic Games\TOEM",
-            @"E:\Epic Games\TOEM",
-            @"C:\Games\Epic\TOEM",
-            @"D:\Games\Epic\TOEM",
-            @"E:\Games\Epic\TOEM",
-            @"C:\Epic\TOEM",
-            @"D:\Epic\TOEM",
-            @"E:\Epic\TOEM",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -839,7 +808,64 @@ public class TOEMManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found TOEM (Epic) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
+                    return path;
+                }
+            }
+            catch { }
+        }
+
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
+        return "";
+    }
+
+    string GetTOEMEpicPath()
+    {
+        string[] quickPaths = new string[]
+        {
+            @"C:\Program Files\Epic Games\TOEM",
+            @"C:\Games\Epic\TOEM",
+        };
+
+        foreach (string path in quickPaths)
+        {
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
                     return path;
                 }
             }
@@ -861,7 +887,7 @@ public class TOEMManualDL : MonoBehaviour
                     try
                     {
                         string content = File.ReadAllText(manifest);
-                        if (content.Contains("TOEM"))
+                        if (content.Contains("TOEM") || content.Contains("TOEM"))
                         {
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
                             System.Text.RegularExpressions.Match match = regex.Match(content);
@@ -871,7 +897,7 @@ public class TOEMManualDL : MonoBehaviour
                                 string epicPath = match.Groups[1].Value;
                                 if (Directory.Exists(epicPath))
                                 {
-                                    UnityEngine.Debug.Log("Found TOEM (Epic) at: " + epicPath);
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
                                     return epicPath;
                                 }
                             }
@@ -883,37 +909,39 @@ public class TOEMManualDL : MonoBehaviour
         }
         catch { }
 
-        try
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "TOEM");
-                    if (Directory.Exists(epicPath))
-                    {
-                        UnityEngine.Debug.Log("Found TOEM (Epic) at: " + epicPath);
-                        return epicPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "TOEM");
-                    if (Directory.Exists(epicPath))
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found TOEM (Epic) at: " + epicPath);
-                        return epicPath;
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("TOEM (Epic) not found.");
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 }

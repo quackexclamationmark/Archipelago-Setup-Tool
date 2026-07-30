@@ -53,6 +53,10 @@ public class RoR2ManualDL : MonoBehaviour
     public Button epicButton;
     public TextMeshProUGUI platformStatus;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Risk of Rain 2";
+    public string epicGameFolderName = "RiskofRain2";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installBepInExToggle;
     public Toggle installArchipelagoToggle;
@@ -126,6 +130,8 @@ public class RoR2ManualDL : MonoBehaviour
         public string ror2APIItems;
         public string ror2APIElites;
         public string ror2APISceneAsset;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     void Start()
@@ -956,6 +962,9 @@ public class RoR2ManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        ror2Path = GetRoR2Path();
+        UpdatePlatformStatus();
     }
 
     void LaunchRoR2()
@@ -1145,16 +1154,8 @@ public class RoR2ManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Risk of Rain 2"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Risk of Rain 2"),
-            @"D:\Steam\steamapps\common\Risk of Rain 2",
-            @"D:\SteamLibrary\steamapps\common\Risk of Rain 2",
-            @"D:\steamapps\common\Risk of Rain 2",
-            @"E:\Steam\steamapps\common\Risk of Rain 2",
-            @"E:\SteamLibrary\steamapps\common\Risk of Rain 2",
-            @"E:\steamapps\common\Risk of Rain 2",
-            @"E:\Program Files (x86)\steamapps\common\Risk of Rain 2",
-            @"E:\Program Files\steamapps\common\Risk of Rain 2",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -1163,82 +1164,56 @@ public class RoR2ManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Risk of Rain 2 (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string ror2Path = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Risk of Rain 2");
-                    if (Directory.Exists(ror2Path))
-                    {
-                        UnityEngine.Debug.Log("Found Risk of Rain 2 (Steam) at: " + ror2Path);
-                        return ror2Path;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    ror2Path = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Risk of Rain 2");
-                    if (Directory.Exists(ror2Path))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Risk of Rain 2 (Steam) at: " + ror2Path);
-                        return ror2Path;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    ror2Path = Path.Combine(drive.Name, "steamapps", "common", "Risk of Rain 2");
-                    if (Directory.Exists(ror2Path))
-                    {
-                        UnityEngine.Debug.Log("Found Risk of Rain 2 (Steam) at: " + ror2Path);
-                        return ror2Path;
-                    }
-
-                    ror2Path = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Risk of Rain 2");
-                    if (Directory.Exists(ror2Path))
-                    {
-                        UnityEngine.Debug.Log("Found Risk of Rain 2 (Steam) at: " + ror2Path);
-                        return ror2Path;
-                    }
-
-                    ror2Path = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Risk of Rain 2");
-                    if (Directory.Exists(ror2Path))
-                    {
-                        UnityEngine.Debug.Log("Found Risk of Rain 2 (Steam) at: " + ror2Path);
-                        return ror2Path;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Risk of Rain 2 (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
     string GetRoR2EpicPath()
     {
         string[] quickPaths = new string[]
-        {
-        @"C:\Program Files\Epic Games\RiskofRain2",
-        @"D:\Epic Games\RiskofRain2",
-        @"E:\Epic Games\RiskofRain2",
-        @"C:\Games\Epic\RiskofRain2",
-        @"D:\Games\Epic\RiskofRain2",
-        @"E:\Games\Epic\RiskofRain2",
-        @"C:\Epic\RiskofRain2",
-        @"D:\Epic\RiskofRain2",
-        @"E:\Epic\RiskofRain2",
-        };
+       {
+            @"C:\Program Files\Epic Games\RiskofRain2",
+            @"C:\Games\Epic\RiskofRain2",
+       };
 
         foreach (string path in quickPaths)
         {
@@ -1246,14 +1221,13 @@ public class RoR2ManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Risk of Rain 2 (Epic) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        // Cherche dans Epic Games Launcher directory
         try
         {
             string epicBaseDir = Path.Combine(
@@ -1263,16 +1237,14 @@ public class RoR2ManualDL : MonoBehaviour
 
             if (Directory.Exists(epicBaseDir))
             {
-                // Cherche le manifest pour Risk of Rain 2
                 string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
                 foreach (string manifest in manifests)
                 {
                     try
                     {
                         string content = File.ReadAllText(manifest);
-                        if (content.Contains("Risk of Rain 2") || content.Contains("RiskOfRain2"))
+                        if (content.Contains("RiskofRain2") || content.Contains("RiskofRain2"))
                         {
-                            // Extract install location from manifest
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
                             System.Text.RegularExpressions.Match match = regex.Match(content);
 
@@ -1281,7 +1253,7 @@ public class RoR2ManualDL : MonoBehaviour
                                 string epicPath = match.Groups[1].Value;
                                 if (Directory.Exists(epicPath))
                                 {
-                                    UnityEngine.Debug.Log("Found Risk of Rain 2 (Epic) at: " + epicPath);
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
                                     return epicPath;
                                 }
                             }
@@ -1293,38 +1265,39 @@ public class RoR2ManualDL : MonoBehaviour
         }
         catch { }
 
-        // Scan all drives
-        try
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "Risk of Rain 2");
-                    if (Directory.Exists(epicPath))
-                    {
-                        UnityEngine.Debug.Log("Found Risk of Rain 2 (Epic) at: " + epicPath);
-                        return epicPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "Risk of Rain 2");
-                    if (Directory.Exists(epicPath))
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Risk of Rain 2 (Epic) at: " + epicPath);
-                        return epicPath;
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Risk of Rain 2 (Epic) not found.");
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 

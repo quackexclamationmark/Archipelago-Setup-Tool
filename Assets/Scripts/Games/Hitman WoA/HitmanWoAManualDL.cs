@@ -1,11 +1,13 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.IO;
+using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using TMPro;
+using UnityEngine;
+/*using UnityEngine.LightTransport;*/
+using UnityEngine.UI;
 
 public class HitmanWoAManualDL : MonoBehaviour
 {
@@ -20,6 +22,10 @@ public class HitmanWoAManualDL : MonoBehaviour
     public Button steamButton;
     public Button epicButton;
     public TextMeshProUGUI platformStatus;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "HITMAN 3";
+    public string epicGameFolderName = "HITMAN3";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installPeacockToggle;
@@ -65,6 +71,8 @@ public class HitmanWoAManualDL : MonoBehaviour
         public string hitmanwoaAP;
         public string hitmanwoaPeacock;
         public string hitmanwoaApworld;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     void Start()
@@ -273,39 +281,59 @@ public class HitmanWoAManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(gamePath))
+        gamePath = GetGamePath();
+
+        bool peacock = installPeacockToggle == null || installPeacockToggle.isOn;
+        bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
+        bool plugin = installPluginToggle == null || installPluginToggle.isOn;
+        bool needsGamePath = plugin || peacock || !apworld;
+
+        if (needsGamePath && string.IsNullOrEmpty(gamePath))
         {
-            string platform = isEpic ? "Epic Games" : "Steam";
-            ShowInfo("Game path not found. Please ensure HITMAN 3 is installed on " + platform + ".");
+            string platform = isEpic ? "Epic" : "Steam";
+            ShowInfo("Game not found on " + platform + ". Please check installation.");
             return;
         }
 
-        bool doPeacock = installPeacockToggle == null || installPeacockToggle.isOn;
-        bool doAPWorld = installAPWorldToggle == null || installAPWorldToggle.isOn;
-        bool doPlugin = installPluginToggle == null || installPluginToggle.isOn;
+        int count = (peacock ? 1 : 0) + (apworld ? 1 : 0) + (plugin ? 1 : 0);
 
-        int count = (doPeacock ? 1 : 0) + (doAPWorld ? 1 : 0) + (doPlugin ? 1 : 0);
-
-        // Individual flows when only one selected
-        if (doPlugin && !doPeacock && !doAPWorld && count == 1)
+        if (count == 0)
         {
-            StartCoroutine(PluginOnlyFlow());
+            ShowInfo("Please select at least one component to install.");
             return;
         }
 
-        if (doPeacock && !doPlugin && !doAPWorld && count == 1)
-        {
-            StartCoroutine(PeacockOnlyFlow());
-            return;
-        }
-
-        if (doAPWorld && !doPeacock && !doPlugin && count == 1)
+        if (apworld && count == 1)
         {
             StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
+        if (peacock && count == 1)
+        {
+            StartCoroutine(PeacockOnlyFlow());
+            return;
+        }
+
+        if (plugin && count == 1)
+        {
+            StartCoroutine(PluginOnlyFlow());
+            return;
+        }
+
         StartCoroutine(SetupWithTracking());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -506,20 +534,6 @@ public class HitmanWoAManualDL : MonoBehaviour
         SaveInstalledFilesManifest(currentManifest);
     }
 
-    IEnumerator APWorldOnlyFlow()
-    {
-        gamePath = GetGamePath();
-        if (string.IsNullOrEmpty(gamePath))
-            yield break;
-
-        currentManifest = currentManifest ?? new InstalledFilesManifest();
-        currentManifest.gameInstallPath = gamePath;
-
-        yield return InstallAPWorld();
-
-        SaveInstalledFilesManifest(currentManifest);
-    }
-
     IEnumerator InstallPeacock()
     {
         // wait for config to be loaded so hitmanPeacock.url is available
@@ -626,7 +640,6 @@ public class HitmanWoAManualDL : MonoBehaviour
 
     IEnumerator InstallAPWorld()
     {
-        // wait for config to be loaded so hitmanwoaApworld.url is available
         while (!configLoaded)
             yield return null;
 
@@ -636,7 +649,6 @@ public class HitmanWoAManualDL : MonoBehaviour
             yield break;
         }
 
-        // Extract filename
         string fileName = hitmanwoaApworld.fileName;
         if (string.IsNullOrEmpty(fileName))
         {
@@ -701,9 +713,21 @@ public class HitmanWoAManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
         }
 
-        yield return null;
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
+        }
     }
 
     IEnumerator StartPeacockServicesCoroutine()
@@ -962,6 +986,9 @@ public class HitmanWoAManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        gamePath = GetGamePath();
+        UpdatePlatformStatus();
     }
 
     void ApplyHitmanConfig()
@@ -1005,18 +1032,10 @@ public class HitmanWoAManualDL : MonoBehaviour
 
     string GetGamePathSteam()
     {
-        // Try likely locations first
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "HITMAN 3"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "HITMAN 3"),
-            @"D:\Steam\steamapps\common\HITMAN 3",
-            @"D:\SteamLibrary\steamapps\common\HITMAN 3",
-            @"D:\steamapps\common\HITMAN 3",
-            @"E:\Steam\steamapps\common\HITMAN 3",
-            @"E:\SteamLibrary\steamapps\common\HITMAN 3",
-            @"E:\steamapps\common\HITMAN 3",
-            @"E:\Program Files (x86)\steamapps\common\HITMAN 3",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -1024,56 +1043,57 @@ public class HitmanWoAManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string gamePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "HITMAN 3");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    gamePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "HITMAN 3");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    gamePath = Path.Combine(drive.Name, "steamapps", "common", "HITMAN 3");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
     string GetGamePathEpic()
     {
         string[] quickPaths = new string[]
-        {
-        @"C:\Program Files\Epic Games\HITMAN3",
-        @"D:\Epic Games\HITMAN3",
-        @"E:\Epic Games\HITMAN3",
-        @"C:\Games\Epic\HITMAN3",
-        @"D:\Games\Epic\HITMAN3",
-        @"E:\Games\Epic\HITMAN3",
-        @"C:\Epic\HITMAN3",
-        @"D:\Epic\HITMAN3",
-        @"E:\Epic\HITMAN3",
-        };
+       {
+            @"C:\Program Files\Epic Games\HITMAN3",
+            @"C:\Games\Epic\HITMAN3",
+       };
 
         foreach (string path in quickPaths)
         {
@@ -1081,45 +1101,83 @@ public class HitmanWoAManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found HITMAN 3 (Epic) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        // Scan all drives
         try
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+            string epicBaseDir = Path.Combine(
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonApplicationData),
+                "Epic", "EpicGamesLauncher", "Data", "Manifests"
+            );
 
-            foreach (System.IO.DriveInfo drive in drives)
+            if (Directory.Exists(epicBaseDir))
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
-
-                try
+                string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
+                foreach (string manifest in manifests)
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "HITMAN3");
-                    if (Directory.Exists(epicPath))
+                    try
                     {
-                        UnityEngine.Debug.Log("Found HITMAN 3 (Epic) at: " + epicPath);
-                        return epicPath;
-                    }
+                        string content = File.ReadAllText(manifest);
+                        if (content.Contains("HITMAN3") || content.Contains("HITMAN3"))
+                        {
+                            System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
+                            System.Text.RegularExpressions.Match match = regex.Match(content);
 
-                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "HITMAN3");
-                    if (Directory.Exists(epicPath))
-                    {
-                        UnityEngine.Debug.Log("Found HITMAN 3 (Epic) at: " + epicPath);
-                        return epicPath;
+                            if (match.Success)
+                            {
+                                string epicPath = match.Groups[1].Value;
+                                if (Directory.Exists(epicPath))
+                                {
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
+                                    return epicPath;
+                                }
+                            }
+                        }
                     }
+                    catch { }
                 }
-                catch { }
             }
         }
         catch { }
 
-        UnityEngine.Debug.LogWarning("HITMAN 3 (Epic) not found.");
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 }

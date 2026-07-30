@@ -84,7 +84,6 @@ public class SHARManualDL : MonoBehaviour
 
     void Start()
     {
-        // Setup listeners
         if (haveGameToggle != null)
             haveGameToggle.onValueChanged.AddListener(OnHaveGameToggled);
         if (noGameToggle != null)
@@ -299,13 +298,32 @@ public class SHARManualDL : MonoBehaviour
         bool haveGameToggleActive = haveGameToggle != null && haveGameToggle.isOn;
         bool noGameToggleActive = noGameToggle != null && noGameToggle.isOn;
 
-        if (!haveGameToggleActive && !noGameToggleActive)
+        bool installModLauncher = installModLauncherToggle != null && installModLauncherToggle.isOn;
+        bool installRandomizerAndMod = installRandomizerAndModToggle != null && installRandomizerAndModToggle.isOn;
+        bool installApworld = installApworldToggle != null && installApworldToggle.isOn;
+
+        int count =
+            (installModLauncher ? 1 : 0) +
+            (installRandomizerAndMod ? 1 : 0) +
+            (installApworld ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
+        bool needsGameChoice = installRandomizerAndMod || installModLauncher;
+
+        if (needsGameChoice && !haveGameToggleActive && !noGameToggleActive)
         {
             ShowInfo("Please select if you have the game or not.");
             return;
         }
 
-        if (string.IsNullOrEmpty(selectedGamePath))
+        bool needsGamePath = installRandomizerAndMod;
+
+        if (needsGamePath && string.IsNullOrEmpty(selectedGamePath))
         {
             ShowInfo("Please select a game directory.");
             return;
@@ -363,7 +381,6 @@ public class SHARManualDL : MonoBehaviour
         }
         launchedProcesses.Clear();
 
-        // Arrêter tous les coroutines
         StopAllCoroutines();
 
         CloseInfoPanel();
@@ -547,6 +564,20 @@ public class SHARManualDL : MonoBehaviour
         catch (System.Exception e)
         {
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 

@@ -22,6 +22,10 @@ public class FEZManualDL : MonoBehaviour
     public Button epicButton;
     public TextMeshProUGUI platformStatus;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "FEZ";
+    public string epicGameFolderName = "Fez";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installHATToggle;
     public Toggle installFEZAPToggle;
@@ -58,6 +62,8 @@ public class FEZManualDL : MonoBehaviour
         public string fezHAT;
         public string fezAP;
         public string fezApworld;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     void Start()
@@ -229,14 +235,85 @@ public class FEZManualDL : MonoBehaviour
     {
         fezPath = GetFezPath();
 
-        if (string.IsNullOrEmpty(fezPath))
+        bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
+        bool hat = installHATToggle == null || installHATToggle.isOn;
+        bool ap = installFEZAPToggle == null || installFEZAPToggle.isOn;
+        bool needsGamePath = ap || hat || !apworld;
+
+        if (needsGamePath && string.IsNullOrEmpty(fezPath))
         {
             string platform = isEpic ? "Epic" : "Steam";
-            ShowInfo("FEZ not found in " + platform + ". Please check installation.");
+            ShowInfo("Game not found on " + platform + ". Please check installation.");
+            return;
+        }
+
+        int count =
+            (apworld ? 1 : 0) +
+            (hat ? 1 : 0) +
+            (ap ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
+        if (apworld && count == 1)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
+
+        if (ap && count == 1)
+        {
+            StartCoroutine(APModOnlyFlow());
             return;
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (launchAfterSetupToggle == null || launchAfterSetupToggle.isOn)
+        {
+            ShowInfo("Launching FEZ...");
+            LaunchFEZ();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
+    }
+
+    IEnumerator APModOnlyFlow()
+    {
+        fezPath = GetFezPath();
+
+        if (string.IsNullOrEmpty(fezPath))
+            yield break;
+
+        ShowInfo("Installing AP Mod...");
+        yield return InstallFEZAP();
+
+        CreateVersionFile(fezApworld.url, fezAP.url, fezHAT.url);
+
+        if (launchAfterSetupToggle == null || launchAfterSetupToggle.isOn)
+        {
+            ShowInfo("Launching FEZ...");
+            LaunchFEZ();
+            ShowInfo("Installation complete!");
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
     }
 
     private void ExecuteRevert()
@@ -609,6 +686,9 @@ public class FEZManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        fezPath = GetFezPath();
+        UpdatePlatformStatus();
     }
 
     // =========================================================
@@ -830,13 +910,8 @@ public class FEZManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "FEZ"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "FEZ"),
-            @"D:\Steam\steamapps\common\FEZ",
-            @"D:\SteamLibrary\steamapps\common\FEZ",
-            @"E:\Steam\steamapps\common\FEZ",
-            @"E:\SteamLibrary\steamapps\common\FEZ",
-            @"E:\steamapps\common\FEZ",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -845,60 +920,56 @@ public class FEZManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found FEZ (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            DriveInfo[] drives = DriveInfo.GetDrives();
-
-            foreach (DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string subPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "FEZ");
-                    if (Directory.Exists(subPath))
-                        return subPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    subPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "FEZ");
-                    if (Directory.Exists(subPath))
-                        return subPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    subPath = Path.Combine(drive.Name, "steamapps", "common", "FEZ");
-                    if (Directory.Exists(subPath))
-                        return subPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("FEZ (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
     string GetFezEpicPath()
     {
-        // Use "Fez" folder name for Epic installs (case requested)
         string[] quickPaths = new string[]
-        {
+       {
             @"C:\Program Files\Epic Games\Fez",
-            @"D:\Epic Games\Fez",
-            @"E:\Epic Games\Fez",
             @"C:\Games\Epic\Fez",
-            @"D:\Games\Epic\Fez",
-            @"E:\Games\Epic\Fez",
-            @"C:\Epic\Fez",
-            @"D:\Epic\Fez",
-            @"E:\Epic\Fez",
-        };
+       };
 
         foreach (string path in quickPaths)
         {
@@ -906,7 +977,7 @@ public class FEZManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Fez (Epic) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
                     return path;
                 }
             }
@@ -916,7 +987,7 @@ public class FEZManualDL : MonoBehaviour
         try
         {
             string epicBaseDir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonApplicationData),
                 "Epic", "EpicGamesLauncher", "Data", "Manifests"
             );
 
@@ -928,7 +999,7 @@ public class FEZManualDL : MonoBehaviour
                     try
                     {
                         string content = File.ReadAllText(manifest);
-                        if (content.Contains("Fez") || content.Contains("FEZ") || content.Contains("FEZ.exe") || content.Contains("MONOMODDED_FEZ"))
+                        if (content.Contains("Fez") || content.Contains("Fez"))
                         {
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
                             System.Text.RegularExpressions.Match match = regex.Match(content);
@@ -938,7 +1009,7 @@ public class FEZManualDL : MonoBehaviour
                                 string epicPath = match.Groups[1].Value;
                                 if (Directory.Exists(epicPath))
                                 {
-                                    UnityEngine.Debug.Log("Found Fez (Epic) at: " + epicPath);
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
                                     return epicPath;
                                 }
                             }
@@ -950,31 +1021,39 @@ public class FEZManualDL : MonoBehaviour
         }
         catch { }
 
-        try
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
         {
-            DriveInfo[] drives = DriveInfo.GetDrives();
-
-            foreach (DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "Fez");
-                    if (Directory.Exists(epicPath))
-                        return epicPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "Fez");
-                    if (Directory.Exists(epicPath))
-                        return epicPath;
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Fez (Epic) not found.");
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 

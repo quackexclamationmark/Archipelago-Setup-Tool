@@ -15,6 +15,9 @@ public class FuniManualDL : MonoBehaviour
     public FileDownloader.FileData funiraccoonAP;
     public FileDownloader.FileData funiraccoonApworld;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Funi Raccoon Game";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installModsToggle;
@@ -44,6 +47,7 @@ public class FuniManualDL : MonoBehaviour
     {
         public string funiraccoonAP;
         public string funiraccoonApworld;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -137,21 +141,18 @@ public class FuniManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (!configLoaded)
-        {
-            ShowInfo("Loading configuration, please wait...");
-            StartCoroutine(WaitForConfigThenSetup());
-            return;
-        }
-
-        if (string.IsNullOrEmpty(gamePath))
-        {
-            ShowInfo("Game path not found. Please check Steam installation.");
-            return;
-        }
+        gamePath = GetGamePath();
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool mods = installModsToggle == null || installModsToggle.isOn;
+
+        bool needsGamePath = mods;
+
+        if (needsGamePath && (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath)))
+        {
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
 
         int count = (apworld ? 1 : 0) + (mods ? 1 : 0);
 
@@ -167,7 +168,31 @@ public class FuniManualDL : MonoBehaviour
             return;
         }
 
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
         StartCoroutine(SetupFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     IEnumerator SetupFlow()
@@ -180,7 +205,6 @@ public class FuniManualDL : MonoBehaviour
 
     private void ExecuteRevert()
     {
-        // refresh game path in case it's changed
         gamePath = GetGamePath();
 
         if (string.IsNullOrEmpty(gamePath))
@@ -220,7 +244,6 @@ public class FuniManualDL : MonoBehaviour
                 }
             }
 
-            // Optionally remove leftover empty directories in the game path
             RemoveEmptyDirectories(gamePath);
 
             ShowInfo("Revert complete!");
@@ -253,19 +276,6 @@ public class FuniManualDL : MonoBehaviour
             }
         }
         catch { }
-    }
-
-    IEnumerator APWorldOnlyFlow()
-    {
-        gamePath = GetGamePath();
-
-        if (string.IsNullOrEmpty(gamePath))
-            yield break;
-
-        yield return InstallAPWorld();
-
-        if (launchGameToggle == null || launchGameToggle.isOn)
-            LaunchGame();
     }
 
     IEnumerator ModsOnlyFlow()
@@ -313,8 +323,6 @@ public class FuniManualDL : MonoBehaviour
             yield break;
         }
 
-        // Determine actual source root inside the extracted folder:
-        // If the zip has a single root folder, use it; otherwise use extractPath itself.
         string sourceRoot = extractPath;
         string[] directories = Directory.GetDirectories(extractPath);
         if (directories.Length == 1 && Directory.GetFiles(extractPath).Length == 0)
@@ -323,7 +331,6 @@ public class FuniManualDL : MonoBehaviour
             UnityEngine.Debug.Log("Single-folder zip detected, using root: " + sourceRoot);
         }
 
-        // Move all files/folders from sourceRoot into the game root
         MoveDirectory(sourceRoot, gamePath);
 
         SafeDeleteDirectory(extractPath);
@@ -376,7 +383,6 @@ public class FuniManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        // Targets to try for Archipelago custom_worlds
         string[] targetPaths = new string[]
         {
             Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
@@ -433,6 +439,20 @@ public class FuniManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -455,32 +475,6 @@ public class FuniManualDL : MonoBehaviour
             {
                 UnityEngine.Debug.Log("Download complete! File size: " + new System.IO.FileInfo(savePath).Length + " bytes");
             }
-        }
-    }
-
-    void SafeDeleteFile(string path)
-    {
-        StartCoroutine(DeleteFileForce(path));
-    }
-
-    IEnumerator DeleteFileForce(string path)
-    {
-        float timer = 0f;
-
-        while (File.Exists(path) && timer < 6f)
-        {
-            try
-            {
-                File.SetAttributes(path, FileAttributes.Normal);
-                File.Delete(path);
-
-                if (!File.Exists(path))
-                    yield break;
-            }
-            catch { }
-
-            timer += 0.5f;
-            yield return new WaitForSeconds(0.5f);
         }
     }
 
@@ -510,7 +504,8 @@ public class FuniManualDL : MonoBehaviour
         }
 
         configLoaded = true;
-        UnityEngine.Debug.Log("Config marked as loaded");
+
+        gamePath = GetGamePath();
     }
 
     void LaunchGame()
@@ -535,11 +530,8 @@ public class FuniManualDL : MonoBehaviour
             return;
         }
 
-        // Build override.cfg full path
         string overrideCfgPath = Path.Combine(currentGamePath, "override.cfg");
 
-        // Steam-style argument: --override-cfg "%STEAMAPPS%\common\Funi Raccoon Game\override.cfg"
-        // We'll pass the concrete path
         string args = $"--override-cfg \"{overrideCfgPath}\"";
 
         UnityEngine.Debug.Log("Starting process: " + exePath + " " + args);
@@ -595,7 +587,6 @@ public class FuniManualDL : MonoBehaviour
 
         Directory.CreateDirectory(target);
 
-        // Move all files preserving relative structure
         foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
         {
             string relative = file.Substring(source.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
@@ -609,10 +600,8 @@ public class FuniManualDL : MonoBehaviour
             File.Move(file, dest);
         }
 
-        // Also handle directories that may be empty after moving
         try
         {
-            // Remove any leftover empty directories in source
             foreach (string dir in Directory.GetDirectories(source, "*", SearchOption.AllDirectories).Reverse())
             {
                 try
@@ -641,79 +630,60 @@ public class FuniManualDL : MonoBehaviour
             infoPanel.SetActive(false);
     }
 
-    IEnumerator WaitForConfigThenSetup()
-    {
-        while (!configLoaded)
-            yield return new WaitForSeconds(0.1f);
-
-        CloseInfoPanel();
-        ShowConfirmation("Are you sure you want to install all the files?", "Setup");
-    }
-
     string GetGamePath()
     {
-        string gameFolderName = "Funi Raccoon Game";
-
         string[] quickPaths = new string[]
-        {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", gameFolderName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", gameFolderName),
-            @"D:\Steam\steamapps\common\" + gameFolderName,
-            @"D:\SteamLibrary\steamapps\common\" + gameFolderName,
-            @"D:\steamapps\common\" + gameFolderName,
-            @"E:\Steam\steamapps\common\" + gameFolderName,
-            @"E:\SteamLibrary\steamapps\common\" + gameFolderName,
-            @"E:\steamapps\common\" + gameFolderName,
-            @"E:\Program Files (x86)\steamapps\common\" + gameFolderName,
-            @"E:\Program Files\steamapps\common\" + gameFolderName,
-        };
+                {
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
+                };
 
         foreach (string path in quickPaths)
         {
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string gamePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", gameFolderName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    gamePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", gameFolderName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    gamePath = Path.Combine(drive.Name, "steamapps", "common", gameFolderName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    gamePath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", gameFolderName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    gamePath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", gameFolderName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 

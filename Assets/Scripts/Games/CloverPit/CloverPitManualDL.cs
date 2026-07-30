@@ -1,11 +1,12 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.IO;
+using Microsoft.Win32;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Win32;
+using System.IO;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class CloverPitManualDL : MonoBehaviour
 {
@@ -15,6 +16,9 @@ public class CloverPitManualDL : MonoBehaviour
     public FileDownloader.FileData cloverPitBepInEx;
     public FileDownloader.FileData cloverPitAP;
     public FileDownloader.FileData cloverPitAPWorld;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "CloverPit";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installBepInExToggle;
@@ -51,6 +55,7 @@ public class CloverPitManualDL : MonoBehaviour
         public string cloverpitBepInEx;
         public string cloverpitAP;
         public string cloverpitApworld;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -154,13 +159,53 @@ public class CloverPitManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(cloverPitPath))
+        cloverPitPath = GetCloverPitPath();
+
+        bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
+        bool ap = installArchipelagoToggle == null || installArchipelagoToggle.isOn;
+        bool bep = installBepInExToggle == null || installBepInExToggle.isOn;
+        bool needsGamePath = ap || bep;
+
+        if (needsGamePath && (string.IsNullOrEmpty(cloverPitPath) || !Directory.Exists(cloverPitPath)))
         {
-            ShowInfo("CloverPit path not found. Please check Steam installation.");
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
+
+        int count = (apworld ? 1 : 0) + (bep ? 1 : 0) + (ap ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
+        if (apworld && count == 1)
+        {
+            StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching CloverPit...");
+            LaunchCloverPit();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -190,12 +235,10 @@ public class CloverPitManualDL : MonoBehaviour
 
             ShowInfo("Removing AP mods...");
 
-            // Supprimer tous les dossiers AP, sauf les fichiers de version
             string[] pluginDirs = Directory.GetDirectories(pluginsPath);
             foreach (string dir in pluginDirs)
             {
                 string dirName = Path.GetFileName(dir);
-                // Ne pas supprimer les dossiers qui ne sont pas des mods AP
                 if (dirName.ToLower().Contains("archipelago") || dirName.ToLower().Contains("ap"))
                 {
                     SafeDeleteDirectory(dir);
@@ -208,7 +251,6 @@ public class CloverPitManualDL : MonoBehaviour
             return;
         }
 
-        // Full clean
         CleanupProcesses();
 
         ShowInfo("Cleaning BepInEx...");
@@ -245,15 +287,6 @@ public class CloverPitManualDL : MonoBehaviour
         }
 
         CreateVersionFile(cloverPitBepInEx.url, cloverPitAP.url, cloverPitAPWorld.url);
-
-        ShowInfo("Launching CloverPit...");
-        LaunchCloverPit();
-
-        yield return new WaitForSeconds(2f);
-
-        CloseCloverPit();
-
-        yield return new WaitForSeconds(1f);
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
@@ -316,12 +349,10 @@ public class CloverPitManualDL : MonoBehaviour
         string pluginsPath = Path.Combine(cloverPitPath, "BepInEx", "plugins");
         Directory.CreateDirectory(pluginsPath);
 
-        // Chercher le dossier BepInEx\Plugins dans l'archive
         string apPluginsSourcePath = Path.Combine(extractPath, "BepInEx", "Plugins");
 
         if (Directory.Exists(apPluginsSourcePath))
         {
-            // Copier tout le contenu de BepInEx\Plugins vers CloverPit\BepInEx\plugins
             string[] pluginDirs = Directory.GetDirectories(apPluginsSourcePath);
             foreach (string pluginDir in pluginDirs)
             {
@@ -357,17 +388,13 @@ public class CloverPitManualDL : MonoBehaviour
         while (!configLoaded)
             yield return null;
 
-        // Nom de l'apworld tel qu'on veut qu'il s'appelle dans custom_worlds
         string fileName = "cloverpit.apworld";
 
-        // Téléchargement dans un dossier temporaire sûr
         string tempDownloadPath = Path.Combine(Application.persistentDataPath, "APWorldTemp");
         Directory.CreateDirectory(tempDownloadPath);
 
-        // Télécharger l'.apworld dans le dossier temporaire
         yield return downloader.DownloadToFolder(cloverPitAPWorld, tempDownloadPath);
 
-        // Cherche le fichier .apworld
         string[] apWorldFiles = Directory.GetFiles(tempDownloadPath, "*.apworld");
 
         if (apWorldFiles.Length == 0)
@@ -453,6 +480,8 @@ public class CloverPitManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        cloverPitPath = GetCloverPitPath();
     }
 
     void LaunchCloverPit()
@@ -610,12 +639,8 @@ public class CloverPitManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "CloverPit"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "CloverPit"),
-            @"D:\Steam\steamapps\common\CloverPit",
-            @"D:\SteamLibrary\steamapps\common\CloverPit",
-            @"E:\Steam\steamapps\common\CloverPit",
-            @"E:\SteamLibrary\steamapps\common\CloverPit",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -624,42 +649,46 @@ public class CloverPitManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found CloverPit at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string cpPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "CloverPit");
-                    if (Directory.Exists(cpPath))
-                        return cpPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    cpPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "CloverPit");
-                    if (Directory.Exists(cpPath))
-                        return cpPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    cpPath = Path.Combine(drive.Name, "steamapps", "common", "CloverPit");
-                    if (Directory.Exists(cpPath))
-                        return cpPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("CloverPit not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 

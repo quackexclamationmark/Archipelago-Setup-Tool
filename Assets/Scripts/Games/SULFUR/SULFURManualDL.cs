@@ -16,6 +16,9 @@ public class SULFURManualDL : MonoBehaviour
     public FileDownloader.FileData sulfurBepInEx;
     public FileDownloader.FileData sulfurAP;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "SULFUR";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installBepInExToggle;
@@ -53,6 +56,7 @@ public class SULFURManualDL : MonoBehaviour
         public string sulfurApworld;
         public string sulfurBepInEx;
         public string sulfurAP;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -174,21 +178,47 @@ public class SULFURManualDL : MonoBehaviour
         bool apmod = installAPModToggle != null && installAPModToggle.isOn;
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
 
-        bool apworldOnly = apworld && !bepinex && !uilib && !apmod;
+        bool needsGamePath = bepinex || apmod;
 
-        if (!apworldOnly && string.IsNullOrEmpty(sulfurPath))
+        if (needsGamePath && (string.IsNullOrEmpty(sulfurPath) || !Directory.Exists(sulfurPath)))
         {
-            ShowInfo("SULFUR not found. Please check installation.");
+            ShowInfo("Game path not found. Please check your installation.");
             return;
         }
 
-        if (apworldOnly)
+        int count = (apworld ? 1 : 0) + (apmod ? 1 : 0) + (bepinex ? 1 : 0);
+
+        if (apworld && count == 1 && !bepinex)
         {
             StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            LaunchSULFUR();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -403,14 +433,6 @@ public class SULFURManualDL : MonoBehaviour
         }
     }
 
-    IEnumerator APWorldOnlyFlow()
-    {
-        ShowInfo("Installing APWorld...");
-        yield return InstallAPWorld();
-        ShowInfo("Installation complete!");
-        yield break;
-    }
-
     IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
@@ -511,6 +533,20 @@ public class SULFURManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -768,18 +804,10 @@ public class SULFURManualDL : MonoBehaviour
     string GetSULFURPath()
     {
         string[] quickPaths = new string[]
-        {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "SULFUR"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "SULFUR"),
-            @"D:\Steam\steamapps\common\SULFUR",
-            @"D:\SteamLibrary\steamapps\common\SULFUR",
-            @"D:\steamapps\common\SULFUR",
-            @"E:\Steam\steamapps\common\SULFUR",
-            @"E:\SteamLibrary\steamapps\common\SULFUR",
-            @"E:\steamapps\common\SULFUR",
-            @"E:\Program Files (x86)\steamapps\common\SULFUR",
-            @"E:\Program Files\steamapps\common\SULFUR",
-        };
+                {
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
+                };
 
         foreach (string path in quickPaths)
         {
@@ -787,70 +815,46 @@ public class SULFURManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found SULFUR (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Look for Steam\steamapps
-                    string subPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "SULFUR");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found SULFUR (Steam) at: " + subPath);
-                        return subPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Look for SteamLibrary\steamapps
-                    subPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "SULFUR");
-                    if (Directory.Exists(subPath))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found SULFUR (Steam) at: " + subPath);
-                        return subPath;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Look for steamapps at the root of the drive
-                    subPath = Path.Combine(drive.Name, "steamapps", "common", "SULFUR");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found SULFUR (Steam) at: " + subPath);
-                        return subPath;
-                    }
-
-                    // Look in Program Files (x86)\steamapps
-                    subPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "SULFUR");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found SULFUR (Steam) at: " + subPath);
-                        return subPath;
-                    }
-
-                    // Look in Program Files\steamapps
-                    subPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "SULFUR");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found SULFUR (Steam) at: " + subPath);
-                        return subPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("SULFUR (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
@@ -880,5 +884,7 @@ public class SULFURManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        sulfurPath = GetSULFURPath();
     }
 }

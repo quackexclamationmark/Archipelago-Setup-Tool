@@ -14,6 +14,9 @@ public class PPDSManualDL : MonoBehaviour
     public FileDownloader.FileData apMod;
     public FileDownloader.FileData melonLoader;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Placid Plastic Duck Simulator";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
@@ -49,6 +52,7 @@ public class PPDSManualDL : MonoBehaviour
         public string ppdsAP;
         public string ppdsMelonLoader;
         public string ppdsApworld;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -130,23 +134,45 @@ public class PPDSManualDL : MonoBehaviour
 
     void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(ppdsPath))
+        ppdsPath = GetPPDSPath();
+
+        bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
+        bool melonloader = installMelonLoaderToggle != null && installMelonLoaderToggle.isOn;
+        bool apmod = installAPModToggle != null && installAPModToggle.isOn;
+
+        bool needsGamePath = melonloader || apmod;
+
+        if (needsGamePath && (string.IsNullOrEmpty(ppdsPath) || !Directory.Exists(ppdsPath)))
         {
-            ShowInfo("PPDS path not found. Please check your Steam installation.");
+            ShowInfo("Game path not found. Please check your installation.");
             return;
         }
 
-        bool apworldInstall = installAPWorldToggle == null || installAPWorldToggle.isOn;
-        bool melonloaderInstall = installMelonLoaderToggle != null && installMelonLoaderToggle.isOn;
-        bool apmodInstall = installAPModToggle != null && installAPModToggle.isOn;
+        int count = (apworld ? 1 : 0) + (melonloader ? 1 : 0) + (apmod ? 1 : 0);
 
-        int count = (apworldInstall ? 1 : 0) + (melonloaderInstall ? 1 : 0) + (apmodInstall ? 1 : 0);
-
-        if (apworldInstall && count == 1) { StartCoroutine(APWorldOnlyFlow()); return; }
-        if (melonloaderInstall && count == 1) { StartCoroutine(MelonLoaderOnlyFlow()); return; }
-        if (apmodInstall && count == 1) { StartCoroutine(APModOnlyFlow()); return; }
+        if (apworld && count == 1) { StartCoroutine(APWorldOnlyFlow()); return; }
+        if (melonloader && count == 1) { StartCoroutine(MelonLoaderOnlyFlow()); return; }
+        if (apmod && count == 1) { StartCoroutine(APModOnlyFlow()); return; }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            LaunchPPDS();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     void ExecuteRevert()
@@ -361,6 +387,20 @@ public class PPDSManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -463,14 +503,6 @@ public class PPDSManualDL : MonoBehaviour
         UnityEngine.Debug.Log("END CopyMelonLoaderFiles");
     }
 
-    IEnumerator APWorldOnlyFlow()
-    {
-        ppdsPath = GetPPDSPath();
-        if (string.IsNullOrEmpty(ppdsPath)) yield break;
-        yield return InstallAPWorld();
-        ShowInfo("APWorld installed successfully!");
-    }
-
     IEnumerator MelonLoaderOnlyFlow()
     {
         ShowInfo("Installing MelonLoader...");
@@ -515,6 +547,8 @@ public class PPDSManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        ppdsPath = GetPPDSPath();
     }
 
     void LaunchPPDS()
@@ -699,44 +733,58 @@ public class PPDSManualDL : MonoBehaviour
 
     string GetPPDSSteamPath()
     {
-        string gameFolder = "Placid Plastic Duck Simulator";
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", gameFolder),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", gameFolder),
-            @"D:\Steam\steamapps\common\" + gameFolder,
-            @"D:\SteamLibrary\steamapps\common\" + gameFolder,
-            @"E:\Steam\steamapps\common\" + gameFolder,
-            @"E:\SteamLibrary\steamapps\common\" + gameFolder,
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
         {
-            try { if (Directory.Exists(path)) { UnityEngine.Debug.Log("Found PPDS (Steam) at: " + path); return path; } }
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
+                    return path;
+                }
+            }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed) continue;
-                try
-                {
-                    string p = Path.Combine(drive.Name, "Steam", "steamapps", "common", gameFolder);
-                    if (Directory.Exists(p)) { UnityEngine.Debug.Log("Found PPDS (Steam) at: " + p); return p; }
-                    p = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", gameFolder);
-                    if (Directory.Exists(p)) { UnityEngine.Debug.Log("Found PPDS (Steam) at: " + p); return p; }
-                    p = Path.Combine(drive.Name, "steamapps", "common", gameFolder);
-                    if (Directory.Exists(p)) { UnityEngine.Debug.Log("Found PPDS (Steam) at: " + p); return p; }
-                }
-                catch { }
-            }
-        }
-        catch { }
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-        UnityEngine.Debug.LogWarning("PPDS (Steam) not found.");
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

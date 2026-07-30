@@ -15,6 +15,9 @@ public class PeaksOfYoreManualDL : MonoBehaviour
     public FileDownloader.FileData apMod;
     public FileDownloader.FileData bepInEx;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Peaks of Yore";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
@@ -38,6 +41,7 @@ public class PeaksOfYoreManualDL : MonoBehaviour
     public TextMeshProUGUI infoText;
     public Button infoOkButton;
 
+    private Process poyProcess;
     private string peaksOfYorePath;
     private string pendingAction;
     private bool pendingFullCleanConfirmation = false;
@@ -50,6 +54,7 @@ public class PeaksOfYoreManualDL : MonoBehaviour
         public string peaksofyoreAP;
         public string peaksofyoreBepInEx;
         public string peaksofyoreApworld;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -144,20 +149,29 @@ public class PeaksOfYoreManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(peaksOfYorePath))
-        {
-            ShowInfo("Peaks of Yore path not found. Please check Steam installation.");
-            return;
-        }
+        peaksOfYorePath = GetPeaksOfYorePath();
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
         bool apmod = installAPModToggle != null && installAPModToggle.isOn;
+        bool needsGamePath = bep || apmod;
+
+        if (needsGamePath && (string.IsNullOrEmpty(peaksOfYorePath) || !Directory.Exists(peaksOfYorePath)))
+        {
+            ShowInfo("Game path not found. Please check Steam installation.");
+            return;
+        }
 
         int count =
             (apworld ? 1 : 0) +
             (bep ? 1 : 0) +
             (apmod ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
 
         if (apworld && count == 1)
         {
@@ -180,6 +194,25 @@ public class PeaksOfYoreManualDL : MonoBehaviour
         StartCoroutine(InstallFlow());
     }
 
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Peaks of Yore...");
+            LaunchPeaksOfYore();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
+    }
+
     private void ExecuteRevert()
     {
         peaksOfYorePath = GetPeaksOfYorePath();
@@ -197,6 +230,8 @@ public class PeaksOfYoreManualDL : MonoBehaviour
             ShowInfo("Please select at least one revert option.");
             return;
         }
+
+        CloseGame();
 
         if (removeAP)
         {
@@ -323,7 +358,8 @@ public class PeaksOfYoreManualDL : MonoBehaviour
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
-            ShowInfo("You can now launch Peaks of Yore!");
+            ShowInfo("Launching Peaks of Yore...");
+            LaunchPeaksOfYore();
         }
 
         yield return null;
@@ -427,6 +463,20 @@ public class PeaksOfYoreManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -493,18 +543,6 @@ public class PeaksOfYoreManualDL : MonoBehaviour
         SafeDeleteDirectory(extractPath);
     }
 
-    IEnumerator APWorldOnlyFlow()
-    {
-        peaksOfYorePath = GetPeaksOfYorePath();
-
-        if (string.IsNullOrEmpty(peaksOfYorePath))
-            yield break;
-
-        yield return InstallAPWorld();
-
-        ShowInfo("APWorld installed successfully!");
-    }
-
     IEnumerator BepInExOnlyFlow()
     {
         ShowInfo("Installing BepInEx...");
@@ -514,7 +552,8 @@ public class PeaksOfYoreManualDL : MonoBehaviour
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
-            ShowInfo("You can now launch Peaks of Yore!");
+            ShowInfo("Launching Peaks of Yore...");
+            LaunchPeaksOfYore();
         }
         else
         {
@@ -538,7 +577,8 @@ public class PeaksOfYoreManualDL : MonoBehaviour
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
-            ShowInfo("AP Mod installed successfully!");
+            ShowInfo("Launching Peaks of Yore...");
+            LaunchPeaksOfYore();
         }
         else
         {
@@ -572,6 +612,32 @@ public class PeaksOfYoreManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        peaksOfYorePath = GetPeaksOfYorePath();
+    }
+
+    void LaunchPeaksOfYore()
+    {
+        string exePath = Path.Combine(peaksOfYorePath, "Peaks of Yore.exe");
+
+        if (File.Exists(exePath))
+            poyProcess = Process.Start(exePath);
+        else
+            UnityEngine.Debug.LogWarning("Peaks of Yore.exe not found at: " + exePath);
+    }
+
+    void CloseGame()
+    {
+        try
+        {
+            if (poyProcess != null && !poyProcess.HasExited)
+            {
+                poyProcess.Kill();
+                poyProcess.Dispose();
+                poyProcess = null;
+            }
+        }
+        catch { }
     }
 
     void SafeDeleteFile(string path)
@@ -785,16 +851,8 @@ public class PeaksOfYoreManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Peaks of Yore"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Peaks of Yore"),
-            @"D:\Steam\steamapps\common\Peaks of Yore",
-            @"D:\SteamLibrary\steamapps\common\Peaks of Yore",
-            @"D:\steamapps\common\Peaks of Yore",
-            @"E:\Steam\steamapps\common\Peaks of Yore",
-            @"E:\SteamLibrary\steamapps\common\Peaks of Yore",
-            @"E:\steamapps\common\Peaks of Yore",
-            @"E:\Program Files (x86)\steamapps\common\Peaks of Yore",
-            @"E:\Program Files\steamapps\common\Peaks of Yore",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -802,52 +860,47 @@ public class PeaksOfYoreManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Cherche Steam\steamapps
-                    string poyPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Peaks of Yore");
-                    if (Directory.Exists(poyPath))
-                        return poyPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Cherche SteamLibrary\steamapps
-                    poyPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Peaks of Yore");
-                    if (Directory.Exists(poyPath))
-                        return poyPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Cherche directement steamapps à la racine du disque
-                    poyPath = Path.Combine(drive.Name, "steamapps", "common", "Peaks of Yore");
-                    if (Directory.Exists(poyPath))
-                        return poyPath;
-
-                    // Cherche dans Program Files (x86)\steamapps
-                    poyPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Peaks of Yore");
-                    if (Directory.Exists(poyPath))
-                        return poyPath;
-
-                    // Cherche dans Program Files\steamapps
-                    poyPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Peaks of Yore");
-                    if (Directory.Exists(poyPath))
-                        return poyPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

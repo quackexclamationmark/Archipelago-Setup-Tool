@@ -15,6 +15,9 @@ public class COE33ManualDL : MonoBehaviour
     public FileDownloader.FileData modFiles;
     public FileDownloader.FileData apworld;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Expedition 33";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installModsToggle;
@@ -45,6 +48,7 @@ public class COE33ManualDL : MonoBehaviour
     {
         public string clairobscurAP;
         public string clairobscurApworld;
+        public string[] steamSearchPaths;
     }
 
     [System.Serializable]
@@ -142,24 +146,25 @@ public class COE33ManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (!configLoaded)
-        {
-            ShowInfo("Loading configuration, please wait...");
-            StartCoroutine(WaitForConfigThenSetup());
-            return;
-        }
+        gamePath = GetGamePath();
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
+        bool ap = installModsToggle == null || installModsToggle.isOn;
+        bool needsGamePath = ap;
 
-        if (!apworld && string.IsNullOrEmpty(gamePath))
+        if (needsGamePath && (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath)))
         {
             ShowInfo("Game path not found. Please check your installation.");
             return;
         }
 
-        bool mods = installModsToggle == null || installModsToggle.isOn;
+        int count = (apworld ? 1 : 0) + (ap ? 1 : 0);
 
-        int count = (apworld ? 1 : 0) + (mods ? 1 : 0);
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
 
         if (apworld && count == 1)
         {
@@ -167,13 +172,32 @@ public class COE33ManualDL : MonoBehaviour
             return;
         }
 
-        if (mods && count == 1)
+        if (ap && count == 1)
         {
             StartCoroutine(ModsOnlyFlow());
             return;
         }
 
         StartCoroutine(SetupWithTracking());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            ShowInfo("Launching Clair Obscur...");
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     IEnumerator SetupWithTracking()
@@ -196,6 +220,8 @@ public class COE33ManualDL : MonoBehaviour
 
     private void ExecuteRevert()
     {
+        gamePath = GetGamePath();
+
         string manifestPath = Path.Combine(Application.persistentDataPath, "InstalledFilesManifest.json");
 
         if (!File.Exists(manifestPath))
@@ -291,19 +317,6 @@ public class COE33ManualDL : MonoBehaviour
             }
         }
         catch { }
-    }
-
-    IEnumerator APWorldOnlyFlow()
-    {
-        gamePath = GetGamePath();
-
-        if (string.IsNullOrEmpty(gamePath))
-            yield break;
-
-        yield return InstallAPWorld();
-
-        if (launchGameToggle == null || launchGameToggle.isOn)
-            LaunchGame();
     }
 
     IEnumerator ModsOnlyFlow()
@@ -474,10 +487,8 @@ public class COE33ManualDL : MonoBehaviour
         UnityEngine.Debug.Log("Downloading APWorld from: " + apworld.url);
         UnityEngine.Debug.Log("Saving to: " + localPath);
 
-        // ✅ Télécharge directement avec UnityWebRequest
         yield return DownloadFile(apworld.url, localPath);
 
-        // Vérifie que le fichier existe
         if (!File.Exists(localPath))
         {
             UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
@@ -487,7 +498,6 @@ public class COE33ManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        // ✅ Cibles possibles
         string[] targetPaths = new string[]
         {
         Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
@@ -522,7 +532,6 @@ public class COE33ManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("Target path: " + target);
 
-        // Nettoie l'ancien fichier s'il existe
         if (File.Exists(target))
         {
             try
@@ -533,7 +542,6 @@ public class COE33ManualDL : MonoBehaviour
             catch { }
         }
 
-        // Copie le fichier téléchargé
         try
         {
             File.Copy(localPath, target, true);
@@ -549,6 +557,20 @@ public class COE33ManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -626,7 +648,8 @@ public class COE33ManualDL : MonoBehaviour
         }
 
         configLoaded = true;
-        UnityEngine.Debug.Log("Config marked as loaded");
+
+        gamePath = GetGamePath();
     }
 
     void LaunchGame()
@@ -758,29 +781,12 @@ public class COE33ManualDL : MonoBehaviour
             infoPanel.SetActive(false);
     }
 
-    IEnumerator WaitForConfigThenSetup()
-    {
-        while (!configLoaded)
-            yield return new WaitForSeconds(0.1f);
-
-        CloseInfoPanel();
-        ShowConfirmation("Are you sure you want to install all the files?", "Setup");
-    }
-
     string GetGamePath()
     {
         string[] quickPaths = new string[]
         {
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Expedition 33"),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Expedition 33"),
-        @"D:\Steam\steamapps\common\Expedition 33",
-        @"D:\SteamLibrary\steamapps\common\Expedition 33",
-        @"D:\steamapps\common\Expedition 33",
-        @"E:\Steam\steamapps\common\Expedition 33",
-        @"E:\SteamLibrary\steamapps\common\Expedition 33",
-        @"E:\steamapps\common\Expedition 33",
-        @"E:\Program Files (x86)\steamapps\common\Expedition 33",
-        @"E:\Program Files\steamapps\common\Expedition 33",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -788,52 +794,47 @@ public class COE33ManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Cherche Steam\steamapps
-                    string gamePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Expedition 33");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Cherche SteamLibrary\steamapps
-                    gamePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Expedition 33");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Cherche directement steamapps à la racine du disque
-                    gamePath = Path.Combine(drive.Name, "steamapps", "common", "Expedition 33");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    // Cherche dans Program Files (x86)\steamapps
-                    gamePath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Expedition 33");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    // Cherche dans Program Files\steamapps
-                    gamePath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Expedition 33");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 

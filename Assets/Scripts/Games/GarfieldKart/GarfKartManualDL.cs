@@ -16,6 +16,9 @@ public class GarfKartManualDL : MonoBehaviour
     public FileDownloader.FileData garfieldkartAP;
     public FileDownloader.FileData garfieldkartBepInEx;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Garfield Kart - Furious Racing";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
@@ -52,6 +55,7 @@ public class GarfKartManualDL : MonoBehaviour
         public string garfieldkartAP;
         public string garfieldkartApworld;
         public string garfieldkartBepInEx;
+        public string[] steamSearchPaths;
     }
 
     [System.Serializable]
@@ -187,27 +191,54 @@ public class GarfKartManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (!configLoaded)
-        {
-            ShowInfo("Loading configuration, please wait...");
-            StartCoroutine(WaitForConfigThenSetup());
-            return;
-        }
+        gamePath = GetGamePath();
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
+        bool apmod = installAPModToggle == null || installAPModToggle.isOn;
+        bool bepinex = installBepInExToggle == null || installBepInExToggle.isOn;
 
-        if (!apworld && string.IsNullOrEmpty(gamePath))
+        bool needsGamePath = bepinex || apmod;
+
+        if (needsGamePath && (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath)))
         {
             ShowInfo("Game path not found. Please check your installation.");
             return;
         }
 
-        bool apmod = installAPModToggle == null || installAPModToggle.isOn;
-        bool bepinex = installBepInExToggle == null || installBepInExToggle.isOn;
-
         int count = (apworld ? 1 : 0) + (apmod ? 1 : 0) + (bepinex ? 1 : 0);
 
+        if (apworld && count == 1)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
         StartCoroutine(SetupWithTracking(apworld, apmod, bepinex));
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            ShowInfo("Launching Garfield Kart...");
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     IEnumerator SetupWithTracking(bool installAPWorld, bool installAPMod, bool installBepInEx)
@@ -235,6 +266,8 @@ public class GarfKartManualDL : MonoBehaviour
         if (string.IsNullOrEmpty(gamePath))
             return;
 
+        DeleteOldVersionFiles();
+
         string pluginsPath = Path.Combine(gamePath, "BepInEx", "plugins");
 
         bool clearAP = clearAPModsToggle != null && clearAPModsToggle.isOn;
@@ -260,7 +293,6 @@ public class GarfKartManualDL : MonoBehaviour
             return;
         }
 
-        // At this point fullClean == true
         bool hasOtherMods = HasOtherMods(pluginsPath);
 
         if (fullClean && hasOtherMods && !pendingFullCleanConfirmation)
@@ -324,7 +356,6 @@ public class GarfKartManualDL : MonoBehaviour
             if (dirName == "Archipelago")
                 continue;
 
-            // If any other directory found => other mod present
             return true;
         }
 
@@ -381,7 +412,6 @@ public class GarfKartManualDL : MonoBehaviour
             yield break;
         }
 
-        // Move all content from extractPath to gamePath
         try
         {
             CopyAllFromExtract(extractPath, gamePath);
@@ -414,13 +444,10 @@ public class GarfKartManualDL : MonoBehaviour
 
         try
         {
-            // Create plugins directory if it doesn't exist
             Directory.CreateDirectory(pluginsPath);
 
-            // Create Archipelago directory
             Directory.CreateDirectory(archipelagoTargetPath);
 
-            // Move all content from extractPath to Archipelago folder
             foreach (string file in Directory.GetFiles(extractPath, "*", SearchOption.AllDirectories))
             {
                 string relativePath = file.Substring(extractPath.Length).TrimStart(Path.DirectorySeparatorChar);
@@ -460,6 +487,7 @@ public class GarfKartManualDL : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
         }
 
+
         UnityEngine.Debug.Log("Config loaded. APWorld URL: " + garfieldkartApworld.url);
 
         if (string.IsNullOrEmpty(garfieldkartApworld.url))
@@ -496,7 +524,6 @@ public class GarfKartManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        // Target paths
         string[] targetPaths = new string[]
         {
             Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
@@ -556,6 +583,20 @@ public class GarfKartManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -633,6 +674,8 @@ public class GarfKartManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        gamePath = GetGamePath();
     }
 
     void LaunchGame()
@@ -725,6 +768,16 @@ public class GarfKartManualDL : MonoBehaviour
         if (!Directory.Exists(extractPath))
             return;
 
+        try
+        {
+            if (!Directory.Exists(targetPath))
+                Directory.CreateDirectory(targetPath);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Failed to ensure target root directory: " + targetPath + " - " + e.Message);
+        }
+
         foreach (string dir in Directory.GetDirectories(extractPath, "*", SearchOption.AllDirectories))
         {
             string rel = dir.Substring(extractPath.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
@@ -747,9 +800,21 @@ public class GarfKartManualDL : MonoBehaviour
             string dest = Path.Combine(targetPath, rel);
             try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(dest));
+                string destDirName = Path.GetDirectoryName(dest);
+
+                if (!string.IsNullOrWhiteSpace(destDirName))
+                {
+                    Directory.CreateDirectory(destDirName);
+                }
+                else
+                {
+                    if (!Directory.Exists(targetPath))
+                        Directory.CreateDirectory(targetPath);
+                }
+
                 if (File.Exists(dest))
                     File.Delete(dest);
+
                 File.Copy(file, dest, true);
                 UnityEngine.Debug.Log("Copied file: " + dest);
 
@@ -761,6 +826,16 @@ public class GarfKartManualDL : MonoBehaviour
                 UnityEngine.Debug.LogWarning("Failed to copy file: " + file + " - " + e.Message);
             }
         }
+
+        try
+        {
+            if (currentManifest != null && !string.IsNullOrEmpty(targetPath))
+            {
+                if (!currentManifest.installedDirectories.Contains(targetPath))
+                    currentManifest.installedDirectories.Add(targetPath);
+            }
+        }
+        catch { }
 
         UnityEngine.Debug.Log("END CopyAllFromExtract");
     }
@@ -797,31 +872,12 @@ public class GarfKartManualDL : MonoBehaviour
             infoPanel.SetActive(false);
     }
 
-    IEnumerator WaitForConfigThenSetup()
-    {
-        while (!configLoaded)
-            yield return new WaitForSeconds(0.1f);
-
-        CloseInfoPanel();
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
-    }
-
     string GetGamePath()
     {
-        string gameName = "Garfield Kart - Furious Racing";
-
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", gameName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", gameName),
-            Path.Combine(@"D:\Steam", "steamapps", "common", gameName),
-            Path.Combine(@"D:\SteamLibrary", "steamapps", "common", gameName),
-            Path.Combine(@"D:\steamapps", "common", gameName),
-            Path.Combine(@"E:\Steam", "steamapps", "common", gameName),
-            Path.Combine(@"E:\SteamLibrary", "steamapps", "common", gameName),
-            Path.Combine(@"E:\steamapps", "common", gameName),
-            Path.Combine(@"E:\Program Files (x86)", "steamapps", "common", gameName),
-            Path.Combine(@"E:\Program Files", "steamapps", "common", gameName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -829,47 +885,47 @@ public class GarfKartManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string gamePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    gamePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    gamePath = Path.Combine(drive.Name, "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    gamePath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    gamePath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
@@ -881,6 +937,12 @@ public class GarfKartManualDL : MonoBehaviour
     {
         try
         {
+            if (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath))
+            {
+                UnityEngine.Debug.LogWarning("CreateVersionFile: gamePath is empty or doesn't exist. Skipping version file creation.");
+                return;
+            }
+
             string apModVersion = ExtractVersionFromUrl(apModUrl, "");
             string apworldVersion = ExtractVersionFromUrl(apworldUrl, "");
             string bepinexVersion = ExtractVersionFromUrl(bepinexUrl, "");
@@ -922,6 +984,12 @@ public class GarfKartManualDL : MonoBehaviour
     {
         try
         {
+            if (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath))
+            {
+                UnityEngine.Debug.LogWarning("DeleteOldVersionFiles: gamePath is empty or doesn't exist. Skipping cleanup of old version files.");
+                return;
+            }
+
             System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"Garfield Kart AP Version .+\.txt");
 
             string[] rootFiles = Directory.GetFiles(gamePath);
@@ -957,7 +1025,6 @@ public class GarfKartManualDL : MonoBehaviour
         if (thunderstoreMatch.Success)
             return thunderstoreMatch.Groups[1].Value;
 
-        // GitHub releases pattern: /releases/download/VERSION/
         System.Text.RegularExpressions.Regex githubPattern = new System.Text.RegularExpressions.Regex(@"/releases/download/([^/]+)/");
         System.Text.RegularExpressions.Match githubMatch = githubPattern.Match(url);
 

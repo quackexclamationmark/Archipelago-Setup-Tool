@@ -1,10 +1,11 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using System;
-using System.IO;
 using System.Collections;
 using System.Diagnostics;
+using System.IO;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class BATIMManualDL : MonoBehaviour
 {
@@ -14,6 +15,15 @@ public class BATIMManualDL : MonoBehaviour
     public FileDownloader.FileData batimApworld;
     public FileDownloader.FileData batimBepInEx;
     public FileDownloader.FileData batimAP;
+
+    [Header("PLATFORM SELECTION")]
+    public Button steamButton;
+    public Button epicButton;
+    public TextMeshProUGUI platformStatus;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Bendy and the Ink Machine";
+    public string epicGameFolderName = "BendyandtheInkMachine";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
@@ -44,6 +54,7 @@ public class BATIMManualDL : MonoBehaviour
     private bool pendingFullClearConfirmation = false;
     private BATIMConfig remoteConfig;
     private bool configLoaded = false;
+    private bool isEpic = false;
 
     [System.Serializable]
     public class BATIMConfig
@@ -51,11 +62,22 @@ public class BATIMManualDL : MonoBehaviour
         public string batimApworld;
         public string batimBepInEx;
         public string batimAP;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     void Start()
     {
-        batimPath = GetBATIMPath();
+        // Initialize platform buttons
+        if (steamButton != null)
+            steamButton.onClick.AddListener(OnSteamButtonClicked);
+
+        if (epicButton != null)
+            epicButton.onClick.AddListener(OnEpicButtonClicked);
+
+        // Select Steam by default
+        SelectSteam();
+
         StartCoroutine(LoadRemoteConfig());
 
         if (secondLaunchToggle != null)
@@ -88,6 +110,53 @@ public class BATIMManualDL : MonoBehaviour
         if (installAPWorldToggle != null)
             installAPWorldToggle.isOn = true;
     }
+
+    void OnDestroy()
+    {
+        CloseBATIM();
+    }
+
+    // =========================================================
+    // PLATFORM SELECTION
+    // =========================================================
+
+    void OnSteamButtonClicked()
+    {
+        SelectSteam();
+    }
+
+    void OnEpicButtonClicked()
+    {
+        SelectEpic();
+    }
+
+    void SelectSteam()
+    {
+        isEpic = false;
+        batimPath = GetBATIMPath();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Steam - Path: " + batimPath);
+    }
+
+    void SelectEpic()
+    {
+        isEpic = true;
+        batimPath = GetBATIMPath();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Epic - Path: " + batimPath);
+    }
+
+    void UpdatePlatformStatus()
+    {
+        if (platformStatus != null)
+        {
+            string platform = isEpic ? "Epic Games" : "Steam";
+            string status = string.IsNullOrEmpty(batimPath) ? "Not Found" : "Found";
+            platformStatus.text = $"Platform: {platform} \n {status}";
+        }
+    }
+
+    // =========================================================
 
     void OnFullClearChanged(bool value)
     {
@@ -156,19 +225,18 @@ public class BATIMManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
+        batimPath = GetBATIMPath();
+
         bool bepinex = installBepInExToggle != null && installBepInExToggle.isOn;
         bool ap = installAPToggle != null && installAPToggle.isOn;
         bool apworld = installAPWorldToggle != null && installAPWorldToggle.isOn;
 
-        if (!apworld && !bepinex && !ap)
-        {
-            ShowInfo("Please select at least one option to install.");
-            return;
-        }
+        bool needsGamePath = bepinex || ap;
 
-        if ((bepinex || ap) && string.IsNullOrEmpty(batimPath))
+        if (needsGamePath && (string.IsNullOrEmpty(batimPath) || !Directory.Exists(batimPath)))
         {
-            ShowInfo("Game path not found. Please check your installation.");
+            string platform = isEpic ? "Epic" : "Steam";
+            ShowInfo("Game not found on " + platform + ". Please check your installation.");
             return;
         }
 
@@ -179,7 +247,7 @@ public class BATIMManualDL : MonoBehaviour
             StartCoroutine(APWorldOnlyFlow());
             return;
         }
-       
+
 
         if (bepinex && count == 1)
         {
@@ -198,10 +266,20 @@ public class BATIMManualDL : MonoBehaviour
 
     IEnumerator APWorldOnlyFlow()
     {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
         yield return InstallAPWorld();
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
             LaunchBATIM();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -497,6 +575,20 @@ public class BATIMManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -603,6 +695,8 @@ public class BATIMManualDL : MonoBehaviour
         {
             if (File.Exists(exePath))
                 batimProcess = Process.Start(exePath);
+            else
+                UnityEngine.Debug.LogWarning("Bendy and the Ink Machine.exe not found at: " + exePath);
         }
         catch (System.Exception e)
         {
@@ -824,20 +918,24 @@ public class BATIMManualDL : MonoBehaviour
         return "Unknown";
     }
 
+    // =========================================================
+    // PATH DETECTION
+    // =========================================================
+
     string GetBATIMPath()
+    {
+        if (isEpic)
+            return GetBATIMEpicPath();
+        else
+            return GetBATIMSteamPath();
+    }
+
+    string GetBATIMSteamPath()
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Bendy and the Ink Machine"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Bendy and the Ink Machine"),
-            @"D:\Steam\steamapps\common\Bendy and the Ink Machine",
-            @"D:\SteamLibrary\steamapps\common\Bendy and the Ink Machine",
-            @"D:\steamapps\common\Bendy and the Ink Machine",
-            @"E:\Steam\steamapps\common\Bendy and the Ink Machine",
-            @"E:\SteamLibrary\steamapps\common\Bendy and the Ink Machine",
-            @"E:\steamapps\common\Bendy and the Ink Machine",
-            @"E:\Program Files (x86)\steamapps\common\Bendy and the Ink Machine",
-            @"E:\Program Files\steamapps\common\Bendy and the Ink Machine",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -846,7 +944,64 @@ public class BATIMManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Bendy and the Ink Machine (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
+                    return path;
+                }
+            }
+            catch { }
+        }
+
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
+        return "";
+    }
+
+    string GetBATIMEpicPath()
+    {
+        string[] quickPaths = new string[]
+       {
+            @"C:\Program Files\Epic Games\BendyandtheInkMachine",
+            @"C:\Games\Epic\BendyandtheInkMachine",
+       };
+
+        foreach (string path in quickPaths)
+        {
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
                     return path;
                 }
             }
@@ -855,61 +1010,74 @@ public class BATIMManualDL : MonoBehaviour
 
         try
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+            string epicBaseDir = Path.Combine(
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonApplicationData),
+                "Epic", "EpicGamesLauncher", "Data", "Manifests"
+            );
 
-            foreach (System.IO.DriveInfo drive in drives)
+            if (Directory.Exists(epicBaseDir))
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
-
-                try
+                string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
+                foreach (string manifest in manifests)
                 {
-                    // Look for Steam\steamapps
-                    string subPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Bendy and the Ink Machine");
-                    if (Directory.Exists(subPath))
+                    try
                     {
-                        UnityEngine.Debug.Log("Found Bendy and the Ink Machine (Steam) at: " + subPath);
-                        return subPath;
-                    }
+                        string content = File.ReadAllText(manifest);
+                        if (content.Contains("BendyandtheInkMachine") || content.Contains("BendyandtheInkMachine"))
+                        {
+                            System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
+                            System.Text.RegularExpressions.Match match = regex.Match(content);
 
-                    // Look for SteamLibrary\steamapps
-                    subPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Bendy and the Ink Machine");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Bendy and the Ink Machine (Steam) at: " + subPath);
-                        return subPath;
+                            if (match.Success)
+                            {
+                                string epicPath = match.Groups[1].Value;
+                                if (Directory.Exists(epicPath))
+                                {
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
+                                    return epicPath;
+                                }
+                            }
+                        }
                     }
-
-                    // Look for steamapps at the root of the drive
-                    subPath = Path.Combine(drive.Name, "steamapps", "common", "Bendy and the Ink Machine");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Bendy and the Ink Machine (Steam) at: " + subPath);
-                        return subPath;
-                    }
-
-                    // Look in Program Files (x86)\steamapps
-                    subPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Bendy and the Ink Machine");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Bendy and the Ink Machine (Steam) at: " + subPath);
-                        return subPath;
-                    }
-
-                    // Look in Program Files\steamapps
-                    subPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Bendy and the Ink Machine");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Bendy and the Ink Machine (Steam) at: " + subPath);
-                        return subPath;
-                    }
+                    catch { }
                 }
-                catch { }
             }
         }
         catch { }
 
-        UnityEngine.Debug.LogWarning("Bendy and the Ink Machine (Steam) not found.");
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 
@@ -939,5 +1107,8 @@ public class BATIMManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        batimPath = GetBATIMPath();
+        UpdatePlatformStatus();
     }
 }

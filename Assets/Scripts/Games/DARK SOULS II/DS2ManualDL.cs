@@ -17,10 +17,14 @@ public class DS2ManualDL : MonoBehaviour
     public FileDownloader.FileData ds2ScholarAP;
     public FileDownloader.FileData ds2VanillaAP;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderNameVanilla = "DARK SOULS II";
+    public string steamGameFolderNameScholar = "Dark Souls II Scholar of the First Sin";
+
     [Header("GAME VERSION SELECTION")]
     public Button ds2ScholarButton;
     public Button ds2VanillaButton;
-    public TextMeshProUGUI versionStatusText; // Affiche la version sélectionnée
+    public TextMeshProUGUI versionStatusText;
 
     [Header("FEATURE TOGGLES")]
     public Toggle installDS2ApworldToggle;
@@ -43,7 +47,7 @@ public class DS2ManualDL : MonoBehaviour
     private Process ds2Process;
     private string ds2Path;
     private string pendingAction;
-    private bool isScholarVersion = true; // default to Scholar
+    private bool isScholarVersion = true;
     private Ds2Config remoteConfig;
     private bool configLoaded = false;
 
@@ -53,6 +57,7 @@ public class DS2ManualDL : MonoBehaviour
         public string ds2scholarAP;
         public string ds2AP;
         public string ds2Apworld;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -66,7 +71,6 @@ public class DS2ManualDL : MonoBehaviour
         if (confirmButton != null) confirmButton.onClick.AddListener(OnConfirm);
         if (cancelButton != null) cancelButton.onClick.AddListener(OnCancel);
 
-        // Set up version buttons
         if (ds2ScholarButton != null)
         {
             ds2ScholarButton.onClick.AddListener(SelectScholarVersion);
@@ -76,31 +80,34 @@ public class DS2ManualDL : MonoBehaviour
             ds2VanillaButton.onClick.AddListener(SelectVanillaVersion);
         }
 
-        // Initialize with Scholar selected
         SelectScholarVersion();
     }
 
     void SelectScholarVersion()
     {
         isScholarVersion = true;
+        ds2Path = GetDS2Path(isScholarVersion);
         UpdateVersionStatusText();
-        UnityEngine.Debug.Log("Selected: Dark Souls II Scholar of the First Sin");
+        UnityEngine.Debug.Log("Selected: Dark Souls II Scholar of the First Sin - Path: " + ds2Path);
     }
 
     void SelectVanillaVersion()
     {
         isScholarVersion = false;
+        ds2Path = GetDS2Path(isScholarVersion);
         UpdateVersionStatusText();
-        UnityEngine.Debug.Log("Selected: DARK SOULS II (Vanilla)");
+        UnityEngine.Debug.Log("Selected: DARK SOULS II (Vanilla) - Path: " + ds2Path);
     }
 
     void UpdateVersionStatusText()
     {
         if (versionStatusText != null)
         {
-            versionStatusText.text = isScholarVersion ?
-                "Selected: Dark Souls II Scholar of the First Sin" :
-                "Selected: DARK SOULS II (Vanilla)";
+            string versionName = isScholarVersion ?
+                "Dark Souls II Scholar of the First Sin" :
+                "DARK SOULS II (Vanilla)";
+            string status = string.IsNullOrEmpty(ds2Path) ? "Not Found" : "Found";
+            versionStatusText.text = $"Selected: {versionName} \n {status}";
         }
     }
 
@@ -142,28 +149,26 @@ public class DS2ManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        // attendre la config distante si nécessaire
-        if (!configLoaded)
-        {
-            ShowInfo("Loading configuration, please wait...");
-            StartCoroutine(WaitForConfigThenSetup());
-            return;
-        }
-
-        // Déterminer le chemin DS2 basé sur la version
         ds2Path = GetDS2Path(isScholarVersion);
 
-        if (string.IsNullOrEmpty(ds2Path))
+        bool apworld = installDS2ApworldToggle == null || installDS2ApworldToggle.isOn;
+        bool ds2ap = installDS2APToggle != null && installDS2APToggle.isOn;
+        bool needsGamePath = ds2ap || !apworld;
+
+        if (needsGamePath && string.IsNullOrEmpty(ds2Path))
         {
             string versionName = isScholarVersion ? "Dark Souls II Scholar of the First Sin" : "Dark Souls II";
             ShowInfo($"{versionName} path not found. Please check your installation.");
             return;
         }
 
-        bool apworld = installDS2ApworldToggle == null || installDS2ApworldToggle.isOn;
-        bool ds2ap = installDS2APToggle != null && installDS2APToggle.isOn;
-
         int count = (apworld ? 1 : 0) + (ds2ap ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
 
         if (apworld && count == 1) { StartCoroutine(APWorldOnlyFlow()); return; }
         if (ds2ap && count == 1) { StartCoroutine(DS2APOnlyFlow()); return; }
@@ -171,18 +176,8 @@ public class DS2ManualDL : MonoBehaviour
         StartCoroutine(InstallFlow());
     }
 
-    IEnumerator WaitForConfigThenSetup()
-    {
-        while (!configLoaded)
-            yield return new WaitForSeconds(0.1f);
-
-        CloseInfoPanel();
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
-    }
-
     private void ExecuteRevert()
     {
-        // Déterminer le chemin DS2 basé sur la version
         ds2Path = GetDS2Path(isScholarVersion);
 
         if (string.IsNullOrEmpty(ds2Path))
@@ -268,6 +263,23 @@ public class DS2ManualDL : MonoBehaviour
 
         string apUrl = isScholarVersion ? ds2ScholarAP.url : ds2VanillaAP.url;
         CreateVersionFile(apUrl, ds2Apworld.url);
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ds2Path = GetDS2Path(isScholarVersion);
+
+            if (!string.IsNullOrEmpty(ds2Path))
+            {
+                LaunchDS2(false);
+                yield return new WaitForSeconds(2f);
+            }
+            else
+            {
+                string versionName = isScholarVersion ? "Dark Souls II Scholar of the First Sin" : "Dark Souls II";
+                UnityEngine.Debug.LogWarning(versionName + " not found, skipping launch.");
+            }
+        }
+
         ShowInfo("AP World installed successfully!");
     }
 
@@ -286,7 +298,6 @@ public class DS2ManualDL : MonoBehaviour
         ShowInfo("DS2 AP Client installed successfully!");
     }
 
-    // Installs the .apworld into Archipelago/custom_worlds (not into DS2 directory)
     IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
@@ -367,10 +378,23 @@ public class DS2ManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
-    // Installs the dinput8.dll into DS2 directory (renames from dinput8_sotfs.dll or dinput8_vanilla.dll to dinput8.dll)
     IEnumerator InstallDS2AP()
     {
         while (!configLoaded)
@@ -385,7 +409,6 @@ public class DS2ManualDL : MonoBehaviour
             yield break;
         }
 
-        // Déterminer le nom de fichier temporaire basé sur la version
         string tempFileName = isScholarVersion ? "dinput8_sotfs.dll" : "dinput8_vanilla.dll";
         string localPath = Path.Combine(Application.persistentDataPath, tempFileName);
 
@@ -403,7 +426,6 @@ public class DS2ManualDL : MonoBehaviour
 
         string targetPath = Path.Combine(ds2Path, "dinput8.dll");
 
-        // Delete old dinput8.dll if it exists
         if (File.Exists(targetPath))
         {
             try { File.Delete(targetPath); } catch { }
@@ -445,8 +467,11 @@ public class DS2ManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogWarning("Config parsing failed (this is OK, config is optional): " + e.Message);
         }
-
+        
         configLoaded = true;
+
+        ds2Path = GetDS2Path(isScholarVersion);
+        UpdateVersionStatusText();
     }
 
     IEnumerator DownloadFile(string url, string savePath)
@@ -590,42 +615,59 @@ public class DS2ManualDL : MonoBehaviour
 
     string GetDS2Path(bool isScholar)
     {
-        string gameDir = isScholar ? "Dark Souls II Scholar of the First Sin" : "DARK SOULS II";
+        string gameDir = isScholar ? steamGameFolderNameScholar : steamGameFolderNameVanilla;
 
-        string[] quickPaths = new string[]
+        string[] baseDirs = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", gameDir),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", gameDir),
-            Path.Combine(@"D:\Steam\steamapps\common", gameDir),
-            Path.Combine(@"D:\SteamLibrary\steamapps\common", gameDir),
-            Path.Combine(@"C:\Program Files (x86)\steamapps\common", gameDir),
-            Path.Combine(@"C:\Program Files\steamapps\common", gameDir),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common"),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common"),
         };
 
-        foreach (string p in quickPaths)
+        foreach (string baseDir in baseDirs)
         {
-            try { if (Directory.Exists(p)) return p; } catch { }
+            try
+            {
+                string path = Path.Combine(baseDir, gameDir);
+                if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Dark Souls II (Steam) at: " + path);
+                    return path;
+                }
+            }
+            catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            var drives = System.IO.DriveInfo.GetDrives();
-            foreach (var drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed) continue;
-                try
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string tryPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", gameDir);
-                    if (Directory.Exists(tryPath)) return tryPath;
-                    tryPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", gameDir);
-                    if (Directory.Exists(tryPath)) return tryPath;
-                    tryPath = Path.Combine(drive.Name, "steamapps", "common", gameDir);
-                    if (Directory.Exists(tryPath)) return tryPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, gameDir);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Dark Souls II (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
         UnityEngine.Debug.LogWarning($"Dark Souls II ({(isScholar ? "Scholar" : "Vanilla")}) not found.");
         return "";

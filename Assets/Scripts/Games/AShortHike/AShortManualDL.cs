@@ -21,6 +21,10 @@ public class AShortHikeManualDL : MonoBehaviour
     public Button epicButton;
     public TextMeshProUGUI platformStatus;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "A Short Hike";
+    public string epicGameFolderName = "AShortHike";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installBepInExToggle;
     public Toggle installAPToggle;
@@ -69,6 +73,8 @@ public class AShortHikeManualDL : MonoBehaviour
         public string ashorthikeBepInEx;
         public string ashorthikeAP;
         public string ashorthikeModdingAPI;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     void Start()
@@ -568,6 +574,9 @@ public class AShortHikeManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        ashorthikePath = GetAShortHikePath();
+        UpdatePlatformStatus();
     }
 
     void LaunchAShortHike()
@@ -682,16 +691,8 @@ public class AShortHikeManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "A Short Hike"),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "A Short Hike"),
-        @"D:\Steam\steamapps\common\A Short Hike",
-        @"D:\SteamLibrary\steamapps\common\A Short Hike",
-        @"D:\steamapps\common\A Short Hike",
-        @"E:\Steam\steamapps\common\A Short Hike",
-        @"E:\SteamLibrary\steamapps\common\A Short Hike",
-        @"E:\steamapps\common\A Short Hike",
-        @"E:\Program Files (x86)\steamapps\common\A Short Hike",
-        @"E:\Program Files\steamapps\common\A Short Hike",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -700,87 +701,56 @@ public class AShortHikeManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found A Short Hike (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Search Steam\steamapps
-                    string subPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "A Short Hike");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found A Short Hike (Steam) at: " + subPath);
-                        return subPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Search SteamLibrary\steamapps
-                    subPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "A Short Hike");
-                    if (Directory.Exists(subPath))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found A Short Hike (Steam) at: " + subPath);
-                        return subPath;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Search steamapps at drive root
-                    subPath = Path.Combine(drive.Name, "steamapps", "common", "A Short Hike");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found A Short Hike (Steam) at: " + subPath);
-                        return subPath;
-                    }
-
-                    // Search Program Files (x86)\steamapps
-                    subPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "A Short Hike");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found A Short Hike (Steam) at: " + subPath);
-                        return subPath;
-                    }
-
-                    // Search Program Files\steamapps
-                    subPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "A Short Hike");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found A Short Hike (Steam) at: " + subPath);
-                        return subPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("A Short Hike (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
     string GetAShortHikeEpicPath()
     {
         string[] quickPaths = new string[]
-        {
-        @"C:\Program Files\Epic Games\AShortHike",
-        @"D:\Epic Games\AShortHike",
-        @"E:\Epic Games\AShortHike",
-        @"C:\Games\Epic\AShortHike",
-        @"D:\Games\Epic\AShortHike",
-        @"E:\Games\Epic\AShortHike",
-        @"C:\Epic\AShortHike",
-        @"D:\Epic\AShortHike",
-        @"E:\Epic\AShortHike",
-        };
+       {
+            @"C:\Program Files\Epic Games\AShortHike",
+            @"C:\Games\Epic\AShortHike",
+       };
 
         foreach (string path in quickPaths)
         {
@@ -788,14 +758,13 @@ public class AShortHikeManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found A Short Hike (Epic) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        // Search in Epic Games Launcher directory
         try
         {
             string epicBaseDir = Path.Combine(
@@ -805,16 +774,14 @@ public class AShortHikeManualDL : MonoBehaviour
 
             if (Directory.Exists(epicBaseDir))
             {
-                // Search for AShortHike manifest
                 string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
                 foreach (string manifest in manifests)
                 {
                     try
                     {
                         string content = File.ReadAllText(manifest);
-                        if (content.Contains("AShortHike") || content.Contains("A Short Hike"))
+                        if (content.Contains("AShortHike") || content.Contains("AShortHike"))
                         {
-                            // Extract install location from manifest
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
                             System.Text.RegularExpressions.Match match = regex.Match(content);
 
@@ -823,7 +790,7 @@ public class AShortHikeManualDL : MonoBehaviour
                                 string epicPath = match.Groups[1].Value;
                                 if (Directory.Exists(epicPath))
                                 {
-                                    UnityEngine.Debug.Log("Found A Short Hike (Epic) at: " + epicPath);
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
                                     return epicPath;
                                 }
                             }
@@ -835,38 +802,39 @@ public class AShortHikeManualDL : MonoBehaviour
         }
         catch { }
 
-        // Scan all drives
-        try
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "AShortHike");
-                    if (Directory.Exists(epicPath))
-                    {
-                        UnityEngine.Debug.Log("Found A Short Hike (Epic) at: " + epicPath);
-                        return epicPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "AShortHike");
-                    if (Directory.Exists(epicPath))
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found A Short Hike (Epic) at: " + epicPath);
-                        return epicPath;
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("A Short Hike (Epic) not found.");
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 

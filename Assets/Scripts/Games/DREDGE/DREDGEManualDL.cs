@@ -19,6 +19,10 @@ public class DREDGEManualDL : MonoBehaviour
     public Button epicButton;
     public TextMeshProUGUI platformStatus;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "DREDGE";
+    public string epicGameFolderName = "DREDGEmKMzx";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
@@ -54,6 +58,8 @@ public class DREDGEManualDL : MonoBehaviour
     {
         public string dredgeApworld;
         public string dredgeAP;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     void Start()
@@ -215,19 +221,26 @@ public class DREDGEManualDL : MonoBehaviour
     {
         dredgePath = GetDREDGEPath();
 
-        if (string.IsNullOrEmpty(dredgePath))
-        {
-            string platform = isEpic ? "Epic" : "Steam";
-            ShowInfo("DREDGE not found in " + platform + ". Please check installation.");
-            return;
-        }
-
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool apmod = installAPModToggle == null || installAPModToggle.isOn;
+        bool needsGamePath = apmod || !apworld;
+
+        if (needsGamePath && string.IsNullOrEmpty(dredgePath))
+        {
+            string platform = isEpic ? "Epic" : "Steam";
+            ShowInfo("Game not found on " + platform + ". Please check installation.");
+            return;
+        }
 
         int count =
             (apworld ? 1 : 0) +
             (apmod ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
 
         if (apworld && count == 1)
         {
@@ -242,6 +255,25 @@ public class DREDGEManualDL : MonoBehaviour
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching DREDGE...");
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -574,6 +606,20 @@ public class DREDGEManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -646,17 +692,6 @@ public class DREDGEManualDL : MonoBehaviour
         yield return null;
     }
 
-    IEnumerator APWorldOnlyFlow()
-    {
-        dredgePath = GetDREDGEPath();
-
-        if (string.IsNullOrEmpty(dredgePath))
-            yield break;
-
-        yield return InstallAPWorld();
-        ShowInfo("APWorld installed successfully!");
-    }
-
     IEnumerator APModOnlyFlow()
     {
         dredgePath = GetDREDGEPath();
@@ -708,6 +743,9 @@ public class DREDGEManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        dredgePath = GetDREDGEPath();
+        UpdatePlatformStatus();
     }
 
     void LaunchGame()
@@ -933,16 +971,8 @@ public class DREDGEManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "DREDGE"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "DREDGE"),
-            @"D:\Steam\steamapps\common\DREDGE",
-            @"D:\SteamLibrary\steamapps\common\DREDGE",
-            @"D:\steamapps\common\DREDGE",
-            @"E:\Steam\steamapps\common\DREDGE",
-            @"E:\SteamLibrary\steamapps\common\DREDGE",
-            @"E:\steamapps\common\DREDGE",
-            @"E:\Program Files (x86)\steamapps\common\DREDGE",
-            @"E:\Program Files\steamapps\common\DREDGE",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -951,82 +981,56 @@ public class DREDGEManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found DREDGE (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string dredgePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "DREDGE");
-                    if (Directory.Exists(dredgePath))
-                    {
-                        UnityEngine.Debug.Log("Found DREDGE (Steam) at: " + dredgePath);
-                        return dredgePath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    dredgePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "DREDGE");
-                    if (Directory.Exists(dredgePath))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found DREDGE (Steam) at: " + dredgePath);
-                        return dredgePath;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    dredgePath = Path.Combine(drive.Name, "steamapps", "common", "DREDGE");
-                    if (Directory.Exists(dredgePath))
-                    {
-                        UnityEngine.Debug.Log("Found DREDGE (Steam) at: " + dredgePath);
-                        return dredgePath;
-                    }
-
-                    dredgePath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "DREDGE");
-                    if (Directory.Exists(dredgePath))
-                    {
-                        UnityEngine.Debug.Log("Found DREDGE (Steam) at: " + dredgePath);
-                        return dredgePath;
-                    }
-
-                    dredgePath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "DREDGE");
-                    if (Directory.Exists(dredgePath))
-                    {
-                        UnityEngine.Debug.Log("Found DREDGE (Steam) at: " + dredgePath);
-                        return dredgePath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("DREDGE (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
     string GetDREDGEEpicPath()
     {
         string[] quickPaths = new string[]
-        {
+       {
             @"C:\Program Files\Epic Games\DREDGEmKMzx",
-            @"D:\Epic Games\DREDGEmKMzx",
-            @"E:\Epic Games\DREDGEmKMzx",
             @"C:\Games\Epic\DREDGEmKMzx",
-            @"D:\Games\Epic\DREDGEmKMzx",
-            @"E:\Games\Epic\DREDGEmKMzx",
-            @"C:\Epic\DREDGEmKMzx",
-            @"D:\Epic\DREDGEmKMzx",
-            @"E:\Epic\DREDGEmKMzx",
-        };
+       };
 
         foreach (string path in quickPaths)
         {
@@ -1034,14 +1038,13 @@ public class DREDGEManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found DREDGE (Epic) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        // Search in Epic Games Launcher directory
         try
         {
             string epicBaseDir = Path.Combine(
@@ -1051,16 +1054,14 @@ public class DREDGEManualDL : MonoBehaviour
 
             if (Directory.Exists(epicBaseDir))
             {
-                // Search for DREDGE manifest
                 string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
                 foreach (string manifest in manifests)
                 {
                     try
                     {
                         string content = File.ReadAllText(manifest);
-                        if (content.Contains("DREDGEmKMzx") || content.Contains("DREDGE"))
+                        if (content.Contains("DREDGEmKMzx") || content.Contains("DREDGEmKMzx"))
                         {
-                            // Extract install location from manifest
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
                             System.Text.RegularExpressions.Match match = regex.Match(content);
 
@@ -1069,7 +1070,7 @@ public class DREDGEManualDL : MonoBehaviour
                                 string epicPath = match.Groups[1].Value;
                                 if (Directory.Exists(epicPath))
                                 {
-                                    UnityEngine.Debug.Log("Found DREDGE (Epic) at: " + epicPath);
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
                                     return epicPath;
                                 }
                             }
@@ -1081,37 +1082,39 @@ public class DREDGEManualDL : MonoBehaviour
         }
         catch { }
 
-        try
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "DREDGEmKMzx");
-                    if (Directory.Exists(epicPath))
-                    {
-                        UnityEngine.Debug.Log("Found DREDGE (Epic) at: " + epicPath);
-                        return epicPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "DREDGEmKMzx");
-                    if (Directory.Exists(epicPath))
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found DREDGE (Epic) at: " + epicPath);
-                        return epicPath;
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("DREDGE (Epic) not found.");
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 }

@@ -15,6 +15,9 @@ public class RE7ManualDL : MonoBehaviour
     public FileDownloader.FileData re7Framework;
     public FileDownloader.FileData re7AP;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "RESIDENT EVIL 7 biohazard";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installRe7ApworldToggle;
     public Toggle installRe7FrameworkToggle;
@@ -44,11 +47,9 @@ public class RE7ManualDL : MonoBehaviour
     private RE7Config remoteConfig;
     private bool configLoaded = false;
 
-    // Store framework backup for revert
     private string frameworkBackupPath;
     private string refprameworkBackupPath;
 
-    // Files to delete in full clean
     private string[] filesToDeleteOnFullClean = new string[]
     {
         "dinput8.dll",
@@ -69,7 +70,6 @@ public class RE7ManualDL : MonoBehaviour
         "re2_framework_log.txt"
     };
 
-    // Files to delete when clearing AP mods
     private string[] filesToDeleteOnClearAPMods = new string[]
     {
         ".gitattributes",
@@ -80,7 +80,6 @@ public class RE7ManualDL : MonoBehaviour
         "README.md"
     };
 
-    // DLLs to NEVER delete (game essentials)
     private string[] protectedDlls = new string[]
     {
         "AkConvolutionReverb.dll",
@@ -97,6 +96,7 @@ public class RE7ManualDL : MonoBehaviour
         public string re7Apworld;
         public string re7Framework;
         public string re7AP;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -202,24 +202,33 @@ public class RE7ManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(re7Path))
-        {
-            ShowInfo("RE7 path not found. Please check Steam installation.");
-            return;
-        }
+        re7Path = GetRE7Path();
 
         bool apworld = installRe7ApworldToggle == null || installRe7ApworldToggle.isOn;
         bool framework = installRe7FrameworkToggle != null && installRe7FrameworkToggle.isOn;
         bool re7mod = installRe7APToggle != null && installRe7APToggle.isOn;
+        bool needsGamePath = framework || re7mod;
+
+        if (needsGamePath && (string.IsNullOrEmpty(re7Path) || !Directory.Exists(re7Path)))
+        {
+            ShowInfo("Game path not found. Please check Steam installation.");
+            return;
+        }
 
         int count =
             (apworld ? 1 : 0) +
             (framework ? 1 : 0) +
             (re7mod ? 1 : 0);
 
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
         if (apworld && count == 1)
         {
-            StartCoroutine(ApWorldOnlyFlow());
+            StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
@@ -236,6 +245,25 @@ public class RE7ManualDL : MonoBehaviour
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching RE7...");
+            LaunchRE7();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -458,7 +486,7 @@ public class RE7ManualDL : MonoBehaviour
         if (installRe7ApworldToggle == null || installRe7ApworldToggle.isOn)
         {
             ShowInfo("Installing APWorld...");
-            yield return InstallRE7APWorld();
+            yield return InstallAPWorld();
         }
 
         if (installRe7FrameworkToggle != null && installRe7FrameworkToggle.isOn)
@@ -490,7 +518,7 @@ public class RE7ManualDL : MonoBehaviour
         yield break;
     }
 
-    IEnumerator InstallRE7APWorld()
+    IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
         {
@@ -588,6 +616,20 @@ public class RE7ManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -667,24 +709,6 @@ public class RE7ManualDL : MonoBehaviour
         SafeDeleteDirectory(extractPath);
     }
 
-    IEnumerator ApWorldOnlyFlow()
-    {
-        re7Path = GetRE7Path();
-
-        if (string.IsNullOrEmpty(re7Path))
-            yield break;
-
-        yield return InstallRE7APWorld();
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-        {
-            LaunchRE7();
-            yield return new WaitForSeconds(2f);
-        }
-
-        ShowInfo("Installation complete!");
-    }
-
     IEnumerator FrameworkOnlyFlow()
     {
         ShowInfo("Installing Framework...");
@@ -753,6 +777,8 @@ public class RE7ManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        re7Path = GetRE7Path();
     }
 
     void LaunchRE7()
@@ -1029,14 +1055,8 @@ public class RE7ManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "RESIDENT EVIL 7 biohazard"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "RESIDENT EVIL 7 biohazard"),
-            @"D:\Steam\steamapps\common\RESIDENT EVIL 7 biohazard",
-            @"D:\SteamLibrary\steamapps\common\RESIDENT EVIL 7 biohazard",
-            @"D:\steamapps\common\RESIDENT EVIL 7 biohazard",
-            @"E:\Steam\steamapps\common\RESIDENT EVIL 7 biohazard",
-            @"E:\SteamLibrary\steamapps\common\RESIDENT EVIL 7 biohazard",
-            @"E:\steamapps\common\RESIDENT EVIL 7 biohazard",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -1044,52 +1064,47 @@ public class RE7ManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Search Steam\steamapps
-                    string re7Path = Path.Combine(drive.Name, "Steam", "steamapps", "common", "RESIDENT EVIL 7 biohazard");
-                    if (Directory.Exists(re7Path))
-                        return re7Path;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Search SteamLibrary\steamapps
-                    re7Path = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "RESIDENT EVIL 7 biohazard");
-                    if (Directory.Exists(re7Path))
-                        return re7Path;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Search steamapps at root
-                    re7Path = Path.Combine(drive.Name, "steamapps", "common", "RESIDENT EVIL 7 biohazard");
-                    if (Directory.Exists(re7Path))
-                        return re7Path;
-
-                    // Search Program Files (x86)\steamapps
-                    re7Path = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "RESIDENT EVIL 7 biohazard");
-                    if (Directory.Exists(re7Path))
-                        return re7Path;
-
-                    // Search Program Files\steamapps
-                    re7Path = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "RESIDENT EVIL 7 biohazard");
-                    if (Directory.Exists(re7Path))
-                        return re7Path;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

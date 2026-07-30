@@ -1,10 +1,11 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.IO;
+﻿using Microsoft.Win32;
 using System.Collections;
 using System.Diagnostics;
-using Microsoft.Win32;
+using System.IO;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class ScheduleManualDL : MonoBehaviour
 {
@@ -14,6 +15,9 @@ public class ScheduleManualDL : MonoBehaviour
     public FileDownloader.FileData apworld;
     public FileDownloader.FileData apMod;
     public FileDownloader.FileData melonLoader;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Schedule I";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
@@ -49,6 +53,7 @@ public class ScheduleManualDL : MonoBehaviour
         public string scheduleAP;
         public string scheduleMelonLoader;
         public string scheduleApworld;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -144,20 +149,29 @@ public class ScheduleManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(schedulePath))
-        {
-            ShowInfo("Schedule I path not found. Please check Steam installation.");
-            return;
-        }
+        schedulePath = GetSchedulePath();
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool melonloader = installMelonLoaderToggle != null && installMelonLoaderToggle.isOn;
         bool apmod = installAPModToggle != null && installAPModToggle.isOn;
+        bool needsGamePath = apmod || melonloader;
+
+        if (needsGamePath && (string.IsNullOrEmpty(schedulePath) || !Directory.Exists(schedulePath)))
+        {
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
 
         int count =
             (apworld ? 1 : 0) +
             (melonloader ? 1 : 0) +
             (apmod ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
 
         if (apworld && count == 1)
         {
@@ -178,6 +192,25 @@ public class ScheduleManualDL : MonoBehaviour
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Schedule I...");
+            LaunchSchedule();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -448,6 +481,20 @@ public class ScheduleManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -658,18 +705,6 @@ public class ScheduleManualDL : MonoBehaviour
         UnityEngine.Debug.Log("END CopyMelonLoaderFiles");
     }
 
-    IEnumerator APWorldOnlyFlow()
-    {
-        schedulePath = GetSchedulePath();
-
-        if (string.IsNullOrEmpty(schedulePath))
-            yield break;
-
-        yield return InstallAPWorld();
-
-        ShowInfo("APWorld installed successfully!");
-    }
-
     IEnumerator MelonLoaderOnlyFlow()
     {
         ShowInfo("Installing MelonLoader...");
@@ -730,6 +765,8 @@ public class ScheduleManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        schedulePath = GetSchedulePath();
     }
 
     void LaunchSchedule()
@@ -1084,16 +1121,8 @@ public class ScheduleManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Schedule I"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Schedule I"),
-            @"D:\Steam\steamapps\common\Schedule I",
-            @"D:\SteamLibrary\steamapps\common\Schedule I",
-            @"D:\steamapps\common\Schedule I",
-            @"E:\Steam\steamapps\common\Schedule I",
-            @"E:\SteamLibrary\steamapps\common\Schedule I",
-            @"E:\steamapps\common\Schedule I",
-            @"E:\Program Files (x86)\steamapps\common\Schedule I",
-            @"E:\Program Files\steamapps\common\Schedule I",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -1101,52 +1130,47 @@ public class ScheduleManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Search Steam\steamapps
-                    string schedPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Schedule I");
-                    if (Directory.Exists(schedPath))
-                        return schedPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Search SteamLibrary\steamapps
-                    schedPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Schedule I");
-                    if (Directory.Exists(schedPath))
-                        return schedPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Search steamapps at root
-                    schedPath = Path.Combine(drive.Name, "steamapps", "common", "Schedule I");
-                    if (Directory.Exists(schedPath))
-                        return schedPath;
-
-                    // Search Program Files (x86)\steamapps
-                    schedPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Schedule I");
-                    if (Directory.Exists(schedPath))
-                        return schedPath;
-
-                    // Search Program Files\steamapps
-                    schedPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Schedule I");
-                    if (Directory.Exists(schedPath))
-                        return schedPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

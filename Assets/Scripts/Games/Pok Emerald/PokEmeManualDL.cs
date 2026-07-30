@@ -142,11 +142,9 @@ public class PokeEmeManualDL : MonoBehaviour
             yield break;
         }
 
-        // Clean any existing temp
         SafeDeleteDirectory(extractPath);
         yield return null;
 
-        // Try to extract using ZipFile
         bool extractionFailed = false;
         string extractionError = null;
 
@@ -163,7 +161,6 @@ public class PokeEmeManualDL : MonoBehaviour
             UnityEngine.Debug.LogWarning("Zip extraction failed: " + e.Message);
         }
 
-        // If extraction failed, attempt fallback extraction using downloader (but do this OUTSIDE the catch)
         if (extractionFailed)
         {
             UnityEngine.Debug.LogWarning("Attempting fallback extraction using downloader if available.");
@@ -178,7 +175,6 @@ public class PokeEmeManualDL : MonoBehaviour
             }
         }
 
-        // Verify extraction produced something
         if (!Directory.Exists(extractPath) || (Directory.GetFiles(extractPath, "*", SearchOption.AllDirectories).Length == 0 && Directory.GetDirectories(extractPath).Length == 0))
         {
             ShowInfo("ERROR: Extraction produced no files.");
@@ -186,7 +182,6 @@ public class PokeEmeManualDL : MonoBehaviour
             yield break;
         }
 
-        // Determine extracted root
         string[] topDirs = Directory.GetDirectories(extractPath);
         string[] topFiles = Directory.GetFiles(extractPath);
         string sourcePath = extractPath;

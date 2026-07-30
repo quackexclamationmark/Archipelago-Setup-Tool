@@ -1,12 +1,13 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.IO;
+using System;
 using System.Collections;
 using System.Diagnostics;
-using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class TCGManualDL : MonoBehaviour
 {
@@ -16,6 +17,9 @@ public class TCGManualDL : MonoBehaviour
     public FileDownloader.FileData tcgApworld;
     public FileDownloader.FileData tcgAP;
     public FileDownloader.FileData tcgBepInEx;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "TCG Card Shop Simulator";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installTCGApworldToggle;
@@ -58,9 +62,9 @@ public class TCGManualDL : MonoBehaviour
         public string tcgAP;
         public string tcgBepInEx;
         public string tcgApworld;
+        public string[] steamSearchPaths;
     }
 
-    // Win32 ShowWindow import + constants (pour cacher la fenêtre après lancement)
     [DllImport("user32.dll")]
     static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     const int SW_HIDE = 0;
@@ -123,45 +127,52 @@ public class TCGManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        // attendre la config distante si nécessaire
-        if (!configLoaded)
-        {
-            ShowInfo("Loading configuration, please wait...");
-            StartCoroutine(WaitForConfigThenSetup());
-            return;
-        }
-
-        if (string.IsNullOrEmpty(tcgPath))
-        {
-            ShowInfo("TCG Card Shop Simulator path not found. Please check Steam installation.");
-            return;
-        }
+        tcgPath = GetTCGPath();
 
         bool apworld = installTCGApworldToggle == null || installTCGApworldToggle.isOn;
-        bool tcgap = installTCGAPToggle != null && installTCGAPToggle.isOn;
+        bool ap = installTCGAPToggle != null && installTCGAPToggle.isOn;
         bool bepinex = installTCGBepInExToggle != null && installTCGBepInExToggle.isOn;
+        bool needsGamePath = ap || bepinex;
 
-        int count = (apworld ? 1 : 0) + (tcgap ? 1 : 0) + (bepinex ? 1 : 0);
+        if (needsGamePath && (string.IsNullOrEmpty(tcgPath) || !Directory.Exists(tcgPath)))
+        {
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
+
+        int count = (apworld ? 1 : 0) + (ap ? 1 : 0) + (bepinex ? 1 : 0);
 
         if (apworld && count == 1) { StartCoroutine(APWorldOnlyFlow()); return; }
-        if (tcgap && count == 1) { StartCoroutine(TCGAPOnlyFlow()); return; }
-        if (bepinex && count == 1) { StartCoroutine(BepInExOnlyFlow()); return; }
+        if (ap && count == 1) { StartCoroutine(TCGAPOnlyFlow()); return; }
+        if (bepinex && count == 1) { StartCoroutine(BepInExOnlyFlow()); return;       
+        }
 
         StartCoroutine(InstallFlow());
     }
 
-    IEnumerator WaitForConfigThenSetup()
+    IEnumerator APWorldOnlyFlow()
     {
-        while (!configLoaded)
-            yield return new WaitForSeconds(0.1f);
+        yield return new WaitUntil(() => configLoaded);
 
-        CloseInfoPanel();
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching TCG CGS...");
+            LaunchTCG();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
     {
         tcgPath = GetTCGPath();
+
         if (string.IsNullOrEmpty(tcgPath)) return;
 
         string pluginsPath = Path.Combine(tcgPath, "BepInEx", "plugins");
@@ -200,6 +211,7 @@ public class TCGManualDL : MonoBehaviour
 
         if (fullClean && hasOtherMods && !pendingFullCleanConfirmation)
         {
+            DeleteOldVersionFiles();
             pendingFullCleanConfirmation = true;
             ShowConfirmation("Other mods were detected.\nDo you REALLY want to fully delete BepInEx?", "ForceFullClean");
             return;
@@ -217,6 +229,7 @@ public class TCGManualDL : MonoBehaviour
 
         if (fullClean)
         {
+            DeleteOldVersionFiles();
             ShowInfo("Cleaning BepInEx...");
             SafeDeleteDirectory(Path.Combine(tcgPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(tcgPath, "winhttp.dll"));
@@ -229,6 +242,7 @@ public class TCGManualDL : MonoBehaviour
 
         if (!hasOtherMods)
         {
+            DeleteOldVersionFiles();
             ShowInfo("Cleaning BepInEx...");
             SafeDeleteDirectory(Path.Combine(tcgPath, "BepInEx"));
             SafeDeleteFile(Path.Combine(tcgPath, "winhttp.dll"));
@@ -337,20 +351,6 @@ public class TCGManualDL : MonoBehaviour
         }
     }
 
-    IEnumerator APWorldOnlyFlow()
-    {
-        yield return new WaitUntil(() => configLoaded);
-
-        ShowInfo("Installing AP World...");
-        yield return new WaitForSeconds(1f);
-        CloseInfoPanel();
-
-        yield return InstallAPWorld();
-
-        CreateVersionFile(tcgAP.url, tcgBepInEx.url, tcgApworld.url);
-        ShowInfo("AP World installed successfully!");
-    }
-
     IEnumerator TCGAPOnlyFlow()
     {
         yield return new WaitUntil(() => configLoaded);
@@ -402,7 +402,7 @@ public class TCGManualDL : MonoBehaviour
             if (!File.Exists(cfgPath))
             {
                 ShowInfo("Launching TCG to generate BepInEx config...");
-                LaunchTCG(true); // helper launch
+                LaunchTCG(true);
                 yield return StartCoroutine(WaitForConfigFiles());
                 CloseTCG();
             }
@@ -417,11 +417,10 @@ public class TCGManualDL : MonoBehaviour
         if (secondLaunchToggle != null && secondLaunchToggle.isOn)
         {
             yield return new WaitForSeconds(1f);
-            LaunchTCG(false); // interactive second launch
+            LaunchTCG(false);
         }
     }
 
-    // Installs the .apworld into Archipelago/custom_worlds (not into plugins)
     IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
@@ -502,16 +501,29 @@ public class TCGManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+        
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
-    // Waits for the BepInEx.cfg file and LogOutput.log to appear and to become stable (not being written).
     IEnumerator WaitForConfigFiles()
     {
         string bepConfig = Path.Combine(tcgPath, "BepInEx", "config", "BepInEx.cfg");
         string logFile = Path.Combine(tcgPath, "BepInEx", "LogOutput.log");
 
-        float timeout = 60f; // increased
+        float timeout = 60f;
         float timer = 0f;
 
         bool cfgOk = false;
@@ -657,13 +669,13 @@ public class TCGManualDL : MonoBehaviour
             {
                 if (stableStart < 0f) stableStart = Time.time;
                 if (Time.time - stableStart >= stableDuration)
-                    yield break; // file stable -> exit
+                    yield break;
             }
             else
             {
                 lastSize = size;
                 lastWrite = writeTime;
-                stableStart = -1f; // reset stability window
+                stableStart = -1f;
             }
         }
     }
@@ -693,6 +705,8 @@ public class TCGManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        tcgPath = GetTCGPath();
     }
 
     IEnumerator DownloadFile(string url, string savePath)
@@ -824,34 +838,6 @@ public class TCGManualDL : MonoBehaviour
         if (removeTCGModsOnlyToggle != null) { removeTCGModsOnlyToggle.isOn = false; removeTCGModsOnlyToggle.interactable = !value; }
     }
 
-    // Robust CopyIfExists: looks directly then searches recursively
-    void CopyIfExists(string root, string file, string target)
-    {
-        try
-        {
-            string path = Path.Combine(root, file);
-            if (!File.Exists(path))
-            {
-                path = FindFile(root, file);
-            }
-
-            if (!string.IsNullOrEmpty(path) && File.Exists(path))
-            {
-                Directory.CreateDirectory(target);
-                File.Copy(path, Path.Combine(target, file), true);
-                UnityEngine.Debug.Log($"Copied {file} from {path} to {target}");
-            }
-            else
-            {
-                UnityEngine.Debug.LogWarning($"CopyIfExists: '{file}' not found under '{root}'");
-            }
-        }
-        catch (Exception ex)
-        {
-            UnityEngine.Debug.LogWarning($"CopyIfExists error: {ex.Message}");
-        }
-    }
-
     void MoveDirectory(string source, string target)
     {
         if (!Directory.Exists(source)) return;
@@ -862,17 +848,6 @@ public class TCGManualDL : MonoBehaviour
             if (File.Exists(dest)) File.Delete(dest);
             File.Move(file, dest);
         }
-    }
-
-    string FindFile(string root, string fileName)
-    {
-        try
-        {
-            foreach (string file in Directory.GetFiles(root, "*", SearchOption.AllDirectories))
-                if (Path.GetFileName(file) == fileName) return file;
-        }
-        catch { }
-        return "";
     }
 
     bool HasOtherMods(string pluginsPath)
@@ -886,7 +861,6 @@ public class TCGManualDL : MonoBehaviour
             if (name.StartsWith("TCG APMod Version") && name.EndsWith(".txt")) continue;
             if (name != "Archipelago.MultiClient.Net.dll" && name != "TCG_AP_Client.dll") return true;
         }
-        // Ignore an "Assets" folder; any other directory counts as another mod
         foreach (string dir in dirs)
         {
             string dirName = Path.GetFileName(dir);
@@ -964,40 +938,56 @@ public class TCGManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "TCG Card Shop Simulator"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "TCG Card Shop Simulator"),
-            @"D:\Steam\steamapps\common\TCG Card Shop Simulator",
-            @"D:\SteamLibrary\steamapps\common\TCG Card Shop Simulator",
-            @"C:\Program Files (x86)\steamapps\common\TCG Card Shop Simulator",
-            @"C:\Program Files\steamapps\common\TCG Card Shop Simulator",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
-        foreach (string p in quickPaths)
+        foreach (string path in quickPaths)
         {
-            try { if (Directory.Exists(p)) return p; } catch { }
-        }
-
-        try
-        {
-            var drives = System.IO.DriveInfo.GetDrives();
-            foreach (var drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed) continue;
-                try
+                if (Directory.Exists(path))
                 {
-                    string tryPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "TCG Card Shop Simulator");
-                    if (Directory.Exists(tryPath)) return tryPath;
-                    tryPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "TCG Card Shop Simulator");
-                    if (Directory.Exists(tryPath)) return tryPath;
-                    tryPath = Path.Combine(drive.Name, "steamapps", "common", "TCG Card Shop Simulator");
-                    if (Directory.Exists(tryPath)) return tryPath;
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
+                    return path;
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("TCG Card Shop Simulator not found.");
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

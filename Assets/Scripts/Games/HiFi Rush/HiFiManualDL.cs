@@ -16,6 +16,9 @@ public class HiFiManualDL : MonoBehaviour
     public FileDownloader.FileData apmodFiles;
     public FileDownloader.FileData apworld;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Hi-Fi RUSH";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installUE4SSToggle;
@@ -47,6 +50,8 @@ public class HiFiManualDL : MonoBehaviour
     private bool configLoaded = false;
     private InstalledFilesManifest currentManifest;
 
+    private const string GameInternalFolderName = "Hibiki";
+
     private static readonly string[] UE4SS_FILES = new string[]
     {
         "hibiki_bootstrap.dll",
@@ -68,6 +73,7 @@ public class HiFiManualDL : MonoBehaviour
     {
         public string hifirushAP;
         public string hifirushApworld;
+        public string[] steamSearchPaths;
     }
 
     [System.Serializable]
@@ -109,7 +115,6 @@ public class HiFiManualDL : MonoBehaviour
         if (setupCancelButton != null)
             setupCancelButton.onClick.AddListener(OnSetupCancel);
 
-        // Revert toggles setup
         if (fullCleanUE4SSToggle != null)
             fullCleanUE4SSToggle.isOn = false;
 
@@ -151,7 +156,7 @@ public class HiFiManualDL : MonoBehaviour
     {
         if (string.IsNullOrEmpty(gamePath))
         {
-            ShowSetupInfo("Hi-Fi RUSH not found. Please check your Steam installation.");
+            ShowInfo("Hi-Fi RUSH not found. Please check your Steam installation.");
             return;
         }
 
@@ -162,7 +167,7 @@ public class HiFiManualDL : MonoBehaviour
     {
         if (string.IsNullOrEmpty(gamePath))
         {
-            ShowSetupInfo("Hi-Fi RUSH not found. Please check your Steam installation.");
+            ShowInfo("Hi-Fi RUSH not found. Please check your Steam installation.");
             return;
         }
 
@@ -208,26 +213,28 @@ public class HiFiManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (!configLoaded)
-        {
-            ShowSetupInfo("Loading configuration, please wait...");
-            StartCoroutine(WaitForConfigThenSetup());
-            return;
-        }
+        gamePath = GetHiFiRushPath();
 
-        if (string.IsNullOrEmpty(gamePath))
-        {
-            ShowSetupInfo("Hi-Fi RUSH path not found!");
-            return;
-        }
-
-        bool apworldInstall = installAPWorldToggle == null || installAPWorldToggle.isOn;
+        bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool ue4ss = installUE4SSToggle == null || installUE4SSToggle.isOn;
         bool apmod = installAPModToggle == null || installAPModToggle.isOn;
+        bool needsGamePath = ue4ss || apmod;
 
-        int count = (apworldInstall ? 1 : 0) + (ue4ss ? 1 : 0) + (apmod ? 1 : 0);
+        if (needsGamePath && (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath)))
+        {
+            ShowInfo("Hi-Fi RUSH path not found!");
+            return;
+        }
 
-        if (apworldInstall && count == 1)
+        int count = (apworld ? 1 : 0) + (ue4ss ? 1 : 0) + (apmod ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
+        if (apworld && count == 1)
         {
             StartCoroutine(APWorldOnlyFlow());
             return;
@@ -248,21 +255,40 @@ public class HiFiManualDL : MonoBehaviour
         StartCoroutine(SetupWithTracking());
     }
 
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            ShowInfo("Launching HiFi RUSH...");
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
+    }
+
     IEnumerator SetupWithTracking()
     {
-        ShowSetupInfo("Initializing installation tracker...");
+        ShowInfo("Initializing installation tracker...");
         yield return new WaitForSeconds(0.5f);
 
         currentManifest = new InstalledFilesManifest();
         currentManifest.gameInstallPath = gamePath;
 
-        ShowSetupInfo("Downloading and installing files...");
+        ShowInfo("Downloading and installing files...");
 
         yield return InstallFlow();
 
         SaveInstalledFilesManifest(currentManifest);
 
-        ShowSetupInfo("Installation complete!");
+        ShowInfo("Installation complete!");
         yield return new WaitForSeconds(1f);
 
         ResetInstallationToggles();
@@ -270,13 +296,15 @@ public class HiFiManualDL : MonoBehaviour
 
     private void ExecuteRevert()
     {
+        gamePath = GetHiFiRushPath();
+
         if (string.IsNullOrEmpty(gamePath))
         {
-            ShowSetupInfo("Hi-Fi RUSH path not found!");
+            ShowInfo("Hi-Fi RUSH path not found!");
             return;
         }
 
-        string win64Path = Path.Combine(gamePath, "Binaries", "Win64");
+        string win64Path = GetWin64Path();
 
         bool removeAP = removeAPModsOnlyToggle != null && removeAPModsOnlyToggle.isOn;
         bool fullClean = fullCleanUE4SSToggle != null && fullCleanUE4SSToggle.isOn;
@@ -285,7 +313,7 @@ public class HiFiManualDL : MonoBehaviour
 
         if (!removeAP && !fullClean)
         {
-            ShowSetupInfo("Please select at least one revert option.");
+            ShowInfo("Please select at least one revert option.");
             return;
         }
 
@@ -295,7 +323,7 @@ public class HiFiManualDL : MonoBehaviour
         {
             CleanupProcesses();
 
-            ShowSetupInfo("Removing AP mods...");
+            ShowInfo("Removing AP mods...");
 
             string modsPath = Path.Combine(win64Path, "Mods");
             string apmodTargetPath = Path.Combine(modsPath, "HbkArchipelago");
@@ -305,7 +333,7 @@ public class HiFiManualDL : MonoBehaviour
             SafeDeleteDirectory(apmodTargetPath);
             DeleteOldVersionFiles();
 
-            ShowSetupInfo("AP mods removed successfully!");
+            ShowInfo("AP mods removed successfully!");
             return;
         }
 
@@ -326,7 +354,7 @@ public class HiFiManualDL : MonoBehaviour
 
             CleanupProcesses();
 
-            ShowSetupInfo("Cleaning UE4SS...");
+            ShowInfo("Cleaning UE4SS...");
 
             // Supprimer les fichiers UE4SS
             foreach (string file in UE4SS_FILES)
@@ -351,7 +379,7 @@ public class HiFiManualDL : MonoBehaviour
 
             DeleteOldVersionFiles();
 
-            ShowSetupInfo("Full clean completed!");
+            ShowInfo("Full clean completed!");
             return;
         }
 
@@ -411,19 +439,6 @@ public class HiFiManualDL : MonoBehaviour
         return false;
     }
 
-    IEnumerator APWorldOnlyFlow()
-    {
-        if (string.IsNullOrEmpty(gamePath))
-            yield break;
-
-        yield return InstallAPWorld();
-
-        if (launchGameToggle == null || launchGameToggle.isOn)
-            LaunchGame();
-
-        ResetInstallationToggles();
-    }
-
     IEnumerator UE4SSOnlyFlow()
     {
         if (string.IsNullOrEmpty(gamePath))
@@ -477,7 +492,7 @@ public class HiFiManualDL : MonoBehaviour
 
         if (launchGameToggle == null || launchGameToggle.isOn)
         {
-            ShowSetupInfo("Launching game...");
+            ShowInfo("Launching game...");
             yield return new WaitForSeconds(1f);
             LaunchGame();
         }
@@ -489,8 +504,8 @@ public class HiFiManualDL : MonoBehaviour
 
         yield return downloader.DownloadAndExtract(apmodFiles, Application.persistentDataPath, extractPath);
 
-        // Target path: [gamePath]\Binaries\Win64
-        string targetBasePath = Path.Combine(gamePath, "Binaries", "Win64");
+        // Target path: [gamePath]\Hibiki\Binaries\Win64
+        string targetBasePath = GetWin64Path();
         Directory.CreateDirectory(targetBasePath);
 
         // Copier les fichiers UE4SS
@@ -535,7 +550,7 @@ public class HiFiManualDL : MonoBehaviour
 
         SafeDeleteDirectory(extractPath);
 
-        ShowSetupInfo("UE4SS installation verified successfully!");
+        ShowInfo("UE4SS installation verified successfully!");
         yield return new WaitForSeconds(1f);
     }
 
@@ -545,8 +560,8 @@ public class HiFiManualDL : MonoBehaviour
 
         yield return downloader.DownloadAndExtract(apmodFiles, Application.persistentDataPath, extractPath);
 
-        // Target path: [gamePath]\Binaries\Win64
-        string targetBasePath = Path.Combine(gamePath, "Binaries", "Win64");
+        // Target path: [gamePath]\Hibiki\Binaries\Win64
+        string targetBasePath = GetWin64Path();
         Directory.CreateDirectory(targetBasePath);
 
         // Copier les fichiers UE4SS
@@ -602,7 +617,7 @@ public class HiFiManualDL : MonoBehaviour
 
         SafeDeleteDirectory(extractPath);
 
-        ShowSetupInfo("APMod installation verified successfully!");
+        ShowInfo("APMod installation verified successfully!");
         yield return new WaitForSeconds(1f);
     }
 
@@ -618,7 +633,7 @@ public class HiFiManualDL : MonoBehaviour
 
         if (string.IsNullOrEmpty(apworld.url))
         {
-            ShowSetupInfo("ERROR: APWorld URL is empty!");
+            ShowInfo("ERROR: APWorld URL is empty!");
             UnityEngine.Debug.LogError("APWorld URL not set!");
             yield break;
         }
@@ -644,7 +659,7 @@ public class HiFiManualDL : MonoBehaviour
         if (!File.Exists(localPath))
         {
             UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
-            ShowSetupInfo("ERROR: APWorld download failed!");
+            ShowInfo("ERROR: APWorld download failed!");
             yield break;
         }
 
@@ -677,7 +692,7 @@ public class HiFiManualDL : MonoBehaviour
 
         if (string.IsNullOrEmpty(target))
         {
-            ShowSetupInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
+            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
             UnityEngine.Debug.LogError("No valid target directory found!");
             yield break;
         }
@@ -703,12 +718,26 @@ public class HiFiManualDL : MonoBehaviour
             if (currentManifest != null)
                 currentManifest.installedFiles.Add(target);
 
-            ShowSetupInfo("APWorld installed successfully!");
+            ShowInfo("APWorld installed successfully!");
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
-            ShowSetupInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -760,27 +789,26 @@ public class HiFiManualDL : MonoBehaviour
         }
 
         configLoaded = true;
-        UnityEngine.Debug.Log("Config marked as loaded");
+
+        gamePath = GetHiFiRushPath();
     }
 
     void LaunchGame()
     {
         if (string.IsNullOrEmpty(gamePath))
         {
-            ShowSetupInfo("Game path not found. Cannot launch.");
+            ShowInfo("Game path not found. Cannot launch.");
             UnityEngine.Debug.LogError("GamePath is empty!");
             return;
         }
 
-        // gamePath = .../Hi-Fi RUSH/Hibiki
-        // exePath = .../Hi-Fi RUSH/Hibiki/Binaries/Win64/Hi-Fi-RUSH.exe
-        string exePath = Path.Combine(gamePath, "Binaries", "Win64", "Hi-Fi-RUSH.exe");
+        string exePath = Path.Combine(GetWin64Path(), "Hi-Fi-RUSH.exe");
 
         UnityEngine.Debug.Log("Looking for exe at: " + exePath);
 
         if (!File.Exists(exePath))
         {
-            ShowSetupInfo("Game executable not found at:\n" + exePath);
+            ShowInfo("Game executable not found at:\n" + exePath);
             UnityEngine.Debug.LogError("Executable not found!");
             return;
         }
@@ -795,7 +823,7 @@ public class HiFiManualDL : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            ShowSetupInfo("Error launching game:\n" + e.Message);
+            ShowInfo("Error launching game:\n" + e.Message);
             UnityEngine.Debug.LogError("Launch error: " + e);
         }
     }
@@ -1011,7 +1039,7 @@ public class HiFiManualDL : MonoBehaviour
         return "Unknown";
     }
 
-    void ShowSetupInfo(string message)
+    void ShowInfo(string message)
     {
         if (setupInfoPanel == null || setupInfoText == null)
             return;
@@ -1055,29 +1083,21 @@ public class HiFiManualDL : MonoBehaviour
         UnityEngine.Debug.Log("HiFiManualDL state reset");
     }
 
-    IEnumerator WaitForConfigThenSetup()
-    {
-        while (!configLoaded)
-            yield return new WaitForSeconds(0.1f);
+    // =========================================================
+    // PATH HELPERS
+    // =========================================================
 
-        CloseSetupInfoPanel();
-        ShowSetupConfirmation("Are you sure you want to install all the files?", "Setup");
+    string GetWin64Path()
+    {
+        return Path.Combine(gamePath, GameInternalFolderName, "Binaries", "Win64");
     }
 
     string GetHiFiRushPath()
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Hi-Fi RUSH", "Hibiki"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Hi-Fi RUSH", "Hibiki"),
-            @"D:\Steam\steamapps\common\Hi-Fi RUSH\Hibiki",
-            @"D:\SteamLibrary\steamapps\common\Hi-Fi RUSH\Hibiki",
-            @"D:\steamapps\common\Hi-Fi RUSH\Hibiki",
-            @"E:\Steam\steamapps\common\Hi-Fi RUSH\Hibiki",
-            @"E:\SteamLibrary\steamapps\common\Hi-Fi RUSH\Hibiki",
-            @"E:\steamapps\common\Hi-Fi RUSH\Hibiki",
-            @"E:\Program Files (x86)\steamapps\common\Hi-Fi RUSH\Hibiki",
-            @"E:\Program Files\steamapps\common\Hi-Fi RUSH\Hibiki",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -1085,49 +1105,47 @@ public class HiFiManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            DriveInfo[] drives = DriveInfo.GetDrives();
-
-            foreach (DriveInfo drive in drives)
+            try
             {
-                try
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Cherche Steam\steamapps
-                    string path = Path.Combine(drive.RootDirectory.FullName, "Steam", "steamapps", "common", "Hi-Fi RUSH", "Hibiki");
-                    if (Directory.Exists(path))
-                        return path;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Cherche SteamLibrary\steamapps
-                    path = Path.Combine(drive.RootDirectory.FullName, "SteamLibrary", "steamapps", "common", "Hi-Fi RUSH", "Hibiki");
-                    if (Directory.Exists(path))
-                        return path;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Cherche directement steamapps à la racine du disque
-                    path = Path.Combine(drive.RootDirectory.FullName, "steamapps", "common", "Hi-Fi RUSH", "Hibiki");
-                    if (Directory.Exists(path))
-                        return path;
-
-                    // Cherche dans Program Files (x86)\steamapps
-                    path = Path.Combine(drive.RootDirectory.FullName, "Program Files (x86)", "steamapps", "common", "Hi-Fi RUSH", "Hibiki");
-                    if (Directory.Exists(path))
-                        return path;
-
-                    // Cherche dans Program Files\steamapps
-                    path = Path.Combine(drive.RootDirectory.FullName, "Program Files", "steamapps", "common", "Hi-Fi RUSH", "Hibiki");
-                    if (Directory.Exists(path))
-                        return path;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

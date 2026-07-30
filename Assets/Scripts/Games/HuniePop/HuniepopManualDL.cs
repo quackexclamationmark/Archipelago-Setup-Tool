@@ -15,6 +15,9 @@ public class HuniePopManualDL : MonoBehaviour
     public FileDownloader.FileData huniepopApworld;
     public FileDownloader.FileData huniepopAP;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "HuniePop";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installBepInExToggle;
@@ -50,6 +53,7 @@ public class HuniePopManualDL : MonoBehaviour
     {
         public string huniepopApworld;
         public string huniepopAP;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -159,12 +163,12 @@ public class HuniePopManualDL : MonoBehaviour
         bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
         bool ap = installAPToggle != null && installAPToggle.isOn;
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
+         
+        bool needsGamePath = bep || ap;
 
-        bool apworldOnly = apworld && !bep && !ap;
-
-        if (!apworldOnly && string.IsNullOrEmpty(huniePath))
+        if (needsGamePath && (string.IsNullOrEmpty(huniePath) || !Directory.Exists(huniePath)))
         {
-            ShowInfo("HuniePop not found in Steam. Please check installation.");
+            ShowInfo("Game path not found. Please check your installation.");
             return;
         }
 
@@ -182,13 +186,37 @@ public class HuniePopManualDL : MonoBehaviour
             return;
         }
 
-        if (apworldOnly)
+        if (apworld && count == 1 && !bep)
         {
             StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            LaunchHuniePop();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -215,7 +243,6 @@ public class HuniePopManualDL : MonoBehaviour
 
             ShowInfo("Removing AP mods...");
 
-            // Remove plugin folder
             string pluginDir = Path.Combine(pluginsPath, "Hunie Pop Archipelago Client");
             SafeDeleteDirectory(pluginDir);
 
@@ -414,14 +441,6 @@ public class HuniePopManualDL : MonoBehaviour
         }
     }
 
-    IEnumerator APWorldOnlyFlow()
-    {
-        ShowInfo("Installing APWorld...");
-        yield return InstallAPWorld();
-        ShowInfo("Installation complete!");
-        yield break;
-    }
-
     IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
@@ -522,6 +541,20 @@ public class HuniePopManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -860,18 +893,10 @@ public class HuniePopManualDL : MonoBehaviour
     string GetHuniePopPath()
     {
         string[] quickPaths = new string[]
-        {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "HuniePop"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "HuniePop"),
-            @"D:\Steam\steamapps\common\HuniePop",
-            @"D:\SteamLibrary\steamapps\common\HuniePop",
-            @"D:\steamapps\common\HuniePop",
-            @"E:\Steam\steamapps\common\HuniePop",
-            @"E:\SteamLibrary\steamapps\common\HuniePop",
-            @"E:\steamapps\common\HuniePop",
-            @"E:\Program Files (x86)\steamapps\common\HuniePop",
-            @"E:\Program Files\steamapps\common\HuniePop",
-        };
+                {
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
+                };
 
         foreach (string path in quickPaths)
         {
@@ -879,70 +904,46 @@ public class HuniePopManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found HuniePop (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Look for Steam\steamapps
-                    string subPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "HuniePop");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found HuniePop (Steam) at: " + subPath);
-                        return subPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Look for SteamLibrary\steamapps
-                    subPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "HuniePop");
-                    if (Directory.Exists(subPath))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found HuniePop (Steam) at: " + subPath);
-                        return subPath;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Look for steamapps at the root of the drive
-                    subPath = Path.Combine(drive.Name, "steamapps", "common", "HuniePop");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found HuniePop (Steam) at: " + subPath);
-                        return subPath;
-                    }
-
-                    // Look in Program Files (x86)\steamapps
-                    subPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "HuniePop");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found HuniePop (Steam) at: " + subPath);
-                        return subPath;
-                    }
-
-                    // Look in Program Files\steamapps
-                    subPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "HuniePop");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found HuniePop (Steam) at: " + subPath);
-                        return subPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("HuniePop (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
@@ -972,5 +973,7 @@ public class HuniePopManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        huniePath = GetHuniePopPath();
     }
 }

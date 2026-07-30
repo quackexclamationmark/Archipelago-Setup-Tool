@@ -18,6 +18,10 @@ public class WitnessManualDL : MonoBehaviour
     public Button epicButton;
     public TextMeshProUGUI platformStatus;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "The Witness";
+    public string epicGameFolderName = "TheWitness";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installWitnessAPToggle;
 
@@ -45,6 +49,8 @@ public class WitnessManualDL : MonoBehaviour
     public class WitnessConfig
     {
         public string thewitnessAP;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     void Start()
@@ -187,7 +193,6 @@ public class WitnessManualDL : MonoBehaviour
         bool witnessap = installWitnessAPToggle != null && installWitnessAPToggle.isOn;
         bool launchAfter = launchAfterSetupToggle != null && launchAfterSetupToggle.isOn;
 
-        // Allow starting if either installation is selected OR launch-after is selected.
         if (!witnessap && !launchAfter)
         {
             ShowInfo("Please select an option to install or enable 'Launch After Setup'.");
@@ -230,7 +235,6 @@ public class WitnessManualDL : MonoBehaviour
             ShowInfo("You can now launch 'The.Witness.Randomizer.for.Archipelago.exe' in your game folder.");
             yield return StartCoroutine(LaunchWitness());
 
-            // NOTE: Removed automatic launch of The.Witness.Randomizer.for.Archipelago.exe as requested.
             ShowInfo("Launch finished.");
         }
         else
@@ -365,6 +369,9 @@ public class WitnessManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        witnessPath = GetWitnessPath();
+        UpdatePlatformStatus();
     }
 
     IEnumerator LaunchWitness()
@@ -466,14 +473,8 @@ public class WitnessManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "The Witness"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "The Witness"),
-            @"D:\Steam\steamapps\common\The Witness",
-            @"D:\SteamLibrary\steamapps\common\The Witness",
-            @"D:\steamapps\common\The Witness",
-            @"E:\Steam\steamapps\common\The Witness",
-            @"E:\SteamLibrary\steamapps\common\The Witness",
-            @"E:\steamapps\common\The Witness",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -482,82 +483,56 @@ public class WitnessManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found The Witness (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string witPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "The Witness");
-                    if (Directory.Exists(witPath))
-                    {
-                        UnityEngine.Debug.Log("Found The Witness (Steam) at: " + witPath);
-                        return witPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    witPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "The Witness");
-                    if (Directory.Exists(witPath))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found The Witness (Steam) at: " + witPath);
-                        return witPath;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    witPath = Path.Combine(drive.Name, "steamapps", "common", "The Witness");
-                    if (Directory.Exists(witPath))
-                    {
-                        UnityEngine.Debug.Log("Found The Witness (Steam) at: " + witPath);
-                        return witPath;
-                    }
-
-                    witPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "The Witness");
-                    if (Directory.Exists(witPath))
-                    {
-                        UnityEngine.Debug.Log("Found The Witness (Steam) at: " + witPath);
-                        return witPath;
-                    }
-
-                    witPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "The Witness");
-                    if (Directory.Exists(witPath))
-                    {
-                        UnityEngine.Debug.Log("Found The Witness (Steam) at: " + witPath);
-                        return witPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("The Witness (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
     string GetWitnessEpicPath()
     {
         string[] quickPaths = new string[]
-        {
+       {
             @"C:\Program Files\Epic Games\TheWitness",
-            @"D:\Epic Games\TheWitness",
-            @"E:\Epic Games\TheWitness",
             @"C:\Games\Epic\TheWitness",
-            @"D:\Games\Epic\TheWitness",
-            @"E:\Games\Epic\TheWitness",
-            @"C:\Epic\TheWitness",
-            @"D:\Epic\TheWitness",
-            @"E:\Epic\TheWitness",
-        };
+       };
 
         foreach (string path in quickPaths)
         {
@@ -565,14 +540,13 @@ public class WitnessManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found The Witness (Epic) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        // Cherche dans Epic Games Launcher directory
         try
         {
             string epicBaseDir = Path.Combine(
@@ -582,16 +556,14 @@ public class WitnessManualDL : MonoBehaviour
 
             if (Directory.Exists(epicBaseDir))
             {
-                // Cherche le manifest pour The Witness
                 string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
                 foreach (string manifest in manifests)
                 {
                     try
                     {
                         string content = File.ReadAllText(manifest);
-                        if (content.Contains("The Witness") || content.Contains("TheWitness"))
+                        if (content.Contains("TheWitness") || content.Contains("TheWitness"))
                         {
-                            // Extract install location from manifest
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
                             System.Text.RegularExpressions.Match match = regex.Match(content);
 
@@ -600,7 +572,7 @@ public class WitnessManualDL : MonoBehaviour
                                 string epicPath = match.Groups[1].Value;
                                 if (Directory.Exists(epicPath))
                                 {
-                                    UnityEngine.Debug.Log("Found The Witness (Epic) at: " + epicPath);
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
                                     return epicPath;
                                 }
                             }
@@ -612,38 +584,39 @@ public class WitnessManualDL : MonoBehaviour
         }
         catch { }
 
-        // Scan all drives
-        try
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "TheWitness");
-                    if (Directory.Exists(epicPath))
-                    {
-                        UnityEngine.Debug.Log("Found The Witness (Epic) at: " + epicPath);
-                        return epicPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "TheWitness");
-                    if (Directory.Exists(epicPath))
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found The Witness (Epic) at: " + epicPath);
-                        return epicPath;
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("The Witness (Epic) not found.");
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 }

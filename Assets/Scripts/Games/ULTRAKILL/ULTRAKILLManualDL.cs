@@ -17,6 +17,9 @@ public class ULTRAKILLManualDL : MonoBehaviour
     public FileDownloader.FileData ultrakillAPWorld;
     public FileDownloader.FileData ultrakillPluginConfigurator;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "ULTRAKILL";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installBepInExToggle;
     public Toggle installArchipelagoToggle;
@@ -54,6 +57,7 @@ public class ULTRAKILLManualDL : MonoBehaviour
         public string ultrakillApworld;
         public string ultrakillBepInEx;
         public string ultrakillPluginConfigurator;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -160,13 +164,58 @@ public class ULTRAKILLManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(ultrakillPath))
+        ultrakillPath = GetULTRAKILLPath();
+
+        bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
+        bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
+        bool apmod = installArchipelagoToggle != null && installArchipelagoToggle.isOn;
+        bool pluginConfigurator = installPluginConfiguratorToggle != null && installPluginConfiguratorToggle.isOn;
+        bool needsGamePath = bep || apmod;
+
+        if (needsGamePath && (string.IsNullOrEmpty(ultrakillPath) || !Directory.Exists(ultrakillPath)))
         {
-            ShowInfo("ULTRAKILL path not found. Please check Steam installation.");
+            ShowInfo("Game path not found. Please check Steam installation.");
+            return;
+        }
+
+        int count =
+            (apworld ? 1 : 0) +
+            (bep ? 1 : 0) +
+            (pluginConfigurator ? 1 : 0) +
+            (apmod ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
+        if (apworld && count == 1)
+        {
+            StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching ULTRAKILL...");
+            LaunchULTRAKILL();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -478,6 +527,8 @@ public class ULTRAKILLManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        ultrakillPath = GetULTRAKILLPath();
     }
 
     void LaunchULTRAKILL()
@@ -635,12 +686,8 @@ public class ULTRAKILLManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "ULTRAKILL"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "ULTRAKILL"),
-            @"D:\Steam\steamapps\common\ULTRAKILL",
-            @"D:\SteamLibrary\steamapps\common\ULTRAKILL",
-            @"E:\Steam\steamapps\common\ULTRAKILL",
-            @"E:\SteamLibrary\steamapps\common\ULTRAKILL",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -649,42 +696,46 @@ public class ULTRAKILLManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found ULTRAKILL at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string ukPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "ULTRAKILL");
-                    if (Directory.Exists(ukPath))
-                        return ukPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    ukPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "ULTRAKILL");
-                    if (Directory.Exists(ukPath))
-                        return ukPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    ukPath = Path.Combine(drive.Name, "steamapps", "common", "ULTRAKILL");
-                    if (Directory.Exists(ukPath))
-                        return ukPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("ULTRAKILL not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 

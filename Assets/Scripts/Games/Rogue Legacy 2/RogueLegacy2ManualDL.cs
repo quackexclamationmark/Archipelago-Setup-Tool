@@ -21,6 +21,10 @@ public class RogueLegacy2ManualDL : MonoBehaviour
     public Button epicButton;
     public TextMeshProUGUI platformStatus;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Rogue Legacy 2";
+    public string epicGameFolderName = "RogueLegacy2";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
@@ -58,6 +62,8 @@ public class RogueLegacy2ManualDL : MonoBehaviour
         public string roguelegacy2AP;
         public string roguelegacy2Apworld;
         public string roguelegacy2BepInEx;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     [System.Serializable]
@@ -246,27 +252,54 @@ public class RogueLegacy2ManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (!configLoaded)
-        {
-            ShowInfo("Loading configuration, please wait...");
-            StartCoroutine(WaitForConfigThenSetup());
-            return;
-        }
-
-        if (string.IsNullOrEmpty(gamePath))
-        {
-            string platform = isEpic ? "Epic" : "Steam";
-            ShowInfo("Rogue Legacy 2 not found in " + platform + ". Please check installation.");
-            return;
-        }
+        gamePath = GetGamePath();
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool apmod = installAPModToggle == null || installAPModToggle.isOn;
         bool bepinex = installBepInExToggle == null || installBepInExToggle.isOn;
+        bool needsGamePath = apmod || bepinex || !apworld;
+
+        if (needsGamePath && string.IsNullOrEmpty(gamePath))
+        {
+            string platform = isEpic ? "Epic" : "Steam";
+            ShowInfo("Game not found on " + platform + ". Please check installation.");
+            return;
+        }
 
         int count = (apworld ? 1 : 0) + (apmod ? 1 : 0) + (bepinex ? 1 : 0);
 
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one option to install.");
+            return;
+        }
+
+        if (apworld && count == 1)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
+
         StartCoroutine(SetupWithTracking(apworld, apmod, bepinex));
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            ShowInfo("Launching Rogue Legacy 2...");
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     IEnumerator SetupWithTracking(bool installAPWorld, bool installAPMod, bool installBepInEx)
@@ -557,7 +590,6 @@ public class RogueLegacy2ManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        // Target paths
         string[] targetPaths = new string[]
         {
             Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
@@ -617,6 +649,20 @@ public class RogueLegacy2ManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -694,6 +740,9 @@ public class RogueLegacy2ManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        gamePath = GetGamePath();
+        UpdatePlatformStatus();
     }
 
     void LaunchGame()
@@ -844,15 +893,6 @@ public class RogueLegacy2ManualDL : MonoBehaviour
             infoPanel.SetActive(false);
     }
 
-    IEnumerator WaitForConfigThenSetup()
-    {
-        while (!configLoaded)
-            yield return new WaitForSeconds(0.1f);
-
-        CloseInfoPanel();
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
-    }
-
     string GetGamePath()
     {
         if (isEpic)
@@ -863,20 +903,10 @@ public class RogueLegacy2ManualDL : MonoBehaviour
 
     string GetGameSteamPath()
     {
-        string gameName = "Rogue Legacy 2";
-
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", gameName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", gameName),
-            Path.Combine(@"D:\Steam", "steamapps", "common", gameName),
-            Path.Combine(@"D:\SteamLibrary", "steamapps", "common", gameName),
-            Path.Combine(@"D:\steamapps", "common", gameName),
-            Path.Combine(@"E:\Steam", "steamapps", "common", gameName),
-            Path.Combine(@"E:\SteamLibrary", "steamapps", "common", gameName),
-            Path.Combine(@"E:\steamapps", "common", gameName),
-            Path.Combine(@"E:\Program Files (x86)", "steamapps", "common", gameName),
-            Path.Combine(@"E:\Program Files", "steamapps", "common", gameName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -885,82 +915,56 @@ public class RogueLegacy2ManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Rogue Legacy 2 (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string gamePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                    {
-                        UnityEngine.Debug.Log("Found Rogue Legacy 2 (Steam) at: " + gamePath);
-                        return gamePath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    gamePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Rogue Legacy 2 (Steam) at: " + gamePath);
-                        return gamePath;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    gamePath = Path.Combine(drive.Name, "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                    {
-                        UnityEngine.Debug.Log("Found Rogue Legacy 2 (Steam) at: " + gamePath);
-                        return gamePath;
-                    }
-
-                    gamePath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                    {
-                        UnityEngine.Debug.Log("Found Rogue Legacy 2 (Steam) at: " + gamePath);
-                        return gamePath;
-                    }
-
-                    gamePath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                    {
-                        UnityEngine.Debug.Log("Found Rogue Legacy 2 (Steam) at: " + gamePath);
-                        return gamePath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Rogue Legacy 2 (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
     string GetGameEpicPath()
     {
         string[] quickPaths = new string[]
-        {
+       {
             @"C:\Program Files\Epic Games\RogueLegacy2",
-            @"D:\Epic Games\RogueLegacy2",
-            @"E:\Epic Games\RogueLegacy2",
             @"C:\Games\Epic\RogueLegacy2",
-            @"D:\Games\Epic\RogueLegacy2",
-            @"E:\Games\Epic\RogueLegacy2",
-            @"C:\Epic\RogueLegacy2",
-            @"D:\Epic\RogueLegacy2",
-            @"E:\Epic\RogueLegacy2",
-        };
+       };
 
         foreach (string path in quickPaths)
         {
@@ -968,14 +972,13 @@ public class RogueLegacy2ManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Rogue Legacy 2 (Epic) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        // Search in Epic Games Launcher directory
         try
         {
             string epicBaseDir = Path.Combine(
@@ -985,16 +988,14 @@ public class RogueLegacy2ManualDL : MonoBehaviour
 
             if (Directory.Exists(epicBaseDir))
             {
-                // Search for Rogue Legacy 2 manifest
                 string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
                 foreach (string manifest in manifests)
                 {
                     try
                     {
                         string content = File.ReadAllText(manifest);
-                        if (content.Contains("RogueLegacy2"))
+                        if (content.Contains("RogueLegacy2") || content.Contains("RogueLegacy2"))
                         {
-                            // Extract install location from manifest
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
                             System.Text.RegularExpressions.Match match = regex.Match(content);
 
@@ -1003,7 +1004,7 @@ public class RogueLegacy2ManualDL : MonoBehaviour
                                 string epicPath = match.Groups[1].Value;
                                 if (Directory.Exists(epicPath))
                                 {
-                                    UnityEngine.Debug.Log("Found Rogue Legacy 2 (Epic) at: " + epicPath);
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
                                     return epicPath;
                                 }
                             }
@@ -1015,38 +1016,39 @@ public class RogueLegacy2ManualDL : MonoBehaviour
         }
         catch { }
 
-        // Scan all drives
-        try
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "RogueLegacy2");
-                    if (Directory.Exists(epicPath))
-                    {
-                        UnityEngine.Debug.Log("Found Rogue Legacy 2 (Epic) at: " + epicPath);
-                        return epicPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "RogueLegacy2");
-                    if (Directory.Exists(epicPath))
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Rogue Legacy 2 (Epic) at: " + epicPath);
-                        return epicPath;
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Rogue Legacy 2 (Epic) not found.");
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 

@@ -16,6 +16,9 @@ public class BO3ManualDL : MonoBehaviour
     public FileDownloader.FileData bo3AP;
     public FileDownloader.FileData bo3APDownpatch;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Call of Duty Black Ops III";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installApworldToggle;
     public Toggle installAPToggle;
@@ -53,6 +56,7 @@ public class BO3ManualDL : MonoBehaviour
         public string bo3Apworld;
         public string bo3AP;
         public string bo3APDownpatch;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -187,27 +191,29 @@ public class BO3ManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (!configLoaded)
-        {
-            ShowInfo("Loading configuration, please wait...");
-            StartCoroutine(WaitForConfigThenSetup());
-            return;
-        }
+        gamePath = GetGamePath();
 
-        if (string.IsNullOrEmpty(gamePath))
+        bool apworld = installApworldToggle == null || installApworldToggle.isOn;
+        bool ap = installAPToggle == null || installAPToggle.isOn;
+        bool needsGamePath = ap;
+
+        if (needsGamePath && (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath)))
         {
             ShowInfo("Game path not found. Please check Steam installation.");
             return;
         }
 
-        bool apworld = installApworldToggle == null || installApworldToggle.isOn;
-        bool ap = installAPToggle == null || installAPToggle.isOn;
-
         int count = (apworld ? 1 : 0) + (ap ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
 
         if (apworld && count == 1)
         {
-            StartCoroutine(ApworldOnlyFlow());
+            StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
@@ -220,8 +226,29 @@ public class BO3ManualDL : MonoBehaviour
         StartCoroutine(InstallFlow());
     }
 
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallApworld();
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            ShowInfo("Launching BO3...");
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
+    }
+
     private void ExecuteRevert()
     {
+        gamePath = GetGamePath();
+
         CleanupProcesses();
         StartCoroutine(RemoveInstalledFilesAsync());
     }
@@ -237,7 +264,6 @@ public class BO3ManualDL : MonoBehaviour
             string bo3ArchipelagoPath = Path.Combine(modsPath, "bo3_archipelago");
             string archipelagoJsonPath = Path.Combine(gamePath, "archipelago.json");
 
-            // Delete bo3_archipelago folder
             if (Directory.Exists(bo3ArchipelagoPath))
             {
                 try
@@ -257,7 +283,6 @@ public class BO3ManualDL : MonoBehaviour
                 UnityEngine.Debug.LogWarning("bo3_archipelago folder not found at: " + bo3ArchipelagoPath);
             }
 
-            // Delete archipelago.json
             if (File.Exists(archipelagoJsonPath))
             {
                 try
@@ -281,19 +306,6 @@ public class BO3ManualDL : MonoBehaviour
             ShowInfo("Error during revert:\n" + e.Message);
             UnityEngine.Debug.LogError("Revert error: " + e);
         }
-    }
-
-    IEnumerator ApworldOnlyFlow()
-    {
-        gamePath = GetGamePath();
-
-        if (string.IsNullOrEmpty(gamePath))
-            yield break;
-
-        yield return InstallApworld();
-
-        if (launchGameToggle == null || launchGameToggle.isOn)
-            LaunchGame();
     }
 
     IEnumerator APOnlyFlow()
@@ -412,7 +424,6 @@ public class BO3ManualDL : MonoBehaviour
 
             yield return downloader.DownloadAndExtract(apFile, Application.persistentDataPath, extractPath);
 
-            // Look for bo3_archipelago folder inside the extraction
             string nestedArchipelagoPath = Path.Combine(extractPath, "bo3_archipelago");
             string sourcePath = extractPath;
 
@@ -559,6 +570,20 @@ public class BO3ManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy Apworld: " + e.Message);
             ShowInfo("ERROR: Failed to install Apworld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -582,11 +607,6 @@ public class BO3ManualDL : MonoBehaviour
                 UnityEngine.Debug.Log("Download complete! File size: " + new System.IO.FileInfo(savePath).Length + " bytes");
             }
         }
-    }
-
-    void SafeDeleteFile(string path)
-    {
-        StartCoroutine(DeleteFileForce(path));
     }
 
     IEnumerator DeleteFileForce(string path)
@@ -707,29 +727,12 @@ public class BO3ManualDL : MonoBehaviour
             infoPanel.SetActive(false);
     }
 
-    IEnumerator WaitForConfigThenSetup()
-    {
-        while (!configLoaded)
-            yield return new WaitForSeconds(0.1f);
-
-        CloseInfoPanel();
-        ShowConfirmation("Are you sure you want to install Black Ops 3 Archipelago?", "Setup");
-    }
-
     string GetGamePath()
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Call of Duty Black Ops III"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Call of Duty Black Ops III"),
-            @"D:\Steam\steamapps\common\Call of Duty Black Ops III",
-            @"D:\SteamLibrary\steamapps\common\Call of Duty Black Ops III",
-            @"D:\steamapps\common\Call of Duty Black Ops III",
-            @"E:\Steam\steamapps\common\Call of Duty Black Ops III",
-            @"E:\SteamLibrary\steamapps\common\Call of Duty Black Ops III",
-            @"E:\steamapps\common\Call of Duty Black Ops III",
-            @"E:\Program Files (x86)\steamapps\common\Call of Duty Black Ops III",
-            @"E:\Program Files\steamapps\common\Call of Duty Black Ops III",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -737,47 +740,47 @@ public class BO3ManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string gamePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Call of Duty Black Ops III");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    gamePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Call of Duty Black Ops III");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    gamePath = Path.Combine(drive.Name, "steamapps", "common", "Call of Duty Black Ops III");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    gamePath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Call of Duty Black Ops III");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    gamePath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Call of Duty Black Ops III");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 

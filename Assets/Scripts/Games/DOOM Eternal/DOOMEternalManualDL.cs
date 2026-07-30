@@ -17,6 +17,9 @@ public class DOOMEternalManualDL : MonoBehaviour
     public FileDownloader.FileData doometernalMeathook;
     public FileDownloader.FileData doometernalApworld;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "DOOMEternal";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installModInjectorToggle;
     public Toggle installAPToggle;
@@ -58,6 +61,7 @@ public class DOOMEternalManualDL : MonoBehaviour
         public string doometernalAP;
         public string doometernalMeathook;
         public string doometernalApworld;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -161,21 +165,24 @@ public class DOOMEternalManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(doometernalPath))
+        doometernalPath = GetDOOMEternalPath();
+
+        bool modInjector = installModInjectorToggle == null || installModInjectorToggle.isOn;
+        bool ap = installAPToggle != null && installAPToggle.isOn;
+        bool meathook = installMeathookToggle != null && installMeathookToggle.isOn;
+        bool apworld = installAPWorldToggle != null && installAPWorldToggle.isOn;
+        bool needsGamePath = modInjector || ap || meathook;
+
+        if (needsGamePath && (string.IsNullOrEmpty(doometernalPath) || !Directory.Exists(doometernalPath)))
         {
-            ShowInfo("DOOM Eternal path not found. Please check Steam installation.");
+            ShowInfo("Game path not found. Please check your installation.");
             return;
         }
 
-        bool modInjector = installModInjectorToggle == null || installModInjectorToggle.isOn;
-        bool ap_install = installAPToggle != null && installAPToggle.isOn;
-        bool meathook_install = installMeathookToggle != null && installMeathookToggle.isOn;
-        bool apworld = installAPWorldToggle != null && installAPWorldToggle.isOn;
-
         int count =
             (modInjector ? 1 : 0) +
-            (ap_install ? 1 : 0) +
-            (meathook_install ? 1 : 0) +
+            (ap ? 1 : 0) +
+            (meathook ? 1 : 0) +
             (apworld ? 1 : 0);
 
         if (modInjector && count == 1)
@@ -184,13 +191,13 @@ public class DOOMEternalManualDL : MonoBehaviour
             return;
         }
 
-        if (ap_install && count == 1)
+        if (ap && count == 1)
         {
             StartCoroutine(APOnlyFlow());
             return;
         }
 
-        if (meathook_install && count == 1)
+        if (meathook && count == 1)
         {
             StartCoroutine(MeathookOnlyFlow());
             return;
@@ -202,12 +209,38 @@ public class DOOMEternalManualDL : MonoBehaviour
             return;
         }
 
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching DOOM Eternal...");
+            LaunchDOOMEternal();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
     {
         doometernalPath = GetDOOMEternalPath();
+
         doometernalBasePath = Path.Combine(doometernalPath, "base");
         modsPath = Path.Combine(doometernalPath, "Mods");
 
@@ -683,6 +716,20 @@ public class DOOMEternalManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -763,20 +810,6 @@ public class DOOMEternalManualDL : MonoBehaviour
         ShowInfo("Installation complete!");
     }
 
-    IEnumerator APWorldOnlyFlow()
-    {
-        ShowInfo("Installing APWorld...");
-        yield return InstallAPWorld();
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-        {
-            LaunchDOOMEternal();
-            yield return new WaitForSeconds(2f);
-        }
-
-        ShowInfo("Installation complete!");
-    }
-
     IEnumerator LoadRemoteConfig()
     {
         string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
@@ -803,6 +836,8 @@ public class DOOMEternalManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        doometernalPath = GetDOOMEternalPath();
     }
 
     void LaunchDOOMEternal()
@@ -864,27 +899,6 @@ public class DOOMEternalManualDL : MonoBehaviour
                 Directory.Delete(path, true);
         }
         catch { }
-    }
-
-    void MoveDirectory(string source, string target)
-    {
-        if (!Directory.Exists(source))
-            return;
-
-        Directory.CreateDirectory(target);
-
-        foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
-        {
-            string relativePath = file.Substring(source.Length + 1);
-            string dest = Path.Combine(target, relativePath);
-
-            Directory.CreateDirectory(Path.GetDirectoryName(dest));
-
-            if (File.Exists(dest))
-                File.Delete(dest);
-
-            File.Move(file, dest);
-        }
     }
 
     void ShowInfo(string message)
@@ -1012,16 +1026,8 @@ public class DOOMEternalManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "DOOMEternal"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "DOOMEternal"),
-            @"D:\Steam\steamapps\common\DOOMEternal",
-            @"D:\SteamLibrary\steamapps\common\DOOMEternal",
-            @"D:\steamapps\common\DOOMEternal",
-            @"E:\Steam\steamapps\common\DOOMEternal",
-            @"E:\SteamLibrary\steamapps\common\DOOMEternal",
-            @"E:\steamapps\common\DOOMEternal",
-            @"E:\Program Files (x86)\steamapps\common\DOOMEternal",
-            @"E:\Program Files\steamapps\common\DOOMEternal",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -1029,52 +1035,47 @@ public class DOOMEternalManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Search Steam\steamapps
-                    string doometernalPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "DOOMEternal");
-                    if (Directory.Exists(doometernalPath))
-                        return doometernalPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Search SteamLibrary\steamapps
-                    doometernalPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "DOOMEternal");
-                    if (Directory.Exists(doometernalPath))
-                        return doometernalPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Search steamapps at root
-                    doometernalPath = Path.Combine(drive.Name, "steamapps", "common", "DOOMEternal");
-                    if (Directory.Exists(doometernalPath))
-                        return doometernalPath;
-
-                    // Search Program Files (x86)\steamapps
-                    doometernalPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "DOOMEternal");
-                    if (Directory.Exists(doometernalPath))
-                        return doometernalPath;
-
-                    // Search Program Files\steamapps
-                    doometernalPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "DOOMEternal");
-                    if (Directory.Exists(doometernalPath))
-                        return doometernalPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

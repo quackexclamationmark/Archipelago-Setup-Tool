@@ -16,6 +16,9 @@ public class IAYBManualDL : MonoBehaviour
     public FileDownloader.FileData iaybAP;
     public FileDownloader.FileData iaybBepInEx;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "I Am Your Beast";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
@@ -52,6 +55,7 @@ public class IAYBManualDL : MonoBehaviour
         public string iaybAP;
         public string iaybApworld;
         public string iaybBepInEx;
+        public string[] steamSearchPaths;
     }
 
     [System.Serializable]
@@ -104,7 +108,6 @@ public class IAYBManualDL : MonoBehaviour
             cancelButton.onClick.AddListener(OnCancel);
     }
 
-    // TOGGLE RULE: If fullClearBepInEx is true, clearAPMods must be disabled
     void OnFullClearChanged(bool value)
     {
         if (clearAPModsToggle != null)
@@ -112,11 +115,6 @@ public class IAYBManualDL : MonoBehaviour
             clearAPModsToggle.isOn = !value ? clearAPModsToggle.isOn : false;
             clearAPModsToggle.interactable = !value;
         }
-    }
-
-    void CleanupProcesses()
-    {
-        CloseGame();
     }
 
     void ApplyGameConfig()
@@ -187,27 +185,53 @@ public class IAYBManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (!configLoaded)
-        {
-            ShowInfo("Loading configuration, please wait...");
-            StartCoroutine(WaitForConfigThenSetup());
-            return;
-        }
+        gamePath = GetGamePath();
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
+        bool apmod = installAPModToggle == null || installAPModToggle.isOn;
+        bool bepinex = installBepInExToggle == null || installBepInExToggle.isOn;
 
-        if (!apworld && string.IsNullOrEmpty(gamePath))
+        bool needsGamePath = bepinex || apmod;
+
+        if (needsGamePath && (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath)))
         {
             ShowInfo("Game path not found. Please check your installation.");
             return;
         }
 
-        bool apmod = installAPModToggle == null || installAPModToggle.isOn;
-        bool bepinex = installBepInExToggle == null || installBepInExToggle.isOn;
-
         int count = (apworld ? 1 : 0) + (apmod ? 1 : 0) + (bepinex ? 1 : 0);
 
+        if (apworld && count == 1 && !bepinex)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
         StartCoroutine(SetupWithTracking(apworld, apmod, bepinex));
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     IEnumerator SetupWithTracking(bool installAPWorld, bool installAPMod, bool installBepInEx)
@@ -262,7 +286,6 @@ public class IAYBManualDL : MonoBehaviour
             return;
         }
 
-        // At this point fullClean == true
         bool hasOtherMods = HasOtherMods(pluginsPath);
 
         if (fullClean && hasOtherMods && !pendingFullCleanConfirmation)
@@ -328,7 +351,6 @@ public class IAYBManualDL : MonoBehaviour
             if (dirName == "IAmYourBeast Archipelago")
                 continue;
 
-            // If any other directory found => other mod present
             return true;
         }
 
@@ -385,7 +407,6 @@ public class IAYBManualDL : MonoBehaviour
             yield break;
         }
 
-        // Look for BepInExPack folder inside the extracted content
         string bepinexPackPath = Path.Combine(extractPath, "BepInExPack");
 
         if (!Directory.Exists(bepinexPackPath))
@@ -395,12 +416,10 @@ public class IAYBManualDL : MonoBehaviour
             yield break;
         }
 
-        // Move all content from BepInExPack to gamePath
         try
         {
             CopyAllFromExtract(bepinexPackPath, gamePath);
 
-            // Create plugins folder in BepInEx if it doesn't exist
             string pluginsPath = Path.Combine(gamePath, "BepInEx", "plugins");
             Directory.CreateDirectory(pluginsPath);
 
@@ -463,7 +482,6 @@ public class IAYBManualDL : MonoBehaviour
             }
             else
             {
-                // If no plugins folder, copy all files directly
                 foreach (string file in Directory.GetFiles(extractPath, "*", SearchOption.AllDirectories))
                 {
                     string relativePath = file.Substring(extractPath.Length).TrimStart(Path.DirectorySeparatorChar);
@@ -600,6 +618,20 @@ public class IAYBManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -677,6 +709,8 @@ public class IAYBManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        gamePath = GetGamePath();
     }
 
     void LaunchGame()
@@ -719,23 +753,6 @@ public class IAYBManualDL : MonoBehaviour
             ShowInfo("Error launching game:\n" + e.Message);
             UnityEngine.Debug.LogError("Launch error: " + e);
         }
-    }
-
-    void CloseGame()
-    {
-        try
-        {
-            Process[] processes = Process.GetProcessesByName("I Am Your Beast");
-            foreach (Process p in processes)
-            {
-                if (!p.HasExited)
-                {
-                    p.Kill();
-                    p.Dispose();
-                }
-            }
-        }
-        catch { }
     }
 
     void SafeDeleteDirectory(string path)
@@ -827,79 +844,60 @@ public class IAYBManualDL : MonoBehaviour
             infoPanel.SetActive(false);
     }
 
-    IEnumerator WaitForConfigThenSetup()
-    {
-        while (!configLoaded)
-            yield return new WaitForSeconds(0.1f);
-
-        CloseInfoPanel();
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
-    }
-
     string GetGamePath()
     {
-        string gameName = "I Am Your Beast";
-
         string[] quickPaths = new string[]
-        {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", gameName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", gameName),
-            Path.Combine(@"D:\Steam", "steamapps", "common", gameName),
-            Path.Combine(@"D:\SteamLibrary", "steamapps", "common", gameName),
-            Path.Combine(@"D:\steamapps", "common", gameName),
-            Path.Combine(@"E:\Steam", "steamapps", "common", gameName),
-            Path.Combine(@"E:\SteamLibrary", "steamapps", "common", gameName),
-            Path.Combine(@"E:\steamapps", "common", gameName),
-            Path.Combine(@"E:\Program Files (x86)", "steamapps", "common", gameName),
-            Path.Combine(@"E:\Program Files", "steamapps", "common", gameName),
-        };
+                {
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
+                };
 
         foreach (string path in quickPaths)
         {
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string gamePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    gamePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    gamePath = Path.Combine(drive.Name, "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    gamePath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    gamePath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 

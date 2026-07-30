@@ -9,7 +9,10 @@ public class DS3ManualDL : MonoBehaviour
     public FileDownloader downloader;
 
     [Header("DS3 FILE")]
-    public FileDownloader.FileData ds3AP; // ex: DS3.Archipelago.4.0.2-windows.zip
+    public FileDownloader.FileData ds3AP;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "DARK SOULS III";
 
     [Header("CONFIRMATION PANEL")]
     public GameObject confirmationPanel;
@@ -31,6 +34,7 @@ public class DS3ManualDL : MonoBehaviour
     public class DS3Config
     {
         public string ds3AP;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -64,13 +68,11 @@ public class DS3ManualDL : MonoBehaviour
         ds3AP.fileName = "DS3-Archipelago.zip";
     }
 
-    // Kicks off installation (no toggle because DS3AP is the only thing installed)
     public void RunSetup()
     {
         ShowConfirmation("Are you sure you want to install the DS3-Archipelago folder?", "Setup");
     }
 
-    // Removes the DS3-Archipelago folder created by the installer
     public void RevertAll()
     {
         ShowConfirmation("Are you sure you want to remove the DS3-Archipelago folder?", "Revert");
@@ -232,6 +234,8 @@ public class DS3ManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        ds3Path = GetDS3Path();
     }
 
     void SafeDeleteDirectory(string path)
@@ -285,70 +289,62 @@ public class DS3ManualDL : MonoBehaviour
 
     string GetDS3Path()
     {
-        string[] candidateNames = new string[]
+        string[] quickPaths = new string[]
         {
-            "DARK SOULS III",
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
-        string[] quickRoots = new string[]
+        foreach (string path in quickPaths)
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common"),
-            @"D:\Steam\steamapps\common",
-            @"D:\SteamLibrary\steamapps\common",
-            @"E:\Steam\steamapps\common",
-            @"E:\SteamLibrary\steamapps\common",
-        };
+            UnityEngine.Debug.Log("Checking path: [" + path + "] Exists=" + Directory.Exists(path));
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
+                    return path;
+                }
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.Log("Exception checking path: " + e.Message);
+            }
+        }
 
-        foreach (string root in quickRoots)
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
             try
             {
-                foreach (string name in candidateNames)
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string path = Path.Combine(root, name);
-                    if (Directory.Exists(path))
-                        return path;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
             }
             catch { }
         }
 
-        try
-        {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
-            {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
-
-                try
-                {
-                    foreach (string name in candidateNames)
-                    {
-                        // common locations
-                        string[] probes = new string[]
-                        {
-                            Path.Combine(drive.Name, "Steam", "steamapps", "common", name),
-                            Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", name),
-                            Path.Combine(drive.Name, "steamapps", "common", name),
-                            Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", name),
-                            Path.Combine(drive.Name, "Program Files", "steamapps", "common", name),
-                        };
-
-                        foreach (string probe in probes)
-                        {
-                            if (Directory.Exists(probe))
-                                return probe;
-                        }
-                    }
-                }
-                catch { }
-            }
-        }
-        catch { }
-
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

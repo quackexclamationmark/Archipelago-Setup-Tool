@@ -15,6 +15,9 @@ public class Spelunky2ManualDL : MonoBehaviour
     public FileDownloader.FileData spelunky2Playlunky;
     public FileDownloader.FileData spelunky2AP;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Spelunky 2";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installSpelunky2ApworldToggle;
     public Toggle installSpelunky2PlaylunkyToggle;
@@ -52,6 +55,7 @@ public class Spelunky2ManualDL : MonoBehaviour
         public string spelunky2Apworld;
         public string spelunky2Playlunky;
         public string spelunky2AP;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -152,24 +156,33 @@ public class Spelunky2ManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(spelunky2Path))
-        {
-            ShowInfo("Spelunky 2 path not found. Please check Steam installation.");
-            return;
-        }
+        spelunky2Path = GetSpelunky2Path();
 
         bool apworld = installSpelunky2ApworldToggle == null || installSpelunky2ApworldToggle.isOn;
         bool playlunky = installSpelunky2PlaylunkyToggle != null && installSpelunky2PlaylunkyToggle.isOn;
-        bool archipelago = installSpelunky2APToggle != null && installSpelunky2APToggle.isOn;
+        bool ap = installSpelunky2APToggle != null && installSpelunky2APToggle.isOn;
+        bool needsGamePath = playlunky || ap;
+
+        if (needsGamePath && (string.IsNullOrEmpty(spelunky2Path) || !Directory.Exists(spelunky2Path)))
+        {
+            ShowInfo("Game path not found. Please check Steam installation.");
+            return;
+        }
 
         int count =
             (apworld ? 1 : 0) +
             (playlunky ? 1 : 0) +
-            (archipelago ? 1 : 0);
+            (ap ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
 
         if (apworld && count == 1)
         {
-            StartCoroutine(ApWorldOnlyFlow());
+            StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
@@ -179,12 +192,56 @@ public class Spelunky2ManualDL : MonoBehaviour
             return;
         }
 
+        if (ap && count == 1)
+        {
+            StartCoroutine(APModOnlyFlow());
+            return;
+        }
+
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            LaunchSpelunky2();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
+    }
+
+    IEnumerator APModOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP Mod...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallSpelunky2AP();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Spelunky 2...");
+            LaunchSpelunky2();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
     {
         spelunky2Path = GetSpelunky2Path();
+
         modsPath = Path.Combine(spelunky2Path, "Mods");
 
         if (string.IsNullOrEmpty(spelunky2Path))
@@ -265,7 +322,6 @@ public class Spelunky2ManualDL : MonoBehaviour
             }
         }
 
-        // Vérifie aussi les fichiers, mais ignore les fichiers de version et autres fichiers système
         string[] files = Directory.GetFiles(modsPath);
         System.Text.RegularExpressions.Regex versionPattern = new System.Text.RegularExpressions.Regex(@"Spelunky2 AP Setup Version .+\.txt");
 
@@ -273,7 +329,6 @@ public class Spelunky2ManualDL : MonoBehaviour
         {
             string fileName = Path.GetFileName(file);
 
-            // Ignore les fichiers de version
             if (!versionPattern.IsMatch(fileName))
             {
                 UnityEngine.Debug.LogWarning("Other file detected in Mods: " + fileName);
@@ -281,13 +336,11 @@ public class Spelunky2ManualDL : MonoBehaviour
             }
         }
 
-        // Vérifie les fichiers dans Packs, mais ignore les fichiers système
         string[] packsFiles = Directory.GetFiles(packsPath);
         foreach (string file in packsFiles)
         {
             string fileName = Path.GetFileName(file);
 
-            // Ignore load_order.txt et .db
             if (fileName != "load_order.txt" && fileName != ".db")
             {
                 UnityEngine.Debug.LogWarning("Other file detected in Packs: " + fileName);
@@ -311,7 +364,7 @@ public class Spelunky2ManualDL : MonoBehaviour
         if (installSpelunky2ApworldToggle == null || installSpelunky2ApworldToggle.isOn)
         {
             ShowInfo("Installing APWorld...");
-            yield return InstallSpelunky2APWorld();
+            yield return InstallAPWorld();
         }
 
         if (installSpelunky2PlaylunkyToggle != null && installSpelunky2PlaylunkyToggle.isOn)
@@ -343,7 +396,7 @@ public class Spelunky2ManualDL : MonoBehaviour
         yield break;
     }
 
-    IEnumerator InstallSpelunky2APWorld()
+    IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
         {
@@ -441,6 +494,20 @@ public class Spelunky2ManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -573,25 +640,6 @@ public class Spelunky2ManualDL : MonoBehaviour
         SafeDeleteDirectory(extractPath);
     }
 
-    IEnumerator ApWorldOnlyFlow()
-    {
-        spelunky2Path = GetSpelunky2Path();
-        modsPath = Path.Combine(spelunky2Path, "Mods");
-
-        if (string.IsNullOrEmpty(spelunky2Path))
-            yield break;
-
-        yield return InstallSpelunky2APWorld();
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-        {
-            LaunchSpelunky2();
-            yield return new WaitForSeconds(2f);
-        }
-
-        ShowInfo("Installation complete!");
-    }
-
     IEnumerator PlaylunkyOnlyFlow()
     {
         ShowInfo("Installing Playlunky...");
@@ -637,6 +685,8 @@ public class Spelunky2ManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        spelunky2Path = GetSpelunky2Path();
     }
 
     void LaunchSpelunky2()
@@ -660,7 +710,6 @@ public class Spelunky2ManualDL : MonoBehaviour
             }
             catch (System.ComponentModel.Win32Exception ex)
             {
-                // L'utilisateur a annulé l'UAC ou pas d'admin
                 UnityEngine.Debug.LogWarning("User cancelled UAC or admin privileges denied: " + ex.Message);
                 ShowInfo("Admin privileges required to launch Playlunky!");
             }
@@ -840,16 +889,8 @@ public class Spelunky2ManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Spelunky 2"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Spelunky 2"),
-            @"D:\Steam\steamapps\common\Spelunky 2",
-            @"D:\SteamLibrary\steamapps\common\Spelunky 2",
-            @"D:\steamapps\common\Spelunky 2",
-            @"E:\Steam\steamapps\common\Spelunky 2",
-            @"E:\SteamLibrary\steamapps\common\Spelunky 2",
-            @"E:\steamapps\common\Spelunky 2",
-            @"E:\Program Files (x86)\steamapps\common\Spelunky 2",
-            @"E:\Program Files\steamapps\common\Spelunky 2",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -857,47 +898,47 @@ public class Spelunky2ManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string spelunky2Path = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Spelunky 2");
-                    if (Directory.Exists(spelunky2Path))
-                        return spelunky2Path;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    spelunky2Path = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Spelunky 2");
-                    if (Directory.Exists(spelunky2Path))
-                        return spelunky2Path;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    spelunky2Path = Path.Combine(drive.Name, "steamapps", "common", "Spelunky 2");
-                    if (Directory.Exists(spelunky2Path))
-                        return spelunky2Path;
-
-                    spelunky2Path = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Spelunky 2");
-                    if (Directory.Exists(spelunky2Path))
-                        return spelunky2Path;
-
-                    spelunky2Path = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Spelunky 2");
-                    if (Directory.Exists(spelunky2Path))
-                        return spelunky2Path;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

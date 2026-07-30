@@ -18,8 +18,8 @@ public class Pikmin2ManualDL : MonoBehaviour
     public GameObject installationPanel;
 
     [Header("INSTALLATION UI")]
-    public Toggle installApworldToggle; // <- nouveau toggle pour l'APWorld seul
-    public Toggle installPikmin2APToggle; // <- zip/package
+    public Toggle installApworldToggle;
+    public Toggle installPikmin2APToggle;
     public Toggle installDolphinToggle;
 
     public Button installButton;
@@ -214,7 +214,7 @@ public class Pikmin2ManualDL : MonoBehaviour
         if (installApworldSelected && !installationCancelled)
         {
             ShowInfo("Installing Pikmin 2 APWorld...");
-            yield return InstallApworld(tempDownloadPath);
+            yield return InstallAPWorld(tempDownloadPath);
         }
 
         if (installPikmin2APSelected && !installationCancelled)
@@ -249,7 +249,7 @@ public class Pikmin2ManualDL : MonoBehaviour
         SafeDeleteDirectory(tempDownloadPath);
     }
 
-    IEnumerator InstallApworld(string tempPath)
+    IEnumerator InstallAPWorld(string tempPath)
     {
         pikmin2apInstalled = false;
 

@@ -49,7 +49,6 @@ public class OpenDetectedGameFolder : MonoBehaviour
                 }
                 else if (parameters.Length == 1 && parameters[0].ParameterType == typeof(bool))
                 {
-                    // try both true and false to cover methods like GetDS2Path(bool isScholar)
                     foreach (bool arg in new[] { true, false })
                     {
                         object result = method.Invoke(instance, new object[] { arg });
@@ -64,7 +63,6 @@ public class OpenDetectedGameFolder : MonoBehaviour
                 }
                 else
                 {
-                    // skip other signatures
                     continue;
                 }
             }

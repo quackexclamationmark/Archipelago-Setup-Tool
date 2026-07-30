@@ -21,6 +21,15 @@ public class SkulManualDL : MonoBehaviour
     public Button epicButton;
     public TextMeshProUGUI platformStatus;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Skul";
+    public string[] epicGameFolderNames = new string[]
+{
+    "Skul",
+    "SkulTheHeroSlayer0cec8",
+    "SkulTheHeroSlayer695c3"
+};
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
@@ -58,6 +67,8 @@ public class SkulManualDL : MonoBehaviour
         public string skulAP;
         public string skulApworld;
         public string skulBepInEx;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     [System.Serializable]
@@ -246,27 +257,54 @@ public class SkulManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (!configLoaded)
-        {
-            ShowInfo("Loading configuration, please wait...");
-            StartCoroutine(WaitForConfigThenSetup());
-            return;
-        }
-
-        if (string.IsNullOrEmpty(gamePath))
-        {
-            string platform = isEpic ? "Epic" : "Steam";
-            ShowInfo("Game not found in " + platform + ". Please check installation.");
-            return;
-        }
+        gamePath = GetGamePath();
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool apmod = installAPModToggle == null || installAPModToggle.isOn;
         bool bepinex = installBepInExToggle == null || installBepInExToggle.isOn;
+        bool needsGamePath = apmod || bepinex || !apworld;
+
+        if (needsGamePath && string.IsNullOrEmpty(gamePath))
+        {
+            string platform = isEpic ? "Epic" : "Steam";
+            ShowInfo("Game not found on " + platform + ". Please check installation.");
+            return;
+        }
 
         int count = (apworld ? 1 : 0) + (apmod ? 1 : 0) + (bepinex ? 1 : 0);
 
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one option to install.");
+            return;
+        }
+
+        if (apworld && count == 1)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
+
         StartCoroutine(SetupWithTracking(apworld, apmod, bepinex));
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            ShowInfo("Launching Skul...");
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     IEnumerator SetupWithTracking(bool installAPWorld, bool installAPMod, bool installBepInEx)
@@ -569,7 +607,6 @@ public class SkulManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        // Target paths
         string[] targetPaths = new string[]
         {
             Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
@@ -629,6 +666,20 @@ public class SkulManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -706,6 +757,9 @@ public class SkulManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        gamePath = GetGamePath();
+        UpdatePlatformStatus();
     }
 
     void LaunchGame()
@@ -892,20 +946,10 @@ public class SkulManualDL : MonoBehaviour
 
     string GetGameSteamPath()
     {
-        string gameName = "Skul";
-
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", gameName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", gameName),
-            Path.Combine(@"D:\Steam", "steamapps", "common", gameName),
-            Path.Combine(@"D:\SteamLibrary", "steamapps", "common", gameName),
-            Path.Combine(@"D:\steamapps", "common", gameName),
-            Path.Combine(@"E:\Steam", "steamapps", "common", gameName),
-            Path.Combine(@"E:\SteamLibrary", "steamapps", "common", gameName),
-            Path.Combine(@"E:\steamapps", "common", gameName),
-            Path.Combine(@"E:\Program Files (x86)", "steamapps", "common", gameName),
-            Path.Combine(@"E:\Program Files", "steamapps", "common", gameName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -914,97 +958,74 @@ public class SkulManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Skul (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string gamePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                    {
-                        UnityEngine.Debug.Log("Found Skul (Steam) at: " + gamePath);
-                        return gamePath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    gamePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Skul (Steam) at: " + gamePath);
-                        return gamePath;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    gamePath = Path.Combine(drive.Name, "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                    {
-                        UnityEngine.Debug.Log("Found Skul (Steam) at: " + gamePath);
-                        return gamePath;
-                    }
-
-                    gamePath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                    {
-                        UnityEngine.Debug.Log("Found Skul (Steam) at: " + gamePath);
-                        return gamePath;
-                    }
-
-                    gamePath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                    {
-                        UnityEngine.Debug.Log("Found Skul (Steam) at: " + gamePath);
-                        return gamePath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Skul (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
     string GetGameEpicPath()
     {
-        string[] quickPaths = new string[]
+        string[] quickBases = new string[]
         {
-            @"C:\Program Files\Epic Games\Skul",
-            @"D:\Epic Games\Skul",
-            @"E:\Epic Games\Skul",
-            @"C:\Games\Epic\Skul",
-            @"D:\Games\Epic\Skul",
-            @"E:\Games\Epic\Skul",
-            @"C:\Epic\Skul",
-            @"D:\Epic\Skul",
-            @"E:\Epic\Skul",
+            @"C:\Program Files\Epic Games",
+            @"C:\Games\Epic",
         };
 
-        foreach (string path in quickPaths)
+        foreach (string basePath in quickBases)
         {
-            try
+            foreach (string folderName in epicGameFolderNames)
             {
-                if (Directory.Exists(path))
+                try
                 {
-                    UnityEngine.Debug.Log("Found Skul (Epic) at: " + path);
-                    return path;
+                    string path = Path.Combine(basePath, folderName);
+                    if (Directory.Exists(path))
+                    {
+                        UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
+                        return path;
+                    }
                 }
+                catch { }
             }
-            catch { }
         }
 
-        // Cherche dans Epic Games Launcher directory
         try
         {
             string epicBaseDir = Path.Combine(
@@ -1014,25 +1035,34 @@ public class SkulManualDL : MonoBehaviour
 
             if (Directory.Exists(epicBaseDir))
             {
-                // Cherche le manifest pour Skul
                 string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
                 foreach (string manifest in manifests)
                 {
                     try
                     {
                         string content = File.ReadAllText(manifest);
-                        if (content.Contains("Skul"))
+
+                        bool matchesBTD6 = false;
+                        foreach (string folderName in epicGameFolderNames)
                         {
-                            // Extract install location from manifest
+                            if (content.Contains(folderName))
+                            {
+                                matchesBTD6 = true;
+                                break;
+                            }
+                        }
+
+                        if (matchesBTD6)
+                        {
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
                             System.Text.RegularExpressions.Match match = regex.Match(content);
 
                             if (match.Success)
                             {
-                                string epicPath = match.Groups[1].Value;
+                                string epicPath = match.Groups[1].Value.Replace(@"\\", @"\");
                                 if (Directory.Exists(epicPath))
                                 {
-                                    UnityEngine.Debug.Log("Found Skul (Epic) at: " + epicPath);
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
                                     return epicPath;
                                 }
                             }
@@ -1044,38 +1074,42 @@ public class SkulManualDL : MonoBehaviour
         }
         catch { }
 
-        // Scan all drives
-        try
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "Skul");
-                    if (Directory.Exists(epicPath))
-                    {
-                        UnityEngine.Debug.Log("Found Skul (Epic) at: " + epicPath);
-                        return epicPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "Skul");
-                    if (Directory.Exists(epicPath))
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Skul (Epic) at: " + epicPath);
-                        return epicPath;
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        foreach (string folderName in epicGameFolderNames)
+                        {
+                            try
+                            {
+                                string epicPath = Path.Combine(drive.Name, relativePath, folderName);
+                                if (Directory.Exists(epicPath))
+                                {
+                                    UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                    return epicPath;
+                                }
+                            }
+                            catch { }
+                        }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Skul (Epic) not found.");
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 

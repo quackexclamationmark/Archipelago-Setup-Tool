@@ -15,6 +15,9 @@ public class AnotherManualDL : MonoBehaviour
     public FileDownloader.FileData apMod;
     public FileDownloader.FileData bepInEx;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Another Crab's Treasure";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
@@ -55,6 +58,7 @@ public class AnotherManualDL : MonoBehaviour
         public string actAP;
         public string actApworld;
         public string actBepInEx;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -149,20 +153,29 @@ public class AnotherManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(actPath))
-        {
-            ShowInfo("Another Crab's Treasure path not found. Please check Steam installation.");
-            return;
-        }
+        actPath = GetActPath();
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
         bool apmod = installAPModToggle != null && installAPModToggle.isOn;
+        bool needsGamePath = apmod || bep;
+
+        if (needsGamePath && (string.IsNullOrEmpty(actPath) || !Directory.Exists(actPath)))
+        {
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
 
         int count =
             (apworld ? 1 : 0) +
             (bep ? 1 : 0) +
             (apmod ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
 
         if (apworld && count == 1)
         {
@@ -183,6 +196,25 @@ public class AnotherManualDL : MonoBehaviour
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching ACT...");
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -285,7 +317,6 @@ public class AnotherManualDL : MonoBehaviour
         {
             string name = Path.GetFileName(file);
 
-            // Whitelist version files
             if (name.StartsWith("ACT Archipelago Version") && name.EndsWith(".txt"))
                 continue;
 
@@ -424,6 +455,20 @@ public class AnotherManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -503,19 +548,6 @@ public class AnotherManualDL : MonoBehaviour
         MoveDirectory(extractPath, actPath);
 
         SafeDeleteDirectory(extractPath);
-    }
-
-    IEnumerator APWorldOnlyFlow()
-    {
-        actPath = GetActPath();
-
-        if (string.IsNullOrEmpty(actPath))
-            yield break;
-
-        yield return InstallAPWorld();
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-            LaunchGame();
     }
 
     IEnumerator BepInExOnlyFlow()
@@ -628,14 +660,6 @@ public class AnotherManualDL : MonoBehaviour
         catch { }
     }
 
-    void CopyIfExists(string root, string file, string target)
-    {
-        string path = Path.Combine(root, file);
-
-        if (File.Exists(path))
-            File.Copy(path, Path.Combine(target, file), true);
-    }
-
     void MoveDirectory(string source, string target)
     {
         if (!Directory.Exists(source))
@@ -704,6 +728,8 @@ public class AnotherManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        actPath = GetActPath();
     }
 
     void LaunchGame()
@@ -833,16 +859,8 @@ public class AnotherManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Another Crab's Treasure"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Another Crab's Treasure"),
-            @"D:\Steam\steamapps\common\Another Crab's Treasure",
-            @"D:\SteamLibrary\steamapps\common\Another Crab's Treasure",
-            @"D:\steamapps\common\Another Crab's Treasure",
-            @"E:\Steam\steamapps\common\Another Crab's Treasure",
-            @"E:\SteamLibrary\steamapps\common\Another Crab's Treasure",
-            @"E:\steamapps\common\Another Crab's Treasure",
-            @"E:\Program Files (x86)\steamapps\common\Another Crab's Treasure",
-            @"E:\Program Files\steamapps\common\Another Crab's Treasure",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -850,47 +868,47 @@ public class AnotherManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string actPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Another Crab's Treasure");
-                    if (Directory.Exists(actPath))
-                        return actPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    actPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Another Crab's Treasure");
-                    if (Directory.Exists(actPath))
-                        return actPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    actPath = Path.Combine(drive.Name, "steamapps", "common", "Another Crab's Treasure");
-                    if (Directory.Exists(actPath))
-                        return actPath;
-
-                    actPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Another Crab's Treasure");
-                    if (Directory.Exists(actPath))
-                        return actPath;
-
-                    actPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Another Crab's Treasure");
-                    if (Directory.Exists(actPath))
-                        return actPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

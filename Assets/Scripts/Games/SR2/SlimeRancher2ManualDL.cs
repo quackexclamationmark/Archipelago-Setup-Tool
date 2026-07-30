@@ -1,10 +1,11 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.IO;
+using Microsoft.Win32;
+using NUnit.Framework;
 using System.Collections;
 using System.Diagnostics;
-using Microsoft.Win32;
+using System.IO;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class SlimeRancher2ManualDL : MonoBehaviour
 {
@@ -20,6 +21,10 @@ public class SlimeRancher2ManualDL : MonoBehaviour
     public Button steamButton;
     public Button epicButton;
     public TextMeshProUGUI platformStatus;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Slime Rancher 2";
+    public string epicGameFolderName = "SlimeRancher2";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
@@ -59,6 +64,8 @@ public class SlimeRancher2ManualDL : MonoBehaviour
         public string slimerancher2BepInEx;
         public string slimerancher2AP;
         public string slimerancher2Interop;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     void Start()
@@ -217,14 +224,55 @@ public class SlimeRancher2ManualDL : MonoBehaviour
     {
         slimeRancher2Path = GetSlimeRancher2Path();
 
-        if (string.IsNullOrEmpty(slimeRancher2Path))
+        bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
+        bool bep = installBepInExToggle == null || installBepInExToggle.isOn;
+        bool ap = installSlimeRancher2APToggle == null || installSlimeRancher2APToggle.isOn;
+        bool needsGamePath = ap || bep || !apworld;
+
+        if (needsGamePath && string.IsNullOrEmpty(slimeRancher2Path))
         {
             string platform = isEpic ? "Epic" : "Steam";
-            ShowInfo("Slime Rancher 2 not found in " + platform + ". Please check installation.");
+            ShowInfo("Game not found on " + platform + ". Please check installation.");
+            return;
+        }
+
+        int count =
+            (apworld ? 1 : 0) +
+            (bep ? 1 : 0) +
+            (ap ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
+        if (apworld && count == 1)
+        {
+            StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Slime Rancher 2...");
+            LaunchSlimeRancher2();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -484,6 +532,20 @@ public class SlimeRancher2ManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -624,6 +686,9 @@ public class SlimeRancher2ManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        slimeRancher2Path = GetSlimeRancher2Path();
+        UpdatePlatformStatus();
     }
 
     IEnumerator LaunchSlimeRancher2()
@@ -662,17 +727,14 @@ public class SlimeRancher2ManualDL : MonoBehaviour
             yield break;
         }
 
-        // Wait for the first process to fully initialize
         yield return new WaitForSeconds(3f);
 
-        // Get all SlimeRancher2 processes
         Process[] processes = Process.GetProcessesByName("SlimeRancher2");
 
         if (processes.Length > 1)
         {
             UnityEngine.Debug.Log("Found " + processes.Length + " Slime Rancher 2 processes. Closing the duplicate...");
 
-            // Keep the first one, close any duplicates
             for (int i = 1; i < processes.Length; i++)
             {
                 try
@@ -690,7 +752,6 @@ public class SlimeRancher2ManualDL : MonoBehaviour
 
     void CleanupProcesses()
     {
-        // Close Slime Rancher 2 if it's running
         try
         {
             Process[] processes = Process.GetProcessesByName("SlimeRancher2");
@@ -835,14 +896,8 @@ public class SlimeRancher2ManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Slime Rancher 2"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Slime Rancher 2"),
-            @"D:\Steam\steamapps\common\Slime Rancher 2",
-            @"D:\SteamLibrary\steamapps\common\Slime Rancher 2",
-            @"D:\steamapps\common\Slime Rancher 2",
-            @"E:\Steam\steamapps\common\Slime Rancher 2",
-            @"E:\SteamLibrary\steamapps\common\Slime Rancher 2",
-            @"E:\steamapps\common\Slime Rancher 2",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -851,82 +906,56 @@ public class SlimeRancher2ManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Slime Rancher 2 (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string sr2Path = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Slime Rancher 2");
-                    if (Directory.Exists(sr2Path))
-                    {
-                        UnityEngine.Debug.Log("Found Slime Rancher 2 (Steam) at: " + sr2Path);
-                        return sr2Path;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    sr2Path = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Slime Rancher 2");
-                    if (Directory.Exists(sr2Path))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Slime Rancher 2 (Steam) at: " + sr2Path);
-                        return sr2Path;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    sr2Path = Path.Combine(drive.Name, "steamapps", "common", "Slime Rancher 2");
-                    if (Directory.Exists(sr2Path))
-                    {
-                        UnityEngine.Debug.Log("Found Slime Rancher 2 (Steam) at: " + sr2Path);
-                        return sr2Path;
-                    }
-
-                    sr2Path = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Slime Rancher 2");
-                    if (Directory.Exists(sr2Path))
-                    {
-                        UnityEngine.Debug.Log("Found Slime Rancher 2 (Steam) at: " + sr2Path);
-                        return sr2Path;
-                    }
-
-                    sr2Path = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Slime Rancher 2");
-                    if (Directory.Exists(sr2Path))
-                    {
-                        UnityEngine.Debug.Log("Found Slime Rancher 2 (Steam) at: " + sr2Path);
-                        return sr2Path;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Slime Rancher 2 (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
     string GetSlimeRancher2EpicPath()
     {
         string[] quickPaths = new string[]
-        {
-        @"C:\Program Files\Epic Games\SlimeRancher2",
-        @"D:\Epic Games\SlimeRancher2",
-        @"E:\Epic Games\SlimeRancher2",
-        @"C:\Games\Epic\SlimeRancher2",
-        @"D:\Games\Epic\SlimeRancher2",
-        @"E:\Games\Epic\SlimeRancher2",
-        @"C:\Epic\SlimeRancher2",
-        @"D:\Epic\SlimeRancher2",
-        @"E:\Epic\SlimeRancher2",
-        };
+       {
+            @"C:\Program Files\Epic Games\SlimeRancher2",
+            @"C:\Games\Epic\SlimeRancher2",
+       };
 
         foreach (string path in quickPaths)
         {
@@ -934,14 +963,13 @@ public class SlimeRancher2ManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Slime Rancher 2 (Epic) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        // Cherche dans Epic Games Launcher directory
         try
         {
             string epicBaseDir = Path.Combine(
@@ -951,16 +979,14 @@ public class SlimeRancher2ManualDL : MonoBehaviour
 
             if (Directory.Exists(epicBaseDir))
             {
-                // Cherche le manifest pour Slime Rancher 2
                 string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
                 foreach (string manifest in manifests)
                 {
                     try
                     {
                         string content = File.ReadAllText(manifest);
-                        if (content.Contains("Slime Rancher 2") || content.Contains("SlimeRancher2"))
+                        if (content.Contains("SlimeRancher2") || content.Contains("SlimeRancher2"))
                         {
-                            // Extract install location from manifest
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
                             System.Text.RegularExpressions.Match match = regex.Match(content);
 
@@ -969,7 +995,7 @@ public class SlimeRancher2ManualDL : MonoBehaviour
                                 string epicPath = match.Groups[1].Value;
                                 if (Directory.Exists(epicPath))
                                 {
-                                    UnityEngine.Debug.Log("Found Slime Rancher 2 (Epic) at: " + epicPath);
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
                                     return epicPath;
                                 }
                             }
@@ -981,38 +1007,39 @@ public class SlimeRancher2ManualDL : MonoBehaviour
         }
         catch { }
 
-        // Scan all drives
-        try
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "Slime Rancher 2");
-                    if (Directory.Exists(epicPath))
-                    {
-                        UnityEngine.Debug.Log("Found Slime Rancher 2 (Epic) at: " + epicPath);
-                        return epicPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "Slime Rancher 2");
-                    if (Directory.Exists(epicPath))
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Slime Rancher 2 (Epic) at: " + epicPath);
-                        return epicPath;
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Slime Rancher 2 (Epic) not found.");
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 

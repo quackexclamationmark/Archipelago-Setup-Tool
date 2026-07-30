@@ -1,3 +1,4 @@
+/*using UnityEditor.Rendering.LookDev;*/
 using UnityEngine;
 
 public class GamePanelManager : MonoBehaviour
@@ -96,6 +97,13 @@ public class GamePanelManager : MonoBehaviour
     public GameObject ksp1Panel;
     public GameObject oniPanel;
     public GameObject sulfurPanel;
+    public GameObject psychonautsPanel;
+    public GameObject sadxPanel;
+    public GameObject nsmbwPanel;
+    public GameObject pokemonsnapPanel;
+    public GameObject pokemonplatinumPanel;
+    public GameObject werecleanerPanel;
+    public GameObject drdrPanel;
 
     void Start()
     {
@@ -390,6 +398,27 @@ public class GamePanelManager : MonoBehaviour
             case "SULFUR":
                 sulfurPanel.SetActive(true);
                 break;
+            case "Psychonauts":
+                psychonautsPanel.SetActive(true);
+                break;
+            case "SonicAdventureDX":
+                sadxPanel.SetActive(true);
+                break;
+            case "NewSuperMarioBrosWii":
+                nsmbwPanel.SetActive(true);
+                break;
+            case "PokémonSnap":
+                pokemonsnapPanel.SetActive(true);
+                break;
+            case "PokémonPlatinum":
+                pokemonplatinumPanel.SetActive(true);
+                break;
+            case "TheWereCleaner":
+                werecleanerPanel.SetActive(true);
+                break;
+            case "DeadRisingDeluxeRemaster":
+                drdrPanel.SetActive(true);
+                break;
         }
     }
 
@@ -489,5 +518,12 @@ public class GamePanelManager : MonoBehaviour
         if (ksp1Panel != null) ksp1Panel.SetActive(false);
         if (oniPanel != null) oniPanel.SetActive(false);
         if (sulfurPanel != null) sulfurPanel.SetActive(false);
+        if (psychonautsPanel != null) psychonautsPanel.SetActive(false);
+        if (sadxPanel != null) sadxPanel.SetActive(false);
+        if (nsmbwPanel != null) nsmbwPanel.SetActive(false);
+        if (pokemonsnapPanel != null) pokemonsnapPanel.SetActive(false);
+        if (pokemonplatinumPanel != null) pokemonplatinumPanel.SetActive(false);
+        if (werecleanerPanel != null) werecleanerPanel.SetActive(false);
+        if (drdrPanel != null) drdrPanel.SetActive(false);
     }
 }

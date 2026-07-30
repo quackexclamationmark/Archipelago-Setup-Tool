@@ -8,7 +8,6 @@ public class HostingButton : MonoBehaviour
     private Button button;
     private ColorBlock originalColors;
 
-    // Static pour garder la référence du bouton actif
     private static HostingButton currentSelectedButton;
 
     void Start()
@@ -21,17 +20,14 @@ public class HostingButton : MonoBehaviour
 
     void OnClick()
     {
-        // Réinitialiser l'ancien bouton
         if (currentSelectedButton != null && currentSelectedButton != this)
         {
             currentSelectedButton.ResetButtonColor();
         }
 
-        // Appliquer la couleur pressed au nouveau bouton
         ApplyPressedColor();
         currentSelectedButton = this;
 
-        // Afficher le panel
         if (panelManager != null)
         {
             panelManager.ShowPanel(hostingName);

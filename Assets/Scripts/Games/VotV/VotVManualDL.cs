@@ -164,7 +164,6 @@ public class VotVManualDL : MonoBehaviour
             startPath = "C:\\";
         }
 
-        // Show .exe files in the browser
         FileBrowser.SetFilters(true, new FileBrowser.Filter("Executable", ".exe"));
 
         yield return FileBrowser.WaitForLoadDialog(
@@ -312,6 +311,9 @@ public class VotVManualDL : MonoBehaviour
         pendingAction = "";
     }
 
+    // =========================================================
+    // SETUP
+    // =========================================================
     private void ExecuteSetup()
     {
         if (!configLoaded)
@@ -321,7 +323,6 @@ public class VotVManualDL : MonoBehaviour
             return;
         }
 
-        // VERIF STRICTE: Vérifier que le chemin est valide
         if (directoryInputField == null || string.IsNullOrEmpty(directoryInputField.text))
         {
             ShowSetupInfo("Please select a directory first!");
@@ -350,21 +351,13 @@ public class VotVManualDL : MonoBehaviour
 
         int count = (apworldInstall ? 1 : 0) + (ue4ss ? 1 : 0) + (apmod ? 1 : 0);
 
-        if (apworldInstall && count == 1)
-        {
-            StartCoroutine(APWorldOnlyFlow());
-            return;
-        }
+        if (apworldInstall && count == 1) { StartCoroutine(APWorldOnlyFlow()); return; }
+        if (ue4ss && count == 1) { StartCoroutine(UE4SSOnlyFlow()); return; }
+        if (apmod && count == 1) { StartCoroutine(APModOnlyFlow()); return; }
 
-        if (ue4ss && count == 1)
+        if (count == 0)
         {
-            StartCoroutine(UE4SSOnlyFlow());
-            return;
-        }
-
-        if (apmod && count == 1)
-        {
-            StartCoroutine(APModOnlyFlow());
+            ShowSetupInfo("Please select at least one component to install.");
             return;
         }
 
@@ -481,7 +474,6 @@ public class VotVManualDL : MonoBehaviour
             return;
         }
 
-        // Si on arrive ici, c'est qu'aucune action n'a été exécutée
         UnityEngine.Debug.LogWarning("ExecuteRevert: No revert action was performed!");
     }
 
@@ -507,16 +499,21 @@ public class VotVManualDL : MonoBehaviour
 
     IEnumerator APWorldOnlyFlow()
     {
-        if (string.IsNullOrEmpty(gamePath))
-            yield break;
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowSetupInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
 
         yield return InstallAPWorld();
 
         if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            ShowSetupInfo("Launching VotV...");
             LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
 
-        // Reset les toggles après l'installation
-        ResetInstallationToggles();
+        ShowSetupInfo("Installation complete!");
     }
 
     IEnumerator UE4SSOnlyFlow()
@@ -643,7 +640,6 @@ public class VotVManualDL : MonoBehaviour
             yield break;
         }
 
-        // Target path: [gamePath]\VotV\Binaries\Win64\ue4ss\Mods
         string targetModsPath = Path.Combine(gamePath, "VotV", "Binaries", "Win64", "ue4ss", "Mods");
         Directory.CreateDirectory(targetModsPath);
 
@@ -759,6 +755,20 @@ public class VotVManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowSetupInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 

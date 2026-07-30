@@ -1,10 +1,11 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.IO;
+﻿using Microsoft.Win32;
 using System.Collections;
 using System.Diagnostics;
-using Microsoft.Win32;
+using System.IO;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class STS2ManualDL : MonoBehaviour
 {
@@ -13,6 +14,9 @@ public class STS2ManualDL : MonoBehaviour
     [Header("STS2 FILES")]
     public FileDownloader.FileData apworld;
     public FileDownloader.FileData apmod;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Slay the Spire 2";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
@@ -46,6 +50,7 @@ public class STS2ManualDL : MonoBehaviour
     {
         public string sts2Apworld;
         public string sts2AP;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -133,14 +138,17 @@ public class STS2ManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(sts2Path))
-        {
-            ShowInfo("Slay the Spire 2 path not found. Please check Steam installation.");
-            return;
-        }
+        sts2Path = GetSTS2Path();
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool apmod = installAPModToggle != null && installAPModToggle.isOn;
+        bool needsGamePath = apmod;
+
+        if (needsGamePath && (string.IsNullOrEmpty(sts2Path) || !Directory.Exists(sts2Path)))
+        {
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
 
         int count =
             (apworld ? 1 : 0) +
@@ -159,6 +167,25 @@ public class STS2ManualDL : MonoBehaviour
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Slay The Spire 2...");
+            LaunchSTS2();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -319,6 +346,20 @@ public class STS2ManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -396,19 +437,6 @@ public class STS2ManualDL : MonoBehaviour
         SafeDeleteDirectory(extractPath);
     }
 
-    IEnumerator APWorldOnlyFlow()
-    {
-        sts2Path = GetSTS2Path();
-
-        if (string.IsNullOrEmpty(sts2Path))
-            yield break;
-
-        yield return InstallAPWorld();
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-            LaunchSTS2();
-    }
-
     IEnumerator APModOnlyFlow()
     {
         sts2Path = GetSTS2Path();
@@ -451,6 +479,8 @@ public class STS2ManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        sts2Path = GetSTS2Path();
     }
 
     void LaunchSTS2()
@@ -667,16 +697,8 @@ public class STS2ManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Slay the Spire 2"),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Slay the Spire 2"),
-        @"D:\Steam\steamapps\common\Slay the Spire 2",
-        @"D:\SteamLibrary\steamapps\common\Slay the Spire 2",
-        @"D:\steamapps\common\Slay the Spire 2",
-        @"E:\Steam\steamapps\common\Slay the Spire 2",
-        @"E:\SteamLibrary\steamapps\common\Slay the Spire 2",
-        @"E:\steamapps\common\Slay the Spire 2",
-        @"E:\Program Files (x86)\steamapps\common\Slay the Spire 2",
-        @"E:\Program Files\steamapps\common\Slay the Spire 2",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -684,52 +706,47 @@ public class STS2ManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Cherche Steam\steamapps
-                    string sts2Path = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Slay the Spire 2");
-                    if (Directory.Exists(sts2Path))
-                        return sts2Path;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Cherche SteamLibrary\steamapps
-                    sts2Path = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Slay the Spire 2");
-                    if (Directory.Exists(sts2Path))
-                        return sts2Path;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Cherche directement steamapps à la racine du disque
-                    sts2Path = Path.Combine(drive.Name, "steamapps", "common", "Slay the Spire 2");
-                    if (Directory.Exists(sts2Path))
-                        return sts2Path;
-
-                    // Cherche dans Program Files (x86)\steamapps
-                    sts2Path = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Slay the Spire 2");
-                    if (Directory.Exists(sts2Path))
-                        return sts2Path;
-
-                    // Cherche dans Program Files\steamapps
-                    sts2Path = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Slay the Spire 2");
-                    if (Directory.Exists(sts2Path))
-                        return sts2Path;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

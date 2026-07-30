@@ -1,10 +1,11 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.IO;
+using Microsoft.Win32;
 using System.Collections;
 using System.Diagnostics;
-using Microsoft.Win32;
+using System.IO;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class RotNDManualDL : MonoBehaviour
 {
@@ -14,6 +15,9 @@ public class RotNDManualDL : MonoBehaviour
     public FileDownloader.FileData apworld;
     public FileDownloader.FileData apMod;
     public FileDownloader.FileData bepInEx;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "RiftOfTheNecroDancerOSTVolume1";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
@@ -50,6 +54,7 @@ public class RotNDManualDL : MonoBehaviour
         public string rotndAP;
         public string rotndApworld;
         public string rotndBepInEx;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -144,15 +149,18 @@ public class RotNDManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(rotNDPath))
-        {
-            ShowInfo("Rift of the NecroDancer path not found. Please check Steam installation.");
-            return;
-        }
+        rotNDPath = GetRotNDPath();
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
         bool apmod = installAPModToggle != null && installAPModToggle.isOn;
+        bool needsGamePath = apmod || bep;
+
+        if (needsGamePath && (string.IsNullOrEmpty(rotNDPath) || !Directory.Exists(rotNDPath)))
+        {
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
 
         int count =
             (apworld ? 1 : 0) +
@@ -178,6 +186,25 @@ public class RotNDManualDL : MonoBehaviour
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching RotND...");
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -424,6 +451,20 @@ public class RotNDManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -515,19 +556,6 @@ public class RotNDManualDL : MonoBehaviour
         CopyDirectory(extractPath, rotNDPath);
 
         SafeDeleteDirectory(extractPath);
-    }
-
-    IEnumerator APWorldOnlyFlow()
-    {
-        rotNDPath = GetRotNDPath();
-
-        if (string.IsNullOrEmpty(rotNDPath))
-            yield break;
-
-        yield return InstallAPWorld();
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-            LaunchGame();
     }
 
     IEnumerator BepInExOnlyFlow()
@@ -687,6 +715,8 @@ public class RotNDManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        rotNDPath = GetRotNDPath();
     }
 
     void LaunchGame()
@@ -816,26 +846,8 @@ public class RotNDManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "RiftOfTheNecroDancerOSTVolume1"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Rift Of The NecroDancer"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "RiftOfTheNecroDancerOSTVolume1"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Rift Of The NecroDancer"),
-            @"D:\Steam\steamapps\common\RiftOfTheNecroDancerOSTVolume1",
-            @"D:\Steam\steamapps\common\Rift Of The NecroDancer",
-            @"D:\SteamLibrary\steamapps\common\RiftOfTheNecroDancerOSTVolume1",
-            @"D:\SteamLibrary\steamapps\common\Rift Of The NecroDancer",
-            @"D:\steamapps\common\RiftOfTheNecroDancerOSTVolume1",
-            @"D:\steamapps\common\Rift Of The NecroDancer",
-            @"E:\Steam\steamapps\common\RiftOfTheNecroDancerOSTVolume1",
-            @"E:\Steam\steamapps\common\Rift Of The NecroDancer",
-            @"E:\SteamLibrary\steamapps\common\RiftOfTheNecroDancerOSTVolume1",
-            @"E:\SteamLibrary\steamapps\common\Rift Of The NecroDancer",
-            @"E:\steamapps\common\RiftOfTheNecroDancerOSTVolume1",
-            @"E:\steamapps\common\Rift Of The NecroDancer",
-            @"E:\Program Files (x86)\steamapps\common\RiftOfTheNecroDancerOSTVolume1",
-            @"E:\Program Files (x86)\steamapps\common\Rift Of The NecroDancer",
-            @"E:\Program Files\steamapps\common\RiftOfTheNecroDancerOSTVolume1",
-            @"E:\Program Files\steamapps\common\Rift Of The NecroDancer",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -843,67 +855,47 @@ public class RotNDManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string rotNDPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "RiftOfTheNecroDancerOSTVolume1");
-                    if (Directory.Exists(rotNDPath))
-                        return rotNDPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    rotNDPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Rift Of The NecroDancer");
-                    if (Directory.Exists(rotNDPath))
-                        return rotNDPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    rotNDPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "RiftOfTheNecroDancerOSTVolume1");
-                    if (Directory.Exists(rotNDPath))
-                        return rotNDPath;
-
-                    rotNDPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Rift Of The NecroDancer");
-                    if (Directory.Exists(rotNDPath))
-                        return rotNDPath;
-
-                    rotNDPath = Path.Combine(drive.Name, "steamapps", "common", "RiftOfTheNecroDancerOSTVolume1");
-                    if (Directory.Exists(rotNDPath))
-                        return rotNDPath;
-
-                    rotNDPath = Path.Combine(drive.Name, "steamapps", "common", "Rift Of The NecroDancer");
-                    if (Directory.Exists(rotNDPath))
-                        return rotNDPath;
-
-                    rotNDPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "RiftOfTheNecroDancerOSTVolume1");
-                    if (Directory.Exists(rotNDPath))
-                        return rotNDPath;
-
-                    rotNDPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Rift Of The NecroDancer");
-                    if (Directory.Exists(rotNDPath))
-                        return rotNDPath;
-
-                    rotNDPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "RiftOfTheNecroDancerOSTVolume1");
-                    if (Directory.Exists(rotNDPath))
-                        return rotNDPath;
-
-                    rotNDPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Rift Of The NecroDancer");
-                    if (Directory.Exists(rotNDPath))
-                        return rotNDPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

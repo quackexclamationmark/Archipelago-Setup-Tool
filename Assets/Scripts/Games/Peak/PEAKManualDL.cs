@@ -15,6 +15,9 @@ public class PEAKManualDL : MonoBehaviour
     public FileDownloader.FileData bepInEx;
     public FileDownloader.FileData peakAP;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "PEAK";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installPeakapworldToggle;
     public Toggle installBepInExToggle;
@@ -51,6 +54,7 @@ public class PEAKManualDL : MonoBehaviour
         public string peakApworld;
         public string peakBepInEx;
         public string peakAP;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -150,24 +154,33 @@ public class PEAKManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(peakPath))
-        {
-            ShowInfo("PEAK path not found. Please check Steam installation.");
-            return;
-        }
+        peakPath = GetPEAKPath();
 
         bool apworld = installPeakapworldToggle == null || installPeakapworldToggle.isOn;
         bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
         bool peakmod = installPeakAPToggle != null && installPeakAPToggle.isOn;
+        bool needsGamePath = bep || peakmod;
+
+        if (needsGamePath && (string.IsNullOrEmpty(peakPath) || !Directory.Exists(peakPath)))
+        {
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
 
         int count =
             (apworld ? 1 : 0) +
             (bep ? 1 : 0) +
             (peakmod ? 1 : 0);
 
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
         if (apworld && count == 1)
         {
-            StartCoroutine(ApWorldOnlyFlow());
+            StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
@@ -184,6 +197,25 @@ public class PEAKManualDL : MonoBehaviour
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching PEAK...");
+            LaunchPEAK();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -315,7 +347,7 @@ public class PEAKManualDL : MonoBehaviour
         if (installPeakapworldToggle == null || installPeakapworldToggle.isOn)
         {
             ShowInfo("Installing APWorld...");
-            yield return InstallPEAKAPWorld();
+            yield return InstallAPWorld();
         }
 
         if (installBepInExToggle != null && installBepInExToggle.isOn)
@@ -347,7 +379,7 @@ public class PEAKManualDL : MonoBehaviour
         yield break;
     }
 
-    IEnumerator InstallPEAKAPWorld()
+    IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
         {
@@ -550,25 +582,6 @@ public class PEAKManualDL : MonoBehaviour
         SafeDeleteDirectory(extractPath);
     }
 
-
-    IEnumerator ApWorldOnlyFlow()
-    {
-        peakPath = GetPEAKPath();
-
-        if (string.IsNullOrEmpty(peakPath))
-            yield break;
-
-        yield return InstallPEAKAPWorld();
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-        {
-            LaunchPEAK();
-            yield return new WaitForSeconds(2f);
-        }
-
-        ShowInfo("Installation complete!");
-    }
-
     IEnumerator BepInExOnlyFlow()
     {
         ShowInfo("Installing BepInEx...");
@@ -635,6 +648,8 @@ public class PEAKManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        peakPath = GetPEAKPath();
     }
 
     void LaunchPEAK()
@@ -843,16 +858,8 @@ public class PEAKManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "PEAK"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "PEAK"),
-            @"D:\Steam\steamapps\common\PEAK",
-            @"D:\SteamLibrary\steamapps\common\PEAK",
-            @"D:\steamapps\common\PEAK",
-            @"E:\Steam\steamapps\common\PEAK",
-            @"E:\SteamLibrary\steamapps\common\PEAK",
-            @"E:\steamapps\common\PEAK",
-            @"E:\Program Files (x86)\steamapps\common\PEAK",
-            @"E:\Program Files\steamapps\common\PEAK",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -860,52 +867,47 @@ public class PEAKManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Search Steam\steamapps
-                    string peakPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "PEAK");
-                    if (Directory.Exists(peakPath))
-                        return peakPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Search SteamLibrary\steamapps
-                    peakPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "PEAK");
-                    if (Directory.Exists(peakPath))
-                        return peakPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Search steamapps at root
-                    peakPath = Path.Combine(drive.Name, "steamapps", "common", "PEAK");
-                    if (Directory.Exists(peakPath))
-                        return peakPath;
-
-                    // Search Program Files (x86)\steamapps
-                    peakPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "PEAK");
-                    if (Directory.Exists(peakPath))
-                        return peakPath;
-
-                    // Search Program Files\steamapps
-                    peakPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "PEAK");
-                    if (Directory.Exists(peakPath))
-                        return peakPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

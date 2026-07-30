@@ -279,9 +279,23 @@ public class TwilightPrincessManualDL : MonoBehaviour
 
     void OnInstallButtonClicked()
     {
-        if (!IsValidRom(selectedRomPath))
+        bool installApworld = installApworldToggle != null && installApworldToggle.isOn;
+        bool installApworldGci = installApworldGciToggle != null && installApworldGciToggle.isOn;
+        bool installAp = installApToggle != null && installApToggle.isOn;
+        bool installRel = installRelToggle != null && installRelToggle.isOn;
+        bool installDolphin = installDolphinToggle != null && installDolphinToggle.isOn;
+
+        if (!installApworld && !installApworldGci && !installAp && !installRel && !installDolphin)
         {
-            ShowInfo("Please select a valid ROM file.");
+            ShowInfo("Please select at least one download element.");
+            return;
+        }
+
+        bool needsRom = installAp || installRel || installDolphin;
+
+        if (needsRom && !IsValidRom(selectedRomPath))
+        {
+            ShowInfo("Select a valid ROM on the ROM tab first. You can still install the APWorld.");
             return;
         }
 
@@ -474,7 +488,6 @@ public class TwilightPrincessManualDL : MonoBehaviour
     {
         apworldInstalled = false;
 
-        // Chercher le fichier "Twilight Princess.apworld" spécifiquement
         string apworldPath = Path.Combine(extractPath, "Twilight Princess.apworld");
 
         UnityEngine.Debug.Log("Looking for APWorld at: " + apworldPath);
@@ -504,7 +517,6 @@ public class TwilightPrincessManualDL : MonoBehaviour
             string fileName = Path.GetFileName(apworldPath);
             UnityEngine.Debug.Log("Processing APWorld: " + fileName);
 
-            // Try multiple target paths (like DREDGE does)
             string[] targetPaths = new string[]
             {
                 Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
@@ -538,7 +550,6 @@ public class TwilightPrincessManualDL : MonoBehaviour
                 yield break;
             }
 
-            // Supprimer l'ancien fichier s'il existe
             if (File.Exists(destPath))
             {
                 try
@@ -572,10 +583,8 @@ public class TwilightPrincessManualDL : MonoBehaviour
     {
         apworldGciInstalled = false;
 
-        // Créer la structure de dossiers si nécessaire
         if (!Directory.Exists(gcUsaCardAPath)) Directory.CreateDirectory(gcUsaCardAPath);
 
-        // Chercher le fichier .gci dans le dossier extrait
         string[] gciFiles = Directory.GetFiles(extractPath, "*.gci", System.IO.SearchOption.AllDirectories);
 
         if (gciFiles.Length == 0)

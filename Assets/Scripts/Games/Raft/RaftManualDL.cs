@@ -13,6 +13,9 @@ public class RaftManualDL : MonoBehaviour
     [Header("RAFT FILES")]
     public FileDownloader.FileData raftAP;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Raft";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installRaftAPToggle;
 
@@ -44,6 +47,7 @@ public class RaftManualDL : MonoBehaviour
     public class RaftConfig
     {
         public string raftAP;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -136,6 +140,8 @@ public class RaftManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
+        raftPath = GetRaftPath();
+
         if (string.IsNullOrEmpty(raftPath))
         {
             ShowInfo("Raft path not found. Please check your installation.");
@@ -492,6 +498,8 @@ public class RaftManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        raftPath = GetRaftPath();
     }
 
     void LaunchModLoader()
@@ -591,16 +599,8 @@ public class RaftManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Raft"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Raft"),
-            @"D:\Steam\steamapps\common\Raft",
-            @"D:\SteamLibrary\steamapps\common\Raft",
-            @"D:\steamapps\common\Raft",
-            @"E:\Steam\steamapps\common\Raft",
-            @"E:\SteamLibrary\steamapps\common\Raft",
-            @"E:\steamapps\common\Raft",
-            @"E:\Program Files (x86)\steamapps\common\Raft",
-            @"E:\Program Files\steamapps\common\Raft",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -608,47 +608,47 @@ public class RaftManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string raftPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Raft");
-                    if (Directory.Exists(raftPath))
-                        return raftPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    raftPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Raft");
-                    if (Directory.Exists(raftPath))
-                        return raftPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    raftPath = Path.Combine(drive.Name, "steamapps", "common", "Raft");
-                    if (Directory.Exists(raftPath))
-                        return raftPath;
-
-                    raftPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Raft");
-                    if (Directory.Exists(raftPath))
-                        return raftPath;
-
-                    raftPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Raft");
-                    if (Directory.Exists(raftPath))
-                        return raftPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

@@ -185,6 +185,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Cuphead", new List<string> { "Cup", "Head", "Cuphead" }));
         games.Add(CreateGame("DARK SOULS II", new List<string> { "Dark", "Souls", "II", "2", "Scholar", "First", "Sin", "DS", "DS2", "DS 2", "DarkSouls", "DarkSouls2" }));
         games.Add(CreateGame("DARK SOULS III", new List<string> { "Dark", "Souls", "III", "3", "DS", "DS3", "DS 3", "DarkSouls", "DarkSouls3" }));
+        games.Add(CreateGame("Dead Rising Deluxe Remaster", new List<string> { "Dead", "Rising", "Deluxe", "Remaster", "DR", "DR 1", "DR1", "DRDR", "Remake" }));
         games.Add(CreateGame("DOOM (1993)", new List<string> { "Doom", "1", "I", "1993", "(1993)" }));
         games.Add(CreateGame("DOOM II", new List<string> { "Doom", "II", "2" }));
         games.Add(CreateGame("DOOM Eternal", new List<string> { "Doom", "Eternal", "DoomEternal" }));
@@ -207,8 +208,9 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Luigi's Mansion", new List<string> { "Luigi", "Luigi's", "Mansion", "LM", "Mario" }));
         games.Add(CreateGame("Mario Kart Wii", new List<string> { "Mario", "Kart", "Wii", "MK", "MKWii", "M K Wii", "M KWii" }));
         games.Add(CreateGame("Minecraft", new List<string> { "Minecraft", "Mine", "Craft", "MC" }));
-        games.Add(CreateGame("Neon White", new List<string> { "Neon", "White" }));
-        games.Add(CreateGame("Nine Sols", new List<string> { "Nine", "Sols" }));
+        games.Add(CreateGame("Neon White", new List<string> { "Neon", "White", "nw" }));
+        games.Add(CreateGame("New Super Mario Bros. Wii", new List<string> { "New", "Super", "Mario", "Bros.", "Bros", "Wii", "NSMBW" }));
+        games.Add(CreateGame("Nine Sols", new List<string> { "Nine", "Sols", "ns" }));
         games.Add(CreateGame("Noita", new List<string> { "Noita" }));
         games.Add(CreateGame("Okami HD", new List<string> { "Okami", "OkamiHD", "HD" }));
         games.Add(CreateGame("Ori and the Blind Forest", new List<string> { "Ori", "Blind", "Forest", "OBF", "OATBF" }));
@@ -220,16 +222,19 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("PEAK", new List<string> { "Peak" }));
         games.Add(CreateGame("Peaks Of Yore", new List<string> { "Peaks", "Yore", "POY" }));
         games.Add(CreateGame("Pikmin 2", new List<string> { "Pikmin", "2", "Pikmin2" }));
-        games.Add(CreateGame("Pikuniku", new List<string> { "Pikuniku" }));
+        games.Add(CreateGame("Pikuniku", new List<string> { "Pikuniku", "pn" }));
         games.Add(CreateGame("Placid Plastic Duck Simulator", new List<string> { "Placid", "Plastic", "Duck", "Simulator", "Sim", "PPDS", "PlacidPlasticDuckSimulator" }));
         games.Add(CreateGame("Plants Vs. Zombies GOTY", new List<string> { "Plants", "vs", "Zombies", "GOTY", "Game", "Year", "PVZ" }));
-        games.Add(CreateGame("Plants Vs. Zombies Replanted", new List<string> { "Plants", "vs", "Zombies", "Replanted", "Remake", "PVZ" }));
+        games.Add(CreateGame("Plants Vs. Zombies Replanted", new List<string> { "Plants", "vs", "Zombies", "Replanted", "Remake", "PVZ", "PVZR" }));
         games.Add(CreateGame("Pokémon Crystal", new List<string> { "Pokemon", "Pokémon", "Crystal" }));
         games.Add(CreateGame("Pokémon Emerald", new List<string> { "Pokemon", "Pokémon", "Emerald" }));
         games.Add(CreateGame("Pokémon FireRed and LeafGreen", new List<string> { "Pokemon", "Pokémon", "FireRed", "Fire", "Red", "LeafGreen", "Leaf", "Green", "and" }));
+        games.Add(CreateGame("Pokémon Platinum", new List<string> { "Pokemon", "Pokémon", "Platinum" }));
+        games.Add(CreateGame("Pokémon Snap", new List<string> { "Pokemon", "Pokémon", "Snap", "PS" }));
         games.Add(CreateGame("PokéPark Wii: Pikachu's Adventure", new List<string> { "Pokemon", "Pokémon", "Poképark", "Pokepark", "Wii", "Pikachu", "Pikachu's", "Adventure", "Park" }));
         games.Add(CreateGame("Portal 2", new List<string> { "Portal", "2", "II" }));
         games.Add(CreateGame("PowerWash Simulator", new List<string> { "PowerWash", "Wash", "Simulator", "PWS" }));
+        games.Add(CreateGame("Psychonauts", new List<string> { "Psycho", "Nauts", "PN" }));
         games.Add(CreateGame("Raft", new List<string> { "Raft" }));
         games.Add(CreateGame("Refunct", new List<string> { "Refunct" }));
         games.Add(CreateGame("R.E.P.O.", new List<string> { "REPO", "R.E.P.O." }));
@@ -243,6 +248,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Slay The Spire 2", new List<string> { "Slay", "Spire", "2", "STS", "STS2" }));
         games.Add(CreateGame("Slime Rancher", new List<string> { "Slime", "Rancher", "SR" }));
         games.Add(CreateGame("Slime Rancher 2", new List<string> { "Slime", "Rancher", "2", "II", "SR", "SR2", "SR 2" }));
+        games.Add(CreateGame("Sonic Adventure DX", new List<string> { "Sonic", "Adventure", "DX", "SADX" }));
         games.Add(CreateGame("Spelunky 2", new List<string> { "Spelunky", "Spel", "spel2", "Spel 2", "2" }));
         games.Add(CreateGame("Stardew Valley", new List<string> { "Stardew", "Valley", "SV" }));
         games.Add(CreateGame("Subnautica", new List<string> { "Subnautica" }));
@@ -254,6 +260,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("The Legend of Zelda: The Wind Waker", new List<string> { "Legend", "Zelda", "Wind", "Waker", "TLOZ", "WW", "TLOZWW", "TWW", "TLOZTWW", "The" }));
         games.Add(CreateGame("The Legend of Zelda: Twilight Princess", new List<string> { "Legend", "Zelda", "Twilight", "Princess", "TLOZ", "TP", "TLOZTP" }));
         games.Add(CreateGame("The Simpsons Hit & Run", new List<string> { "Simpsons", "Hit", "And", "Run", "SHAR" }));
+        games.Add(CreateGame("The WereCleaner", new List<string> { "The", "WereCleaner", "Were", "Cleaner", "TWC" }));
         games.Add(CreateGame("The Witness", new List<string> { "Witness" }));
         games.Add(CreateGame("TOEM: A Photo Adventure", new List<string> { "TOEM", "A", "Photo", "Adventure", ":", "TOEM:" }));
         games.Add(CreateGame("TUNIC", new List<string> { "Tunic" }));

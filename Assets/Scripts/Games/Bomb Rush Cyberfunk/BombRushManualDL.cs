@@ -16,6 +16,9 @@ public class BombRushManualDL : MonoBehaviour
     public FileDownloader.FileData bombRushAP;
     public FileDownloader.FileData bombRushModLocalizer;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "BombRushCyberfunk";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installBepInExToggle;
     public Toggle installArchipelagoToggle;
@@ -51,6 +54,7 @@ public class BombRushManualDL : MonoBehaviour
         public string bombrushBepInEx;
         public string bombrushAP;
         public string bombrushModLocalizer;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -154,6 +158,8 @@ public class BombRushManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
+        bombRushPath = GetBombRushPath();
+
         if (string.IsNullOrEmpty(bombRushPath))
         {
             ShowInfo("Bomb Rush Cyberfunk path not found. Please check Steam installation.");
@@ -359,6 +365,8 @@ public class BombRushManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        bombRushPath = GetBombRushPath();
     }
 
     void LaunchBombRush()
@@ -516,12 +524,8 @@ public class BombRushManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "BombRushCyberfunk"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "BombRushCyberfunk"),
-            @"D:\Steam\steamapps\common\BombRushCyberfunk",
-            @"D:\SteamLibrary\steamapps\common\BombRushCyberfunk",
-            @"E:\Steam\steamapps\common\BombRushCyberfunk",
-            @"E:\SteamLibrary\steamapps\common\BombRushCyberfunk",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -530,42 +534,46 @@ public class BombRushManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Bomb Rush Cyberfunk at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string brcPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "BombRushCyberfunk");
-                    if (Directory.Exists(brcPath))
-                        return brcPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    brcPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "BombRushCyberfunk");
-                    if (Directory.Exists(brcPath))
-                        return brcPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    brcPath = Path.Combine(drive.Name, "steamapps", "common", "BombRushCyberfunk");
-                    if (Directory.Exists(brcPath))
-                        return brcPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Bomb Rush Cyberfunk not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 

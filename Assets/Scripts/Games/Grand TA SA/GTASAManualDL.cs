@@ -18,6 +18,13 @@ public class GTASAManualDL : MonoBehaviour
     public FileDownloader.FileData gtasaWidescreen;
     public FileDownloader.FileData gtasaAP;
 
+    [Header("GAME FOLDER NAMES")]
+    public string[] steamGameFolderNames = new string[]
+    {
+    "Grand Theft Auto San Andreas",
+    "GTA San Andreas - The Definitive Edition",
+    };
+
     [Header("FEATURE TOGGLES")]
     public Toggle installGTASAApworldToggle;
     public Toggle installGTASAASIToggle;
@@ -56,6 +63,7 @@ public class GTASAManualDL : MonoBehaviour
         public string gtasaASI;
         public string gtasaWidescreen;
         public string gtasaAP;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -115,26 +123,29 @@ public class GTASAManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        // wait for remote config if necessary
-        if (!configLoaded)
-        {
-            ShowInfo("Loading configuration, please wait...");
-            StartCoroutine(WaitForConfigThenSetup());
-            return;
-        }
-
-        if (string.IsNullOrEmpty(gtasaPath))
-        {
-            ShowInfo("GTA San Andreas path not found. Please check Steam installation.");
-            return;
-        }
+        gtasaPath = GetGTASAPath();
+        backupPath = Path.Combine(gtasaPath, "backup");
 
         bool apworld = installGTASAApworldToggle == null || installGTASAApworldToggle.isOn;
         bool asi = installGTASAASIToggle != null && installGTASAASIToggle.isOn;
         bool widescreen = installGTASAWidescreenToggle != null && installGTASAWidescreenToggle.isOn;
         bool apmod = installGTASAAPToggle != null && installGTASAAPToggle.isOn;
 
+        bool needsGamePath = asi || apmod || widescreen;
+
+        if (needsGamePath && (string.IsNullOrEmpty(gtasaPath) || !Directory.Exists(gtasaPath)))
+        {
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
+
         int count = (apworld ? 1 : 0) + (asi ? 1 : 0) + (widescreen ? 1 : 0) + (apmod ? 1 : 0);
+
+        if (apworld && count == 1)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
 
         if (count == 0)
         {
@@ -145,18 +156,26 @@ public class GTASAManualDL : MonoBehaviour
         StartCoroutine(SetupFlow());
     }
 
-    IEnumerator WaitForConfigThenSetup()
+    IEnumerator APWorldOnlyFlow()
     {
-        while (!configLoaded)
-            yield return new WaitForSeconds(0.1f);
+        yield return new WaitUntil(() => configLoaded);
 
-        CloseInfoPanel();
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            LaunchGTASAClient();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     IEnumerator SetupFlow()
     {
-        // Create backup folder and backup vorbisFile.dll if it exists
         ShowInfo("Creating backup...");
         yield return new WaitForSeconds(0.5f);
 
@@ -188,6 +207,7 @@ public class GTASAManualDL : MonoBehaviour
     {
         gtasaPath = GetGTASAPath();
         if (string.IsNullOrEmpty(gtasaPath)) return;
+        backupPath = Path.Combine(gtasaPath, "backup");
 
         CleanupProcesses();
         ShowInfo("Reverting changes...");
@@ -280,7 +300,6 @@ public class GTASAManualDL : MonoBehaviour
         }
     }
 
-    // Installs the .apworld into Archipelago/custom_worlds (not into plugins)
     IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
@@ -361,10 +380,23 @@ public class GTASAManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
-    // Downloads and installs vorbisFile.dll directly to GTA SA directory
     IEnumerator InstallASI()
     {
         while (!configLoaded)
@@ -736,6 +768,9 @@ public class GTASAManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        gtasaPath = GetGTASAPath();
+        backupPath = Path.Combine(gtasaPath, "backup");
     }
 
     string GetGTASAPath()
@@ -745,56 +780,65 @@ public class GTASAManualDL : MonoBehaviour
 
     string GetGTASASteamPath()
     {
-        string[] quickPaths = new string[]
+        string[] baseDirs = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Grand Theft Auto San Andreas"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "GTA San Andreas - The Definitive Edition"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Grand Theft Auto San Andreas"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "GTA San Andreas - The Definitive Edition"),
-            @"D:\Steam\steamapps\common\Grand Theft Auto San Andreas",
-            @"D:\Steam\steamapps\common\GTA San Andreas - The Definitive Edition",
-            @"D:\SteamLibrary\steamapps\common\Grand Theft Auto San Andreas",
-            @"D:\SteamLibrary\steamapps\common\GTA San Andreas - The Definitive Edition",
-            @"C:\Program Files (x86)\steamapps\common\Grand Theft Auto San Andreas",
-            @"C:\Program Files (x86)\steamapps\common\GTA San Andreas - The Definitive Edition",
-            @"C:\Program Files\steamapps\common\Grand Theft Auto San Andreas",
-            @"C:\Program Files\steamapps\common\GTA San Andreas - The Definitive Edition",
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common"),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common"),
         };
 
-        foreach (string p in quickPaths)
+        foreach (string baseDir in baseDirs)
         {
-            try { if (Directory.Exists(p)) return p; } catch { }
-        }
-
-        try
-        {
-            var drives = System.IO.DriveInfo.GetDrives();
-            foreach (var drive in drives)
+            foreach (string folderName in steamGameFolderNames)
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed) continue;
                 try
                 {
-                    string[] pathPatterns = new string[]
+                    string path = Path.Combine(baseDir, folderName);
+                    if (Directory.Exists(path))
                     {
-                        Path.Combine(drive.Name, "Steam", "steamapps", "common", "Grand Theft Auto San Andreas"),
-                        Path.Combine(drive.Name, "Steam", "steamapps", "common", "GTA San Andreas - The Definitive Edition"),
-                        Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Grand Theft Auto San Andreas"),
-                        Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "GTA San Andreas - The Definitive Edition"),
-                        Path.Combine(drive.Name, "steamapps", "common", "Grand Theft Auto San Andreas"),
-                        Path.Combine(drive.Name, "steamapps", "common", "GTA San Andreas - The Definitive Edition"),
-                    };
-
-                    foreach (string tryPath in pathPatterns)
-                    {
-                        if (Directory.Exists(tryPath)) return tryPath;
+                        UnityEngine.Debug.Log("Found GTA SA (Steam) at: " + path);
+                        return path;
                     }
                 }
                 catch { }
             }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("GTA San Andreas not found.");
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        foreach (string folderName in steamGameFolderNames)
+                        {
+                            try
+                            {
+                                string path = Path.Combine(drive.Name, relativePath, folderName);
+                                if (Directory.Exists(path))
+                                {
+                                    UnityEngine.Debug.Log("Found GTA SA (Steam, via remote config) at: " + path);
+                                    return path;
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("GTA SA (Steam) not found.");
         return "";
     }
 }

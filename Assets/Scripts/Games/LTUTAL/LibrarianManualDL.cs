@@ -15,6 +15,9 @@ public class LibrarianManualDL : MonoBehaviour
     public FileDownloader.FileData modFiles;
     public FileDownloader.FileData apworld;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Librarian Tidy Up the Arcane Library!";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installModsToggle;
@@ -45,6 +48,7 @@ public class LibrarianManualDL : MonoBehaviour
     {
         public string librarianAP;
         public string librarianApworld;
+        public string[] steamSearchPaths;
     }
 
     [System.Serializable]
@@ -142,24 +146,25 @@ public class LibrarianManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (!configLoaded)
-        {
-            ShowInfo("Loading configuration, please wait...");
-            StartCoroutine(WaitForConfigThenSetup());
-            return;
-        }
+        gamePath = GetGamePath();
 
-        if (string.IsNullOrEmpty(gamePath))
-        {
-            ShowInfo("Game path not found. Please check Steam installation.");
-            return;
-        }
-
-        // ✅ FLOWS individuels
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
-        bool mods = installModsToggle == null || installModsToggle.isOn;
+        bool ap = installModsToggle == null || installModsToggle.isOn;
+        bool needsGamePath = ap;
 
-        int count = (apworld ? 1 : 0) + (mods ? 1 : 0);
+        if (needsGamePath && (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath)))
+        {
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
+
+        int count = (apworld ? 1 : 0) + (ap ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
 
         if (apworld && count == 1)
         {
@@ -167,13 +172,32 @@ public class LibrarianManualDL : MonoBehaviour
             return;
         }
 
-        if (mods && count == 1)
+        if (ap && count == 1)
         {
             StartCoroutine(ModsOnlyFlow());
             return;
         }
 
         StartCoroutine(SetupWithTracking());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            ShowInfo("Launching LTUTAL...");
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     IEnumerator SetupWithTracking()
@@ -196,6 +220,8 @@ public class LibrarianManualDL : MonoBehaviour
 
     private void ExecuteRevert()
     {
+        gamePath = GetGamePath();
+
         string manifestPath = Path.Combine(Application.persistentDataPath, "LibrarianInstalledFilesManifest.json");
 
         if (!File.Exists(manifestPath))
@@ -290,19 +316,6 @@ public class LibrarianManualDL : MonoBehaviour
             }
         }
         catch { }
-    }
-
-    IEnumerator APWorldOnlyFlow()
-    {
-        gamePath = GetGamePath();
-
-        if (string.IsNullOrEmpty(gamePath))
-            yield break;
-
-        yield return InstallAPWorld();
-
-        if (launchGameToggle == null || launchGameToggle.isOn)
-            LaunchGame();
     }
 
     IEnumerator ModsOnlyFlow()
@@ -479,7 +492,6 @@ public class LibrarianManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("Target path: " + target);
 
-        // Nettoie l'ancien fichier s'il existe
         if (File.Exists(target))
         {
             try
@@ -490,7 +502,6 @@ public class LibrarianManualDL : MonoBehaviour
             catch { }
         }
 
-        // Copie le fichier téléchargé
         try
         {
             File.Copy(localPath, target, true);
@@ -506,6 +517,20 @@ public class LibrarianManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -583,7 +608,8 @@ public class LibrarianManualDL : MonoBehaviour
         }
 
         configLoaded = true;
-        UnityEngine.Debug.Log("Config marked as loaded");
+
+        gamePath = GetGamePath();
     }
 
     void LaunchGame()
@@ -727,84 +753,58 @@ public class LibrarianManualDL : MonoBehaviour
 
     string GetGamePath()
     {
-        // Cherche les 2 variantes du nom du dossier
-        string[] gameNames = new string[]
+        string[] quickPaths = new string[]
         {
-            "Librarian Tidy Up the Arcane Library",
-            "Librarian Tidy Up the Arcane Library!"
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
-        foreach (string gameName in gameNames)
+        foreach (string path in quickPaths)
         {
-            string[] quickPaths = new string[]
+            try
             {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", gameName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", gameName),
-            Path.Combine(@"D:\Steam", "steamapps", "common", gameName),
-            Path.Combine(@"D:\SteamLibrary", "steamapps", "common", gameName),
-            Path.Combine(@"D:\steamapps", "common", gameName),
-            Path.Combine(@"E:\Steam", "steamapps", "common", gameName),
-            Path.Combine(@"E:\SteamLibrary", "steamapps", "common", gameName),
-            Path.Combine(@"E:\steamapps", "common", gameName),
-            Path.Combine(@"E:\Program Files (x86)", "steamapps", "common", gameName),
-            Path.Combine(@"E:\Program Files", "steamapps", "common", gameName),
-            };
-
-            foreach (string path in quickPaths)
-            {
-                try
+                if (Directory.Exists(path))
                 {
-                    if (Directory.Exists(path))
-                        return path;
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
+                    return path;
                 }
-                catch { }
             }
+            catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                foreach (string gameName in gameNames)
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    try
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        // Cherche Steam\steamapps
-                        string gamePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", gameName);
-                        if (Directory.Exists(gamePath))
-                            return gamePath;
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                        // Cherche SteamLibrary\steamapps
-                        gamePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", gameName);
-                        if (Directory.Exists(gamePath))
-                            return gamePath;
-
-                        // Cherche directement steamapps à la racine du disque
-                        gamePath = Path.Combine(drive.Name, "steamapps", "common", gameName);
-                        if (Directory.Exists(gamePath))
-                            return gamePath;
-
-                        // Cherche dans Program Files (x86)\steamapps
-                        gamePath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", gameName);
-                        if (Directory.Exists(gamePath))
-                            return gamePath;
-
-                        // Cherche dans Program Files\steamapps
-                        gamePath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", gameName);
-                        if (Directory.Exists(gamePath))
-                            return gamePath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
-                    catch { }
                 }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 

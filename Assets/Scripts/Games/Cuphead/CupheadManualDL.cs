@@ -1,10 +1,11 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.IO;
+using Microsoft.Win32;
 using System.Collections;
 using System.Diagnostics;
-using Microsoft.Win32;
+using System.IO;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class CupheadManualDL : MonoBehaviour
 {
@@ -14,6 +15,9 @@ public class CupheadManualDL : MonoBehaviour
     public FileDownloader.FileData apworld;
     public FileDownloader.FileData bepInEx;
     public FileDownloader.FileData cupheadArchipelago;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Cuphead";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
@@ -51,6 +55,7 @@ public class CupheadManualDL : MonoBehaviour
         public string cupheadApworld;
         public string cupheadBepInEx;
         public string cupheadAP;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -154,13 +159,53 @@ public class CupheadManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(cupheadPath))
+        cupheadPath = GetCupheadPath();
+
+        bool bepinex = installBepInExToggle != null && installBepInExToggle.isOn;
+        bool apmod = installCupheadArchipelagoToggle != null && installCupheadArchipelagoToggle.isOn;
+        bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
+
+        bool needsGamePath = bepinex || apmod;
+
+        if (needsGamePath && (string.IsNullOrEmpty(cupheadPath) || !Directory.Exists(cupheadPath)))
         {
-            ShowInfo("Cuphead path not found. Please check Steam installation.");
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
+
+        int count = (apworld ? 1 : 0) + (apmod ? 1 : 0) + (bepinex ? 1 : 0);
+
+        if (apworld && count == 1 && !bepinex)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
             return;
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            LaunchCuphead();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -406,6 +451,20 @@ public class CupheadManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -520,6 +579,8 @@ public class CupheadManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        cupheadPath = GetCupheadPath();
     }
 
     void LaunchCuphead()
@@ -676,18 +737,10 @@ public class CupheadManualDL : MonoBehaviour
     string GetCupheadPath()
     {
         string[] quickPaths = new string[]
-        {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Cuphead"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Cuphead"),
-            @"D:\Steam\steamapps\common\Cuphead",
-            @"D:\SteamLibrary\steamapps\common\Cuphead",
-            @"D:\steamapps\common\Cuphead",
-            @"E:\Steam\steamapps\common\Cuphead",
-            @"E:\SteamLibrary\steamapps\common\Cuphead",
-            @"E:\steamapps\common\Cuphead",
-            @"E:\Program Files (x86)\steamapps\common\Cuphead",
-            @"E:\Program Files\steamapps\common\Cuphead",
-        };
+                {
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
+                };
 
         foreach (string path in quickPaths)
         {
@@ -695,50 +748,46 @@ public class CupheadManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Cuphead at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string cupheadPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Cuphead");
-                    if (Directory.Exists(cupheadPath))
-                        return cupheadPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    cupheadPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Cuphead");
-                    if (Directory.Exists(cupheadPath))
-                        return cupheadPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    cupheadPath = Path.Combine(drive.Name, "steamapps", "common", "Cuphead");
-                    if (Directory.Exists(cupheadPath))
-                        return cupheadPath;
-
-                    cupheadPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Cuphead");
-                    if (Directory.Exists(cupheadPath))
-                        return cupheadPath;
-
-                    cupheadPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Cuphead");
-                    if (Directory.Exists(cupheadPath))
-                        return cupheadPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Cuphead not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 

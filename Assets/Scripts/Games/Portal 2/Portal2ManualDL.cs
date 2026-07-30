@@ -125,11 +125,26 @@ public class Portal2ManualDL : MonoBehaviour
         pendingAction = "";
     }
 
+    // =========================================================
+    // SETUP (logique alignée sur REPOManualDL / ContentWarningManualDL)
+    // =========================================================
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(sourcemodsPath))
+        sourcemodsPath = GetSourceModsPath();
+
+        bool archipelago = installArchipelagoToggle == null || installArchipelagoToggle.isOn;
+        bool apworld = installApworldToggle == null || installApworldToggle.isOn;
+
+        int count =
+            (archipelago ? 1 : 0) +
+            (apworld ? 1 : 0);
+
+        if (archipelago && count == 1) { StartCoroutine(ArchipelagoOnlyFlow()); return; }
+        if (apworld && count == 1) { StartCoroutine(APWorldOnlyFlow()); return; }
+
+        if (count == 0)
         {
-            ShowInfo("Steam sourcemods path not found.");
+            ShowInfo("Please select at least one component to install.");
             return;
         }
 
@@ -158,7 +173,7 @@ public class Portal2ManualDL : MonoBehaviour
         if (installApworldToggle != null && installApworldToggle.isOn)
         {
             ShowInfo("Installing Portal 2 APWorld...");
-            yield return InstallPortal2Apworld();
+            yield return InstallAPWorld();
         }
 
         if (installArchipelagoToggle != null && installArchipelagoToggle.isOn)
@@ -175,6 +190,34 @@ public class Portal2ManualDL : MonoBehaviour
         ShowInfo("You can now start Portal 2 Archipelago Mod in your library!");
     }
 
+    IEnumerator ArchipelagoOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing Portal 2 Archipelago Mod...");
+        yield return InstallPortal2AP();
+
+        ShowInfo("Closing Steam...");
+        CloseAllSteamProcesses();
+
+        yield return new WaitForSeconds(1f);
+
+        ShowInfo("Relaunching Steam...");
+        LaunchSteam();
+
+        ShowInfo("Installation complete!");
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing Portal 2 APWorld...");
+        yield return InstallAPWorld();
+
+        ShowInfo("Installation complete!");
+    }
+
     IEnumerator InstallPortal2AP()
     {
         while (!configLoaded)
@@ -187,7 +230,6 @@ public class Portal2ManualDL : MonoBehaviour
 
         try
         {
-            // Chercher le dossier "Portal2ArchipelagoMod" à l'intérieur de l'archive
             string[] modDirs = Directory.GetDirectories(extractPath, "Portal2ArchipelagoMod", SearchOption.AllDirectories);
 
             if (modDirs.Length > 0)
@@ -214,7 +256,7 @@ public class Portal2ManualDL : MonoBehaviour
         SafeDeleteDirectory(extractPath);
     }
 
-    IEnumerator InstallPortal2Apworld()
+    IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
             yield return null;
@@ -473,5 +515,51 @@ public class Portal2ManualDL : MonoBehaviour
     {
         if (infoPanel != null)
             infoPanel.SetActive(false);
+    }
+
+    string GetSourceModsPath()
+    {
+        string quickPath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "sourcemods");
+
+        try
+        {
+            if (Directory.Exists(quickPath))
+                return quickPath;
+        }
+        catch { }
+
+        try
+        {
+            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+            foreach (System.IO.DriveInfo drive in drives)
+            {
+                if (drive.DriveType != System.IO.DriveType.Fixed)
+                    continue;
+
+                try
+                {
+                    string path = Path.Combine(drive.Name, "Steam", "steamapps", "sourcemods");
+                    if (Directory.Exists(path))
+                        return path;
+
+                    path = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "sourcemods");
+                    if (Directory.Exists(path))
+                        return path;
+
+                    path = Path.Combine(drive.Name, "Program Files (x86)", "Steam", "steamapps", "sourcemods");
+                    if (Directory.Exists(path))
+                        return path;
+
+                    path = Path.Combine(drive.Name, "Program Files", "Steam", "steamapps", "sourcemods");
+                    if (Directory.Exists(path))
+                        return path;
+                }
+                catch { }
+            }
+        }
+        catch { }
+
+        return quickPath;
     }
 }

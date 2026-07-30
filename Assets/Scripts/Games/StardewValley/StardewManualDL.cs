@@ -14,6 +14,9 @@ public class StardewManualDL : MonoBehaviour
     public FileDownloader.FileData preloadedMods;
     public FileDownloader.FileData apMod;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Stardew Valley";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installPreloadedToggle;
     public Toggle installAPModToggle;
@@ -48,6 +51,7 @@ public class StardewManualDL : MonoBehaviour
     {
         public string stardewvalleyAP;
         public string stardewvalleyPreloaded;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -450,6 +454,8 @@ public class StardewManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        stardewPath = GetStardewValleyPath();
     }
 
     void LaunchStardewModdingAPI()
@@ -668,16 +674,8 @@ public class StardewManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Stardew Valley"),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Stardew Valley"),
-        @"D:\Steam\steamapps\common\Stardew Valley",
-        @"D:\SteamLibrary\steamapps\common\Stardew Valley",
-        @"D:\steamapps\common\Stardew Valley",
-        @"E:\Steam\steamapps\common\Stardew Valley",
-        @"E:\SteamLibrary\steamapps\common\Stardew Valley",
-        @"E:\steamapps\common\Stardew Valley",
-        @"E:\Program Files (x86)\steamapps\common\Stardew Valley",
-        @"E:\Program Files\steamapps\common\Stardew Valley",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -686,70 +684,46 @@ public class StardewManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Stardew Valley at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Cherche Steam\steamapps
-                    string subPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Stardew Valley");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Stardew Valley at: " + subPath);
-                        return subPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Cherche SteamLibrary\steamapps
-                    subPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Stardew Valley");
-                    if (Directory.Exists(subPath))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Stardew Valley at: " + subPath);
-                        return subPath;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Cherche directement steamapps à la racine du disque
-                    subPath = Path.Combine(drive.Name, "steamapps", "common", "Stardew Valley");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Stardew Valley at: " + subPath);
-                        return subPath;
-                    }
-
-                    // Cherche dans Program Files (x86)\steamapps
-                    subPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Stardew Valley");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Stardew Valley at: " + subPath);
-                        return subPath;
-                    }
-
-                    // Cherche dans Program Files\steamapps
-                    subPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Stardew Valley");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Stardew Valley at: " + subPath);
-                        return subPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Stardew Valley not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

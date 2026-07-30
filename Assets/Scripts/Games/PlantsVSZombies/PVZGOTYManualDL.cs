@@ -15,6 +15,15 @@ public class PVZGOTYManualDL : MonoBehaviour
     public FileDownloader.FileData pvzgotyAPWorld;
     public FileDownloader.FileData pvzgotyAP;
 
+    [Header("PLATFORM SELECTION")]
+    public Button steamButton;
+    public Button epicButton;
+    public TextMeshProUGUI platformStatus;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Plants Vs Zombies";
+    public string epicGameFolderName = "PlantsvsZombiesGameoKg1e6";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPToggle;
@@ -38,17 +47,29 @@ public class PVZGOTYManualDL : MonoBehaviour
     private string pendingAction;
     private GameConfig remoteConfig;
     private bool configLoaded = false;
+    private bool isEpic = false;
 
     [System.Serializable]
     public class GameConfig
     {
         public string pvzgotyApworld;
         public string pvzgotyAP;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     void Start()
     {
-        gamePath = GetGamePath();
+        // Initialize platform buttons
+        if (steamButton != null)
+            steamButton.onClick.AddListener(OnSteamButtonClicked);
+
+        if (epicButton != null)
+            epicButton.onClick.AddListener(OnEpicButtonClicked);
+
+        // Select Steam by default
+        SelectSteam();
+
         StartCoroutine(LoadRemoteConfig());
 
         if (infoPanel != null)
@@ -75,6 +96,53 @@ public class PVZGOTYManualDL : MonoBehaviour
         if (cancelButton != null)
             cancelButton.onClick.AddListener(OnCancel);
     }
+
+    void OnDestroy()
+    {
+        CloseGame();
+    }
+
+    // =========================================================
+    // PLATFORM SELECTION
+    // =========================================================
+
+    void OnSteamButtonClicked()
+    {
+        SelectSteam();
+    }
+
+    void OnEpicButtonClicked()
+    {
+        SelectEpic();
+    }
+
+    void SelectSteam()
+    {
+        isEpic = false;
+        gamePath = GetGamePath();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Steam - Path: " + gamePath);
+    }
+
+    void SelectEpic()
+    {
+        isEpic = true;
+        gamePath = GetGamePath();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Epic - Path: " + gamePath);
+    }
+
+    void UpdatePlatformStatus()
+    {
+        if (platformStatus != null)
+        {
+            string platform = isEpic ? "Epic Games" : "Steam";
+            string status = string.IsNullOrEmpty(gamePath) ? "Not Found" : "Found";
+            platformStatus.text = $"Platform: {platform} \n {status}";
+        }
+    }
+
+    // =========================================================
 
     void CleanupProcesses()
     {
@@ -134,23 +202,26 @@ public class PVZGOTYManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (!configLoaded)
-        {
-            ShowInfo("Loading configuration, please wait...");
-            StartCoroutine(WaitForConfigThenSetup());
-            return;
-        }
-
-        if (string.IsNullOrEmpty(gamePath))
-        {
-            ShowInfo("Game path not found. Please check Steam installation.");
-            return;
-        }
+        gamePath = GetGamePath();
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool ap = installAPToggle == null || installAPToggle.isOn;
+        bool needsGamePath = ap;
+
+        if (needsGamePath && (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath)))
+        {
+            string platform = isEpic ? "Epic" : "Steam";
+            ShowInfo("Game not found on " + platform + ". Please check your installation.");
+            return;
+        }
 
         int count = (apworld ? 1 : 0) + (ap ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
 
         if (apworld && count == 1)
         {
@@ -167,8 +238,35 @@ public class PVZGOTYManualDL : MonoBehaviour
         StartCoroutine(InstallFlow());
     }
 
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            ShowInfo("Launching PVZ GOTY...");
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
+    }
+
     private void ExecuteRevert()
     {
+        gamePath = GetGamePath();
+
+        if (string.IsNullOrEmpty(gamePath))
+        {
+            ShowInfo("Game path not found. Cannot revert.");
+            return;
+        }
+
         CleanupProcesses();
         StartCoroutine(RemoveInstalledFilesAsync());
     }
@@ -213,19 +311,6 @@ public class PVZGOTYManualDL : MonoBehaviour
             ShowInfo("Error during revert:\n" + e.Message);
             UnityEngine.Debug.LogError("Revert error: " + e);
         }
-    }
-
-    IEnumerator APWorldOnlyFlow()
-    {
-        gamePath = GetGamePath();
-
-        if (string.IsNullOrEmpty(gamePath))
-            yield break;
-
-        yield return InstallAPWorld();
-
-        if (launchGameToggle == null || launchGameToggle.isOn)
-            LaunchGame();
     }
 
     IEnumerator APOnlyFlow()
@@ -477,6 +562,20 @@ public class PVZGOTYManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -554,7 +653,9 @@ public class PVZGOTYManualDL : MonoBehaviour
         }
 
         configLoaded = true;
-        UnityEngine.Debug.Log("Config marked as loaded");
+
+        gamePath = GetGamePath();
+        UpdatePlatformStatus();
     }
 
     void LaunchGame()
@@ -635,20 +736,24 @@ public class PVZGOTYManualDL : MonoBehaviour
         ShowConfirmation("Are you sure you want to install PVZ GOTY Archipelago?", "Setup");
     }
 
+    // =========================================================
+    // PATH DETECTION
+    // =========================================================
+
     string GetGamePath()
+    {
+        if (isEpic)
+            return GetGameEpicPath();
+        else
+            return GetGameSteamPath();
+    }
+
+    string GetGameSteamPath()
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Plants Vs Zombies"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Plants Vs Zombies"),
-            @"D:\Steam\steamapps\common\Plants Vs Zombies",
-            @"D:\SteamLibrary\steamapps\common\Plants Vs Zombies",
-            @"D:\steamapps\common\Plants Vs Zombies",
-            @"E:\Steam\steamapps\common\Plants Vs Zombies",
-            @"E:\SteamLibrary\steamapps\common\Plants Vs Zombies",
-            @"E:\steamapps\common\Plants Vs Zombies",
-            @"E:\Program Files (x86)\steamapps\common\Plants Vs Zombies",
-            @"E:\Program Files\steamapps\common\Plants Vs Zombies",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -656,47 +761,141 @@ public class PVZGOTYManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
+            }
+            catch { }
+        }
+
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
+        return "";
+    }
+
+    string GetGameEpicPath()
+    {
+        string[] quickPaths = new string[]
+       {
+            @"C:\Program Files\Epic Games\PlantsvsZombiesGameoKg1e6",
+            @"C:\Games\Epic\PlantsvsZombiesGameoKg1e6",
+       };
+
+        foreach (string path in quickPaths)
+        {
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
+                    return path;
+                }
             }
             catch { }
         }
 
         try
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+            string epicBaseDir = Path.Combine(
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonApplicationData),
+                "Epic", "EpicGamesLauncher", "Data", "Manifests"
+            );
 
-            foreach (System.IO.DriveInfo drive in drives)
+            if (Directory.Exists(epicBaseDir))
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
-
-                try
+                string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
+                foreach (string manifest in manifests)
                 {
-                    string gamePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Plants Vs Zombies");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    try
+                    {
+                        string content = File.ReadAllText(manifest);
+                        if (content.Contains("PlantsvsZombiesGameoKg1e6") || content.Contains("PlantsvsZombiesGameoKg1e6"))
+                        {
+                            System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
+                            System.Text.RegularExpressions.Match match = regex.Match(content);
 
-                    gamePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Plants Vs Zombies");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    gamePath = Path.Combine(drive.Name, "steamapps", "common", "Plants Vs Zombies");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    gamePath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Plants Vs Zombies");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    gamePath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Plants Vs Zombies");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                            if (match.Success)
+                            {
+                                string epicPath = match.Groups[1].Value;
+                                if (Directory.Exists(epicPath))
+                                {
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
+                                    return epicPath;
+                                }
+                            }
+                        }
+                    }
+                    catch { }
                 }
-                catch { }
             }
         }
         catch { }
 
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 

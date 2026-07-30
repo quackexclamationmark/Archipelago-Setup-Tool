@@ -12,15 +12,18 @@ public class EDCManualDL : MonoBehaviour
 
     [Header("EASY DELIVERY CO FILES")]
     public FileDownloader.FileData easydeliverycoBepInEx;
-    public FileDownloader.FileData easydeliverycoApworld; // easy_delivery_co.apworld
-    public FileDownloader.FileData easydeliverycoAP;      // EasyDeliveryAP-0.1.2.zip -> folder EasyDeliveryAP
-    public FileDownloader.FileData easydeliverycoAPI;     // EasyDeliveryAPI.zip.zip -> contains BepInEx/plugins/*.dll
+    public FileDownloader.FileData easydeliverycoApworld;
+    public FileDownloader.FileData easydeliverycoAP;
+    public FileDownloader.FileData easydeliverycoAPI;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Easy Delivery Co";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installBepInExToggle;
     public Toggle installApworldToggle;
-    public Toggle installArchipelagoToggle; // maps to easydeliverycoAP
-    public Toggle installAPI_Toggle;        // maps to easydeliverycoAPI
+    public Toggle installArchipelagoToggle;
+    public Toggle installAPI_Toggle;
 
     [Header("LAUNCH OPTIONS")]
     public Toggle secondLaunchToggle;
@@ -46,7 +49,6 @@ public class EDCManualDL : MonoBehaviour
     private EDCConfig remoteConfig;
     private bool configLoaded = false;
 
-    // Optional manifest tracking (kept minimal, used if you later want to save installed files)
     private InstalledFilesManifest currentManifest;
 
     [System.Serializable]
@@ -56,6 +58,7 @@ public class EDCManualDL : MonoBehaviour
         public string easydeliverycoApworld;
         public string easydeliverycoAP;
         public string easydeliverycoAPI;
+        public string[] steamSearchPaths;
     }
 
     [System.Serializable]
@@ -113,16 +116,29 @@ public class EDCManualDL : MonoBehaviour
             return;
 
         easydeliverycoBepInEx.url = remoteConfig.easydeliverycoBepInEx;
-        easydeliverycoBepInEx.fileName = "BepInEx.zip";
+        easydeliverycoBepInEx.fileName = ExtractFileNameFromUrl(remoteConfig.easydeliverycoBepInEx, "BepInEx.zip");
 
         easydeliverycoApworld.url = remoteConfig.easydeliverycoApworld;
-        easydeliverycoApworld.fileName = "easy_delivery_co.apworld";
+        easydeliverycoApworld.fileName = ExtractFileNameFromUrl(remoteConfig.easydeliverycoApworld, "easy_delivery_co.apworld");
 
         easydeliverycoAP.url = remoteConfig.easydeliverycoAP;
-        easydeliverycoAP.fileName = "EasyDeliveryAP-0.1.2.zip";
+        easydeliverycoAP.fileName = ExtractFileNameFromUrl(remoteConfig.easydeliverycoAP, "EasyDeliveryAP.zip");
 
         easydeliverycoAPI.url = remoteConfig.easydeliverycoAPI;
-        easydeliverycoAPI.fileName = "EasyDeliveryAPI.zip.zip";
+        easydeliverycoAPI.fileName = ExtractFileNameFromUrl(remoteConfig.easydeliverycoAPI, "EasyDeliveryAPI.zip");
+    }
+
+    string ExtractFileNameFromUrl(string url, string fallback)
+    {
+        if (string.IsNullOrEmpty(url))
+            return fallback;
+
+        string fileName = url.Substring(url.LastIndexOf('/') + 1);
+
+        if (fileName.Contains("?"))
+            fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+        return string.IsNullOrEmpty(fileName) ? fallback : fileName;
     }
 
     public void RunSetup()
@@ -173,13 +189,118 @@ public class EDCManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(edcPath))
+        edcPath = GetEDCPath();
+
+        bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
+        bool apworld = installApworldToggle != null && installApworldToggle.isOn;
+        bool apmod = installArchipelagoToggle != null && installArchipelagoToggle.isOn;
+        bool api = installAPI_Toggle != null && installAPI_Toggle.isOn;
+
+        bool needsGamePath = bep || apmod || api;
+
+        if (needsGamePath && (string.IsNullOrEmpty(edcPath) || !Directory.Exists(edcPath)))
         {
             ShowInfo("Easy Delivery Co path not found. Please check Steam installation.");
             return;
         }
 
+        int count =
+            (bep ? 1 : 0) +
+            (apworld ? 1 : 0) +
+            (apmod ? 1 : 0) +
+            (api ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
+        if (apworld && count == 1)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
+
+        if (bep && count == 1)
+        {
+            StartCoroutine(BepInExOnlyFlow());
+            return;
+        }
+
+        if (apmod && count == 1)
+        {
+            StartCoroutine(ArchipelagoOnlyFlow());
+            return;
+        }
+
+        if (api && count == 1)
+        {
+            StartCoroutine(APIOnlyFlow());
+            return;
+        }
+
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Easy Delivery Co...");
+            LaunchEDC();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
+    }
+
+    IEnumerator BepInExOnlyFlow()
+    {
+        ShowInfo("Installing BepInEx...");
+        yield return InstallBepInEx();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Easy Delivery Co...");
+            LaunchEDC();
+
+            yield return new WaitForSeconds(2f);
+
+            CloseEDC();
+
+            yield return new WaitForSeconds(1f);
+
+            ShowInfo("Second launch...");
+            LaunchEDC();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
+    }
+
+    IEnumerator ArchipelagoOnlyFlow()
+    {
+        ShowInfo("Installing EasyDeliveryAP...");
+        yield return InstallEasyDeliveryAP();
+
+        ShowInfo("Installation complete!");
+    }
+
+    IEnumerator APIOnlyFlow()
+    {
+        ShowInfo("Installing EasyDeliveryAPI DLLs...");
+        yield return InstallEasyDeliveryAPI();
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -245,7 +366,7 @@ public class EDCManualDL : MonoBehaviour
         if (installApworldToggle != null && installApworldToggle.isOn)
         {
             ShowInfo("Installing .apworld file...");
-            yield return InstallApworld();
+            yield return InstallAPWorld();
         }
 
         if (installArchipelagoToggle != null && installArchipelagoToggle.isOn)
@@ -296,11 +417,7 @@ public class EDCManualDL : MonoBehaviour
         SafeDeleteDirectory(extractPath);
     }
 
-    // Remplacé par une logique inspirée de COE33ManualDL:
-    // - Téléchargement direct via UnityWebRequest -> fichier local
-    // - Recherche du nom de fichier si absent
-    // - Tentative de plusieurs chemins cibles pour Archipelago/custom_worlds
-    IEnumerator InstallApworld()
+    IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
             yield return null;
@@ -316,8 +433,8 @@ public class EDCManualDL : MonoBehaviour
 
         string fileName = easydeliverycoApworld.fileName;
         if (string.IsNullOrEmpty(fileName))
+
         {
-            // Extraire le nom de fichier de l'URL
             fileName = easydeliverycoApworld.url.Substring(easydeliverycoApworld.url.LastIndexOf('/') + 1);
             if (fileName.Contains("?"))
                 fileName = fileName.Substring(0, fileName.IndexOf("?"));
@@ -329,7 +446,6 @@ public class EDCManualDL : MonoBehaviour
         UnityEngine.Debug.Log("Downloading APWorld from: " + easydeliverycoApworld.url);
         UnityEngine.Debug.Log("Saving to: " + localPath);
 
-        // Télécharge directement avec UnityWebRequest et DownloadHandlerFile
         yield return DownloadFile(easydeliverycoApworld.url, localPath);
 
         if (!File.Exists(localPath))
@@ -376,7 +492,6 @@ public class EDCManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("Target path: " + target);
 
-        // Supprime l'ancien fichier s'il existe
         if (File.Exists(target))
         {
             try
@@ -387,7 +502,6 @@ public class EDCManualDL : MonoBehaviour
             catch { }
         }
 
-        // Copie le fichier téléchargé vers le dossier cible
         try
         {
             File.Copy(localPath, target, true);
@@ -402,6 +516,20 @@ public class EDCManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -513,6 +641,8 @@ public class EDCManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        edcPath = GetEDCPath();
     }
 
     void LaunchEDC()
@@ -670,12 +800,8 @@ public class EDCManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Easy Delivery Co"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Easy Delivery Co"),
-            @"D:\Steam\steamapps\common\Easy Delivery Co",
-            @"D:\SteamLibrary\steamapps\common\Easy Delivery Co",
-            @"E:\Steam\steamapps\common\Easy Delivery Co",
-            @"E:\SteamLibrary\steamapps\common\Easy Delivery Co",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -684,42 +810,46 @@ public class EDCManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Easy Delivery Co at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string p = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Easy Delivery Co");
-                    if (Directory.Exists(p))
-                        return p;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    p = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Easy Delivery Co");
-                    if (Directory.Exists(p))
-                        return p;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    p = Path.Combine(drive.Name, "steamapps", "common", "Easy Delivery Co");
-                    if (Directory.Exists(p))
-                        return p;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Easy Delivery Co not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
@@ -844,7 +974,6 @@ public class EDCManualDL : MonoBehaviour
         return "Unknown";
     }
 
-    // Helper to download a file to disk (uses DownloadHandlerFile like COE33ManualDL)
     IEnumerator DownloadFile(string url, string savePath)
     {
         UnityEngine.Debug.Log("Starting download from: " + url);

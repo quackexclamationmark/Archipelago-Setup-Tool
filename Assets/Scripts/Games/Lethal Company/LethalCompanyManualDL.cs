@@ -25,6 +25,9 @@ public class LethalCompanyManualDL : MonoBehaviour
     public FileDownloader.FileData monoDetour;
     public FileDownloader.FileData mmhook;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Lethal Company";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
@@ -80,6 +83,7 @@ public class LethalCompanyManualDL : MonoBehaviour
         public string lethalcompanyMonoDetourBep5;
         public string lethalcompanyMonoDetour;
         public string lethalcompanyMMHook;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -191,11 +195,65 @@ public class LethalCompanyManualDL : MonoBehaviour
         pendingAction = "";
     }
 
+    // =========================================================
+    // SETUP (logique alignée sur REPOManualDL.ExecuteSetup)
+    // =========================================================
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(lethalCompanyPath))
+        lethalCompanyPath = GetLethalCompanyPath();
+
+        bool apworldT = installAPWorldToggle == null || installAPWorldToggle.isOn;
+        bool bepT = installBepInExToggle != null && installBepInExToggle.isOn;
+        bool apmodT = installAPModToggle == null || installAPModToggle.isOn;
+        bool lethalApiT = installLethalAPIToggle == null || installLethalAPIToggle.isOn;
+        bool apScrapT = installAPScrapToggle == null || installAPScrapToggle.isOn;
+        bool levelLoaderT = installLevelLoaderToggle == null || installLevelLoaderToggle.isOn;
+        bool lethalLibT = installLethalLibToggle == null || installLethalLibToggle.isOn;
+        bool fixSerializeT = installFixSerializeToggle == null || installFixSerializeToggle.isOn;
+        bool modDataT = installModDataToggle == null || installModDataToggle.isOn;
+        bool hookT = installHookToggle == null || installHookToggle.isOn;
+        bool monoDetourBep5T = installMonoDetourBep5Toggle == null || installMonoDetourBep5Toggle.isOn;
+        bool monoDetourT = installMonoDetourToggle == null || installMonoDetourToggle.isOn;
+
+        bool needsGamePath = bepT || apmodT || lethalApiT || apScrapT || levelLoaderT ||
+            lethalLibT || fixSerializeT || modDataT || hookT || monoDetourBep5T || monoDetourT;
+
+        if (needsGamePath && (string.IsNullOrEmpty(lethalCompanyPath) || !Directory.Exists(lethalCompanyPath)))
         {
-            ShowInfo("Lethal Company path not found. Please check Steam installation.");
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
+
+        int count =
+            (apworldT ? 1 : 0) +
+            (bepT ? 1 : 0) +
+            (apmodT ? 1 : 0) +
+            (lethalApiT ? 1 : 0) +
+            (apScrapT ? 1 : 0) +
+            (levelLoaderT ? 1 : 0) +
+            (lethalLibT ? 1 : 0) +
+            (fixSerializeT ? 1 : 0) +
+            (modDataT ? 1 : 0) +
+            (hookT ? 1 : 0) +
+            (monoDetourBep5T ? 1 : 0) +
+            (monoDetourT ? 1 : 0);
+
+        if (apworldT && count == 1) { StartCoroutine(APWorldOnlyFlow()); return; }
+        if (bepT && count == 1) { StartCoroutine(BepInExOnlyFlow()); return; }
+        if (apmodT && count == 1) { StartCoroutine(APModOnlyFlow()); return; }
+        if (lethalApiT && count == 1) { StartCoroutine(LethalAPIOnlyFlow()); return; }
+        if (apScrapT && count == 1) { StartCoroutine(APScrapOnlyFlow()); return; }
+        if (levelLoaderT && count == 1) { StartCoroutine(LevelLoaderOnlyFlow()); return; }
+        if (lethalLibT && count == 1) { StartCoroutine(LethalLibOnlyFlow()); return; }
+        if (fixSerializeT && count == 1) { StartCoroutine(FixSerializeOnlyFlow()); return; }
+        if (modDataT && count == 1) { StartCoroutine(ModDataOnlyFlow()); return; }
+        if (hookT && count == 1) { StartCoroutine(HookOnlyFlow()); return; }
+        if (monoDetourBep5T && count == 1) { StartCoroutine(MonoDetourBep5OnlyFlow()); return; }
+        if (monoDetourT && count == 1) { StartCoroutine(MonoDetourOnlyFlow()); return; }
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
             return;
         }
 
@@ -420,6 +478,245 @@ public class LethalCompanyManualDL : MonoBehaviour
         }
     }
 
+    // =========================================================
+    // ONLY FLOWS (un seul composant sélectionné, inspiré de REPOManualDL)
+    // =========================================================
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Lethal Company...");
+            LaunchLethalCompany();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
+    }
+
+    IEnumerator BepInExOnlyFlow()
+    {
+        ShowInfo("Installing BepInEx...");
+        yield return InstallBepInEx();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Lethal Company...");
+            LaunchLethalCompany();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
+
+        yield break;
+    }
+
+    IEnumerator APModOnlyFlow()
+    {
+        ShowInfo("Installing AP Mod...");
+        yield return InstallAPMod();
+
+        CreateVersionFile(apMod.url, bepInEx.url, apworld.url, lethalAPI.url, apScrap.url, levelLoader.url, lethalLib.url, fixSerialize.url, modData.url, hook.url, monoDetourBep5.url, monoDetour.url);
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Lethal Company...");
+            LaunchLethalCompany();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
+
+        yield break;
+    }
+
+    IEnumerator LethalAPIOnlyFlow()
+    {
+        ShowInfo("Installing LethalAPI...");
+        yield return InstallLethalAPI();
+
+        CreateVersionFile(apMod.url, bepInEx.url, apworld.url, lethalAPI.url, apScrap.url, levelLoader.url, lethalLib.url, fixSerialize.url, modData.url, hook.url, monoDetourBep5.url, monoDetour.url);
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Lethal Company...");
+            LaunchLethalCompany();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
+
+        yield break;
+    }
+
+    IEnumerator APScrapOnlyFlow()
+    {
+        ShowInfo("Installing AP Scrap...");
+        yield return InstallAPScrap();
+
+        CreateVersionFile(apMod.url, bepInEx.url, apworld.url, lethalAPI.url, apScrap.url, levelLoader.url, lethalLib.url, fixSerialize.url, modData.url, hook.url, monoDetourBep5.url, monoDetour.url);
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Lethal Company...");
+            LaunchLethalCompany();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
+
+        yield break;
+    }
+
+    IEnumerator LevelLoaderOnlyFlow()
+    {
+        ShowInfo("Installing Level Loader...");
+        yield return InstallLevelLoader();
+
+        CreateVersionFile(apMod.url, bepInEx.url, apworld.url, lethalAPI.url, apScrap.url, levelLoader.url, lethalLib.url, fixSerialize.url, modData.url, hook.url, monoDetourBep5.url, monoDetour.url);
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Lethal Company...");
+            LaunchLethalCompany();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
+
+        yield break;
+    }
+
+    IEnumerator LethalLibOnlyFlow()
+    {
+        ShowInfo("Installing LethalLib...");
+        yield return InstallLethalLib();
+
+        CreateVersionFile(apMod.url, bepInEx.url, apworld.url, lethalAPI.url, apScrap.url, levelLoader.url, lethalLib.url, fixSerialize.url, modData.url, hook.url, monoDetourBep5.url, monoDetour.url);
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Lethal Company...");
+            LaunchLethalCompany();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
+
+        yield break;
+    }
+
+    IEnumerator FixSerializeOnlyFlow()
+    {
+        ShowInfo("Installing Fix Serialize...");
+        yield return InstallFixSerialize();
+
+        CreateVersionFile(apMod.url, bepInEx.url, apworld.url, lethalAPI.url, apScrap.url, levelLoader.url, lethalLib.url, fixSerialize.url, modData.url, hook.url, monoDetourBep5.url, monoDetour.url);
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Lethal Company...");
+            LaunchLethalCompany();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
+
+        yield break;
+    }
+
+    IEnumerator ModDataOnlyFlow()
+    {
+        ShowInfo("Installing Mod Data...");
+        yield return InstallModData();
+
+        CreateVersionFile(apMod.url, bepInEx.url, apworld.url, lethalAPI.url, apScrap.url, levelLoader.url, lethalLib.url, fixSerialize.url, modData.url, hook.url, monoDetourBep5.url, monoDetour.url);
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Lethal Company...");
+            LaunchLethalCompany();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
+
+        yield break;
+    }
+
+    IEnumerator HookOnlyFlow()
+    {
+        ShowInfo("Installing Hook...");
+        yield return InstallHook();
+
+        CreateVersionFile(apMod.url, bepInEx.url, apworld.url, lethalAPI.url, apScrap.url, levelLoader.url, lethalLib.url, fixSerialize.url, modData.url, hook.url, monoDetourBep5.url, monoDetour.url);
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Lethal Company...");
+            LaunchLethalCompany();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
+
+        yield break;
+    }
+
+    IEnumerator MonoDetourBep5OnlyFlow()
+    {
+        ShowInfo("Installing MonoDetour BepInEx 5...");
+        yield return InstallMonoDetourBep5();
+
+        CreateVersionFile(apMod.url, bepInEx.url, apworld.url, lethalAPI.url, apScrap.url, levelLoader.url, lethalLib.url, fixSerialize.url, modData.url, hook.url, monoDetourBep5.url, monoDetour.url);
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Lethal Company...");
+            LaunchLethalCompany();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
+
+        yield break;
+    }
+
+    IEnumerator MonoDetourOnlyFlow()
+    {
+        ShowInfo("Installing MonoDetour...");
+        yield return InstallMonoDetour();
+
+        CreateVersionFile(apMod.url, bepInEx.url, apworld.url, lethalAPI.url, apScrap.url, levelLoader.url, lethalLib.url, fixSerialize.url, modData.url, hook.url, monoDetourBep5.url, monoDetour.url);
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Lethal Company...");
+            LaunchLethalCompany();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
+
+        yield break;
+    }
+
     IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
@@ -509,6 +806,20 @@ public class LethalCompanyManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -785,6 +1096,8 @@ public class LethalCompanyManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        lethalCompanyPath = GetLethalCompanyPath();
     }
 
     void LaunchLethalCompany()
@@ -954,29 +1267,12 @@ public class LethalCompanyManualDL : MonoBehaviour
             infoPanel.SetActive(false);
     }
 
-    string FindFile(string root, string fileName)
-    {
-        foreach (string file in Directory.GetFiles(root, "*", SearchOption.AllDirectories))
-            if (Path.GetFileName(file) == fileName)
-                return file;
-
-        return "";
-    }
-
     string GetLethalCompanyPath()
     {
         string[] quickPaths = new string[]
         {
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Lethal Company"),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Lethal Company"),
-        @"D:\Steam\steamapps\common\Lethal Company",
-        @"D:\SteamLibrary\steamapps\common\Lethal Company",
-        @"D:\steamapps\common\Lethal Company",
-        @"E:\Steam\steamapps\common\Lethal Company",
-        @"E:\SteamLibrary\steamapps\common\Lethal Company",
-        @"E:\steamapps\common\Lethal Company",
-        @"E:\Program Files (x86)\steamapps\common\Lethal Company",
-        @"E:\Program Files\steamapps\common\Lethal Company",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -985,55 +1281,46 @@ public class LethalCompanyManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Lethal Company at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Cherche Steam\steamapps
-                    string lcPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Lethal Company");
-                    if (Directory.Exists(lcPath))
-                        return lcPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Cherche SteamLibrary\steamapps
-                    lcPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Lethal Company");
-                    if (Directory.Exists(lcPath))
-                        return lcPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Cherche directement steamapps à la racine du disque
-                    lcPath = Path.Combine(drive.Name, "steamapps", "common", "Lethal Company");
-                    if (Directory.Exists(lcPath))
-                        return lcPath;
-
-                    // Cherche dans Program Files (x86)\steamapps
-                    lcPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Lethal Company");
-                    if (Directory.Exists(lcPath))
-                        return lcPath;
-
-                    // Cherche dans Program Files\steamapps
-                    lcPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Lethal Company");
-                    if (Directory.Exists(lcPath))
-                        return lcPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Lethal Company not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 

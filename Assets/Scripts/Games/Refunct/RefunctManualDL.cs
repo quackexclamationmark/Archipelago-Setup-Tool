@@ -15,6 +15,9 @@ public class RefunctManualDL : MonoBehaviour
     public FileDownloader.FileData refunctApworld;
     public FileDownloader.FileData refunctAP;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Refunct";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installApworldToggle;
     public Toggle installAPToggle;
@@ -44,6 +47,7 @@ public class RefunctManualDL : MonoBehaviour
     {
         public string refunctApworld;
         public string refunctAP;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -134,6 +138,8 @@ public class RefunctManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
+        gamePath = GetGamePath();
+
         if (!configLoaded)
         {
             ShowInfo("Loading configuration, please wait...");
@@ -169,6 +175,8 @@ public class RefunctManualDL : MonoBehaviour
 
     private void ExecuteRevert()
     {
+        gamePath = GetGamePath();
+
         CleanupProcesses();
         StartCoroutine(RemoveInstalledFilesAsync());
     }
@@ -474,6 +482,20 @@ public class RefunctManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy Apworld: " + e.Message);
             ShowInfo("ERROR: Failed to install Apworld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -525,14 +547,14 @@ public class RefunctManualDL : MonoBehaviour
         }
 
         configLoaded = true;
-        UnityEngine.Debug.Log("Config marked as loaded");
+
+        gamePath = GetGamePath();
     }
 
     void LaunchGame()
     {
         string refunctTasPath = Path.Combine(gamePath, "practice-windows", "refunct-tas.exe");
 
-        // Try to find the main game executable
         string gameExePath = Path.Combine(gamePath, "Refunct", "Binaries", "Win32", "Refunct-Win32-Shipping.exe");
 
         if (!File.Exists(gameExePath))
@@ -583,12 +605,10 @@ public class RefunctManualDL : MonoBehaviour
             yield break;
         }
 
-        // Wait 2 seconds
         yield return new WaitForSeconds(2f);
 
         try
         {
-            // Launch refunct-tas.exe
             UnityEngine.Debug.Log("Launching refunct-tas.exe from: " + refunctTasPath);
             tasStartInfo = new ProcessStartInfo
             {
@@ -606,7 +626,6 @@ public class RefunctManualDL : MonoBehaviour
             yield break;
         }
 
-        // Wait 15 seconds for the game to close
         float timer = 0f;
         while (timer < 15f)
         {
@@ -617,7 +636,6 @@ public class RefunctManualDL : MonoBehaviour
 
                 try
                 {
-                    // Relaunch the game
                     gameProcess = Process.Start(gameStartInfo);
                     UnityEngine.Debug.Log("Game relaunched successfully");
                 }
@@ -688,16 +706,8 @@ public class RefunctManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Refunct"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Refunct"),
-            @"D:\Steam\steamapps\common\Refunct",
-            @"D:\SteamLibrary\steamapps\common\Refunct",
-            @"D:\steamapps\common\Refunct",
-            @"E:\Steam\steamapps\common\Refunct",
-            @"E:\SteamLibrary\steamapps\common\Refunct",
-            @"E:\steamapps\common\Refunct",
-            @"E:\Program Files (x86)\steamapps\common\Refunct",
-            @"E:\Program Files\steamapps\common\Refunct",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -705,47 +715,47 @@ public class RefunctManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string gamePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Refunct");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    gamePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Refunct");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    gamePath = Path.Combine(drive.Name, "steamapps", "common", "Refunct");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    gamePath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Refunct");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    gamePath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Refunct");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 

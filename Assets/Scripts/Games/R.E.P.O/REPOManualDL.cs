@@ -14,6 +14,9 @@ public class REPOManualDL : MonoBehaviour
     public FileDownloader.FileData apworld;
     public FileDownloader.FileData apMod;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "REPO";
+
     [Header("MODS")]
     public FileDownloader.FileData menuLib;
     public FileDownloader.FileData repoLib;
@@ -64,6 +67,7 @@ public class REPOManualDL : MonoBehaviour
         public string repoRepoLib;
         public string repoBepInEx;
         public string repoApworld;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -168,17 +172,20 @@ public class REPOManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(repoPath))
-        {
-            ShowInfo("REPO path not found. Please check Steam installation.");
-            return;
-        }
+        repoPath = GetRepoPath();
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
         bool apmod = installAPModToggle != null && installAPModToggle.isOn;
         bool menulib = installMenuLibToggle != null && installMenuLibToggle.isOn;
         bool repolib = installRepoLibToggle != null && installRepoLibToggle.isOn;
+        bool needsGamePath = bep || apmod || menulib || repolib;
+
+        if (needsGamePath && (string.IsNullOrEmpty(repoPath) || !Directory.Exists(repoPath)))
+        {
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
 
         int count =
             (apworld ? 1 : 0) +
@@ -187,37 +194,38 @@ public class REPOManualDL : MonoBehaviour
             (menulib ? 1 : 0) +
             (repolib ? 1 : 0);
 
-        if (menulib && count == 1)
-        {
-            StartCoroutine(MenuLibOnlyFlow());
-            return;
-        }
+        if (menulib && count == 1) { StartCoroutine(MenuLibOnlyFlow()); return; }
+        if (apmod && count == 1) { StartCoroutine(APModOnlyFlow()); return; }
+        if (apworld && count == 1) { StartCoroutine(APWorldOnlyFlow()); return; }
+        if (bep && count == 1) { StartCoroutine(BepInExOnlyFlow()); return; }
+        if (repolib && count == 1) { StartCoroutine(RepoLibOnlyFlow()); return; }
 
-        if (apmod && count == 1)
+        if (count == 0)
         {
-            StartCoroutine(APModOnlyFlow());
-            return;
-        }
-
-        if (apworld && count == 1)
-        {
-            StartCoroutine(APWorldOnlyFlow());
-            return;
-        }
-
-        if (bep && count == 1)
-        {
-            StartCoroutine(BepInExOnlyFlow());
-            return;
-        }
-
-        if (repolib && count == 1)
-        {
-            StartCoroutine(RepoLibOnlyFlow());
+            ShowInfo("Please select at least one component to install.");
             return;
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching R.E.P.O...");
+            LaunchREPO();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -553,6 +561,20 @@ public class REPOManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -646,19 +668,6 @@ public class REPOManualDL : MonoBehaviour
         MoveDirectory(extractPath, repoPath);
 
         SafeDeleteDirectory(extractPath);
-    }
-
-    IEnumerator APWorldOnlyFlow()
-    {
-        repoPath = GetRepoPath();
-
-        if (string.IsNullOrEmpty(repoPath))
-            yield break;
-
-        yield return InstallAPWorld();
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-            LaunchREPO();
     }
 
     IEnumerator BepInExOnlyFlow()
@@ -906,6 +915,8 @@ public class REPOManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        repoPath = GetRepoPath();
     }
 
     void LaunchREPO()
@@ -1163,16 +1174,8 @@ public class REPOManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "REPO"),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "REPO"),
-        @"D:\Steam\steamapps\common\REPO",
-        @"D:\SteamLibrary\steamapps\common\REPO",
-        @"D:\steamapps\common\REPO",
-        @"E:\Steam\steamapps\common\REPO",
-        @"E:\SteamLibrary\steamapps\common\REPO",
-        @"E:\steamapps\common\REPO",
-        @"E:\Program Files (x86)\steamapps\common\REPO",
-        @"E:\Program Files\steamapps\common\REPO",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -1180,52 +1183,47 @@ public class REPOManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Cherche Steam\steamapps
-                    string repoPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "REPO");
-                    if (Directory.Exists(repoPath))
-                        return repoPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Cherche SteamLibrary\steamapps
-                    repoPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "REPO");
-                    if (Directory.Exists(repoPath))
-                        return repoPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Cherche directement steamapps à la racine du disque
-                    repoPath = Path.Combine(drive.Name, "steamapps", "common", "REPO");
-                    if (Directory.Exists(repoPath))
-                        return repoPath;
-
-                    // Cherche dans Program Files (x86)\steamapps
-                    repoPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "REPO");
-                    if (Directory.Exists(repoPath))
-                        return repoPath;
-
-                    // Cherche dans Program Files\steamapps
-                    repoPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "REPO");
-                    if (Directory.Exists(repoPath))
-                        return repoPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

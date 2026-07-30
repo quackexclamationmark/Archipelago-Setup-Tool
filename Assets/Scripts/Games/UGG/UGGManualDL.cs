@@ -21,6 +21,10 @@ public class UGGManualDL : MonoBehaviour
     public Button epicButton;
     public TextMeshProUGUI platformStatus;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Untitled Goose Game";
+    public string epicGameFolderName = "UntitledGooseGame";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installApworldToggle;
     public Toggle installBepInExToggle;
@@ -57,6 +61,8 @@ public class UGGManualDL : MonoBehaviour
         public string untitledApworld;
         public string untitledBepInEx;
         public string untitledAP;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     void Start()
@@ -210,14 +216,57 @@ public class UGGManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(uggPath))
+        uggPath = GetUGGPath();
+
+        bool apworld = installApworldToggle == null || installApworldToggle.isOn;
+        bool bep = installBepInExToggle == null || installBepInExToggle.isOn;
+        bool ap = installArchipelagoToggle == null || installArchipelagoToggle.isOn;
+        bool needsGamePath = ap || bep;
+
+        if (needsGamePath && string.IsNullOrEmpty(uggPath))
         {
             string platform = isEpic ? "Epic" : "Steam";
-            ShowInfo("Untitled Goose Game not found in " + platform + ". Please check installation.");
+            ShowInfo("Game not found on " + platform + ". Please check installation.");
+            return;
+        }
+
+        int count =
+            (apworld ? 1 : 0) +
+            (bep ? 1 : 0) +
+            (ap ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
+        if (apworld && count == 1)
+        {
+            StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallApworld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Game...");
+            LaunchUGG();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -226,6 +275,8 @@ public class UGGManualDL : MonoBehaviour
 
         if (string.IsNullOrEmpty(uggPath))
             return;
+
+        DeleteOldVersionFiles();
 
         string pluginsPath = Path.Combine(uggPath, "BepInEx", "plugins");
 
@@ -309,7 +360,6 @@ public class UGGManualDL : MonoBehaviour
         while (!configLoaded)
             yield return null;
 
-        // Conserver le nom de fichier original (comme auparavant)
         string tempDownloadPath = Path.Combine(Application.persistentDataPath, "ApworldTemp");
         Directory.CreateDirectory(tempDownloadPath);
 
@@ -324,7 +374,6 @@ public class UGGManualDL : MonoBehaviour
             yield break;
         }
 
-        // Utiliser le nom de fichier tel quel
         string fileName = Path.GetFileName(apworldFiles[0]);
 
         string[] targetPaths = new string[]
@@ -384,7 +433,6 @@ public class UGGManualDL : MonoBehaviour
 
         yield return downloader.DownloadAndExtract(untitledBepInEx, Application.persistentDataPath, extractPath);
 
-        // Copy all contents from extractPath to uggPath
         CopyDirectory(extractPath, uggPath);
 
         SafeDeleteDirectory(extractPath);
@@ -447,6 +495,9 @@ public class UGGManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        uggPath = GetUGGPath();
+        UpdatePlatformStatus();
     }
 
     void LaunchUGG()
@@ -569,22 +620,6 @@ public class UGGManualDL : MonoBehaviour
         }
     }
 
-    void MoveDirectory(string source, string target)
-    {
-        if (!Directory.Exists(source))
-            return;
-
-        try
-        {
-            CopyDirectory(source, target);
-            SafeDeleteDirectory(source);
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogError("Error moving directory: " + e.Message);
-        }
-    }
-
     void ShowInfo(string message)
     {
         if (infoPanel == null || infoText == null)
@@ -612,12 +647,8 @@ public class UGGManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Untitled Goose Game"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Untitled Goose Game"),
-            @"D:\Steam\steamapps\common\Untitled Goose Game",
-            @"D:\SteamLibrary\steamapps\common\Untitled Goose Game",
-            @"E:\Steam\steamapps\common\Untitled Goose Game",
-            @"E:\SteamLibrary\steamapps\common\Untitled Goose Game",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -626,65 +657,56 @@ public class UGGManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Untitled Goose Game (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string uggPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Untitled Goose Game");
-                    if (Directory.Exists(uggPath))
-                    {
-                        UnityEngine.Debug.Log("Found Untitled Goose Game (Steam) at: " + uggPath);
-                        return uggPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    uggPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Untitled Goose Game");
-                    if (Directory.Exists(uggPath))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Untitled Goose Game (Steam) at: " + uggPath);
-                        return uggPath;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    uggPath = Path.Combine(drive.Name, "steamapps", "common", "Untitled Goose Game");
-                    if (Directory.Exists(uggPath))
-                    {
-                        UnityEngine.Debug.Log("Found Untitled Goose Game (Steam) at: " + uggPath);
-                        return uggPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Untitled Goose Game (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
     string GetUGGEpicPath()
     {
         string[] quickPaths = new string[]
-        {
-            @"C:\Program Files\Epic Games\Untitled Goose Game",
-            @"D:\Epic Games\Untitled Goose Game",
-            @"E:\Epic Games\Untitled Goose Game",
-            @"C:\Games\Epic\Untitled Goose Game",
-            @"D:\Games\Epic\Untitled Goose Game",
-            @"E:\Games\Epic\Untitled Goose Game",
-        };
+       {
+            @"C:\Program Files\Epic Games\UntitledGooseGame",
+            @"C:\Games\Epic\UntitledGooseGame",
+       };
 
         foreach (string path in quickPaths)
         {
@@ -692,14 +714,13 @@ public class UGGManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Untitled Goose Game (Epic) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        // Cherche dans Epic Games Launcher directory
         try
         {
             string epicBaseDir = Path.Combine(
@@ -709,16 +730,14 @@ public class UGGManualDL : MonoBehaviour
 
             if (Directory.Exists(epicBaseDir))
             {
-                // Cherche le manifest pour Untitled Goose Game
                 string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
                 foreach (string manifest in manifests)
                 {
                     try
                     {
                         string content = File.ReadAllText(manifest);
-                        if (content.Contains("Untitled Goose Game"))
+                        if (content.Contains("UntitledGooseGame") || content.Contains("UntitledGooseGame"))
                         {
-                            // Extract install location from manifest
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
                             System.Text.RegularExpressions.Match match = regex.Match(content);
 
@@ -727,7 +746,7 @@ public class UGGManualDL : MonoBehaviour
                                 string epicPath = match.Groups[1].Value;
                                 if (Directory.Exists(epicPath))
                                 {
-                                    UnityEngine.Debug.Log("Found Untitled Goose Game (Epic) at: " + epicPath);
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
                                     return epicPath;
                                 }
                             }
@@ -739,38 +758,39 @@ public class UGGManualDL : MonoBehaviour
         }
         catch { }
 
-        // Scan all drives
-        try
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "Untitled Goose Game");
-                    if (Directory.Exists(epicPath))
-                    {
-                        UnityEngine.Debug.Log("Found Untitled Goose Game (Epic) at: " + epicPath);
-                        return epicPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "Untitled Goose Game");
-                    if (Directory.Exists(epicPath))
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Untitled Goose Game (Epic) at: " + epicPath);
-                        return epicPath;
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Untitled Goose Game (Epic) not found.");
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 

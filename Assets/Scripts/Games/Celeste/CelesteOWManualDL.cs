@@ -23,6 +23,10 @@ public class CelesteOWManualDL : MonoBehaviour
     public Button epicButton;
     public TextMeshProUGUI platformStatus;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Celeste";
+    public string epicGameFolderName = "Celeste";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPToggle;
     public Toggle installEverestToggle;
@@ -161,6 +165,8 @@ public class CelesteOWManualDL : MonoBehaviour
         public string celesteowAP;
         public string celesteowEverest;
         public string celesteowOlympus;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     void Start()
@@ -398,7 +404,6 @@ public class CelesteOWManualDL : MonoBehaviour
 
             ShowInfo("Removing AP mods...");
 
-            // Remove Archipelago_Open_World.zip from Mods folder
             string modsPath = Path.Combine(celestePath, "Mods");
             if (Directory.Exists(modsPath))
             {
@@ -429,7 +434,6 @@ public class CelesteOWManualDL : MonoBehaviour
 
         ShowInfo("Clearing specified directories and files...");
 
-        // 1) Supprimer uniquement les répertoires listés
         foreach (string dir in FULL_CLEAR_DIRECTORIES)
         {
             string dirPath = Path.Combine(celestePath, dir);
@@ -444,7 +448,6 @@ public class CelesteOWManualDL : MonoBehaviour
             }
         }
 
-        // 2) Supprimer uniquement les fichiers (ou dossiers) listés dans FULL_CLEAR_FILES
         foreach (string name in FULL_CLEAR_FILES)
         {
             if (string.IsNullOrEmpty(name))
@@ -626,7 +629,6 @@ public class CelesteOWManualDL : MonoBehaviour
                 UnityEngine.Debug.Log("Restored Celeste.exe from orig");
             }
 
-            // Copy Steamworks.NET.dll from orig to root (if present)
             string origSteamworks = Path.Combine(origPath, "Steamworks.NET.dll");
             if (File.Exists(origSteamworks))
             {
@@ -813,6 +815,9 @@ public class CelesteOWManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        celestePath = GetCelestePath();
+        UpdatePlatformStatus();
     }
 
     void LaunchEverest()
@@ -933,20 +938,6 @@ public class CelesteOWManualDL : MonoBehaviour
         catch { }
     }
 
-    void CopyDirectory(string source, string target)
-    {
-        Directory.CreateDirectory(target);
-
-        foreach (string dir in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
-            Directory.CreateDirectory(dir.Replace(source, target));
-
-        foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
-        {
-            string destination = file.Replace(source, target);
-            File.Copy(file, destination, true);
-        }
-    }
-
     // =========================================================
     // PATH DETECTION
     // =========================================================
@@ -963,16 +954,8 @@ public class CelesteOWManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Celeste"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Celeste"),
-            @"D:\Steam\steamapps\common\Celeste",
-            @"D:\SteamLibrary\steamapps\common\Celeste",
-            @"D:\steamapps\common\Celeste",
-            @"E:\Steam\steamapps\common\Celeste",
-            @"E:\SteamLibrary\steamapps\common\Celeste",
-            @"E:\steamapps\common\Celeste",
-            @"E:\Program Files (x86)\steamapps\common\Celeste",
-            @"E:\Program Files\steamapps\common\Celeste",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -981,87 +964,56 @@ public class CelesteOWManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Celeste (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Search Steam\steamapps
-                    string subPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Celeste");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Celeste (Steam) at: " + subPath);
-                        return subPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Search SteamLibrary\steamapps
-                    subPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Celeste");
-                    if (Directory.Exists(subPath))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Celeste (Steam) at: " + subPath);
-                        return subPath;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Search steamapps at drive root
-                    subPath = Path.Combine(drive.Name, "steamapps", "common", "Celeste");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Celeste (Steam) at: " + subPath);
-                        return subPath;
-                    }
-
-                    // Search Program Files (x86)\steamapps
-                    subPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Celeste");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Celeste (Steam) at: " + subPath);
-                        return subPath;
-                    }
-
-                    // Search Program Files\steamapps
-                    subPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Celeste");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found Celeste (Steam) at: " + subPath);
-                        return subPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Celeste (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
     string GetCelesteEpicPath()
     {
         string[] quickPaths = new string[]
-        {
+       {
             @"C:\Program Files\Epic Games\Celeste",
-            @"D:\Epic Games\Celeste",
-            @"E:\Epic Games\Celeste",
             @"C:\Games\Epic\Celeste",
-            @"D:\Games\Epic\Celeste",
-            @"E:\Games\Epic\Celeste",
-            @"C:\Epic\Celeste",
-            @"D:\Epic\Celeste",
-            @"E:\Epic\Celeste",
-        };
+       };
 
         foreach (string path in quickPaths)
         {
@@ -1069,14 +1021,13 @@ public class CelesteOWManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Celeste (Epic) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        // Search in Epic Games Launcher directory
         try
         {
             string epicBaseDir = Path.Combine(
@@ -1086,16 +1037,14 @@ public class CelesteOWManualDL : MonoBehaviour
 
             if (Directory.Exists(epicBaseDir))
             {
-                // Search for Celeste manifest
                 string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
                 foreach (string manifest in manifests)
                 {
                     try
                     {
                         string content = File.ReadAllText(manifest);
-                        if (content.Contains("Celeste"))
+                        if (content.Contains("Celeste") || content.Contains("Celeste"))
                         {
-                            // Extract install location from manifest
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
                             System.Text.RegularExpressions.Match match = regex.Match(content);
 
@@ -1104,7 +1053,7 @@ public class CelesteOWManualDL : MonoBehaviour
                                 string epicPath = match.Groups[1].Value;
                                 if (Directory.Exists(epicPath))
                                 {
-                                    UnityEngine.Debug.Log("Found Celeste (Epic) at: " + epicPath);
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
                                     return epicPath;
                                 }
                             }
@@ -1116,38 +1065,39 @@ public class CelesteOWManualDL : MonoBehaviour
         }
         catch { }
 
-        // Scan all drives
-        try
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "Celeste");
-                    if (Directory.Exists(epicPath))
-                    {
-                        UnityEngine.Debug.Log("Found Celeste (Epic) at: " + epicPath);
-                        return epicPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "Celeste");
-                    if (Directory.Exists(epicPath))
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Celeste (Epic) at: " + epicPath);
-                        return epicPath;
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Celeste (Epic) not found.");
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 }

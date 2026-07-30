@@ -16,6 +16,13 @@ public class OriBFManualDL : MonoBehaviour
     public FileDownloader.FileData apMod;
     public FileDownloader.FileData bepInEx;
 
+    [Header("GAME FOLDER NAMES")]
+    public string[] steamGameFolderNames = new string[]
+    {
+    "Ori DE",
+    "Ori",
+    };
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
@@ -56,6 +63,7 @@ public class OriBFManualDL : MonoBehaviour
         public string oriblindAP;
         public string oriblindApworld;
         public string oriblindBepInEx;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -150,17 +158,14 @@ public class OriBFManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
+        oriBFPath = GetOriBFPath();
+
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
         bool apmod = installAPModToggle != null && installAPModToggle.isOn;
+        bool needsGamePath = bep || apmod;
 
-        if (!apworld && !bep && !apmod)
-        {
-            ShowInfo("Please select at least one option to install.");
-            return;
-        }
-
-        if ((bep || apmod) && string.IsNullOrEmpty(oriBFPath))
+        if (needsGamePath && (string.IsNullOrEmpty(oriBFPath) || !Directory.Exists(oriBFPath)))
         {
             ShowInfo("Game path not found. Please check your installation.");
             return;
@@ -170,6 +175,12 @@ public class OriBFManualDL : MonoBehaviour
             (apworld ? 1 : 0) +
             (bep ? 1 : 0) +
             (apmod ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
 
         if (apworld && count == 1)
         {
@@ -190,6 +201,25 @@ public class OriBFManualDL : MonoBehaviour
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Ori BF...");
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -442,6 +472,20 @@ public class OriBFManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -532,14 +576,6 @@ public class OriBFManualDL : MonoBehaviour
         MoveDirectory(extractPath, oriBFPath);
 
         SafeDeleteDirectory(extractPath);
-    }
-
-    IEnumerator APWorldOnlyFlow()
-    {
-        yield return InstallAPWorld();
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-            LaunchGame();
     }
 
     IEnumerator BepInExOnlyFlow()
@@ -737,6 +773,8 @@ public class OriBFManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        oriBFPath = GetOriBFPath();
     }
 
     void LaunchGame()
@@ -864,66 +902,65 @@ public class OriBFManualDL : MonoBehaviour
 
     string GetOriBFPath()
     {
-        string[] quickPaths = new string[]
+        string[] baseDirs = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Ori DE"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Ori DE"),
-            @"D:\Steam\steamapps\common\Ori DE",
-            @"D:\SteamLibrary\steamapps\common\Ori DE",
-            @"D:\steamapps\common\Ori DE",
-            @"E:\Steam\steamapps\common\Ori DE",
-            @"E:\SteamLibrary\steamapps\common\Ori DE",
-            @"E:\steamapps\common\Ori DE",
-            @"E:\Program Files (x86)\steamapps\common\Ori DE",
-            @"E:\Program Files\steamapps\common\Ori DE",
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common"),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common"),
         };
 
-        foreach (string path in quickPaths)
+        foreach (string baseDir in baseDirs)
         {
-            try
+            foreach (string folderName in steamGameFolderNames)
             {
-                if (Directory.Exists(path))
-                    return path;
-            }
-            catch { }
-        }
-
-        try
-        {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
-            {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
-
                 try
                 {
-                    string oriBFPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Ori DE");
-                    if (Directory.Exists(oriBFPath))
-                        return oriBFPath;
-
-                    oriBFPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Ori DE");
-                    if (Directory.Exists(oriBFPath))
-                        return oriBFPath;
-
-                    oriBFPath = Path.Combine(drive.Name, "steamapps", "common", "Ori DE");
-                    if (Directory.Exists(oriBFPath))
-                        return oriBFPath;
-
-                    oriBFPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Ori DE");
-                    if (Directory.Exists(oriBFPath))
-                        return oriBFPath;
-
-                    oriBFPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Ori DE");
-                    if (Directory.Exists(oriBFPath))
-                        return oriBFPath;
+                    string path = Path.Combine(baseDir, folderName);
+                    if (Directory.Exists(path))
+                    {
+                        UnityEngine.Debug.Log("Found Ori BF (Steam) at: " + path);
+                        return path;
+                    }
                 }
                 catch { }
             }
         }
-        catch { }
 
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        foreach (string folderName in steamGameFolderNames)
+                        {
+                            try
+                            {
+                                string path = Path.Combine(drive.Name, relativePath, folderName);
+                                if (Directory.Exists(path))
+                                {
+                                    UnityEngine.Debug.Log("Found Ori BF (Steam, via remote config) at: " + path);
+                                    return path;
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("GTA SA (Steam) not found.");
         return "";
     }
 }

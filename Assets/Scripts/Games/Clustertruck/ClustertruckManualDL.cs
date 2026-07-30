@@ -14,6 +14,9 @@ public class ClustertruckManualDL : MonoBehaviour
     public FileDownloader.FileData apworld;
     public FileDownloader.FileData bepInEx;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "ClusterTruck";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installBepInExToggle;
@@ -50,6 +53,8 @@ public class ClustertruckManualDL : MonoBehaviour
     {
         public string clustertruckApworld;
         public string clustertruckBepInEx;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     void Start()
@@ -152,13 +157,84 @@ public class ClustertruckManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(clustertruckPath))
+        clustertruckPath = GetClustertruckPath();
+
+        bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
+        bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
+        bool ap = installAPModToggle != null && installAPModToggle.isOn;
+        bool configMan = installConfigurationManagerToggle != null && installConfigurationManagerToggle.isOn;
+        bool needsGamePath = ap || configMan || bep;
+
+        if (needsGamePath && (string.IsNullOrEmpty(clustertruckPath) || !Directory.Exists(clustertruckPath)))
         {
-            ShowInfo("Clustertruck path not found. Please check Steam installation.");
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
+
+        int count =
+           (apworld ? 1 : 0) +
+           (bep ? 1 : 0) +
+           (ap ? 1 : 0) +
+           (configMan ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
+        if (apworld && count == 1)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
+
+        if (bep && count == 1)
+        {
+            StartCoroutine(BepInExOnlyFlow());
             return;
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return StartCoroutine(InstallAPWorld());
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            yield return StartCoroutine(LaunchClustertruck());
+        }
+
+        ShowInfo("Installation complete!");
+    }
+
+    IEnumerator BepInExOnlyFlow()
+    {
+        ShowInfo("Installing BepInEx...");
+        yield return StartCoroutine(InstallBepInEx());
+
+        yield return StartCoroutine(CleanupOptionalMods());
+
+        ShowInfo("BepInEx installed successfully!");
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Clustertruck...");
+            yield return StartCoroutine(LaunchClustertruck());
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
+
+        yield break;
     }
 
     private void ExecuteRevert()
@@ -399,6 +475,20 @@ public class ClustertruckManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -511,6 +601,8 @@ public class ClustertruckManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        clustertruckPath = GetClustertruckPath();
     }
 
     IEnumerator LaunchClustertruck()
@@ -694,14 +786,8 @@ public class ClustertruckManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "ClusterTruck"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "ClusterTruck"),
-            @"D:\Steam\steamapps\common\ClusterTruck",
-            @"D:\SteamLibrary\steamapps\common\ClusterTruck",
-            @"D:\steamapps\common\ClusterTruck",
-            @"E:\Steam\steamapps\common\ClusterTruck",
-            @"E:\SteamLibrary\steamapps\common\ClusterTruck",
-            @"E:\steamapps\common\ClusterTruck",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -710,50 +796,46 @@ public class ClustertruckManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Clustertruck at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string ctPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "ClusterTruck");
-                    if (Directory.Exists(ctPath))
-                        return ctPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    ctPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "ClusterTruck");
-                    if (Directory.Exists(ctPath))
-                        return ctPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    ctPath = Path.Combine(drive.Name, "steamapps", "common", "ClusterTruck");
-                    if (Directory.Exists(ctPath))
-                        return ctPath;
-
-                    ctPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "ClusterTruck");
-                    if (Directory.Exists(ctPath))
-                        return ctPath;
-
-                    ctPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "ClusterTruck");
-                    if (Directory.Exists(ctPath))
-                        return ctPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Clustertruck not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 

@@ -16,7 +16,6 @@ public class URLButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     [Header("BUTTON SWITCH (si linkType = 1)")]
     public Button targetButton;
     public Button buttonToDeactivate;
-    // 2ème paire optionnelle
     public Button targetButton2;
     public Button buttonToDeactivate2;
 
@@ -31,13 +30,11 @@ public class URLButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        // Change le curseur en mode clic (doigt)
         Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        // Réinitialise le curseur par défaut
         Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
     }
 
@@ -45,15 +42,15 @@ public class URLButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     {
         switch (linkType)
         {
-            case 0: // OpenURL
+            case 0:
                 OpenURL();
                 break;
 
-            case 1: // SwitchButton
+            case 1:
                 SwitchButton();
                 break;
 
-            case 2: // TextTrigger
+            case 2:
                 TriggerByText();
                 break;
         }
@@ -74,44 +71,53 @@ public class URLButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
 
     void SwitchButton()
     {
-        // Gère la première paire si assignée
         bool anyAssigned = false;
 
         if (targetButton != null)
         {
             anyAssigned = true;
             targetButton.interactable = true;
-            UnityEngine.Debug.Log("Activated: " + targetButton.gameObject.name);
-            // Simuler un vrai clic sur le bouton cible
-            targetButton.onClick.Invoke();
-            UnityEngine.Debug.Log("Clicked: " + targetButton.gameObject.name);
         }
-
         if (buttonToDeactivate != null)
         {
             anyAssigned = true;
-            // Conserver le comportement existant : le bouton reste interactif
             buttonToDeactivate.interactable = true;
-            UnityEngine.Debug.Log("Kept active: " + buttonToDeactivate.gameObject.name);
         }
-
-        // Gère la 2ème paire optionnelle si assignée
         if (targetButton2 != null)
         {
             anyAssigned = true;
             targetButton2.interactable = true;
-            UnityEngine.Debug.Log("Activated (2): " + targetButton2.gameObject.name);
-            // Simuler un vrai clic sur le 2ème bouton cible
-            targetButton2.onClick.Invoke();
-            UnityEngine.Debug.Log("Clicked (2): " + targetButton2.gameObject.name);
         }
-
         if (buttonToDeactivate2 != null)
         {
             anyAssigned = true;
-            // Conserver le comportement existant : le bouton reste interactif
             buttonToDeactivate2.interactable = true;
-            UnityEngine.Debug.Log("Kept active (2): " + buttonToDeactivate2.gameObject.name);
+        }
+
+        if (targetButton != null)
+        {
+            try
+            {
+                targetButton.onClick.Invoke();
+                UnityEngine.Debug.Log("Clicked: " + targetButton.gameObject.name);
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogError("Erreur en invoquant targetButton (" + targetButton.gameObject.name + "): " + e);
+            }
+        }
+
+        if (targetButton2 != null)
+        {
+            try
+            {
+                targetButton2.onClick.Invoke();
+                UnityEngine.Debug.Log("Clicked (2): " + targetButton2.gameObject.name);
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogError("Erreur en invoquant targetButton2 (" + targetButton2.gameObject.name + "): " + e);
+            }
         }
 
         if (!anyAssigned)
@@ -124,12 +130,10 @@ public class URLButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     {
         if (!string.IsNullOrEmpty(triggerText))
         {
-            // Cherche tous les boutons dans la scène (sans tri pour plus de performance)
             Button[] allButtons = FindObjectsByType<Button>(FindObjectsSortMode.None);
 
             foreach (Button btn in allButtons)
             {
-                // Cherche le texte du bouton
                 Text buttonText = btn.GetComponentInChildren<Text>();
 
                 if (buttonText != null && buttonText.text == triggerText)

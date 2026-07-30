@@ -11,8 +11,9 @@ using System.IO.Compression;
 
 public class SSBBManualDL : MonoBehaviour
 {
-    [Header("FILEDOWNLOADER (optionnel)")]
     public FileDownloader downloader;
+
+    [Header("SSBB FILES")]
     public FileDownloader.FileData ssbbApworld;
     public FileDownloader.FileData ssbbDolphin;
     public FileDownloader.FileData ssbbMinus;
@@ -336,9 +337,21 @@ public class SSBBManualDL : MonoBehaviour
 
     void OnInstallButtonClicked()
     {
-        if (!IsValidRom(selectedRomPath))
+        bool installSSBBAP = installSSBBAPToggle != null && installSSBBAPToggle.isOn;
+        bool installDolphin = installDolphinToggle != null && installDolphinToggle.isOn;
+        bool installMinus = installMinusToggle != null && installMinusToggle.isOn;
+
+        if (!installSSBBAP && !installDolphin && !installMinus)
         {
-            ShowInfo("Please select a valid ROM file (.iso or .wbfs).");
+            ShowInfo("Please select at least one download element.");
+            return;
+        }
+
+        bool apworldOnly = installSSBBAP && !installDolphin && !installMinus;
+
+        if (installMinus && !IsValidRom(selectedRomPath))
+        {
+            ShowInfo("Select a valid ROM on the ROM tab first. You can still install the APWorld.");
             return;
         }
 

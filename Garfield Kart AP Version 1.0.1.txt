@@ -1,0 +1,16 @@
+Archipelago Setup Tool by quack!
+https://github.com/quackexclamationmark/Archipelago-Setup-Tool
+
+=== AP MOD ===
+Downloaded from: https://github.com/robotzurg/GarfieldKartAPMod/releases/download/1.0.1/GarfieldKartAPMod.zip
+Version: 1.0.1
+
+=== APWORLD ===
+Downloaded from: https://github.com/FeluciaPS/Archipelago/releases/download/1.0.0/garfkart.apworld
+Version: 1.0.0
+
+=== BEPINEX ===
+Downloaded from: https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip
+Version: v5.4.23.5
+
+Downloaded at: 26/07/2026 02:35:53

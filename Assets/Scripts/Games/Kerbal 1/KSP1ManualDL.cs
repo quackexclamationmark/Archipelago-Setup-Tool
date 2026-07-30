@@ -13,6 +13,15 @@ public class KSP1ManualDL : MonoBehaviour
     public FileDownloader.FileData kspApworld;
     public FileDownloader.FileData kspAP;
 
+    [Header("PLATFORM SELECTION")]
+    public Button steamButton;
+    public Button epicButton;
+    public TextMeshProUGUI platformStatus;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Kerbal Space Program";
+    public string epicGameFolderName = "KerbalSpaceProgram";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
@@ -38,17 +47,27 @@ public class KSP1ManualDL : MonoBehaviour
     private string pendingAction;
     private GameConfig remoteConfig;
     private bool configLoaded = false;
+    private bool isEpic = false;
 
     [System.Serializable]
     public class GameConfig
     {
         public string kspAP;
         public string kspApworld;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     void Start()
     {
-        gamePath = GetGamePath();
+        if (steamButton != null)
+            steamButton.onClick.AddListener(OnSteamButtonClicked);
+
+        if (epicButton != null)
+            epicButton.onClick.AddListener(OnEpicButtonClicked);
+
+        SelectSteam();
+
         StartCoroutine(LoadRemoteConfig());
 
         if (infoPanel != null)
@@ -78,6 +97,48 @@ public class KSP1ManualDL : MonoBehaviour
         if (revertButton != null)
             revertButton.onClick.AddListener(OnRevertClicked);
     }
+
+    // =========================================================
+    // PLATFORM SELECTION
+    // =========================================================
+
+    void OnSteamButtonClicked()
+    {
+        SelectSteam();
+    }
+
+    void OnEpicButtonClicked()
+    {
+        SelectEpic();
+    }
+
+    void SelectSteam()
+    {
+        isEpic = false;
+        gamePath = GetGamePath();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Steam - Path: " + gamePath);
+    }
+
+    void SelectEpic()
+    {
+        isEpic = true;
+        gamePath = GetGamePath();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Epic - Path: " + gamePath);
+    }
+
+    void UpdatePlatformStatus()
+    {
+        if (platformStatus != null)
+        {
+            string platform = isEpic ? "Epic Games" : "Steam";
+            string status = string.IsNullOrEmpty(gamePath) ? "Not Found" : "Found";
+            platformStatus.text = $"Platform: {platform} \n {status}";
+        }
+    }
+
+    // =========================================================
 
     void ApplyGameConfig()
     {
@@ -132,28 +193,49 @@ public class KSP1ManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (!configLoaded)
-        {
-            ShowInfo("Loading configuration, please wait...");
-            StartCoroutine(WaitForConfigThenSetup());
-            return;
-        }
+        gamePath = GetGamePath();
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool apmod = installAPModToggle == null || installAPModToggle.isOn;
 
-        if (!apworld && !apmod)
+        bool needsGamePath = apmod;
+
+        if (needsGamePath && (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath)))
         {
-            ShowInfo("Please select at least one option to install.");
+            string platform = isEpic ? "Epic" : "Steam";
+            ShowInfo("Game not found on " + platform + ". Please check your installation.");
             return;
         }
 
-        if (!apworld && string.IsNullOrEmpty(gamePath))
+        int count =
+            (apworld ? 1 : 0) +
+            (apmod ? 1 : 0);
+
+        if (apworld && count == 1)
         {
-            ShowInfo("Game path not found. APWorld can still be installed.");
+            StartCoroutine(APWorldOnlyFlow());
+            return;
         }
 
         StartCoroutine(InstallFlow(apworld, apmod));
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -314,7 +396,6 @@ public class KSP1ManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        // Target paths for Archipelago custom_worlds directory
         string[] targetPaths = new string[]
         {
             Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
@@ -368,6 +449,20 @@ public class KSP1ManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -419,6 +514,9 @@ public class KSP1ManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        gamePath = GetGamePath();
+        UpdatePlatformStatus();
     }
 
     void LaunchGame()
@@ -433,7 +531,6 @@ public class KSP1ManualDL : MonoBehaviour
             return;
         }
 
-        // Try KSP_x64.exe first, then KSP.exe
         string exePath = Path.Combine(currentGamePath, "KSP_x64.exe");
 
         if (!File.Exists(exePath))
@@ -486,7 +583,6 @@ public class KSP1ManualDL : MonoBehaviour
         if (!Directory.Exists(sourcePath))
             return;
 
-        // Create all directories
         foreach (string dir in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
         {
             string rel = dir.Substring(sourcePath.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
@@ -501,7 +597,6 @@ public class KSP1ManualDL : MonoBehaviour
             }
         }
 
-        // Copy all files
         foreach (string file in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories))
         {
             string rel = file.Substring(sourcePath.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
@@ -536,31 +631,81 @@ public class KSP1ManualDL : MonoBehaviour
             infoPanel.SetActive(false);
     }
 
-    IEnumerator WaitForConfigThenSetup()
-    {
-        while (!configLoaded)
-            yield return new WaitForSeconds(0.1f);
-
-        CloseInfoPanel();
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
-    }
+    // =========================================================
+    // PATH DETECTION
+    // =========================================================
 
     string GetGamePath()
     {
-        string gameName = "Kerbal Space Program";
+        if (isEpic)
+            return GetGameEpicPath();
+        else
+            return GetGameSteamPath();
+    }
 
+    string GetGameSteamPath()
+    {
+        string[] quickPaths = new string[]
+                {
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
+                };
+
+        foreach (string path in quickPaths)
+        {
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
+                    return path;
+                }
+            }
+            catch { }
+        }
+
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
+        return "";
+    }
+
+    string GetGameEpicPath()
+    {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", gameName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", gameName),
-            Path.Combine(@"D:\Steam", "steamapps", "common", gameName),
-            Path.Combine(@"D:\SteamLibrary", "steamapps", "common", gameName),
-            Path.Combine(@"D:\steamapps", "common", gameName),
-            Path.Combine(@"E:\Steam", "steamapps", "common", gameName),
-            Path.Combine(@"E:\SteamLibrary", "steamapps", "common", gameName),
-            Path.Combine(@"E:\steamapps", "common", gameName),
-            Path.Combine(@"E:\Program Files (x86)", "steamapps", "common", gameName),
-            Path.Combine(@"E:\Program Files", "steamapps", "common", gameName),
+            @"C:\Program Files\Epic Games\KerbalSpaceProgram",
+            @"C:\Games\Epic\KerbalSpaceProgram",
         };
 
         foreach (string path in quickPaths)
@@ -568,47 +713,84 @@ public class KSP1ManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
         try
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+            string epicBaseDir = Path.Combine(
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonApplicationData),
+                "Epic", "EpicGamesLauncher", "Data", "Manifests"
+            );
 
-            foreach (System.IO.DriveInfo drive in drives)
+            if (Directory.Exists(epicBaseDir))
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
-
-                try
+                string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
+                foreach (string manifest in manifests)
                 {
-                    string gamePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    try
+                    {
+                        string content = File.ReadAllText(manifest);
+                        if (content.Contains("KerbalSpaceProgram") || content.Contains("KerbalSpaceProgram"))
+                        {
+                            System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
+                            System.Text.RegularExpressions.Match match = regex.Match(content);
 
-                    gamePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    gamePath = Path.Combine(drive.Name, "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    gamePath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    gamePath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", gameName);
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                            if (match.Success)
+                            {
+                                string epicPath = match.Groups[1].Value;
+                                if (Directory.Exists(epicPath))
+                                {
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
+                                    return epicPath;
+                                }
+                            }
+                        }
+                    }
+                    catch { }
                 }
-                catch { }
             }
         }
         catch { }
 
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 }

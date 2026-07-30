@@ -14,6 +14,9 @@ public class HuniePop2ManualDL : MonoBehaviour
     public FileDownloader.FileData huniepop2Apworld;
     public FileDownloader.FileData huniepop2AP;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "HuniePop 2 - Double Date";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installBepInExToggle;
@@ -49,6 +52,7 @@ public class HuniePop2ManualDL : MonoBehaviour
     {
         public string huniepop2Apworld;
         public string huniepop2AP;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -869,16 +873,8 @@ public class HuniePop2ManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "HuniePop 2 - Double Date"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "HuniePop 2 - Double Date"),
-            @"D:\Steam\steamapps\common\HuniePop 2 - Double Date",
-            @"D:\SteamLibrary\steamapps\common\HuniePop 2 - Double Date",
-            @"D:\steamapps\common\HuniePop 2 - Double Date",
-            @"E:\Steam\steamapps\common\HuniePop 2 - Double Date",
-            @"E:\SteamLibrary\steamapps\common\HuniePop 2 - Double Date",
-            @"E:\steamapps\common\HuniePop 2 - Double Date",
-            @"E:\Program Files (x86)\steamapps\common\HuniePop 2 - Double Date",
-            @"E:\Program Files\steamapps\common\HuniePop 2 - Double Date",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -887,65 +883,46 @@ public class HuniePop2ManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found HuniePop 2 (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string subPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "HuniePop 2 - Double Date");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found HuniePop 2 (Steam) at: " + subPath);
-                        return subPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    subPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "HuniePop 2 - Double Date");
-                    if (Directory.Exists(subPath))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found HuniePop 2 (Steam) at: " + subPath);
-                        return subPath;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    subPath = Path.Combine(drive.Name, "steamapps", "common", "HuniePop 2 - Double Date");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found HuniePop 2 (Steam) at: " + subPath);
-                        return subPath;
-                    }
-
-                    subPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "HuniePop 2 - Double Date");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found HuniePop 2 (Steam) at: " + subPath);
-                        return subPath;
-                    }
-
-                    subPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "HuniePop 2 - Double Date");
-                    if (Directory.Exists(subPath))
-                    {
-                        UnityEngine.Debug.Log("Found HuniePop 2 (Steam) at: " + subPath);
-                        return subPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("HuniePop 2 (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
@@ -975,5 +952,7 @@ public class HuniePop2ManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        hunie2Path = GetHuniePop2Path();
     }
 }

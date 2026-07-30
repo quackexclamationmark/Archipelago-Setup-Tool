@@ -14,6 +14,9 @@ public class DOOM2ManualDL : MonoBehaviour
     [Header("GAME FILES")]
     public FileDownloader.FileData doom2AP;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Ultimate Doom";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installDOOM2APToggle;
 
@@ -42,6 +45,7 @@ public class DOOM2ManualDL : MonoBehaviour
     public class GameConfig
     {
         public string doom2AP;
+        public string[] steamSearchPaths;
     }
 
     [System.Serializable]
@@ -136,6 +140,8 @@ public class DOOM2ManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
+        gamePath = GetGamePath();
+
         if (!configLoaded)
         {
             ShowInfo("Loading configuration, please wait...");
@@ -172,6 +178,8 @@ public class DOOM2ManualDL : MonoBehaviour
 
     private void ExecuteRevert()
     {
+        gamePath = GetGamePath();
+
         CleanupProcesses();
         StartCoroutine(RemoveInstalledFilesAsync());
     }
@@ -185,7 +193,6 @@ public class DOOM2ManualDL : MonoBehaviour
         {
             string doomArchipelagoPath = Path.Combine(gamePath, "DOOM Archipelago");
 
-            // Remove the DOOM Archipelago folder entirely
             if (Directory.Exists(doomArchipelagoPath))
             {
                 try
@@ -258,13 +265,11 @@ public class DOOM2ManualDL : MonoBehaviour
             yield break;
         }
 
-        // Create DOOM Archipelago folder
         string doomArchipelagoPath = Path.Combine(gamePath, "DOOM Archipelago");
         bool isExistingInstallation = false;
 
         if (Directory.Exists(doomArchipelagoPath))
         {
-            // Check if APDoomLauncher.exe exists
             string launcherPath = Path.Combine(doomArchipelagoPath, "APDoomLauncher.exe");
             if (File.Exists(launcherPath))
             {
@@ -458,7 +463,8 @@ public class DOOM2ManualDL : MonoBehaviour
         }
 
         configLoaded = true;
-        UnityEngine.Debug.Log("Config marked as loaded");
+
+        gamePath = GetGamePath();
     }
 
     void LaunchGame()
@@ -560,16 +566,8 @@ public class DOOM2ManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Ultimate Doom"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Ultimate Doom"),
-            @"D:\Steam\steamapps\common\Ultimate Doom",
-            @"D:\SteamLibrary\steamapps\common\Ultimate Doom",
-            @"D:\steamapps\common\Ultimate Doom",
-            @"E:\Steam\steamapps\common\Ultimate Doom",
-            @"E:\SteamLibrary\steamapps\common\Ultimate Doom",
-            @"E:\steamapps\common\Ultimate Doom",
-            @"E:\Program Files (x86)\steamapps\common\Ultimate Doom",
-            @"E:\Program Files\steamapps\common\Ultimate Doom",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -577,52 +575,47 @@ public class DOOM2ManualDL : MonoBehaviour
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Search for Steam\steamapps
-                    string gamePath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Ultimate Doom");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Search for SteamLibrary\steamapps
-                    gamePath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Ultimate Doom");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Search for steamapps at drive root
-                    gamePath = Path.Combine(drive.Name, "steamapps", "common", "Ultimate Doom");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    // Search in Program Files (x86)\steamapps
-                    gamePath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Ultimate Doom");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
-
-                    // Search in Program Files\steamapps
-                    gamePath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Ultimate Doom");
-                    if (Directory.Exists(gamePath))
-                        return gamePath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 

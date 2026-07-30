@@ -1,32 +1,37 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.IO;
 using System.Collections;
 using System.Diagnostics;
+using System.IO;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class NWManualDL : MonoBehaviour
 {
     public FileDownloader downloader;
 
     [Header("NEON WHITE FILES")]
-    public FileDownloader.FileData neonwhiteApworld;      // neonwhite.apworld
-    public FileDownloader.FileData neonwhiteMelonLoader; // MelonLoader.x64.zip
-    public FileDownloader.FileData neonwhiteAP;          // NWArchipelago.dll
-    public FileDownloader.FileData neonwhiteAPMCN;       // Archipelago.MultiClient.Net.dll
-    public FileDownloader.FileData neonwhitePrefManager; // MelonPrefManager.Mono.dll
-    public FileDownloader.FileData neonwhiteUniverseLib; // UniverseLib.Mono.zip (contains UniverseLib.Mono folder)
-    public FileDownloader.FileData neonwhiteNeonLite;    // NeonLite.dll
+    public FileDownloader.FileData neonwhiteApworld;
+    public FileDownloader.FileData neonwhiteMelonLoader;
+    public FileDownloader.FileData neonwhiteAP;
+    public FileDownloader.FileData neonwhiteAPMCN;
+    public FileDownloader.FileData neonwhitePrefManager;
+    public FileDownloader.FileData neonwhiteUniverseLib;
+    public FileDownloader.FileData neonwhiteNeonLite;
 
     [Header("PLATFORM SELECTION")]
     public Button steamButton;
     public Button epicButton;
     public TextMeshProUGUI platformStatus;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Neon White";
+    public string epicGameFolderName = "NeonWhite";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installApworldToggle;
     public Toggle installMelonLoaderToggle;
-    public Toggle installAPsToggle;           // <-- single toggle for NWArchipelago.dll + Archipelago.MultiClient.Net.dll
+    public Toggle installAPsToggle;
     public Toggle installPrefManagerToggle;
     public Toggle installUniverseLibToggle;
     public Toggle installNeonLiteToggle;
@@ -35,8 +40,8 @@ public class NWManualDL : MonoBehaviour
     public Toggle secondLaunchToggle;
 
     [Header("REVERT OPTIONS")]
-    public Toggle clearAPModsToggle;        // "Clear AP Mods" - removes Archipelago-related DLLs in Mods
-    public Toggle fullClearMelonLoaderToggle; // "Full Clear MelonLoader" - deletes MelonLoader, UserData, Plugins, UserLibs and specific files
+    public Toggle clearAPModsToggle;
+    public Toggle fullClearMelonLoaderToggle;
 
     [Header("CONFIRMATION PANEL")]
     public GameObject confirmationPanel;
@@ -66,6 +71,8 @@ public class NWManualDL : MonoBehaviour
         public string neonwhitePrefManager;
         public string neonwhiteUniverseLib;
         public string neonwhiteNeonLite;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     void Start()
@@ -210,19 +217,20 @@ public class NWManualDL : MonoBehaviour
     {
         neonwhitePath = GetNeonWhitePath();
 
-        if (string.IsNullOrEmpty(neonwhitePath))
-        {
-            string platform = isEpic ? "Epic" : "Steam";
-            ShowInfo("Neon White path not found. Please check " + platform + " installation.");
-            return;
-        }
-
         bool apworld = installApworldToggle == null || installApworldToggle.isOn;
         bool melonloader = installMelonLoaderToggle != null && installMelonLoaderToggle.isOn;
-        bool aps = installAPsToggle != null && installAPsToggle.isOn; // installs both NWArchipelago.dll + Archipelago.MultiClient.Net.dll
+        bool aps = installAPsToggle != null && installAPsToggle.isOn;
         bool pref = installPrefManagerToggle != null && installPrefManagerToggle.isOn;
         bool uni = installUniverseLibToggle != null && installUniverseLibToggle.isOn;
         bool neonlite = installNeonLiteToggle != null && installNeonLiteToggle.isOn;
+        bool needsGamePath = aps || melonloader || pref || uni || neonlite;
+
+        if (needsGamePath && string.IsNullOrEmpty(neonwhitePath))
+        {
+            string platform = isEpic ? "Epic" : "Steam";
+            ShowInfo("Game not found on " + platform + ". Please check installation.");
+            return;
+        }
 
         int count =
             (apworld ? 1 : 0) +
@@ -234,7 +242,7 @@ public class NWManualDL : MonoBehaviour
 
         if (apworld && count == 1)
         {
-            StartCoroutine(ApworldOnlyFlow());
+            StartCoroutine(APWorldOnlyFlow());
             return;
         }
         if (melonloader && count == 1)
@@ -249,6 +257,25 @@ public class NWManualDL : MonoBehaviour
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallApworld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Neon White...");
+            LaunchNeonWhite();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -281,7 +308,6 @@ public class NWManualDL : MonoBehaviour
             SafeDeleteFile(Path.Combine(modsPath, "MelonPrefManager.Mono.dll"));
             SafeDeleteFile(Path.Combine(modsPath, "NeonLite.dll"));
 
-            // Also try to remove UniverseLib.Mono contents (files/folders starting with UniverseLib)
             try
             {
                 foreach (string file in Directory.GetFiles(modsPath))
@@ -460,7 +486,6 @@ public class NWManualDL : MonoBehaviour
 
     IEnumerator InstallApworld()
     {
-        // Wait for config if needed
         while (!configLoaded)
             yield return null;
 
@@ -527,6 +552,20 @@ public class NWManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -716,18 +755,6 @@ public class NWManualDL : MonoBehaviour
         yield break;
     }
 
-    IEnumerator ApworldOnlyFlow()
-    {
-        neonwhitePath = GetNeonWhitePath();
-
-        if (string.IsNullOrEmpty(neonwhitePath))
-            yield break;
-
-        yield return InstallApworld();
-
-        ShowInfo("APWorld installed successfully!");
-    }
-
     IEnumerator LoadRemoteConfig()
     {
         string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
@@ -754,6 +781,9 @@ public class NWManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        neonwhitePath = GetNeonWhitePath();
+        UpdatePlatformStatus();
     }
 
     void LaunchNeonWhite()
@@ -924,12 +954,8 @@ public class NWManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Neon White"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Neon White"),
-            @"D:\Steam\steamapps\common\Neon White",
-            @"D:\SteamLibrary\steamapps\common\Neon White",
-            @"E:\Steam\steamapps\common\Neon White",
-            @"E:\SteamLibrary\steamapps\common\Neon White",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -938,68 +964,56 @@ public class NWManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Neon White (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string nwPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Neon White");
-                    if (Directory.Exists(nwPath))
-                    {
-                        UnityEngine.Debug.Log("Found Neon White (Steam) at: " + nwPath);
-                        return nwPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    nwPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Neon White");
-                    if (Directory.Exists(nwPath))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Neon White (Steam) at: " + nwPath);
-                        return nwPath;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    nwPath = Path.Combine(drive.Name, "steamapps", "common", "Neon White");
-                    if (Directory.Exists(nwPath))
-                    {
-                        UnityEngine.Debug.Log("Found Neon White (Steam) at: " + nwPath);
-                        return nwPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Neon White (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
     string GetNeonWhiteEpicPath()
     {
         string[] quickPaths = new string[]
-        {
+       {
             @"C:\Program Files\Epic Games\NeonWhite",
-            @"D:\Epic Games\NeonWhite",
-            @"E:\Epic Games\NeonWhite",
             @"C:\Games\Epic\NeonWhite",
-            @"D:\Games\Epic\NeonWhite",
-            @"E:\Games\Epic\NeonWhite",
-            @"C:\Epic\NeonWhite",
-            @"D:\Epic\NeonWhite",
-            @"E:\Epic\NeonWhite",
-        };
+       };
 
         foreach (string path in quickPaths)
         {
@@ -1007,7 +1021,7 @@ public class NWManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found Neon White (Epic) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
                     return path;
                 }
             }
@@ -1029,7 +1043,7 @@ public class NWManualDL : MonoBehaviour
                     try
                     {
                         string content = File.ReadAllText(manifest);
-                        if (content.Contains("Neon White") || content.Contains("NeonWhite"))
+                        if (content.Contains("NeonWhite") || content.Contains("NeonWhite"))
                         {
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
                             System.Text.RegularExpressions.Match match = regex.Match(content);
@@ -1039,7 +1053,7 @@ public class NWManualDL : MonoBehaviour
                                 string epicPath = match.Groups[1].Value;
                                 if (Directory.Exists(epicPath))
                                 {
-                                    UnityEngine.Debug.Log("Found Neon White (Epic) at: " + epicPath);
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
                                     return epicPath;
                                 }
                             }
@@ -1051,37 +1065,39 @@ public class NWManualDL : MonoBehaviour
         }
         catch { }
 
-        try
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "NeonWhite");
-                    if (Directory.Exists(epicPath))
-                    {
-                        UnityEngine.Debug.Log("Found Neon White (Epic) at: " + epicPath);
-                        return epicPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    epicPath = Path.Combine(drive.Name, "Games", "Epic", "NeonWhite");
-                    if (Directory.Exists(epicPath))
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found Neon White (Epic) at: " + epicPath);
-                        return epicPath;
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("Neon White (Epic) not found.");
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 }

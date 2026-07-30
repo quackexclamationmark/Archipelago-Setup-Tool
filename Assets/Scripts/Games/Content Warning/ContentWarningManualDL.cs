@@ -15,6 +15,9 @@ public class ContentWarningManualDL : MonoBehaviour
     public FileDownloader.FileData bepInEx;
     public FileDownloader.FileData mycelium;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Content Warning";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
@@ -53,6 +56,7 @@ public class ContentWarningManualDL : MonoBehaviour
         public string contentwarningAP;
         public string contentwarningBepInEx;
         public string contentwarningMycelium;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -136,6 +140,9 @@ public class ContentWarningManualDL : MonoBehaviour
     {
         confirmationPanel.SetActive(false);
 
+        if (string.IsNullOrEmpty(pendingAction))
+            return;
+
         switch (pendingAction)
         {
             case "Setup":
@@ -157,53 +164,62 @@ public class ContentWarningManualDL : MonoBehaviour
         pendingAction = "";
     }
 
+    // =========================================================
+    // SETUP (logique alignée sur REPOManualDL.ExecuteSetup)
+    // =========================================================
     private void ExecuteSetup()
     {
-        // Réinitialiser gamePath pour s'assurer qu'on a le chemin à jour
         gamePath = GetGamePath();
-
-        if (string.IsNullOrEmpty(gamePath))
-        {
-            ShowInfo("Content Warning path not found. Please check Steam installation.");
-            return;
-        }
 
         bool apworldToggle = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
         bool apmod = installAPModToggle != null && installAPModToggle.isOn;
-        bool myceliumToggle = installMyceliumToggle != null && installMyceliumToggle.isOn;
+        bool mycelium = installMyceliumToggle != null && installMyceliumToggle.isOn;
+        bool needsGamePath = apmod || bep || mycelium;
+
+        if (needsGamePath && (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath)))
+        {
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
 
         int count =
             (apworldToggle ? 1 : 0) +
             (bep ? 1 : 0) +
             (apmod ? 1 : 0) +
-            (myceliumToggle ? 1 : 0);
+            (mycelium ? 1 : 0);
 
-        if (apworldToggle && count == 1)
-        {
-            StartCoroutine(APWorldOnlyFlow());
-            return;
-        }
+        if (apworldToggle && count == 1) { StartCoroutine(APWorldOnlyFlow()); return; }
+        if (bep && count == 1) { StartCoroutine(BepInExOnlyFlow()); return; }
+        if (apmod && count == 1) { StartCoroutine(APModOnlyFlow()); return; }
+        if (mycelium && count == 1) { StartCoroutine(MyceliumOnlyFlow()); return; }
 
-        if (bep && count == 1)
+        if (count == 0)
         {
-            StartCoroutine(BepInExOnlyFlow());
-            return;
-        }
-
-        if (apmod && count == 1)
-        {
-            StartCoroutine(APModOnlyFlow());
-            return;
-        }
-
-        if (myceliumToggle && count == 1)
-        {
-            StartCoroutine(MyceliumOnlyFlow());
+            ShowInfo("Please select at least one component to install.");
             return;
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Content Warning...");
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -369,6 +385,11 @@ public class ContentWarningManualDL : MonoBehaviour
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
+            ShowInfo("Launching Content Warning...");
+            LaunchGame();
+        }
+        else
+        {
             ShowInfo("Ready to play!");
         }
     }
@@ -492,6 +513,19 @@ public class ContentWarningManualDL : MonoBehaviour
             UnityEngine.Debug.LogError("APWorld install failed: " + e.Message);
             ShowInfo("Failed to install APWorld.");
             yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -632,12 +666,6 @@ public class ContentWarningManualDL : MonoBehaviour
         }
     }
 
-    IEnumerator APWorldOnlyFlow()
-    {
-        yield return InstallAPWorld();
-        yield break;
-    }
-
     IEnumerator APModOnlyFlow()
     {
         ShowInfo("Installing AP Mod...");
@@ -645,7 +673,16 @@ public class ContentWarningManualDL : MonoBehaviour
 
         CreateVersionFile(apMod.url, bepInEx.url, apworld.url, mycelium.url);
 
-        ShowInfo("Installation complete!");
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Content Warning...");
+            LaunchGame();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
+
         yield break;
     }
 
@@ -654,7 +691,16 @@ public class ContentWarningManualDL : MonoBehaviour
         ShowInfo("Installing BepInEx...");
         yield return InstallBepInEx();
 
-        ShowInfo("Installation complete!");
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Content Warning...");
+            LaunchGame();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
+
         yield break;
     }
 
@@ -665,7 +711,16 @@ public class ContentWarningManualDL : MonoBehaviour
 
         CreateVersionFile(apMod.url, bepInEx.url, apworld.url, mycelium.url);
 
-        ShowInfo("Installation complete!");
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Content Warning...");
+            LaunchGame();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
+
         yield break;
     }
 
@@ -695,10 +750,40 @@ public class ContentWarningManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        gamePath = GetGamePath();
+    }
+
+    // =========================================================
+    // GAME LAUNCH (inspiré de REPOManualDL.LaunchREPO / CloseREPO)
+    // =========================================================
+    void LaunchGame()
+    {
+        string exePath = Path.Combine(gamePath, "Content Warning.exe");
+
+        if (File.Exists(exePath))
+            gameProcess = Process.Start(exePath);
+        else
+            UnityEngine.Debug.LogError("Content Warning.exe not found at: " + exePath);
+    }
+
+    void CloseGame()
+    {
+        try
+        {
+            if (gameProcess != null && !gameProcess.HasExited)
+            {
+                gameProcess.Kill();
+                gameProcess.Dispose();
+                gameProcess = null;
+            }
+        }
+        catch { }
     }
 
     void CleanupProcesses()
     {
+        CloseGame();
     }
 
     void SafeDeleteFile(string path)
@@ -766,16 +851,8 @@ public class ContentWarningManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Content Warning"),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Content Warning"),
-        @"D:\Steam\steamapps\common\Content Warning",
-        @"D:\SteamLibrary\steamapps\common\Content Warning",
-        @"D:\steamapps\common\Content Warning",
-        @"E:\Steam\steamapps\common\Content Warning",
-        @"E:\SteamLibrary\steamapps\common\Content Warning",
-        @"E:\steamapps\common\Content Warning",
-        @"E:\Program Files (x86)\steamapps\common\Content Warning",
-        @"E:\Program Files\steamapps\common\Content Warning",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -784,67 +861,46 @@ public class ContentWarningManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Game path found: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                try
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Cherche Steam\steamapps
-                    string path = Path.Combine(drive.RootDirectory.FullName, "Steam", "steamapps", "common", "Content Warning");
-                    if (Directory.Exists(path))
-                    {
-                        UnityEngine.Debug.Log("Game path found: " + path);
-                        return path;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Cherche SteamLibrary\steamapps
-                    path = Path.Combine(drive.RootDirectory.FullName, "SteamLibrary", "steamapps", "common", "Content Warning");
-                    if (Directory.Exists(path))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Game path found: " + path);
-                        return path;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Cherche directement steamapps à la racine du disque
-                    path = Path.Combine(drive.RootDirectory.FullName, "steamapps", "common", "Content Warning");
-                    if (Directory.Exists(path))
-                    {
-                        UnityEngine.Debug.Log("Game path found: " + path);
-                        return path;
-                    }
-
-                    // Cherche dans Program Files (x86)\steamapps
-                    path = Path.Combine(drive.RootDirectory.FullName, "Program Files (x86)", "steamapps", "common", "Content Warning");
-                    if (Directory.Exists(path))
-                    {
-                        UnityEngine.Debug.Log("Game path found: " + path);
-                        return path;
-                    }
-
-                    // Cherche dans Program Files\steamapps
-                    path = Path.Combine(drive.RootDirectory.FullName, "Program Files", "steamapps", "common", "Content Warning");
-                    if (Directory.Exists(path))
-                    {
-                        UnityEngine.Debug.Log("Game path found: " + path);
-                        return path;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogError("Game path NOT found! Checked all standard locations.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
@@ -960,21 +1016,18 @@ public class ContentWarningManualDL : MonoBehaviour
         if (string.IsNullOrEmpty(url))
             return "Unknown";
 
-        // Essayer d'abord le pattern GitHub releases: /releases/download/v1.0.0/
         System.Text.RegularExpressions.Regex githubPattern = new System.Text.RegularExpressions.Regex(@"/releases/download/([^/]+)/");
         System.Text.RegularExpressions.Match githubMatch = githubPattern.Match(url);
 
         if (githubMatch.Success)
             return githubMatch.Groups[1].Value;
 
-        // Essayer le pattern Thunderstore: /package/download/Author/Package/1.0.0/
         System.Text.RegularExpressions.Regex thunderstorePattern = new System.Text.RegularExpressions.Regex(@"/package/download/[^/]+/[^/]+/([^/]+)/");
         System.Text.RegularExpressions.Match thunderstoreMatch = thunderstorePattern.Match(url);
 
         if (thunderstoreMatch.Success)
             return thunderstoreMatch.Groups[1].Value;
 
-        // Si aucun pattern ne correspond, retourner "Unknown"
         return "Unknown";
     }
 }

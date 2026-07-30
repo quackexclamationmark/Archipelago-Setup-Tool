@@ -1,10 +1,11 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.IO;
+using Microsoft.Win32;
 using System.Collections;
 using System.Diagnostics;
-using Microsoft.Win32;
+using System.IO;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class NineSolsManualDL : MonoBehaviour
 {
@@ -17,6 +18,9 @@ public class NineSolsManualDL : MonoBehaviour
     public FileDownloader.FileData teleportFromAnywhere;
     public FileDownloader.FileData configurationManager;
     public FileDownloader.FileData nineSolsAPI;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Nine Sols";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installNineSolsapworldToggle;
@@ -60,6 +64,7 @@ public class NineSolsManualDL : MonoBehaviour
         public string ninesolsTeleport;
         public string ninesolsBepInExConfiguration;
         public string ninesolsAPI;
+        public string[] steamSearchPaths;
     }
 
     void Start()
@@ -162,30 +167,34 @@ public class NineSolsManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(ninesolsPath))
-        {
-            ShowInfo("Nine Sols path not found. Please check Steam installation.");
-            return;
-        }
+        ninesolsPath = GetNineSolsPath();
 
         bool apworld = installNineSolsapworldToggle == null || installNineSolsapworldToggle.isOn;
         bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
-        bool archipelago = installArchipelagoRandomizerToggle != null && installArchipelagoRandomizerToggle.isOn;
+        bool ap = installArchipelagoRandomizerToggle != null && installArchipelagoRandomizerToggle.isOn;
         bool teleport = installTeleportFromAnywhereToggle != null && installTeleportFromAnywhereToggle.isOn;
         bool configMgr = installConfigurationManagerToggle != null && installConfigurationManagerToggle.isOn;
         bool api = installNineSolsAPIToggle != null && installNineSolsAPIToggle.isOn;
 
+        bool needsGamePath = bep || ap || teleport || configMgr || api;
+
+        if (needsGamePath && (string.IsNullOrEmpty(ninesolsPath) || !Directory.Exists(ninesolsPath)))
+        {
+            ShowInfo("Game path not found. Please check your installation.");
+            return;
+        }
+
         int count =
             (apworld ? 1 : 0) +
             (bep ? 1 : 0) +
-            (archipelago ? 1 : 0) +
+            (ap ? 1 : 0) +
             (teleport ? 1 : 0) +
             (configMgr ? 1 : 0) +
             (api ? 1 : 0);
 
         if (apworld && count == 1)
         {
-            StartCoroutine(ApWorldOnlyFlow());
+            StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
@@ -195,7 +204,32 @@ public class NineSolsManualDL : MonoBehaviour
             return;
         }
 
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching Nine Sols...");
+            LaunchNineSols();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -330,7 +364,7 @@ public class NineSolsManualDL : MonoBehaviour
         if (installNineSolsapworldToggle == null || installNineSolsapworldToggle.isOn)
         {
             ShowInfo("Installing APWorld...");
-            yield return InstallNineSolsAPWorld();
+            yield return InstallAPWorld();
         }
 
         if (installBepInExToggle != null && installBepInExToggle.isOn)
@@ -381,7 +415,7 @@ public class NineSolsManualDL : MonoBehaviour
     }
 
 
-    IEnumerator InstallNineSolsAPWorld()
+    IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
         {
@@ -509,6 +543,11 @@ public class NineSolsManualDL : MonoBehaviour
         while (!configLoaded)
             yield return null;
 
+        if (!Directory.Exists(ninesolsPath))
+        {
+            yield break;
+        }
+
         string extractPath = Path.Combine(Application.persistentDataPath, "BepInExTemp");
 
         yield return downloader.DownloadAndExtract(bepInEx, Application.persistentDataPath, extractPath);
@@ -613,24 +652,6 @@ public class NineSolsManualDL : MonoBehaviour
         SafeDeleteDirectory(extractPath);
     }
 
-    IEnumerator ApWorldOnlyFlow()
-    {
-        ninesolsPath = GetNineSolsPath();
-
-        if (string.IsNullOrEmpty(ninesolsPath))
-            yield break;
-
-        yield return InstallNineSolsAPWorld();
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-        {
-            LaunchNineSols();
-            yield return new WaitForSeconds(2f);
-        }
-
-        ShowInfo("Installation complete!");
-    }
-
     IEnumerator BepInExOnlyFlow()
     {
         ShowInfo("Installing BepInEx...");
@@ -676,6 +697,8 @@ public class NineSolsManualDL : MonoBehaviour
         }
 
         configLoaded = true;
+
+        ninesolsPath = GetNineSolsPath();
     }
 
     void LaunchNineSols()
@@ -741,7 +764,11 @@ public class NineSolsManualDL : MonoBehaviour
         if (!Directory.Exists(source))
             return;
 
-        Directory.CreateDirectory(target);
+        if (!Directory.Exists(target))
+        {
+            UnityEngine.Debug.LogError("Target directory does not exist, refusing to create it: " + target);
+            return;
+        }
 
         foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
         {
@@ -907,70 +934,57 @@ public class NineSolsManualDL : MonoBehaviour
     string GetNineSolsPath()
     {
         string[] quickPaths = new string[]
-        {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Nine Sols"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "Nine Sols"),
-            @"D:\Steam\steamapps\common\Nine Sols",
-            @"D:\SteamLibrary\steamapps\common\Nine Sols",
-            @"D:\steamapps\common\Nine Sols",
-            @"E:\Steam\steamapps\common\Nine Sols",
-            @"E:\SteamLibrary\steamapps\common\Nine Sols",
-            @"E:\steamapps\common\Nine Sols",
-            @"E:\Program Files (x86)\steamapps\common\Nine Sols",
-            @"E:\Program Files\steamapps\common\Nine Sols",
-        };
+                {
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
+                };
 
         foreach (string path in quickPaths)
         {
             try
             {
                 if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
+                }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    // Search Steam\steamapps
-                    string ninesolsPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "Nine Sols");
-                    if (Directory.Exists(ninesolsPath))
-                        return ninesolsPath;
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    // Search SteamLibrary\steamapps
-                    ninesolsPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "Nine Sols");
-                    if (Directory.Exists(ninesolsPath))
-                        return ninesolsPath;
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    // Search steamapps at root
-                    ninesolsPath = Path.Combine(drive.Name, "steamapps", "common", "Nine Sols");
-                    if (Directory.Exists(ninesolsPath))
-                        return ninesolsPath;
-
-                    // Search Program Files (x86)\steamapps
-                    ninesolsPath = Path.Combine(drive.Name, "Program Files (x86)", "steamapps", "common", "Nine Sols");
-                    if (Directory.Exists(ninesolsPath))
-                        return ninesolsPath;
-
-                    // Search Program Files\steamapps
-                    ninesolsPath = Path.Combine(drive.Name, "Program Files", "steamapps", "common", "Nine Sols");
-                    if (Directory.Exists(ninesolsPath))
-                        return ninesolsPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 }

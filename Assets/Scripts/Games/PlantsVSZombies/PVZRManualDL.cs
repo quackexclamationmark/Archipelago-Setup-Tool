@@ -1,11 +1,13 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.IO;
+using Microsoft.Win32;
+using NUnit.Framework;
 using System.Collections;
 using System.Diagnostics;
-using Microsoft.Win32;
+using System.IO;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class PVZRManualDL : MonoBehaviour
 {
@@ -20,6 +22,10 @@ public class PVZRManualDL : MonoBehaviour
     public Button steamButton;
     public Button epicButton;
     public TextMeshProUGUI platformStatus;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "PVZ Replanted";
+    public string epicGameFolderName = "PlantsvsZombiesReplaiXEyJ";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
@@ -56,6 +62,8 @@ public class PVZRManualDL : MonoBehaviour
         public string pvzreplantedAP;
         public string pvzreplantedMelonLoader;
         public string pvzreplantedApworld;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
     }
 
     private PVZRConfig remoteConfig;
@@ -191,18 +199,27 @@ public class PVZRManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        if (string.IsNullOrEmpty(pvzPath))
-        {
-            string platform = isEpic ? "Epic" : "Steam";
-            ShowInfo("PVZ Replanted path not found. Please check " + platform + " installation.");
-            return;
-        }
+        pvzPath = GetPVZPath();
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool melonloader = installMelonLoaderToggle != null && installMelonLoaderToggle.isOn;
         bool apmod = installAPToggle != null && installAPToggle.isOn;
+        bool needsGamePath = apmod || melonloader || !apworld;
+
+        if (needsGamePath && string.IsNullOrEmpty(pvzPath))
+        {
+            string platform = isEpic ? "Epic" : "Steam";
+            ShowInfo("Game not found on " + platform + ". Please check installation.");
+            return;
+        }
 
         int count = (apworld ? 1 : 0) + (melonloader ? 1 : 0) + (apmod ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
 
         if (apworld && count == 1)
         {
@@ -223,6 +240,25 @@ public class PVZRManualDL : MonoBehaviour
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            ShowInfo("Launching PVZ Replanted...");
+            LaunchPVZR();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -376,7 +412,6 @@ public class PVZRManualDL : MonoBehaviour
 
     IEnumerator InstallAPWorld()
     {
-        // wait for config if needed
         while (!configLoaded)
         {
             UnityEngine.Debug.Log("Waiting for config to load...");
@@ -471,6 +506,20 @@ public class PVZRManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -582,18 +631,6 @@ public class PVZRManualDL : MonoBehaviour
         }
 
         UnityEngine.Debug.Log("END CopyMelonLoaderFiles");
-    }
-
-    IEnumerator APWorldOnlyFlow()
-    {
-        pvzPath = GetPVZPath();
-
-        if (string.IsNullOrEmpty(pvzPath))
-            yield break;
-
-        yield return InstallAPWorld();
-
-        ShowInfo("APWorld installed successfully!");
     }
 
     IEnumerator MelonLoaderOnlyFlow()
@@ -712,24 +749,6 @@ public class PVZRManualDL : MonoBehaviour
         catch { }
     }
 
-    void MoveDirectory(string source, string target)
-    {
-        if (!Directory.Exists(source))
-            return;
-
-        foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
-        {
-            string dest = file.Replace(source, target);
-
-            Directory.CreateDirectory(Path.GetDirectoryName(dest));
-
-            if (File.Exists(dest))
-                File.Delete(dest);
-
-            File.Move(file, dest);
-        }
-    }
-
     void ShowInfo(string message)
     {
         if (infoPanel == null || infoText == null)
@@ -743,22 +762,6 @@ public class PVZRManualDL : MonoBehaviour
     {
         if (infoPanel != null)
             infoPanel.SetActive(false);
-    }
-
-    string FindFile(string root, string fileName)
-    {
-        try
-        {
-            foreach (string file in Directory.GetFiles(root, "*", SearchOption.AllDirectories))
-                if (Path.GetFileName(file) == fileName)
-                    return file;
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogError("Error finding file: " + e.Message);
-        }
-
-        return "";
     }
 
     string FindDirectory(string root, string dirName)
@@ -906,12 +909,8 @@ public class PVZRManualDL : MonoBehaviour
     {
         string[] quickPaths = new string[]
         {
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "PVZ Replanted"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", "PVZ Replanted"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", "Plants vs Zombies Replanted"),
-            @"D:\Steam\steamapps\common\PVZ Replanted",
-            @"D:\SteamLibrary\steamapps\common\PVZ Replanted",
-            @"E:\Steam\steamapps\common\PVZ Replanted",
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
         foreach (string path in quickPaths)
@@ -920,51 +919,46 @@ public class PVZRManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found PVZ Replanted (Steam) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        try
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string pvzPath = Path.Combine(drive.Name, "Steam", "steamapps", "common", "PVZ Replanted");
-                    if (Directory.Exists(pvzPath))
-                    {
-                        UnityEngine.Debug.Log("Found PVZ Replanted (Steam) at: " + pvzPath);
-                        return pvzPath;
-                    }
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
 
-                    pvzPath = Path.Combine(drive.Name, "SteamLibrary", "steamapps", "common", "PVZ Replanted");
-                    if (Directory.Exists(pvzPath))
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found PVZ Replanted (Steam) at: " + pvzPath);
-                        return pvzPath;
-                    }
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
 
-                    pvzPath = Path.Combine(drive.Name, "steamapps", "common", "PVZ Replanted");
-                    if (Directory.Exists(pvzPath))
-                    {
-                        UnityEngine.Debug.Log("Found PVZ Replanted (Steam) at: " + pvzPath);
-                        return pvzPath;
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("PVZ Replanted (Steam) not found.");
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
@@ -973,10 +967,7 @@ public class PVZRManualDL : MonoBehaviour
         string[] quickPaths = new string[]
         {
             @"C:\Program Files\Epic Games\PlantsvsZombiesReplaiXEyJ",
-            @"D:\Epic Games\PlantsvsZombiesReplaiXEyJ",
-            @"E:\Epic Games\PlantsvsZombiesReplaiXEyJ",
             @"C:\Games\Epic\PlantsvsZombiesReplaiXEyJ",
-            @"D:\Games\Epic\PlantsvsZombiesReplaiXEyJ",
         };
 
         foreach (string path in quickPaths)
@@ -985,14 +976,13 @@ public class PVZRManualDL : MonoBehaviour
             {
                 if (Directory.Exists(path))
                 {
-                    UnityEngine.Debug.Log("Found PVZ Replanted (Epic) at: " + path);
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
                     return path;
                 }
             }
             catch { }
         }
 
-        // Try Epic manifest lookup
         try
         {
             string epicBaseDir = Path.Combine(
@@ -1008,7 +998,7 @@ public class PVZRManualDL : MonoBehaviour
                     try
                     {
                         string content = File.ReadAllText(manifest);
-                        if (content.Contains("PlantsvsZombiesReplai") || content.Contains("Replanted"))
+                        if (content.Contains("PlantsvsZombiesReplaiXEyJ") || content.Contains("PlantsvsZombiesReplaiXEyJ"))
                         {
                             System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
                             System.Text.RegularExpressions.Match match = regex.Match(content);
@@ -1018,7 +1008,7 @@ public class PVZRManualDL : MonoBehaviour
                                 string epicPath = match.Groups[1].Value;
                                 if (Directory.Exists(epicPath))
                                 {
-                                    UnityEngine.Debug.Log("Found PVZ Replanted (Epic) at: " + epicPath);
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
                                     return epicPath;
                                 }
                             }
@@ -1030,30 +1020,39 @@ public class PVZRManualDL : MonoBehaviour
         }
         catch { }
 
-        try
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
 
-                try
+                foreach (System.IO.DriveInfo drive in drives)
                 {
-                    string epicPath = Path.Combine(drive.Name, "Epic Games", "PlantsvsZombiesReplaiXEyJ");
-                    if (Directory.Exists(epicPath))
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
                     {
-                        UnityEngine.Debug.Log("Found PVZ Replanted (Epic) at: " + epicPath);
-                        return epicPath;
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string epicPath = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(epicPath))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + epicPath);
+                                return epicPath;
+                            }
+                        }
+                        catch { }
                     }
                 }
-                catch { }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("PVZ Replanted (Epic) not found.");
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
         return "";
     }
 
@@ -1084,6 +1083,9 @@ public class PVZRManualDL : MonoBehaviour
             }
 
             configLoaded = true;
+
+            pvzPath = GetPVZPath();
+            UpdatePlatformStatus();
         }
     }
 
