@@ -7,7 +7,7 @@ DOWNLOAD THE INSTALLER, NOT THE .ZIP FILE!
 Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could (idk I didn't try it) but it COULD delete everything that is next to the .exe (in the same folder) even tho it's not supposed to. Basically, you can move the folder but probably don't rename it and do not touch what's inside.
 
 # Archipelago Setup Tool
-### [Download latest version | v2.0.0 - THE 100 GAMES UPDATE!](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v2.0.0)
+### [Download latest version | v2.0.1 - THE 100 GAMES UPDATE!](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v2.0.1)
 ---
 
 ## Features
