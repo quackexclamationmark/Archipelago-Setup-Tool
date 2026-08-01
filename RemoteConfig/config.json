@@ -157,7 +157,7 @@
 
     "doom2AP": "https://github.com/Daivuk/apdoom/releases/download/1.2.0/APDOOM-1_2_0-Win32.zip",
 
-    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.3.6/DoomEternalArchipelagoPlayableTest-v0.3.6-alpha.2.zip",
+    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.3.8/DoomEternalArchipelagoPlayableTest-v0.3.8-alpha.1.zip",
     "doometernalMeathook": "https://github.com/brongo/m3337ho0o0ok/releases/download/v7.2/XINPUT1_3.dll",
     "doometernalModInjector": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/eternalmodinjector_b20ec.zip",
     "doometernalApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/doometernal.apworld",
@@ -181,8 +181,8 @@
     "garfieldkartApworld": "https://github.com/FeluciaPS/Archipelago/releases/download/1.0.0/garfkart.apworld",
     "garfieldkartBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
-    "gtasaAP": "https://github.com/awakenbad/SanAndreasAP/releases/download/v0.3.0/SanAndreasAP-v0.3.0.zip",
-    "gtasaApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/gta_sa.apworld",
+    "gtasaAP": "https://github.com/awakenbad/SanAndreasAP/releases/download/v0.4.0/SanAndreasAP-v0.4.0.zip",
+    "gtasaApworld": "https://github.com/awakenbad/SanAndreasAP/releases/download/v0.4.0/gta_sa.apworld",
     "gtasaWidescreen": "https://github.com/ThirteenAG/WidescreenFixesPack/releases/download/gtasa/GTASA.WidescreenFix.zip",
     "gtasaASI": "https://github.com/GTAmodding/ASI-Loader/releases/download/v1.3.0/vorbisFile.dll",
 
