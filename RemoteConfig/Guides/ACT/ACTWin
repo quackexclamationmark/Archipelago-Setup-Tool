@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• BepInEx (+ .doorstop_version, doorstop_config.ini, winhttp.dll & changelog.txt)\n• ACTAP.dll (Archipelago Mod)\n• another_crab.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, another_crab.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. BepInEx will then be downloaded into the ACT core files, along with the required mod DLL, which will be placed in Another Crab's Treasure\\BepInEx\\plugins. Then 'BepInEx.cfg' config file will be created with the Logging option enabled.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"ACT is not a core Archipelago game, it needs a custom world file. When 'another_crab.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, a new 'Archipelago' window should appear in the top-left corner of your main menu.\n\nIn the 'Address' field, enter archipelago.gg.\n\nIn 'Port' enter the room's port. This is a 5-digit number that you can find on the website after creating a new room.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nIn 'Slot', enter the name assigned to your YAML file.\n\nFinally, click 'Connect' and then, you can start a new run!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"You have 2 revert options, both can't be enabled at the same time.\n\nIf you use the 'Clear AP Mods' option it will only delete the mods that are required for ACT Archipelago.\n\nIf you use the 'Full Clear BepInEx' option it will delete everything related to BepInEx and mods. If other mods are detected an additional confirmation will appear.",
+"clear"
+
+]
