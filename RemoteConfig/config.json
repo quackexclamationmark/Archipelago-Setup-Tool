@@ -71,6 +71,7 @@
     "sadxPopTracker": "https://github.com/RaceProUK/SADX-APTracker/releases/download/v1.112.11/sadx_rando_raceprouk.zip",
     "pokemonplatinumPopTracker": "https://github.com/palex00/platinum-ap-tracker/archive/refs/tags/1.2.3.zip",
     "pokemonbwPopTracker": "https://github.com/Radis7Noir/pokemon-bw-ap-tracker/releases/download/3.6.3/pokemon-bw-ap-tracker.zip",
+    "borderlands2PopTracker": "https://github.com/DDogeOneeSama/Borderlands-2-PopTracker/releases/download/0.2.1/bl2_poptracker_0_2_1.zip",
     
 
     "adofaiPathName": "A Dance of Fire and Ice",
@@ -110,6 +111,11 @@
     "bombrushBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "bombrushAP": "https://github.com/TRPG0/BRC-Archipelago/releases/download/1.0.6/BRC-Archipelago.1.0.6.zip",
     "bombrushModLocalizer": "https://github.com/TRPG0/BRC-ModLocalizer/releases/download/1.0.1/ModLocalizer.dll",
+
+    "borderlands2ModManager": "https://github.com/bl-sdk/willow2-mod-manager/releases/download/v3.8/willow2-sdk.zip",
+    "borderlands2AP": "https://github.com/EdricY/Bouncy-Loot-God/releases/download/v0.5.4/BouncyLootGod.sdkmod",
+    "borderlands2Apworld": "https://github.com/EdricY/Bouncy-Loot-God/releases/download/v0.5.4/borderlands2.apworld",
+    "borderlands2Coroutines": "https://github.com/juso40/bl2sdk-mods/raw/refs/heads/main/coroutines/coroutines.sdkmod",
 
     "celesteowAP": "https://github.com/PoryGoneDev/Celeste-Archipelago-Open-World/releases/download/v1.1.2/Archipelago_Open_World.zip",
     "celesteowEverest": "https://gamebanana.com/dl/1083425",
