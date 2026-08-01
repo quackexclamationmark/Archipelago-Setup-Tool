@@ -13,6 +13,7 @@
 "Borderlands 2 is not a core Archipelago game, it needs a custom world file. When 'borderlands2.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
 "kill",
 "[HEADER] Connection Infos",
+"kill",
 "Once everything is set up, a new 'Mods' button should appear in the main menu, (re)open the Archipelago Launcher, launch the 'Borderlands 2 Client' and connect to the client. Finally, you can go back to the game, go to the 'Mods' section from the main menu and enable the 'BouncyLootGod' mod. After doing so you see a message saying that you are connected, you can now create a new save and start playing!",
 "kill",
 "[HEADER] Revert Infos",
