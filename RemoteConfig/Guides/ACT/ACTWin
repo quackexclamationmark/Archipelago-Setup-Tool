@@ -14,7 +14,7 @@
 "kill",
 "[HEADER] Connection Infos",
 "kill",
-"Once everything is set up, a new 'Archipelago' window should appear in the top-left corner of your main menu.\n\nIn the 'Address' field, enter archipelago.gg.\n\nIn 'Port' enter the room's port. This is a 5-digit number that you can find on the website after creating a new room.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nIn 'Slot', enter the name assigned to your YAML file.\n\nFinally, click 'Connect' and then, you can start a new run!",
+"Once everything is set up, a new 'Archipelago' window should appear in the top-left corner of the game's main menu.\n\nIn the 'Address' field, enter archipelago.gg.\n\nIn 'Port' enter the room's port. This is a 5-digit number that you can find on the website after creating a new room.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nIn 'Slot', enter the name assigned to your YAML file.\n\nFinally, click 'Connect' and then, you can start a new run!",
 "kill",
 "[HEADER] Revert Infos",
 "kill",
