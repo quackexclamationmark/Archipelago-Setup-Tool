@@ -70,6 +70,7 @@
     "psychonautsPopTracker": "https://github.com/Mysteryem/Psychonauts_AP_PopTracker/archive/refs/tags/v2.0.1.zip",
     "sadxPopTracker": "https://github.com/RaceProUK/SADX-APTracker/releases/download/v1.112.11/sadx_rando_raceprouk.zip",
     "pokemonplatinumPopTracker": "https://github.com/palex00/platinum-ap-tracker/archive/refs/tags/1.2.3.zip",
+    "pokemonbwPopTracker": "https://github.com/Radis7Noir/pokemon-bw-ap-tracker/releases/download/3.6.3/pokemon-bw-ap-tracker.zip",
     
 
     "adofaiPathName": "A Dance of Fire and Ice",
@@ -299,6 +300,9 @@
     "pvzreplantedAP": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.9.0/replanted_archipelago_v1.9.0.zip",
     "pvzreplantedApworld": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.9.0/replanted_archipelago_v1.9.0.zip",
     "pvzreplantedMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
+
+    "pokemonbwApworld": "https://github.com/BlastSlimey/PokemonBWAP/releases/download/0.3.37/pokemon_bw.apworld",
+    "pokemonbwBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
     "pokemoncrystalBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
     "pokemoncrystalApworld": "https://github.com/gerbiljames/Archipelago-Crystal/releases/download/5.4.6/pokemon_crystal.apworld",
