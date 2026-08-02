@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• ArchipelagoNotIncluded (AP Mod)\n• oni.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, oni.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. The ONI AP Mod folder will then be downloaded into the game's mods directory 'C:\\Users\\[YOUR NAME]\\Documents\\Klei\\OxygenNotIncluded\\mods" (or "C:\\Users\\[YOUR NAME]\\OneDrive\\Documents\\Klei\\OxygenNotIncluded\\mods').",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"ONI is not a core Archipelago game, it needs a custom world file. When 'oni.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, in the main menu press 'Mods' and enable the Archipelago Mod and restart your game. Go back to the Mods tab and click the 'Options' button.\n\nIn the 'URL' field, enter archipelago.gg.\n\nIn 'Port' enter the room's port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Player Name', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nYou can also tweak a few settings.\n\nWhen you're done, click 'OK' and you can start playing.",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will simply delete the AP Mod folder.",
+"clear"
+
+]
