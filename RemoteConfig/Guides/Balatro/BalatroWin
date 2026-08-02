@@ -6,7 +6,7 @@
 "kill",
 "[HEADER] Installation Infos",
 "kill",
-"When you click 'START SETUP' in the 'SETUP' tab, balatro.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. Lovely's version.dll will then be installed into the game's core folder. Then Steamodded & BalatroAP will be downloaded in AppData\\Roaming\\Balatro\\Mods./nLovely's mod folder will only be created in the Mods directory after booting up the game using the version.dll file.",
+"When you click 'START SETUP' in the 'SETUP' tab, balatro.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. Lovely's version.dll will then be installed into the game's core folder. Then Steamodded & BalatroAP will be downloaded in AppData\\Roaming\\Balatro\\Mods.\nLovely's mod folder will only be created in the Mods directory after booting up the game using the version.dll file.",
 "kill",
 "[HEADER] apworld / yaml Infos",
 "kill",
