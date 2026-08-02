@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• ori_wotw.apworld",
+"kill",
+"[HEADER] Setup Infos",
+"kill",
+"This game has to be partially setup manually. Click the WotW Randomizer link that you can find on the Setup tab, it should open a new tab on your default browser. Click download and select your OS (Windows or Linux).\nOnce you have downloaded 'WotwRandoSetup.exe' / 'WotwRando.tar.gz' open it and setup the Randomizer app.",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'DL APWORLD' in the 'SETUP' tab, ori_wotw.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Ori WotW is not a core Archipelago game, it needs a custom world file. When 'ori_wotw.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up and that the WotW Randomizer app is open. Click the 3 dots icon (next to the 'Settings'), go to 'Play Archipelago'.\n\nIn the 'Server Address & Port' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Player/Slot name', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, you can click 'LAUNCH' start a new run and it should connect you!",
+"clear"
+
+]
