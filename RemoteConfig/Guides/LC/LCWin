@@ -1,0 +1,26 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"WAY TOO MUCH JUST CHECK THE .TXT PRESENT IN THE GAME'S FOLDER AFTER SETUP IF YOU WANT TO KNOW WHAT'S DOWNLOADED",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, lethal_company.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. BepInEx and the Archipelago mods + their dependencies will be downloaded into Lethal Company's core directory. The game will then launch and automatically close after a few seconds to ensure BepInEx is correctly initialized.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Lethal Company is not a core Archipelago game, it needs a custom world file. When 'lethal_company.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up and that you are in the game, start a new save file.
+
+Press '/' to open the text chat and type /connect archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\nFor example: /connect archipelago.gg:12345\n\nAfter that, the text chat will ask you to enter your slot name, enter the name assigned to your YAML file.\n\nFinally, it will ask you to type the password, if there's no password, simply type 'n' and then ENTER.\n\nAnd you should now be connected, you can now start playing.",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"You have 2 revert options, both can't be enabled at the same time.\n\nIf you use the 'Clear AP Mods' option it will only delete the mods that are required for LC Archipelago.\n\nIf you use the 'Full Clear BepInEx' option it will delete everything related to BepInEx and mods. If other mods are detected an additionnal confirmation will appear.",
+"clear"
+
+]
