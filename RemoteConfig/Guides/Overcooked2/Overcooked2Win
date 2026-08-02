@@ -14,7 +14,7 @@
 "kill",
 "[HEADER] Connection Infos",
 "kill",
-"If you didn't enable 'Launch Installation after setup' for the setup, before moving on to the next step, go to your Overcooked! 2 folder and run 'oc2-modding-install.bat'\n\nOnce everything is set up, after starting the game, continue to the main menu and at some point, an Archipelago connection window should appear in the top-left corner of the game (you can also click the 'Show' button).\n\nEnter archipelago.gg:XXXXX in the 'Host' field, where XXXXX is the room’s port. You can find this number on the website after creating a new room.\n\nIn 'Player Name', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect' and you can start playing!",
+"If you didn't enable 'Launch Installation after setup' for the setup, before moving on to the next step, go to your Overcooked! 2 folder and run 'oc2-modding-install.bat'.\n\nOnce everything is set up, after starting the game, continue to the main menu and at some point, an Archipelago connection window should appear in the top-left corner of the game (you can also click the 'Show' button).\n\nEnter archipelago.gg:XXXXX in the 'Host' field, where XXXXX is the room’s port. You can find this number on the website after creating a new room.\n\nIn 'Player Name', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect' and you can start playing!",
 "kill",
 "[HEADER] Revert Infos",
 "kill",
