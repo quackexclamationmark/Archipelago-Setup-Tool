@@ -2,7 +2,7 @@
 
 "[HEADER] Downloaded",
 "kill",
-"• BepInEx (+ .doorstop_version, doorstop_config.ini, winhttp.dll)\n• Archipelago.MultiClient.Net.dll, IAmYourBeastArchipelago.dll, Newtonsoft.Json.dll (Archipelago Mod)\n• i_am_your_beast.apworld",
+"• BepInEx (+ .doorstop_version, doorstop_config.ini, winhttp.dll)\n• Archipelago.MultiClient.Net.dll, IAmYourBeastArchipelago.dll & Newtonsoft.Json.dll (Archipelago Mod)\n• i_am_your_beast.apworld",
 "kill",
 "[HEADER] Installation Infos",
 "kill",
