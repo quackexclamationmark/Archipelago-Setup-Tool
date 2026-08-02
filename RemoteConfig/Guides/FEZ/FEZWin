@@ -1,0 +1,28 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• HAT (FEZ Mod Loader)\n• fezap.zip (Archipelago Mod)\n• fez.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, fez.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. HAT will be installed into the game's core folder and 'hat_install.bat' will be executed which will create 'MONOMODDED_FEZ.exe'. The AP Mod .zip folder will be installed inside the FEZ\\Mods directory.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"FEZ is not a core Archipelago game, it needs a custom world file. When 'fez.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, a new 'ARCHIPELAGO' window should appear.\n\nOnce in-game, press ESCAPE, then, F10 and type 'connect archipelago.gg:XXXXX [slotname] [optional password]'\n\nXXXXX is the room’s port. You can find this number on the website after creating a new room.\n\n'[slotname]' is the name assigned to your yaml file.\n\n'[optional password]' is optional.\n\nFinally, press 'Enter' and you should be able to start playing!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"You have 2 revert options, both can't be enabled at the same time.\n\nIf you use the 'Clear AP Mods' option it will only delete the mods that are required for Fez Archipelago.\n\nIf you use the 'Full Clear HAT' option it will delete everything related to HAT and mods. If other mods are detected an additionnal confirmation will appear.",
+"kill",
+"[HEADER] PopTracker Infos",
+"kill",
+"Some games have a PopTracker integration for Archipelago which allows you to track all possible Locations, Items, Upgrades, Zones, Hints and more depending on the game.\n\nFor the setup there are 3 different cases:\n\n\t• If the selected directory does not contain a PopTracker folder (or any similarly named folder), a new 'poptracker' folder will be created and the pack will be downloaded to poptracker\\packs.\n\n\t• If the selected directory already contains a folder with 'PopTracker' in its name, the installer will look for a poptracker.exe file. If one is found, the pack will be downloaded to its packs folder. If no poptracker.exe is found, the folder will be renamed to 'poptracker' and any missing files or folders will be created.\n\n\t• If the selected directory is already a PopTracker folder (for example: C:\\Users\\magni\\Documents\\poptracker), its contents will be validated. If everything is present, the pack will simply be downloaded to poptracker\\packs. Otherwise, the folder will be repaired before the pack is installed.",
+"clear"
+
+]
