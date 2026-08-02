@@ -14,7 +14,7 @@
 "kill",
 "[HEADER] Connection Infos",
 "kill",
-"Once everything is set up and that you are in the game, click 'Start Game', create a NEW save and a new window called "Archipelago Connection Info".\n\nIn the 'Server Address & Port' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Player/Slot Name', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect to AP Server' and then, you can start a new run!",
+"Once everything is set up and that you are in the game, click 'Start Game', create a NEW save and a new window called 'Archipelago Connection Info'.\n\nIn the 'Server Address & Port' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Player/Slot Name', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect to AP Server' and then, you can start a new run!",
 "kill",
 "[HEADER] Revert Infos",
 "kill",
