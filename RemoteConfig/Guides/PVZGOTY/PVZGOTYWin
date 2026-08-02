@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• PVZ GOTY Archipelago folder\n• pvzr.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, pvzr.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. The Archipelago mod folder will be downloaded into PVZ' core directory.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"PVZ GOTY Edition is not a core Archipelago game, it needs a custom world file. When 'pvzr.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, launch 'PlantsVsZombies.exe' inside the 'Archipelago' folder (you can do it automatically by toggling launch after setup). Once in the main menu, click the 'Start Adventure' button.\n\nIn the 'Host and Port' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Slot Name', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect To Archipelago' and then, you can start playing!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will simply delete the 'Archipelago' folder.",
+"clear"
+
+]
