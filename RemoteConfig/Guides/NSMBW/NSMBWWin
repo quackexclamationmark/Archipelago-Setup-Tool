@@ -1,0 +1,20 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• Dolphin Emulator (if toggled)\n• nsmbw.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, nsmbw.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. If you don't already have Dolphin Emulator, you can enable its toggle and it will be downloaded in your 'Documents' directory.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"NSMBW is not a core Archipelago game, it needs a custom world file. When 'nsmbw.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"REMEMBER TO USE THE 'PATCH DOLPHIN' BUTTON IN THE SETUP TAB AFTER SETTING UP!! ALSO IF YOU JUST DOWNLOADED DOLPHIN USING THE SETUP, OPEN DOLPHIN ONCE BEFORE PATCHING IT!!\n\nOnce the setup is done, patch Dolphin (open Dolphin first if downloaded for the first time).\n\nIf you already have a save on the 2nd save slot, save it (if you want to keep it).\n\nOpen the Archipelago Launcher and start the 'New Super Mario Bros Wii Client', it should prompt you to select your ROM.\n\nIf the ROM doesn't start automatically, launch it with dolphin and connect on the NSMBW Client.\n\nOnce in-game, select the 2nd save slot and start your new randomized run on it (it will only work on this slot, not the other ones).",
+"clear"
+
+]
