@@ -6,7 +6,7 @@
 "kill",
 "[HEADER] Installation Infos",
 "kill",
-"When you click 'START SETUP' in the 'SETUP' tab, BepInEx will be installed into the game's core folder. ModLocalizer.dll and the AP Mod folder will be installed inside the BepInEx\plugins directory.",
+"When you click 'START SETUP' in the 'SETUP' tab, BepInEx will be installed into the game's core folder. ModLocalizer.dll and the AP Mod folder will be installed inside the BepInEx\\plugins directory.",
 "kill",
 "[HEADER] apworld / yaml Infos",
 "kill",
