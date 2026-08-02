@@ -1,0 +1,26 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• minecraft.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, minecraft.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Minecraft is not a core Archipelago game, it needs a custom world file. When 'minecraft.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, open the Archipelago website and go to the room you have just opened. In the room, you should see a clickable text 'Download Patch File' next to your name. (SEE IMAGE BELOW)\n\nOpen the Archipelago Launcher again and now that minecraft.apworld has been installed, you should be able to find a new 'Minecraft Client', open it and you will see a 'Open APMC File', click it and select the .apmc file you have just downloaded from the Archipelago website.\n\nWait until the Server loads correctly and you should see 'Server Running' on top with the Server Address.\n\nBoot up the Minecraft Launcher and start Minecraft in version 1.21.11.\nIf you don't already have it, go to Installations, New installation and in version select 1.21.11, install it and then start the game in the right version.\n\nTo connect, go in Multiplayer and add a new address, the address can be found on the Archipelago Minecraft Client. Once you're in, open the text chat and type: '/start' and you should be able to play!",
+"kill",
+"[IMAGE1]",
+"kill",
+"[HEADER] PopTracker Infos",
+"kill",
+"Some games have a PopTracker integration for Archipelago which allows you to track all possible Locations, Items, Upgrades, Zones, Hints and more depending on the game.\n\nFor the setup there are 3 different cases:\n\n\t• If the selected directory does not contain a PopTracker folder (or any similarly named folder), a new 'poptracker' folder will be created and the pack will be downloaded to poptracker\\packs.\n\n\t• If the selected directory already contains a folder with 'PopTracker' in its name, the installer will look for a poptracker.exe file. If one is found, the pack will be downloaded to its packs folder. If no poptracker.exe is found, the folder will be renamed to 'poptracker' and any missing files or folders will be created.\n\n\t• If the selected directory is already a PopTracker folder (for example: C:\\Users\\magni\\Documents\\poptracker), its contents will be validated. If everything is present, the pack will simply be downloaded to poptracker\\packs. Otherwise, the folder will be repaired before the pack is installed.",
+"clear"
+
+]
