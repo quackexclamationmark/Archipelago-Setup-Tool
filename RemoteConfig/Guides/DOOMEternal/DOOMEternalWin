@@ -19,6 +19,9 @@
 "[HEADER] Revert Infos",
 "kill",
 "You have 2 revert options, both can't be enabled at the same time.\n\nIf you use the 'Clear AP Mods' option it will only delete the mods that are required for DOOM Eternal Archipelago. For this game it will only delete the mod zip folder and keep Meathook + Mod Injector.\n\nIf you use the 'Full Clear' option it will delete everything related to Mod Injector, Meathook and mods. If other mods are detected an additionnal confirmation will appear.",
+"[HEADER] Troubleshoot",
+"kill",
+"If the 'RPC memory gate OPEN' message doesn't show up and/or that you're not receiving any check, you can try 3 things:\n\n1- Close everthing and verify the game's files through the games 'Properties' on Steam and try again.\n\n2- Open the game using the 'EternalModInjector.bat' file present in your game files and try again.\n\n3- If none of them work disconnect from the Multiworld and move the 'DOOM Eternal Archipelago' folder inside Documents to another directory. Then, delete the 'ap_config.json' file inside 'DOOM Eternal Archipelago\\client' and restart the client on the Archipelago Launcher.",
 "clear"
 
 ]
