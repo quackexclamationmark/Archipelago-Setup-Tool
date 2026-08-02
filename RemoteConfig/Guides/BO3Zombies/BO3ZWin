@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• BO3 Archipelago folder\n• cod_bo3.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, cod_bo3.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. The Archipelago mod folder will be downloaded into BO3's 'mods' folder. If this folder doesn't exist, it will be created.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"BO3 is not a core Archipelago game, it needs a custom world file. When 'cod_bo3.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, once in the main menu you should be able to see a 'Mods' button, press it and then enable the 'bo3_archipelago' mod. Now that it has been enabled, go to 'Zombies' and a new 'Archipelago' button should be there.\n\nIn the 'Server Name' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Slot Name', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Test Connection' on the bottom and once you're connect, you can start playing!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will simply delete 'bo3_archipelago' inside the 'mods' folder.",
+"clear"
+
+]
