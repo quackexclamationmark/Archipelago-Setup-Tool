@@ -14,7 +14,7 @@
 "kill",
 "[HEADER] Connection Infos",
 "kill",
-"Once everything is set up, The RE Framework mod loader windows will appear. The default key to manually open the windows should be 'INSERT' but you can change it in the Configuration tab.\n\nIn the Archipelago Client for REFramework window:\nIn the 'Host' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Slot', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click the Connect button and then, you can start a new run!",
+"Once everything is set up, The RE Framework mod loader windows will appear. The default key to manually open the windows should be 'INSERT' but you can change it in the Configuration tab.\n\nInside the Archipelago Client for REFramework window:\n\nIn the 'Host' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Slot', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click the Connect button and then, you can start a new run!",
 "kill",
 "[HEADER] Revert Infos",
 "kill",
