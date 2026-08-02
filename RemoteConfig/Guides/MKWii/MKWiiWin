@@ -14,7 +14,7 @@
 "kill",
 "[HEADER] Connection Infos",
 "kill",
-"Once everything is setup, open "Documents\MK Wii Archipelago\mkwii client.exe".\nI would recommend enabling AP Tracker Auto-Launch (by typing 'y' when it's asking you). Answer all questions and then it will ask you to select your MK Wii save file (usually here 'AppData\\Roaming\\Dolphin Emulator\\Wii\\title\\00010004\\524d4345\\data\\rksys.dat'). You can access the AppData folder by pressing 'Win+R' and typing '%AppData%'.\n\nAfter selecting your save file, it will ask you if you're at the license select screen, before selecting anything, open Dolphin, open Mario Kart Wii until you're on the license selection screen, you can now go back to the command window and type 'y' to continue.\n\nDoing that will open a Text Client, connect to it and you should be good to go!\n\nBy the way, you'll need to select the top-left license.",
+"Once everything is setup, open 'Documents\MK Wii Archipelago\mkwii client.exe'.\nI would recommend enabling AP Tracker Auto-Launch (by typing 'y' when it's asking you). Answer all questions and then it will ask you to select your MK Wii save file (usually here 'AppData\\Roaming\\Dolphin Emulator\\Wii\\title\\00010004\\524d4345\\data\\rksys.dat'). You can access the AppData folder by pressing 'Win+R' and typing '%AppData%'.\n\nAfter selecting your save file, it will ask you if you're at the license select screen, before selecting anything, open Dolphin, open Mario Kart Wii until you're on the license selection screen, you can now go back to the command window and type 'y' to continue.\n\nDoing that will open a Text Client, connect to it and you should be good to go!\n\nBy the way, you'll need to select the top-left license.",
 "kill",
 "[HEADER] Troubleshoot",
 "kill",
