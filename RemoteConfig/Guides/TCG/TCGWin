@@ -6,7 +6,7 @@
 "kill",
 "[HEADER] Installation Infos",
 "kill",
-"When you click 'START SETUP' in the 'SETUP' tab, tcg_card_shop_simulator.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. BepInEx will then be downloaded into the TCGCSS core files, along with the required mods, which will be placed in BepInEx\\plugins. Then "BepInEx.cfg" (in BepInEx\\config) will be modified to match the required setup.",
+"When you click 'START SETUP' in the 'SETUP' tab, tcg_card_shop_simulator.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. BepInEx will then be downloaded into the TCGCSS core files, along with the required mods, which will be placed in BepInEx\\plugins. Then 'BepInEx.cfg' (in BepInEx\\config) will be modified to match the required setup.",
 "kill",
 "[HEADER] apworld / yaml Infos",
 "kill",
