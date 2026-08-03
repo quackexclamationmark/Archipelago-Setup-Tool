@@ -15,7 +15,7 @@ All the Twilight Princess save files can be found in 'AppData\\Roaming\\Dolphin 
 "kill",
 "[HEADER] Connection Infos",
 "kill",
-"Once everything is set up, launch 'Dolphin.exe' and start your Twilight Princess ROM (.iso file).\n\nIn the save selection screen, there should be a new 'REM Loader' save in the 3rd slot. Start the save and a 'console' should appear saying '1 seed(s) available', then, you will be back into the main menu. Select a fresh new save slot (I'm not sure if you can change Link's name but leave it by default just in case) and after you started a new save, go to the Archipelago Launcher and you should see a new 'Twilight Princess Client"', open it, in the command bar at the bottom type:\n'/name [SlotName]' but replace [SlotName] by the name that was assigned to your yaml.\nOnce your name have been written, you can now connect to the server through the client (/connect archipelago.gg:[Port]).",
+"Once everything is set up, launch 'Dolphin.exe' and start your Twilight Princess ROM (.iso file).\n\nIn the save selection screen, there should be a new 'REM Loader' save in the 3rd slot. Start the save and a 'console' should appear saying '1 seed(s) available', then, you will be back into the main menu. Select a fresh new save slot (I'm not sure if you can change Link's name but leave it by default just in case) and after you started a new save, go to the Archipelago Launcher and you should see a new 'Twilight Princess Client', open it, in the command bar at the bottom type:\n'/name [SlotName]' but replace [SlotName] by the name that was assigned to your yaml.\nOnce your name have been written, you can now connect to the server through the client (/connect archipelago.gg:[Port]).",
 "kill",
 "[HEADER] PopTracker Infos",
 "kill",
