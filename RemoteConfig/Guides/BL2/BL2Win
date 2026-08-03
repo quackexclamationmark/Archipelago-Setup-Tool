@@ -6,7 +6,7 @@
 "kill",
 "[HEADER] Installation Infos",
 "kill",
-"When you click 'START SETUP' in the 'SETUP' tab, BL2 Mod Manager will be installed into the game's core folder (sdk_mods folder and DLLs inside Binaries\\Win32). Required mod files 'BouncyLootGod.sdkmod' and 'coroutines.sdkmod' will be installed inside the sdk_mods directory.",
+"When you click 'START SETUP' in the 'SETUP' tab, borderlands2.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. BL2 Mod Manager will be installed into the game's core folder (sdk_mods folder and DLLs inside Binaries\\Win32). Required mod files 'BouncyLootGod.sdkmod' and 'coroutines.sdkmod' will be installed inside the sdk_mods directory.",
 "kill",
 "[HEADER] apworld / yaml Infos",
 "kill",
