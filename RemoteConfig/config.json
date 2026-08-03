@@ -460,6 +460,10 @@
     "version": "5a6b930"
     },
 
+    "supermarketsimApworld": "https://github.com/Lemix028/SupermarketSimulator-Archipelago/releases/download/v0.3.0/supermarket_simulator.apworld",
+    "supermarketsimAP": "https://github.com/Lemix028/SupermarketSimulator-Archipelago/releases/download/v0.3.0/SupermarketArchipelago_Client_v0.3.0.zip",
+    "supermarketsimBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
+
     "ssbbMinus": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Minus%20Launcher.elf",
     "ssbbApworld": "https://github.com/kenniky/ArchipelagoSSE/releases/download/v0.2.6/ssbb_sse.apworld",
     "ssbbDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
