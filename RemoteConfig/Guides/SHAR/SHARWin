@@ -6,7 +6,7 @@
 "kill",
 "[HEADER] Installation Infos",
 "kill",
-"Requires PC port of the game. Can be downloaded via the 'Game' tab if you don't already have the game.\n\nWhen you click 'START SETUP' in the 'SETUP' tab, simpsonshitnrun.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. SHAR Mod Launcher into the 'Documents' directory.\nThe required AP Mod file "SHARAP.lmlm" will be installed inside Documents\\My Games\\Lucas' Simpsons Hit & Run Mod Launcher\\Mods\\SHARAP.lmlm.\nThe Archipelago Randomizer folder (containing the app used for connecting to the AP servers) will be installed inside the game's folder.",
+"Requires PC port of the game. Can be downloaded via the 'Game' tab if you don't already have the game.\n\nWhen you click 'START SETUP' in the 'SETUP' tab, simpsonshitnrun.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. SHAR Mod Launcher into the 'Documents' directory.\nThe required AP Mod file 'SHARAP.lmlm' will be installed inside Documents\\My Games\\Lucas' Simpsons Hit & Run Mod Launcher\\Mods\\SHARAP.lmlm.\nThe Archipelago Randomizer folder (containing the app used for connecting to the AP servers) will be installed inside the game's folder.",
 "kill",
 "[HEADER] apworld / yaml Infos",
 "kill",
