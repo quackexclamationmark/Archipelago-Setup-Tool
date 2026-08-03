@@ -15,22 +15,7 @@
 "kill",
 "[HEADER] Connection Infos",
 "kill",
-"I WOULD HIGHLY RECOMMEND USING THE START AFTER SETUP TOGGLE BUT IF YOU DON'T, YOU CAN FOLLOW THE FULL GUIDE BELOW.
-
-Once everything is set up, start the game (Refunct\Binaries\Win32\Refunct-Win32-Shipping.exe) and then, start 'Refunct\practice-windows.exe'.
-If you didn't setup with launch after setup, if the game closes after launching refunct-tas.exe, simply restart the game and then restart the AP Mod executable.
-
-Once you're in game with the mod loaded, press 'm' and and window should appear in the top-left corner of the screen, click 'Connect'.
-
-In the 'Server' field, enter archipelago.gg.
-
-In 'Port' enter the room's port. This is a 5-digit number that you can find on the website after creating a new room.
-
-In 'Slot', enter the name assigned to your yaml file.
-
-The 'Password' field is optional. If the host did not set one, leave it blank.
-
-Finally, click 'Connect' and once you're connect, you can start playing!",
+"I WOULD HIGHLY RECOMMEND USING THE START AFTER SETUP TOGGLE BUT IF YOU DON'T, YOU CAN FOLLOW THE FULL GUIDE BELOW.\n\nOnce everything is set up, start the game (Refunct\Binaries\Win32\Refunct-Win32-Shipping.exe) and then, start 'Refunct\practice-windows.exe'.\nIf you didn't setup with launch after setup, if the game closes after launching refunct-tas.exe, simply restart the game and then restart the AP Mod executable.\n\nOnce you're in game with the mod loaded, press 'm' and and window should appear in the top-left corner of the screen, click 'Connect'.\n\nIn the 'Server' field, enter archipelago.gg.\n\nIn 'Port' enter the room's port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Slot', enter the name assigned to your yaml file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect' and once you're connect, you can start playing!",
 "kill",
 "[HEADER] Revert Infos",
 "kill",
