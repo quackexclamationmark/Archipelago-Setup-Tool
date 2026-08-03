@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• BepInEx (+ changelog.txt, doorstop_config.ini & winhttp.dll)\n• UGG-Archipelago (APProxy.dll, APProxy.exe, APProxy.runtimeconfig.json & GooseGameAP.dll)\n• untitled_goose_game.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, untitled_goose_game.apworld will be installed and moved into the 'custom_worlds' folder within the Archipelago Launcher directory. BepInEx will then be downloaded into the UGG game directory, along with the UGG-Archipelago folder, which will be placed in BepInEx\\plugins.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"UGG is not a core Archipelago game, it needs a custom world file (untitled_goose_game.apworld). When the apworld is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, you should be able to press 'F1' when inside the game to open a new 'Archipelago' window.\n\nIn the 'Server' field, enter archipelago.gg. In front of it there is a separated text field, enter the room’s 5-digit port number. You can find this number on the website after creating a new room.\n\nIn 'Slot', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect' and then, you can start a new run!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"You have 2 revert options, both can't be enabled at the same time.\n\nIf you use the 'Clear AP Mods' option it will only delete the mods that are required for UGG Archipelago.\n\nIf you use the 'Full Clear BepInEx' option it will delete everything related to BepInEx and mods. If other mods are detected an additionnal confirmation will appear.",
+"clear"
+
+]
