@@ -1,0 +1,26 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• BizHawk Emulator\n• pokemon_platinum.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, pokemon_platinum.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. BizHawk will be downloaded inside the 'Documents' directory.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Pokémon Platinum is not a core Archipelago game, it needs a custom world file. When 'pokemon_platinum.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, the host will need to go to the room you'll be using for your Archipelago session on the Archipelago website. Once you have the room, you'll need click the 'Download Patch File' next to your name.\n\nAfter it is downloaded, open the Archipelago Launcher and open 'Open Patch'. It will ask you to select your patch file that was just downloaded (.applatinum), then, it will ask for your ROM file and finally, you'll need to select 'EmuHawk.exe' (not sure tho). It will automatically open the randomized ROM and the Text Client, once the emulation has started correctly, you can connect on the Client.\n\nIf you have to disconnect at some point and have to reconnect, follow this guide:",
+"kill",
+"[LINK] HERE",
+"kill",
+"[HEADER] PopTracker Infos",
+"kill",
+"Some games have a PopTracker integration for Archipelago which allows you to track all possible Locations, Items, Upgrades, Zones, Hints and more depending on the game.\n\nFor the setup there are 3 different cases:\n\n\t• If the selected directory does not contain a PopTracker folder (or any similarly named folder), a new 'poptracker' folder will be created and the pack will be downloaded to poptracker\\packs.\n\n\t• If the selected directory already contains a folder with 'PopTracker' in its name, the installer will look for a poptracker.exe file. If one is found, the pack will be downloaded to its packs folder. If no poptracker.exe is found, the folder will be renamed to 'poptracker' and any missing files or folders will be created.\n\n\t• If the selected directory is already a PopTracker folder (for example: C:\\Users\\magni\\Documents\\poptracker), its contents will be validated. If everything is present, the pack will simply be downloaded to poptracker\\packs. Otherwise, the folder will be repaired before the pack is installed.",
+"clear"
+
+]
