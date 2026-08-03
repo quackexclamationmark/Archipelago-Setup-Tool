@@ -276,8 +276,8 @@
 
     "oc2AP": "https://github.com/toasterparty/oc2-modding/releases/download/v1.9.9/oc2-modding-v1.9.9.zip",
 
-    "oniApworld": "https://github.com/ShadowKitty42/ONI-Archipelago/releases/download/v0.99/oni.apworld",
-    "oniAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/ArchipelagoNotIncluded.zip",
+    "oniApworld": "https://github.com/ShadowKitty42/ONI-Archipelago/releases/download/v0.9.10/oni.apworld",
+    "oniAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/ArchipelagoNotIncluded__0.9.10.zip",
 
     "pmttydApworld": "https://github.com/jamesbrq/ArchipelagoTTYD/releases/download/v0.11.1/ttyd.apworld",
     "pmttydDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
@@ -421,8 +421,8 @@
     "slimerancherApworld": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.2/slime_rancher.apworld",
     "slimerancherMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.1/MelonLoader.x64.zip",
 
-    "slimerancher2AP": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.12.1/SlimeRancher2-AP.zip",
-    "slimerancher2Apworld": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.12.1/slime_rancher_2.apworld",
+    "slimerancher2AP": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.12.2/SlimeRancher2-AP.zip",
+    "slimerancher2Apworld": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.12.2/slime_rancher_2.apworld",
     "slimerancher2BepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
     "slimerancher2Interop": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/interop.zip",
 
