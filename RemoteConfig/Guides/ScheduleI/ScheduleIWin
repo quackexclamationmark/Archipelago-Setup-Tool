@@ -6,7 +6,7 @@
 "kill",
 "[HEADER] Installation Infos",
 "kill",
-"When you click 'START SETUP' in the "SETUP' tab, Schedule_I.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. MelonLoader will then be installed into the game's core folder. Both required dlls will be installed inside the Schedule I\\Mods directory.\nOnly the Mods folder will be created automatically, the other ones will be created after starting the game.",
+"When you click 'START SETUP' in the 'SETUP' tab, Schedule_I.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. MelonLoader will then be installed into the game's core folder. Both required dlls will be installed inside the Schedule I\\Mods directory.\nOnly the Mods folder will be created automatically, the other ones will be created after starting the game.",
 "kill",
 "[HEADER] apworld / yaml Infos",
 "kill",
