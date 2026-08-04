@@ -60,7 +60,6 @@ public class Overcooked2ManualDL : MonoBehaviour
 
     void Start()
     {
-        // Platform buttons
         if (steamButton != null)
             steamButton.onClick.AddListener(OnSteamButtonClicked);
         if (epicButton != null)
@@ -84,17 +83,15 @@ public class Overcooked2ManualDL : MonoBehaviour
         if (cancelButton != null)
             cancelButton.onClick.AddListener(OnCancel);
 
-        // Defaults for toggles
         if (installPackageToggle != null)
             installPackageToggle.isOn = true;
 
         if (installModdingToggle != null)
-            installModdingToggle.isOn = false;
+            installModdingToggle.isOn = true;
 
         if (launchGameToggle != null)
             launchGameToggle.isOn = false;
 
-        // Wire toggle events
         if (installPackageToggle != null)
             installPackageToggle.onValueChanged.AddListener((v) => UpdateTogglesInteractable());
 

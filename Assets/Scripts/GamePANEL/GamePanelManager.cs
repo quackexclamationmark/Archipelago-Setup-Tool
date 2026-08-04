@@ -104,6 +104,9 @@ public class GamePanelManager : MonoBehaviour
     public GameObject pokemonplatinumPanel;
     public GameObject werecleanerPanel;
     public GameObject drdrPanel;
+    public GameObject pokemonbwPanel;
+    public GameObject borderlands2Panel;
+    public GameObject supermarketsimPanel;
 
     void Start()
     {
@@ -419,6 +422,15 @@ public class GamePanelManager : MonoBehaviour
             case "DeadRisingDeluxeRemaster":
                 drdrPanel.SetActive(true);
                 break;
+            case "PokémonBlackAndWhite":
+                pokemonbwPanel.SetActive(true);
+                break;
+            case "Borderlands2":
+                borderlands2Panel.SetActive(true);
+                break;
+            case "SupermarketSimulator":
+                supermarketsimPanel.SetActive(true);
+                break;
         }
     }
 
@@ -525,5 +537,8 @@ public class GamePanelManager : MonoBehaviour
         if (pokemonplatinumPanel != null) pokemonplatinumPanel.SetActive(false);
         if (werecleanerPanel != null) werecleanerPanel.SetActive(false);
         if (drdrPanel != null) drdrPanel.SetActive(false);
+        if (pokemonbwPanel != null) pokemonbwPanel.SetActive(false);
+        if (borderlands2Panel != null) borderlands2Panel.SetActive(false);
+        if (supermarketsimPanel != null) supermarketsimPanel.SetActive(false);
     }
 }

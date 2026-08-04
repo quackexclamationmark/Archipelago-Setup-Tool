@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class ScrollToTop : MonoBehaviour
 {
@@ -15,10 +16,16 @@ public class ScrollToTop : MonoBehaviour
         StartCoroutine(ResetScroll());
     }
 
-    System.Collections.IEnumerator ResetScroll()
+    private IEnumerator ResetScroll()
     {
         yield return null;
         Canvas.ForceUpdateCanvases();
-        scrollRect.verticalNormalizedPosition = 1f;
+        if (scrollRect != null)
+            scrollRect.verticalNormalizedPosition = 1f;
+    }
+
+    public void ScrollToTopNow()
+    {
+        StartCoroutine(ResetScroll());
     }
 }
