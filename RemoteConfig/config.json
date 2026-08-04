@@ -10,7 +10,8 @@
         "Program Files (x86)\\steamapps\\common",
         "Program Files\\steamapps\\common",
         "Programs\\steamapps\\common",
-        "Games\\steamapps\\common"
+        "Games\\steamapps\\common",
+        "SteamLibrarySSD\\steamapps\\common"
     ],
 
     "epicSearchPaths": [
