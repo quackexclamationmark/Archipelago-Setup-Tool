@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• OC2 Modding folder (contains Archipelago Mod)",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, the OC2 Modding folder used for the Archipelago will be installed into the Overcooked 2 directory. If the 'Launch Installation after setup' toggle is enabled, 'oc2-modding-install.bat' will start after setup, it will install all required files into the game's folder.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Overcooked! 2 is an Archipelago core game, meaning it does not require a custom world file (.apworld).\nBecause of this, aside from installing the mods, all you need to do is create your YAML file using the 'Options Creator' in the AP Launcher and send it to the person hosting the AP multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"If you didn't enable 'Launch Installation after setup' for the setup, before moving on to the next step, go to your Overcooked! 2 folder and run 'oc2-modding-install.bat'.\n\nOnce everything is set up, after starting the game, continue to the main menu and at some point, an Archipelago connection window should appear in the top-left corner of the game (you can also click the 'Show' button).\n\nEnter archipelago.gg:XXXXX in the 'Host' field, where XXXXX is the room’s port. You can find this number on the website after creating a new room.\n\nIn 'Player Name', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect' and you can start playing!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will run 'oc2-modding-uninstall.bat' which will uninstall all modded files. Then it will delete oc2-modding-uninstall.bat and the modding folder if present.",
+"clear"
+
+]

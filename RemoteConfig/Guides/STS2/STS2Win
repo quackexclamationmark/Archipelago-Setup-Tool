@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• Archipelago Mod folder (+ all required files inside)",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you start the mods setup, sts2.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. The Archipelago mod folder will be downloaded into the mods folder inside Slay The Spire 2's core directory. If this folder doesn't exist, it will be created automatically.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"STS 2 is not a core Archipelago game, it needs a custom world file. When 'sts2.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, a new 'Archipelago' button should appear in the main menu.\n\nIn 'Slot Name', enter the name assigned to your YAML file.\n\nIn the 'Server URL' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect' and start a new run!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will simply delete the Archipelago mod folder (with the toggle enabled).",
+"clear"
+
+]

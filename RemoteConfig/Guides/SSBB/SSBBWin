@@ -1,0 +1,22 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• Minus Launcher.elf\n• Dolphin Emulator (if toggled)\n• ssbb_sse.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, ssbb_sse.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. If you don't already have Dolphin Emulator, you can enable its toggle and it will be downloaded in your 'Documents' directory. 'Minus Launcher.elf' is required and will be downloaded inside the same directory as your ROM.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"SSBB SSE is not a core Archipelago game, it needs a custom world file. When 'ssbb_sse.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"REMEMBER TO USE THE 'PATCH DOLPHIN' BUTTON IN THE SETUP TAB AFTER SETTING UP!!\n\nThe setup is way too long to type it so I made a vid (please follow every single step, just one oversight and it won't work):",
+"kill",
+"[LINK] ENGLISH GUIDE\n\nFRENCH GUIDE",
+"clear"
+
+]

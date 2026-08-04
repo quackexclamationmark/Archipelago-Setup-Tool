@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• BepInEx (+ .doorstop_version, doorstop_config.ini & winhttp.dll)\n• TRPG-Archipelago folder (Archipelago Mod)\n• ModLocalizer.dll",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, BepInEx will be installed into the game's core folder. ModLocalizer.dll and the AP Mod folder will be installed inside the BepInEx\\plugins directory.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Bomb Rush Cyberfunk is an Archipelago core game, meaning it does not require a custom world file (.apworld).\nBecause of this, aside from installing the mods, all you need to do is create your YAML file using the 'Options Creator' in the AP Launcher and send it to the person hosting the AP multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, click 'Start Game', click the Archipelago icon next to an empty save slot, after doing so, a new window should open.\n\nIn 'name', enter the name assigned to your YAML file.\n\nIn the 'address' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nThe 'password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click the little check icon to connect and then you can start playing!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"You have 2 revert options, both can't be enabled at the same time.\n\nIf you use the 'Clear AP Mods' option it will only delete the mods that are required for BRC Archipelago.\n\nIf you use the 'Full Clear BepInEx' option it will delete everything related to BepInEx and mods. If other mods are detected an additionnal confirmation will appear.",
+"clear"
+
+]

@@ -1,0 +1,28 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• Archipelago Mod folder and its dependencies\n• Archipelago Map Mod folder and its dependencies (optional)\n• A LOT OF DLLs",
+"kill",
+"[HEADER] Downpatch Infos",
+"kill",
+"YOU NEED TO DOWNPATCH TO PLAY WITH MODS!!! TO DO SO, RIGHT CLICK HOLLOW KNIGHT IN THE STEAM LIBRARY, PROPERTIES, GO TO VERSIONS AND BETAS AND FINALLY, SELECT '1.5.78.11833'",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"Uses a Lumafly preloaded setup folder, thank you Lumafly.\n\nWhen you click 'START SETUP' in the 'SETUP' tab, the Archipelago Mod folder, the Archipelago Map Mod (if enabled) and all their dependencies mods and DLLs will be installed into Hollow Knight\\hollow_knight_Data\\Managed.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Hollow Knight is an Archipelago core game, meaning it does not require a custom world file (.apworld).\nBecause of this, aside from installing the mods, all you need to do is create your YAML file using the 'Options Creator' in the AP Launcher and send it to the person hosting the AP multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once the Archipelago is set up and that you downpatched, click 'START GAME', select a fresh new save and click the Archipelago option.\n\nIn the 'Server URL' field, enter archipelago.gg.\n\nIn 'Server Port' enter the room's port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Slot Name', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'START' and you can start playing!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"You have 2 revert options, both can't be enabled at the same time.\n\nIf you use the 'Clear AP Mods' option it will only delete the mods that are required for Hollow Knight Archipelago.\n\nIf you use the 'Full Clear' option it will delete everything related to Lumafly setup and mods. If other mods are detected an additionnal confirmation will appear.",
+"clear"
+
+]

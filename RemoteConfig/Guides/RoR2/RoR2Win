@@ -1,0 +1,28 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"WAY TOO MUCH SHIT DOWNLOADED, CHECK THE VERSION FILE (.TXT) INSIDE YOUR GAME'S FOLDER AFTER SETUP IF YOU ARE INTERESTED",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, BepInEx will be downloaded into the game's core folder. All required mods will be installed inside the BepInEx\\plugins, patchers & config directories.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Risk Of Rain 2 is an Archipelago core game, meaning it does not require a custom world file (.apworld).\nBecause of this, aside from installing the mods, all you need to do is create your YAML file using the 'Options Creator' in the AP Launcher and send it to the person hosting the AP multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, click the 'Solo' or the 'Multiplayer' button and you should see a new window in the middle.\n\nIn 'Archipelago Slot Name', enter the name assigned to your YAML file.\n\nThe 'Archipelago Server Password' field is optional. If the host did not set one, leave it blank.\n\nIn the 'Archipelago Server URL' field, enter 'archipelago.gg'.\n\nIn 'Archipelago Server Port' enter the room port. This is a 5-digit number that you can find on the website after creating a new room.\n\nFinally, click 'Connect To AP' and then, you can start a new run!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"You have 2 revert options, both can't be enabled at the same time.\n\nIf you use the 'Clear AP Mods' option it will only delete the mods that are required for RoR 2 Archipelago.\n\nIf you use the 'Full Clear BepInEx' option it will delete everything related to BepInEx and mods. If other mods are detected an additionnal confirmation will appear.",
+"kill",
+"[HEADER] PopTracker Infos",
+"kill",
+"Some games have a PopTracker integration for Archipelago which allows you to track all possible Locations, Items, Upgrades, Zones, Hints and more depending on the game.\n\nFor the setup there are 3 different cases:\n\n\t• If the selected directory does not contain a PopTracker folder (or any similarly named folder), a new 'poptracker' folder will be created and the pack will be downloaded to poptracker\\packs.\n\n\t• If the selected directory already contains a folder with 'PopTracker' in its name, the installer will look for a poptracker.exe file. If one is found, the pack will be downloaded to its packs folder. If no poptracker.exe is found, the folder will be renamed to 'poptracker' and any missing files or folders will be created.\n\n\t• If the selected directory is already a PopTracker folder (for example: C:\\Users\\magni\\Documents\\poptracker), its contents will be validated. If everything is present, the pack will simply be downloaded to poptracker\\packs. Otherwise, the folder will be repaired before the pack is installed.",
+"clear"
+
+]

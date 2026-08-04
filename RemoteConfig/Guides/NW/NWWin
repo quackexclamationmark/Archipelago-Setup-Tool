@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• MelonLoader (+ all its folders & version.dll, dobby.dll & NOTICE.txt)\n• NWArchipelago.dll & Archipelago.MultiClient.Net.dll (Archipelago Mod)\n• MelonPrefManager.Mono.dll\n• NeonLite.dll\n• UniverseLib.Mono.dll & UniverseLib.Mono.xml\n• neonwhite.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, neonwhite.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. MelonLoader will then be installed into the game's core folder. The 6 required files will be installed inside the Neon White\\Mods directory.\nOnly the Mods folder will be created automatically, the other ones will be created after starting the game.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Neon White is not a core Archipelago game, it needs a custom world file. When 'neonwhite.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, press 'F5' in the main menu, a new window should appear. Go to the 'Archipelago/Connection' tab.\n\nIn the 'Server IP/Address' field, enter 'archipelago.gg'.\n\nIn the 'Server Port' field, enter the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Player/Slot Name', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nClick 'Save Preferences' on top of the window, go to the 'Archipelago' tab and enable Archipelago by clicking the box and save again. Finally, restart the game and then you should be able to connect by pressing the 1st button on the main menu.",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"You have 2 revert options, both can't be enabled at the same time.\n\nIf you use the 'Clear AP Mods' option it will only delete the mods that are required for Neon White Archipelago.\n\nIf you use the 'Full Clear MelonLoader' option it will delete everything related to MelonLoader and mods. If other mods are detected an additionnal confirmation will appear.",
+"clear"
+
+]

@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• BizHawk Emulator\n• pokemon_frlg.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, pokemon_frlg.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. BizHawk will be downloaded inside the 'Documents' directory.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Pokémon FireRed and LeafGreen is not a core Archipelago game, it needs a custom world file. When 'pokemon_frlg.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.\n\nMake sure to select the right version of the game (FireRed or LeafGreen) when making your YAML.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, the host will need to go to the room you'll be using for your Archipelago session on the Archipelago website. Once you have the room, you'll need click the 'Download Patch File' next to your name.\n\nAfter it is downloaded, open the Archipelago Launcher and open 'Open Patch'. It will ask you to select your patch file (.apleafgreen or .apfirered), then, it will ask for your ROM file and finally, you'll need to select 'EmuHawk.exe'. It will automatically open the randomized ROM and the Text Client, once the emulation has started correctly, you can connect on the Client.\n\nOnce in game, you should be able to see an 'AP' save, simply launch it and you should be good to go!\n\nIN CASE YOU NEED TO RECONNECT:\n\nIf you need to reconnect, open 'EmuHawk.exe' and use it to start your randomized Black or White ROM (located in the same directory as the patch file). Once the ROM's loaded, go to Tools > Lua Console and if the script not already in the list, click the 'Open Script' button and select 'connector_bizhawk_generic.lua' which can be found inside the Archipelago Launcher's directory (usually 'C:\ProgramData\Archipelago\data\lua\connector_bizhawk_generic.lua').\nFinally once the script has been injected, go to the Archipelago Launcher and open 'BizHawk Client', then connect.",
+"kill",
+"[HEADER] PopTracker Infos",
+"kill",
+"Some games have a PopTracker integration for Archipelago which allows you to track all possible Locations, Items, Upgrades, Zones, Hints and more depending on the game.\n\nFor the setup there are 3 different cases:\n\n\t• If the selected directory does not contain a PopTracker folder (or any similarly named folder), a new 'poptracker' folder will be created and the pack will be downloaded to poptracker\\packs.\n\n\t• If the selected directory already contains a folder with 'PopTracker' in its name, the installer will look for a poptracker.exe file. If one is found, the pack will be downloaded to its packs folder. If no poptracker.exe is found, the folder will be renamed to 'poptracker' and any missing files or folders will be created.\n\n\t• If the selected directory is already a PopTracker folder (for example: C:\\Users\\magni\\Documents\\poptracker), its contents will be validated. If everything is present, the pack will simply be downloaded to poptracker\\packs. Otherwise, the folder will be repaired before the pack is installed.",
+"clear"
+
+]

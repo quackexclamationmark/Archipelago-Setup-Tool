@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• UE4SS (+ all required files inside)\n• Archipelago Mod folder\n• hi_fi_rush.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you start the mods setup, the UE4SS folder will be downloaded inside HiFi RUSH's core directory. Then, the AP Mod folder will be downloaded inside the Mods folder.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Hi-Fi RUSH is not a core Archipelago game, it needs a custom world file (hi_fi_rush.apworld). When 'hi_fi_rush.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, start a NEW 'Story' mode save.\n\nOnce in-game, press ESCAPE, then, F10 and type 'connect archipelago.gg:XXXXX [slotname]'\n\nXXXXX is the room’s port. You can find this number on the website after creating a new room.\n\n'[slotname]' is the name assigned to your yaml file.\n\nFinally, press enter and you should see a few messages appear on the right-side of your screen saying that you're connected or, that there was an error.",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"You have 2 revert options, both can't be enabled at the same time.\n\nIf you use the 'Clear AP Mods' option it will only delete the mods that are required for Hi-Fi RUSH Archipelago.\n\nIf you use the 'Full Clear UE4SS' option it will delete everything related to UE4SS and mods. If other mods are detected an additionnal confirmation will appear.",
+"clear"
+
+]

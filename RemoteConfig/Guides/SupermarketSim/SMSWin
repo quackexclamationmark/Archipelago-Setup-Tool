@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• BepInEx & dotnet (.doorstop_version, changelog.txt, doorstop_config.ini & winhttp.dll)\n• SupermarketArchipelago folder (Archipelago Mod)\n• supermarket_simulator.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, supermarket_simulator.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. BepInEx will be installed inside the game's directory. Finally, the Archipelago mod folder will be downloaded inside 'BepInEx\\plugins'.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Supermarket Simulator is not a core Archipelago game, it needs a custom world file. When 'supermarket_simulator.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, a new 'Connect AP Server' button should appear on the middle-right side of the main menu.\n\nIn the 'Server Address' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Slot Name', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect & Save' and start a new run!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"You have 2 revert options, both can't be enabled at the same time.\n\nIf you use the 'Clear AP Mods' option it will only delete the mods that are required for SMS Archipelago.\n\nIf you use the 'Full Clear BepInEx' option it will delete everything related to BepInEx and mods. If other mods are detected an additionnal confirmation will appear.",
+"clear"
+
+]

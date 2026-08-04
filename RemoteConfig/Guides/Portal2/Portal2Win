@@ -1,0 +1,28 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• Portal2ArchipelagoMod (Archipelago Mod)\n• portal2.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, portal2.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. The Portal2ArchipelagoMod folder will be installed into steamapps\\sourcemods. After Steam restarted, there should be a new game in the Library called 'Portal 2 Archipelago Mod'.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Portal 2 is not a core Archipelago game, it needs a custom world file. When 'portal2.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, (re)start the Archipelago Launcher and look for the 'Portal 2 Client'.\n\nOnce the Portal 2 Text Client is open, in the top text field type 'archipelago:XXXXX' where XXXXX is the port, you can find this 5-digit number on the Archipelago website after opening a new room.\n\nFinally, click 'Connect' and then go back to the game and you can start playing!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will simply remove the AP Mod folder from steamapps\\sourcemods.",
+"kill",
+"[HEADER] PopTracker Infos",
+"kill",
+"Some games have a PopTracker integration for Archipelago which allows you to track all possible Locations, Items, Upgrades, Zones, Hints and more depending on the game.\n\nFor the setup there are 3 different cases:\n\n\t• If the selected directory does not contain a PopTracker folder (or any similarly named folder), a new 'poptracker' folder will be created and the pack will be downloaded to poptracker\\packs.\n\n\t• If the selected directory already contains a folder with 'PopTracker' in its name, the installer will look for a poptracker.exe file. If one is found, the pack will be downloaded to its packs folder. If no poptracker.exe is found, the folder will be renamed to 'poptracker' and any missing files or folders will be created.\n\n\t• If the selected directory is already a PopTracker folder (for example: C:\\Users\\magni\\Documents\\poptracker), its contents will be validated. If everything is present, the pack will simply be downloaded to poptracker\\packs. Otherwise, the folder will be repaired before the pack is installed.",
+"clear"
+
+]

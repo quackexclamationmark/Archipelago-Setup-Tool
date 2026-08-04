@@ -1,0 +1,25 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• Twilight Princess Randomizer Loader save file\n• Twilight Princess Archipelago save file\n• Twilight Princess Archipelago seed save file\n• Dolphin Emulator (if you don't already have it you can toggle)\n• Twilight Princess.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you start the mods setup, 'Twilight Princess.apworld', all the Twilight Princess GC save files and Dolphin Emulator will be downloaded (if toggled).\n\n'Dolphin' can be found in 'Documents\\dolphin.7z'
+All the Twilight Princess save files can be found in 'AppData\\Roaming\\Dolphin Emulator\\GC\\USA\\Card A'.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Twilight Princess is not a core Archipelago game, it needs a custom world file (Twilight Princess.apworld). When the apworld is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, launch 'Dolphin.exe' and start your Twilight Princess ROM (.iso file).\n\nIn the save selection screen, there should be a new 'REM Loader' save in the 3rd slot. Start the save and a 'console' should appear saying '1 seed(s) available', then, you will be back into the main menu. Select a fresh new save slot (I'm not sure if you can change Link's name but leave it by default just in case) and after you started a new save, go to the Archipelago Launcher and you should see a new 'Twilight Princess Client', open it, in the command bar at the bottom type:\n'/name [SlotName]' but replace [SlotName] by the name that was assigned to your yaml.\nOnce your name have been written, you can now connect to the server through the client (/connect archipelago.gg:[Port]).",
+"kill",
+"[HEADER] PopTracker Infos",
+"kill",
+"Some games have a PopTracker integration for Archipelago which allows you to track all possible Locations, Items, Upgrades, Zones, Hints and more depending on the game.\n\nFor the setup there are 3 different cases:\n\n\t• If the selected directory does not contain a PopTracker folder (or any similarly named folder), a new 'poptracker' folder will be created and the pack will be downloaded to poptracker\\packs.\n\n\t• If the selected directory already contains a folder with 'PopTracker' in its name, the installer will look for a poptracker.exe file. If one is found, the pack will be downloaded to its packs folder. If no poptracker.exe is found, the folder will be renamed to 'poptracker' and any missing files or folders will be created.\n\n\t• If the selected directory is already a PopTracker folder (for example: C:\\Users\\magni\\Documents\\poptracker), its contents will be validated. If everything is present, the pack will simply be downloaded to poptracker\\packs. Otherwise, the folder will be repaired before the pack is installed.",
+"clear"
+
+]

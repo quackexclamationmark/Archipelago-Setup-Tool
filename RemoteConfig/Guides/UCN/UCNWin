@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• Copy of the game's executable file (Ultimate Custom Night.exe)\n• ucn.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, ucn.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. A copy of the game's .exe file (Ultimate Custom Night.exe) will be created inside a new 'UCN' folder in the Archipelago directory (for that you will need to download UCN from Steam first).",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"UCN is not a core Archipelago game, it needs a custom world file. When 'ucn.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once you have used the setup, a new 'FNAF UCN Client' will be created inside the Archipelago Launcher and open this client.\n\nOn the client, in the bottom input field, type '/patch'. Once the command is done, a new patched UCN .exe will be created next to the one that was just copied by the setup (should be at: 'C:\\ProgramData\\Archipelago\\UCN\\UCN Archipelago.exe').\n\nOn the client again, in the top input field this time, type your multiworld's server address and press 'Connect' (see the 'HOSTING' tab if you want infos about generating a multiworld). When it asks you to enter your slot name, type the name attached to your YAML file, if an error message appears, simply open the patched version of the game and it should connect you and give you your starting character (UCN Archipelago.exe).",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will delete the 'UCN' folder from the Archipelago directory.",
+"clear"
+
+]

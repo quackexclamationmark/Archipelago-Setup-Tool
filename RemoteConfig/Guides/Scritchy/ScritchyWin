@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• BepInEx & dotnet (+ .doorstop_version, doorstop_config.ini, changelog.txt & winhttp.dll)\n• ScritchyScratchyAP.dll, Archipelago.MultiClient.Net.dll (+a few dependency DLLs) (Archipelago Mod)\n• scritchy_scratchy.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, scritchy_scratchy.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. BepInEx will then be downloaded into the Scritchy Scratchy core files, along with the AP files, which will be placed in BepInEx\\plugins.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Scritchy Scratchy is not a core Archipelago game, it needs a custom world file. When 'scritchy_scratchy.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, a new AP Connection window should appear in the main menu.\n\nIn the 1st field ('Host'), enter 'archipelago.gg'.\n\nIn the 2nd field ('Port'), enter the room's port, this is a 5-digit number that can be found when creating a new room on the Archipelago website.\n\nIn the 3nd field ('Slot Name'), enter the name assigned to your YAML file.\n\nThe 4th field, the Password, is optional. If the host did not set a password, leave it blank.\n\nFinally, click 'Connect' and then you can start playing!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"You have 2 revert options, both can't be enabled at the same time.\n\nIf you use the 'Clear AP Mods' option it will only delete the mods that are required for Scritchy Scratchy Archipelago.\n\nIf you use the 'Full Clear BepInEx' option it will delete everything related to BepInEx and mods. If other mods are detected an additionnal confirmation will appear.",
+"clear"
+
+]
