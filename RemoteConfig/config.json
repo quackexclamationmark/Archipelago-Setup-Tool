@@ -81,6 +81,7 @@
     "btd6PopTracker": "https://github.com/Fairweather-Furry/btd6_fair/releases/download/v0.2.0/btd6_fair.zip",
     "pokemonsnapPopTracker": "https://github.com/lighting8282/Pokemon-Snap-AP-Pop-Tracker/releases/download/v1.3.0.2/SnapTracker-1.3.0.2.zip",
     "portal2PopTracker": "https://github.com/LimeDreaming/Archipelago-Portal2-AP-Tracker/archive/refs/heads/main.zip",
+    "contentwarningPopTracker": "https://github.com/Jakeodude/cw-poptracker/releases/download/v1.0.2/content_warning_poptracker.zip",
     
 
     "adofaiPathName": "A Dance of Fire and Ice",
@@ -286,7 +287,7 @@
     "oniApworld": "https://github.com/ShadowKitty42/ONI-Archipelago/releases/download/v0.9.10/oni.apworld",
     "oniAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/ArchipelagoNotIncluded__0.9.10.zip",
 
-    "pmttydApworld": "https://github.com/jamesbrq/ArchipelagoTTYD/releases/download/v0.11.1/ttyd.apworld",
+    "pmttydApworld": "https://github.com/jamesbrq/ArchipelagoTTYD/releases/download/v0.12.0/ttyd.apworld",
     "pmttydDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "peakAP": "https://github.com/Mickemoose/peak-archipelago/releases/download/0.6.0/peakpelago_0.6.0.zip",
@@ -503,8 +504,8 @@
 
     "ucnApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/ucn.apworld",
 
-    "ultrakillAP": "https://github.com/TRPG0/ArchipelagoULTRAKILL/releases/download/3.5.4/ArchipelagoULTRAKILL.3.5.4.zip",
-    "ultrakillApworld": "https://github.com/TRPG0/ArchipelagoULTRAKILL/releases/download/3.5.4/ultrakill.apworld",
+    "ultrakillAP": "https://github.com/TRPG0/ArchipelagoULTRAKILL/releases/download/3.5.5/ArchipelagoULTRAKILL.3.5.5.zip",
+    "ultrakillApworld": "https://github.com/TRPG0/ArchipelagoULTRAKILL/releases/download/3.5.5/ultrakill.apworld",
     "ultrakillBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "ultrakillPluginConfigurator": "https://thunderstore.io/package/download/EternalsTeam/PluginConfigurator/1.10.2/",
 
