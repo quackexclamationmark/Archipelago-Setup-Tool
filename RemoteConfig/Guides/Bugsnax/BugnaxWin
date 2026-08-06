@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• BugsnaxMod.zip (Archipelago Mod)\n• bugsnax.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, bugsnax.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. The mod's .zip folder will be placed inside the game's core directory (no need to extract).",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Bugsnax is not a core Archipelago game, it needs a custom world file. When 'bugsnax.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, (re)open the Archipelago Launcher, start the 'Bugsnax Client' and connect to it as you normally would with any client.\n\nFinally, launch the game and start a fresh new save ON THE 2ND SLOT, THE OTHER SLOTS WON'T WORK.\n\nUpon setup, if a save was detected in the 2nd save slot, it will be saved inside a new 'SaveCopy' folder in the game's directory.",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will simply delete the mods' .zip folder (and restore the vanilla game save in the 2nd slot if found).",
+"clear"
+
+]
