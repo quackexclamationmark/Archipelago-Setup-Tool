@@ -208,7 +208,9 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Lethal Company", new List<string> { "Lethal", "Company", "LC" }));
         games.Add(CreateGame("Librarian Tidy Up the Arcane Library", new List<string> { "Librarian", "Tidy", "Up", "Arcane", "Library", "LTUTAL" }));
         games.Add(CreateGame("Luigi's Mansion", new List<string> { "Luigi", "Luigi's", "Mansion", "LM", "Mario" }));
-        games.Add(CreateGame("Mario Kart Wii", new List<string> { "Mario", "Kart", "Wii", "MK", "MKWii", "M K Wii", "M KWii" }));
+        games.Add(CreateGame("Mario Kart Double Dash!!", new List<string> { "Mario", "Kart", "MK", "Double", "Dash", "MKDD", "M K DD", "M KDD", "DD" }));
+        games.Add(CreateGame("Mario Kart Wii", new List<string> { "Mario", "Kart", "Wii", "MK", "MKWii", "M K Wii", "M KWii"}));
+        games.Add(CreateGame("Metroid Fusion", new List<string> { "Metroid", "Fusion", "MetFus" }));
         games.Add(CreateGame("Minecraft", new List<string> { "Minecraft", "Mine", "Craft", "MC" }));
         games.Add(CreateGame("Neon White", new List<string> { "Neon", "White", "nw" }));
         games.Add(CreateGame("New Super Mario Bros. Wii", new List<string> { "New", "Super", "Mario", "Bros.", "Bros", "Wii", "NSMBW" }));

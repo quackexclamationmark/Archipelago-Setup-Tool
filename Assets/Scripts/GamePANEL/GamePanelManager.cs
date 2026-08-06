@@ -108,6 +108,8 @@ public class GamePanelManager : MonoBehaviour
     public GameObject borderlands2Panel;
     public GameObject supermarketsimPanel;
     public GameObject bugsnaxPanel;
+    public GameObject mkddPanel;
+    public GameObject metfusPanel;
 
     void Start()
     {
@@ -435,6 +437,12 @@ public class GamePanelManager : MonoBehaviour
             case "Bugsnax":
                 bugsnaxPanel.SetActive(true);
                 break;
+            case "MarioKartDoubleDash":
+                mkddPanel.SetActive(true);
+                break;
+            case "MetroidFusion":
+                metfusPanel.SetActive(true);
+                break;
         }
     }
 
@@ -545,5 +553,7 @@ public class GamePanelManager : MonoBehaviour
         if (borderlands2Panel != null) borderlands2Panel.SetActive(false);
         if (supermarketsimPanel != null) supermarketsimPanel.SetActive(false);
         if (bugsnaxPanel != null) bugsnaxPanel.SetActive(false);
+        if (mkddPanel != null) mkddPanel.SetActive(false);
+        if (metfusPanel != null) metfusPanel.SetActive(false);
     }
 }
