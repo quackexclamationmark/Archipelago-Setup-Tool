@@ -218,8 +218,8 @@
     "huniepop2Apworld": "https://github.com/DotsofdarknessArchipelago/HuniePop2Archipelago/releases/download/v3.1.0/huniepop2.apworld",
 
     "iaybBepInEx": "https://thunderstore.io/package/download/BepInEx/BepInExPack/5.4.2305/",
-    "iaybAP": "https://github.com/petiboy7/IAYBArchipelago/releases/download/0.3.1/IAmYourBeast.zip",
-    "iaybApworld": "https://github.com/petiboy7/IAYBArchipelago/releases/download/0.3.1/i_am_your_beast.apworld",
+    "iaybAP": "https://github.com/petiboy7/IAYBArchipelago/releases/download/0.3.3/IAmYourBeast.zip",
+    "iaybApworld": "https://github.com/petiboy7/IAYBArchipelago/releases/download/0.3.3/i_am_your_beast.apworld",
 
     "kspAP": "https://github.com/nickdavies/KSP1-Archipelago-client/releases/download/v0.8.0/KSPArchipelago.zip",
     "kspApworld": "https://github.com/nickdavies/Archipelago/releases/download/v0.8.4/ksp1.apworld",
@@ -469,8 +469,8 @@
     "version": "5a6b930"
     },
 
-    "supermarketsimApworld": "https://github.com/Lemix028/SupermarketSimulator-Archipelago/releases/download/v0.3.0/supermarket_simulator.apworld",
-    "supermarketsimAP": "https://github.com/Lemix028/SupermarketSimulator-Archipelago/releases/download/v0.3.0/SupermarketArchipelago_Client_v0.3.0.zip",
+    "supermarketsimApworld": "https://github.com/Lemix028/SupermarketSimulator-Archipelago/releases/download/v0.3.1/supermarket_simulator.apworld",
+    "supermarketsimAP": "https://github.com/Lemix028/SupermarketSimulator-Archipelago/releases/download/v0.3.1/SupermarketArchipelago_Client_v0.3.1.zip",
     "supermarketsimBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
 
     "ssbbMinus": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Minus%20Launcher.elf",
