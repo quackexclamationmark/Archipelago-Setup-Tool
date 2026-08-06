@@ -177,6 +177,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Bloons TD 6", new List<string> { "Bloons", "TD6", "TD", "6", "BloonsTD6", "BTD6" }));
         games.Add(CreateGame("Bomb Rush Cyberfunk", new List<string> { "Bomb", "Rush", "Cyberfunk", "Cyber", "Funk", "BRC" }));
         games.Add(CreateGame("Borderlands 2", new List<string> { "Borderlands", "2", "Borderlands2" }));
+        games.Add(CreateGame("Bugsnax", new List<string> { "Bug", "Snax" }));
         games.Add(CreateGame("Celeste (Open World)", new List<string> { "Celeste", "Open", "World", "(Open World)" }));
         games.Add(CreateGame("Choo-Choo Charles", new List<string> { "Choo", "ChooChoo", "Choo-Choo", "Charles", "CCC" }));
         games.Add(CreateGame("Clair Obscur: Expedition 33", new List<string> { "Clair", "Obscur", "Expedition", "33", "COE33", "E33" }));

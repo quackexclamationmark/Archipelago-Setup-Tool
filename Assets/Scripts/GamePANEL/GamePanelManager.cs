@@ -107,6 +107,7 @@ public class GamePanelManager : MonoBehaviour
     public GameObject pokemonbwPanel;
     public GameObject borderlands2Panel;
     public GameObject supermarketsimPanel;
+    public GameObject bugsnaxPanel;
 
     void Start()
     {
@@ -431,6 +432,9 @@ public class GamePanelManager : MonoBehaviour
             case "SupermarketSimulator":
                 supermarketsimPanel.SetActive(true);
                 break;
+            case "Bugsnax":
+                bugsnaxPanel.SetActive(true);
+                break;
         }
     }
 
@@ -540,5 +544,6 @@ public class GamePanelManager : MonoBehaviour
         if (pokemonbwPanel != null) pokemonbwPanel.SetActive(false);
         if (borderlands2Panel != null) borderlands2Panel.SetActive(false);
         if (supermarketsimPanel != null) supermarketsimPanel.SetActive(false);
+        if (bugsnaxPanel != null) bugsnaxPanel.SetActive(false);
     }
 }
