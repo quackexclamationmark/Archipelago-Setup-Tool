@@ -243,6 +243,9 @@
     "luigismansionApworld": "https://github.com/BootsinSoots/Archipelago/releases/download/V0.6.4/luigismansion.apworld",
     "luigismansionDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
+    "mkddApworld": "https://github.com/aXu-AP/archipelago-double-dash/releases/download/v1.0.1/mario_kart_double_dash.apworld",
+    "mkddDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
+
     "mkwiiApworld": "https://github.com/toent/Archipelago-MKWii/releases/download/v0.2.3/mkwii.apworld",
     "mkwiiAP": "https://github.com/toent/Archipelago-MKWii/releases/download/v0.2.3/mkwii_client_win_v0.2.3.zip",
     "mkwiiDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
