@@ -123,6 +123,12 @@
     "bombrushBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "bombrushAP": "https://github.com/TRPG0/BRC-Archipelago/releases/download/1.0.6/BRC-Archipelago.1.0.6.zip",
     "bombrushModLocalizer": "https://github.com/TRPG0/BRC-ModLocalizer/releases/download/1.0.1/ModLocalizer.dll",
+    "bombrushMoreMap": "https://github.com/TRPG0/BRC-MoreMap/releases/download/1.1.0/MoreMap-1.1.0.zip",
+    "bombrushFasterLoadTimes": "https://thunderstore.io/package/download/cspotcode/FasterLoadTimes/0.0.1/",
+    "bombrushCutsceneSkip": "https://github.com/ceciliabarks/BRC_CutsceneSkip/releases/download/v1.0.0/CutsceneSkip.dll",
+    "bombrushGimmeMyBoost": "https://thunderstore.io/package/download/Yuri/GimmeMyBoost/1.0.0/",
+    "bombrushDisableAnnoyingCutscenes": "https://thunderstore.io/package/download/viliger/DisableAnnoyingCutscenes/0.7.0/",
+    "bombrushFastTravel": "https://thunderstore.io/package/download/tari/FastTravel/1.0.1/",
 
     "borderlands2ModManager": "https://github.com/bl-sdk/willow2-mod-manager/releases/download/v3.8/willow2-sdk.zip",
     "borderlands2AP": "https://github.com/EdricY/Bouncy-Loot-God/releases/download/v0.5.4/BouncyLootGod.sdkmod",
@@ -529,8 +535,8 @@
     "untitledBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.9/BepInEx_x64_5.4.9.0.zip",
 
     "votvUE4SS": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/UE4SS_v3.0.1-1016-g6c26f038.zip",
-    "votvApworld": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.4.0/votv.apworld",
-    "votvAP": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.4.0/votv_ap-main.zip",
+    "votvApworld": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.5.0/votv.apworld",
+    "votvAP": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.5.0/votv_ap-main.zip",
     "votvDL": "https://r2.votv.dev/archive/votv/090n.7z",
     "votvFileName": "Voices Of The Void v0.9.0n",
 
