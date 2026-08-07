@@ -15,6 +15,12 @@ public class BombRushManualDL : MonoBehaviour
     public FileDownloader.FileData bombRushBepInEx;
     public FileDownloader.FileData bombRushAP;
     public FileDownloader.FileData bombRushModLocalizer;
+    public FileDownloader.FileData bombRushMoreMap;
+    public FileDownloader.FileData bombRushFasterLoadTimes;
+    public FileDownloader.FileData bombRushCutsceneSkip;
+    public FileDownloader.FileData bombRushGimmeMyBoost;
+    public FileDownloader.FileData bombRushDisableAnnoyingCutscenes;
+    public FileDownloader.FileData bombRushFastTravel;
 
     [Header("GAME FOLDER NAMES")]
     public string steamGameFolderName = "BombRushCyberfunk";
@@ -23,6 +29,12 @@ public class BombRushManualDL : MonoBehaviour
     public Toggle installBepInExToggle;
     public Toggle installArchipelagoToggle;
     public Toggle installModLocalizerToggle;
+    public Toggle installMoreMapToggle;
+    public Toggle installFasterLoadTimesToggle;
+    public Toggle installCutsceneSkipToggle;
+    public Toggle installGimmeMyBoostToggle;
+    public Toggle installDisableAnnoyingCutscenesToggle;
+    public Toggle installFastTravelToggle;
 
     [Header("LAUNCH OPTIONS")]
     public Toggle secondLaunchToggle;
@@ -45,15 +57,21 @@ public class BombRushManualDL : MonoBehaviour
     private Process bombRushProcess;
     private string bombRushPath;
     private string pendingAction;
-    private RoR2Config remoteConfig;
+    private BRCConfig remoteConfig;
     private bool configLoaded = false;
 
     [System.Serializable]
-    public class RoR2Config
+    public class BRCConfig
     {
         public string bombrushBepInEx;
         public string bombrushAP;
         public string bombrushModLocalizer;
+        public string bombrushMoreMap;
+        public string bombrushFasterLoadTimes;
+        public string bombrushCutsceneSkip;
+        public string bombrushGimmeMyBoost;
+        public string bombrushDisableAnnoyingCutscenes;
+        public string bombrushFastTravel;
         public string[] steamSearchPaths;
     }
 
@@ -112,6 +130,24 @@ public class BombRushManualDL : MonoBehaviour
 
         bombRushModLocalizer.url = remoteConfig.bombrushModLocalizer;
         bombRushModLocalizer.fileName = "ModLocalizer.dll";
+
+        bombRushMoreMap.url = remoteConfig.bombrushMoreMap;
+        bombRushMoreMap.fileName = "MoreMap-1.1.0.zip";
+
+        bombRushFasterLoadTimes.url = remoteConfig.bombrushFasterLoadTimes;
+        bombRushFasterLoadTimes.fileName = "cspotcode-FasterLoadTimes-0.0.1.zip";
+
+        bombRushCutsceneSkip.url = remoteConfig.bombrushCutsceneSkip;
+        bombRushCutsceneSkip.fileName = "CutsceneSkip.dll";
+
+        bombRushGimmeMyBoost.url = remoteConfig.bombrushGimmeMyBoost;
+        bombRushGimmeMyBoost.fileName = "Yuri-GimmeMyBoost-1.0.0.zip";
+
+        bombRushDisableAnnoyingCutscenes.url = remoteConfig.bombrushDisableAnnoyingCutscenes;
+        bombRushDisableAnnoyingCutscenes.fileName = "viliger-DisableAnnoyingCutscenes-0.7.0.zip";
+
+        bombRushFastTravel.url = remoteConfig.bombrushFastTravel;
+        bombRushFastTravel.fileName = "tari-FastTravel-1.0.1.zip";
     }
 
     public void RunSetup()
@@ -197,6 +233,11 @@ public class BombRushManualDL : MonoBehaviour
             ShowInfo("Removing AP mods...");
 
             SafeDeleteDirectory(Path.Combine(pluginsPath, "TRPG-Archipelago"));
+            SafeDeleteDirectory(Path.Combine(pluginsPath, "FasterLoadTimes"));
+            SafeDeleteDirectory(Path.Combine(pluginsPath, "CutsceneSkip"));
+            SafeDeleteDirectory(Path.Combine(pluginsPath, "GimmeMyBoost"));
+            SafeDeleteDirectory(Path.Combine(pluginsPath, "DisableAnnoyingCutscenes"));
+            SafeDeleteDirectory(Path.Combine(pluginsPath, "FastTravel"));
 
             DeleteOldVersionFiles();
 
@@ -240,20 +281,47 @@ public class BombRushManualDL : MonoBehaviour
             yield return InstallModLocalizer();
         }
 
+        if (installMoreMapToggle != null && installMoreMapToggle.isOn)
+        {
+            ShowInfo("Installing MoreMap...");
+            yield return InstallMoreMap();
+        }
+
+        if (installFasterLoadTimesToggle != null && installFasterLoadTimesToggle.isOn)
+        {
+            ShowInfo("Installing FasterLoadTimes...");
+            yield return InstallFasterLoadTimes();
+        }
+
+        if (installCutsceneSkipToggle != null && installCutsceneSkipToggle.isOn)
+        {
+            ShowInfo("Installing CutsceneSkip...");
+            yield return InstallCutsceneSkip();
+        }
+
+        if (installGimmeMyBoostToggle != null && installGimmeMyBoostToggle.isOn)
+        {
+            ShowInfo("Installing GimmeMyBoost...");
+            yield return InstallGimmeMyBoost();
+        }
+
+        if (installDisableAnnoyingCutscenesToggle != null && installDisableAnnoyingCutscenesToggle.isOn)
+        {
+            ShowInfo("Installing DisableAnnoyingCutscenes...");
+            yield return InstallDisableAnnoyingCutscenes();
+        }
+
+        if (installFastTravelToggle != null && installFastTravelToggle.isOn)
+        {
+            ShowInfo("Installing FastTravel...");
+            yield return InstallFastTravel();
+        }
+
         CreateVersionFile(bombRushBepInEx.url, bombRushAP.url, bombRushModLocalizer.url);
-
-        ShowInfo("Launching Bomb Rush Cyberfunk...");
-        LaunchBombRush();
-
-        yield return new WaitForSeconds(2f);
-
-        CloseRoR2();
-
-        yield return new WaitForSeconds(1f);
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
-            ShowInfo("Second launch...");
+            ShowInfo("Launching BRC...");
             LaunchBombRush();
         }
         else
@@ -339,6 +407,164 @@ public class BombRushManualDL : MonoBehaviour
         SafeDeleteDirectory(tempDownloadPath);
     }
 
+    IEnumerator InstallMoreMap()
+    {
+        while (!configLoaded)
+            yield return null;
+
+        string pluginsPath = Path.Combine(bombRushPath, "BepInEx", "plugins");
+        Directory.CreateDirectory(pluginsPath);
+
+        string extractPath = Path.Combine(Application.persistentDataPath, "MoreMapTemp");
+        yield return downloader.DownloadAndExtract(bombRushMoreMap, Application.persistentDataPath, extractPath);
+
+        // Le contenu du zip est copié directement dans BepInEx/plugins
+        MoveDirectory(extractPath, pluginsPath);
+
+        SafeDeleteDirectory(extractPath);
+    }
+
+    IEnumerator InstallFasterLoadTimes()
+    {
+        while (!configLoaded)
+            yield return null;
+
+        string pluginsPath = Path.Combine(bombRushPath, "BepInEx", "plugins");
+        string targetPath = Path.Combine(pluginsPath, "FasterLoadTimes");
+        Directory.CreateDirectory(pluginsPath);
+
+        string extractPath = Path.Combine(Application.persistentDataPath, "FasterLoadTimesTemp");
+        yield return downloader.DownloadAndExtract(bombRushFasterLoadTimes, Application.persistentDataPath, extractPath);
+
+        if (Directory.Exists(targetPath))
+            SafeDeleteDirectory(targetPath);
+
+        // Le contenu du zip est copié dans un nouveau dossier "FasterLoadTimes"
+        MoveDirectory(extractPath, targetPath);
+
+        SafeDeleteDirectory(extractPath);
+    }
+
+    IEnumerator InstallCutsceneSkip()
+    {
+        while (!configLoaded)
+            yield return null;
+
+        string pluginsPath = Path.Combine(bombRushPath, "BepInEx", "plugins");
+        string targetFolder = Path.Combine(pluginsPath, "CutsceneSkip");
+        Directory.CreateDirectory(targetFolder);
+
+        string tempDownloadPath = Path.Combine(Application.persistentDataPath, "CutsceneSkipTemp");
+
+        yield return downloader.DownloadToFolder(bombRushCutsceneSkip, tempDownloadPath);
+
+        string[] dllFiles = Directory.GetFiles(tempDownloadPath, "CutsceneSkip.dll");
+
+        if (dllFiles.Length > 0)
+        {
+            string targetPath = Path.Combine(targetFolder, "CutsceneSkip.dll");
+            File.Copy(dllFiles[0], targetPath, true);
+            UnityEngine.Debug.Log("Copied CutsceneSkip.dll to plugins/CutsceneSkip");
+        }
+        else
+        {
+            UnityEngine.Debug.LogWarning("CutsceneSkip.dll not found in download");
+        }
+
+        SafeDeleteDirectory(tempDownloadPath);
+    }
+
+    IEnumerator InstallGimmeMyBoost()
+    {
+        while (!configLoaded)
+            yield return null;
+
+        string pluginsPath = Path.Combine(bombRushPath, "BepInEx", "plugins");
+        Directory.CreateDirectory(pluginsPath);
+
+        string extractPath = Path.Combine(Application.persistentDataPath, "GimmeMyBoostTemp");
+        yield return downloader.DownloadAndExtract(bombRushGimmeMyBoost, Application.persistentDataPath, extractPath);
+
+        // Cherche le dossier "GimmeMyBoost" à l'intérieur de l'archive (peu importe la profondeur)
+        string[] boostDirs = Directory.GetDirectories(extractPath, "GimmeMyBoost", SearchOption.AllDirectories);
+
+        if (boostDirs.Length > 0)
+        {
+            string sourcePath = boostDirs[0];
+            string targetPath = Path.Combine(pluginsPath, "GimmeMyBoost");
+
+            if (Directory.Exists(targetPath))
+                SafeDeleteDirectory(targetPath);
+
+            CopyDirectory(sourcePath, targetPath);
+            UnityEngine.Debug.Log("Copied GimmeMyBoost to plugins");
+        }
+        else
+        {
+            UnityEngine.Debug.LogWarning("GimmeMyBoost folder not found in archive");
+        }
+
+        SafeDeleteDirectory(extractPath);
+    }
+
+    IEnumerator InstallDisableAnnoyingCutscenes()
+    {
+        while (!configLoaded)
+            yield return null;
+
+        string pluginsPath = Path.Combine(bombRushPath, "BepInEx", "plugins");
+        Directory.CreateDirectory(pluginsPath);
+
+        string extractPath = Path.Combine(Application.persistentDataPath, "DisableAnnoyingCutscenesTemp");
+        yield return downloader.DownloadAndExtract(bombRushDisableAnnoyingCutscenes, Application.persistentDataPath, extractPath);
+
+        // Cherche le dossier contenant "DisableAnnoyingCutscenes" à l'intérieur de l'archive (peu importe le préfixe ou la profondeur)
+        // Le zip contient un dossier racine (ex: "viliger-DisableAnnoyingCutscenes-0.7.0") ET le vrai dossier du plugin
+        // plus profond (ex: "plugins\viliger-DisableAnnoyingCutscenes"), qui matchent tous les deux le pattern.
+        // On prend donc le chemin le plus profond, qui correspond au vrai dossier du plugin.
+        string[] cutsceneDirs = Directory.GetDirectories(extractPath, "*DisableAnnoyingCutscenes*", SearchOption.AllDirectories);
+
+        if (cutsceneDirs.Length > 0)
+        {
+            System.Array.Sort(cutsceneDirs, (a, b) => b.Length.CompareTo(a.Length));
+            string sourcePath = cutsceneDirs[0];
+            string targetPath = Path.Combine(pluginsPath, "DisableAnnoyingCutscenes");
+
+            if (Directory.Exists(targetPath))
+                SafeDeleteDirectory(targetPath);
+
+            CopyDirectory(sourcePath, targetPath);
+            UnityEngine.Debug.Log("Copied DisableAnnoyingCutscenes to plugins");
+        }
+        else
+        {
+            UnityEngine.Debug.LogWarning("DisableAnnoyingCutscenes folder not found in archive");
+        }
+
+        SafeDeleteDirectory(extractPath);
+    }
+
+    IEnumerator InstallFastTravel()
+    {
+        while (!configLoaded)
+            yield return null;
+
+        string pluginsPath = Path.Combine(bombRushPath, "BepInEx", "plugins");
+        string targetPath = Path.Combine(pluginsPath, "FastTravel");
+        Directory.CreateDirectory(pluginsPath);
+
+        string extractPath = Path.Combine(Application.persistentDataPath, "FastTravelTemp");
+        yield return downloader.DownloadAndExtract(bombRushFastTravel, Application.persistentDataPath, extractPath);
+
+        if (Directory.Exists(targetPath))
+            SafeDeleteDirectory(targetPath);
+
+        // Le contenu du zip est copié dans un nouveau dossier "FastTravel"
+        MoveDirectory(extractPath, targetPath);
+
+        SafeDeleteDirectory(extractPath);
+    }
+
     IEnumerator LoadRemoteConfig()
     {
         string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
@@ -355,7 +581,7 @@ public class BombRushManualDL : MonoBehaviour
 
         try
         {
-            remoteConfig = JsonUtility.FromJson<RoR2Config>(request.downloadHandler.text);
+            remoteConfig = JsonUtility.FromJson<BRCConfig>(request.downloadHandler.text);
             UnityEngine.Debug.Log("Remote config loaded successfully");
             ApplyBombRushConfig();
         }
@@ -388,7 +614,7 @@ public class BombRushManualDL : MonoBehaviour
         }
     }
 
-    void CloseRoR2()
+    void CloseBRC()
     {
         try
         {
@@ -404,7 +630,7 @@ public class BombRushManualDL : MonoBehaviour
 
     void CleanupProcesses()
     {
-        CloseRoR2();
+        CloseBRC();
     }
 
     void SafeDeleteFile(string path)
@@ -577,15 +803,15 @@ public class BombRushManualDL : MonoBehaviour
         return "";
     }
 
-    void CreateVersionFile(string bepinexUrl, string ror2apUrl, string modLocalizerUrl)
+    void CreateVersionFile(string bepinexUrl, string brcapUrl, string modLocalizerUrl)
     {
         try
         {
             string bepinexVersion = ExtractVersionFromUrl(bepinexUrl);
-            string ror2apVersion = ExtractVersionFromUrl(ror2apUrl);
+            string brcapVersion = ExtractVersionFromUrl(brcapUrl);
             string modLocalizerVersion = ExtractVersionFromUrl(modLocalizerUrl);
 
-            string versionFileName = "Bomb Rush Archipelago Version " + ror2apVersion + ".txt";
+            string versionFileName = "Bomb Rush Archipelago Version " + brcapVersion + ".txt";
             string content = "Archipelago Setup Tool by quack!\n";
             content += "https://github.com/quackexclamationmark/Archipelago-Setup-Tool\n";
             content += "\n";
@@ -598,8 +824,8 @@ public class BombRushManualDL : MonoBehaviour
             content += "Version: " + modLocalizerVersion + "\n";
             content += "\n";
             content += "=== BOMB RUSH ARCHIPELAGO ===\n";
-            content += "Downloaded from: " + ror2apUrl + "\n";
-            content += "Version: " + ror2apVersion + "\n";
+            content += "Downloaded from: " + brcapUrl + "\n";
+            content += "Version: " + brcapVersion + "\n";
             content += "\n";
             content += "Downloaded at: " + System.DateTime.Now + "\n";
 

@@ -31,8 +31,8 @@ public class GTASAManualDL : MonoBehaviour
     public Toggle installGTASAWidescreenToggle;
     public Toggle installGTASAAPToggle;
 
-    [Header("LAUNCH OPTIONS")]
-    public Toggle secondLaunchToggle;
+    /*[Header("LAUNCH OPTIONS")]
+    public Toggle secondLaunchToggle;*/
 
     [Header("REVERT BUTTON")]
     public Button revertButton;
@@ -74,7 +74,7 @@ public class GTASAManualDL : MonoBehaviour
 
         if (infoPanel != null) infoPanel.SetActive(false);
         if (infoOkButton != null) infoOkButton.onClick.AddListener(CloseInfoPanel);
-        if (secondLaunchToggle != null) secondLaunchToggle.isOn = false;
+        /*if (secondLaunchToggle != null) secondLaunchToggle.isOn = false;*/
         if (confirmationPanel != null) confirmationPanel.SetActive(false);
         if (confirmButton != null) confirmButton.onClick.AddListener(OnConfirm);
         if (cancelButton != null) cancelButton.onClick.AddListener(OnCancel);
@@ -165,11 +165,11 @@ public class GTASAManualDL : MonoBehaviour
 
         yield return InstallAPWorld();
 
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        /*if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
             LaunchGTASAClient();
             yield return new WaitForSeconds(2f);
-        }
+        }*/
 
         ShowInfo("Installation complete!");
     }
@@ -252,7 +252,6 @@ public class GTASAManualDL : MonoBehaviour
 
     IEnumerator InstallFlow()
     {
-        // wait for config loaded
         yield return new WaitUntil(() => configLoaded);
 
         ShowInfo("Starting installation...");
@@ -263,8 +262,6 @@ public class GTASAManualDL : MonoBehaviour
         bool installASI = installGTASAASIToggle != null && installGTASAASIToggle.isOn;
         bool installWidescreen = installGTASAWidescreenToggle != null && installGTASAWidescreenToggle.isOn;
         bool installApmod = installGTASAAPToggle != null && installGTASAAPToggle.isOn;
-
-        // Installation order: APWorld -> ASI -> Widescreen -> AP
 
         if (installApworld)
         {
@@ -293,11 +290,11 @@ public class GTASAManualDL : MonoBehaviour
         CreateVersionFile(gtasaApworld.url, gtasaASI.url, gtasaWidescreen.url, gtasaAP.url);
 
         ShowInfo("Installation complete!");
-        if (secondLaunchToggle != null && secondLaunchToggle.isOn)
+        /*if (secondLaunchToggle != null && secondLaunchToggle.isOn)
         {
             yield return new WaitForSeconds(2f);
             LaunchGTASAClient(false);
-        }
+        }*/
     }
 
     IEnumerator InstallAPWorld()
@@ -481,7 +478,6 @@ public class GTASAManualDL : MonoBehaviour
         }
     }
 
-    // Downloads and installs AP Mod
     IEnumerator InstallAPMod()
     {
         while (!configLoaded)
@@ -494,58 +490,50 @@ public class GTASAManualDL : MonoBehaviour
             yield break;
         }
 
-        string extractPath = Path.Combine(Application.persistentDataPath, "GTASAAPTemp");
+        string fileName = "Archipelago.SA.asi";
+        string localPath = Path.Combine(Application.persistentDataPath, fileName);
 
         UnityEngine.Debug.Log("Downloading AP Mod from: " + gtasaAP.url);
+        UnityEngine.Debug.Log("Saving to: " + localPath);
 
-        yield return downloader.DownloadAndExtract(gtasaAP, Application.persistentDataPath, extractPath);
+        yield return DownloadFile(gtasaAP.url, localPath);
 
-        if (!Directory.Exists(extractPath))
+        if (!File.Exists(localPath))
         {
-            UnityEngine.Debug.LogError("Extract failed for AP Mod");
-            ShowInfo("ERROR: AP Mod extraction failed!");
+            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
+            ShowInfo("ERROR: AP Mod download failed!");
             yield break;
         }
 
         try
         {
-            // Extract Archipelago.SA.asi to scripts folder
-            string asiPath = FindFile(extractPath, "Archipelago.SA.asi");
-            if (!string.IsNullOrEmpty(asiPath))
-            {
-                string scriptsPath = Path.Combine(gtasaPath, "scripts");
-                Directory.CreateDirectory(scriptsPath);
-                string targetASI = Path.Combine(scriptsPath, "Archipelago.SA.asi");
-                if (File.Exists(targetASI)) File.Delete(targetASI);
-                File.Copy(asiPath, targetASI, true);
-                UnityEngine.Debug.Log("Archipelago.SA.asi copied to: " + targetASI);
-            }
-            else
-            {
-                UnityEngine.Debug.LogWarning("Archipelago.SA.asi not found in extracted files");
-            }
+            string scriptsPath = Path.Combine(gtasaPath, "scripts");
+            Directory.CreateDirectory(scriptsPath);
+            string targetASI = Path.Combine(scriptsPath, fileName);
+            if (File.Exists(targetASI)) File.Delete(targetASI);
+            File.Copy(localPath, targetASI, true);
+            UnityEngine.Debug.Log("Archipelago.SA.asi copied to: " + targetASI);
 
-            // Extract GTASAClient.exe to GTA SA root
-            string clientPath = FindFile(extractPath, "GTASAClient.exe");
-            if (!string.IsNullOrEmpty(clientPath))
-            {
-                string targetClient = Path.Combine(gtasaPath, "GTASAClient.exe");
-                if (File.Exists(targetClient)) File.Delete(targetClient);
-                File.Copy(clientPath, targetClient, true);
-                UnityEngine.Debug.Log("GTASAClient.exe copied to: " + targetClient);
-            }
-            else
-            {
-                UnityEngine.Debug.LogWarning("GTASAClient.exe not found in extracted files");
-            }
-
-            SafeDeleteDirectory(extractPath);
             ShowInfo("AP Mod installed successfully!");
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to install AP Mod: " + e.Message);
             ShowInfo("ERROR: Failed to install AP Mod\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary AP Mod file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary AP Mod file: " + e.Message);
         }
     }
 
@@ -567,10 +555,9 @@ public class GTASAManualDL : MonoBehaviour
         }
     }
 
-    // LaunchGTASAClient: accepts asHelper flag to mark the process as killable by CloseGTASA()
-    void LaunchGTASAClient(bool asHelper = false)
+    /*void LaunchGTASAClient(bool asHelper = false)
     {
-        string clientPath = Path.Combine(gtasaPath, "GTASAClient.exe");
+        string clientPath = Path.Combine(gtasaPath, "gta_sa.exe");
         if (File.Exists(clientPath))
         {
             try
@@ -584,7 +571,7 @@ public class GTASAManualDL : MonoBehaviour
 
                 gtasaProcess = Process.Start(psi);
                 gtasaLaunchedAsHelper = asHelper;
-                UnityEngine.Debug.Log($"GTASAClient launched for {(asHelper ? "config generation (helper)" : "user/interactive launch")}.");
+                UnityEngine.Debug.Log($"gta_sa.exe launched for {(asHelper ? "config generation (helper)" : "user/interactive launch")}.");
             }
             catch (Exception e)
             {
@@ -593,9 +580,9 @@ public class GTASAManualDL : MonoBehaviour
         }
         else
         {
-            UnityEngine.Debug.LogWarning("GTASAClient executable not found: " + clientPath);
+            UnityEngine.Debug.LogWarning("gta_sa.exe not found: " + clientPath);
         }
-    }
+    }*/
 
     void CloseGTASA(bool force = false)
     {
@@ -714,7 +701,7 @@ public class GTASAManualDL : MonoBehaviour
             string apworldVersion = ExtractVersionFromUrl(apworldUrl, @"/([^/]+)\.apworld");
             string asiVersion = "vorbisFile.dll";
             string widescreenVersion = ExtractVersionFromUrl(widescreenUrl, @"/([^/]+)\.zip");
-            string apVersion = ExtractVersionFromUrl(apUrl, @"/([^/]+)\.zip");
+            string apVersion = ExtractVersionFromUrl(apUrl, @"/([^/]+)\.asi");
 
             string versionFileName = "GTA SA Archipelago Version " + apVersion + ".txt";
             string content = "GTA San Andreas Archipelago Setup Tool\n\n";
@@ -745,7 +732,7 @@ public class GTASAManualDL : MonoBehaviour
 
     IEnumerator LoadRemoteConfig()
     {
-        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
+        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main2/RemoteConfig/config.json";
         UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url);
         yield return request.SendWebRequest();
 
