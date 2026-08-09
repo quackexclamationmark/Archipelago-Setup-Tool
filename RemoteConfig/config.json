@@ -199,7 +199,7 @@
     "funiraccoonApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-Funi/releases/download/1.6.1/funi_raccoon.apworld",
 
     "garfieldkartAP": "https://github.com/robotzurg/GarfieldKartAPMod/releases/download/1.0.1/GarfieldKartAPMod.zip",
-    "garfieldkartApworld": "https://github.com/FeluciaPS/Archipelago/releases/download/1.0.0/garfkart.apworld",
+    "garfieldkartApworld": "https://github.com/FeluciaPS/Archipelago/releases/download/1.0.2/garfkart.apworld",
     "garfieldkartBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
     "gtasaAP": "https://github.com/awakenbad/SanAndreasAP/releases/download/v0.4.1/SanAndreasAP-v0.4.1.zip",
@@ -226,8 +226,8 @@
     "huniepop2Apworld": "https://github.com/DotsofdarknessArchipelago/HuniePop2Archipelago/releases/download/v3.1.0/huniepop2.apworld",
 
     "iaybBepInEx": "https://thunderstore.io/package/download/BepInEx/BepInExPack/5.4.2305/",
-    "iaybAP": "https://github.com/petiboy7/IAYBArchipelago/releases/download/0.3.3/IAmYourBeast.zip",
-    "iaybApworld": "https://github.com/petiboy7/IAYBArchipelago/releases/download/0.3.3/i_am_your_beast.apworld",
+    "iaybAP": "https://github.com/petiboy7/IAYBArchipelago/releases/download/0.3.3a/IAmYourBeast.zip",
+    "iaybApworld": "https://github.com/petiboy7/IAYBArchipelago/releases/download/0.3.3a/i_am_your_beast.apworld",
 
     "kspAP": "https://github.com/nickdavies/KSP1-Archipelago-client/releases/download/v0.8.0/KSPArchipelago.zip",
     "kspApworld": "https://github.com/nickdavies/Archipelago/releases/download/v0.8.4/ksp1.apworld",
@@ -368,8 +368,8 @@
 
     "raftAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-RMLL-Raft.zip",
 
-    "refunctAP": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.2.2a/practice-windows.zip",
-    "refunctApworld": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.2.2a/refunct.apworld",
+    "refunctAP": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.3.2/practice-windows.zip",
+    "refunctApworld": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.3.2/refunct.apworld",
 
     "repoPathName": "REPO",
     "repoAP": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.3/RepoAP.zip",
@@ -492,8 +492,8 @@
     "ssbbDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "tcgBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
-    "tcgApworld": "https://github.com/FyreDay/Archipelago-TCGCardShopSimulator/releases/download/v1.1.0/tcg_card_shop_simulator.apworld",
-    "tcgAP": "https://github.com/FyreDay/TCG-CardShop-Sim-APClient/releases/download/v1.1.1/TCG_AP_Client_v1.1.1.zip",
+    "tcgApworld": "https://github.com/FyreDay/Archipelago-TCGCardShopSimulator/releases/download/v1.2.0-pre.1/tcg_card_shop_simulator.apworld",
+    "tcgAP": "https://github.com/FyreDay/TCG-CardShop-Sim-APClient/releases/download/v1.2.0-prerelease.1/TCG_AP_Client_v1.2.0-pre1.zip",
 
     "tloztmcApworld": "https://github.com/eternalcode0/Archipelago/releases/download/v0.3.1/tmc.apworld",
     "tloztmcBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
