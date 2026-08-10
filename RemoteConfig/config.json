@@ -138,9 +138,9 @@
     "bugsnaxApworld": "https://github.com/robofett28/bugsnax_ap_world/releases/download/v0.1.0-alpha/bugsnax.apworld",
     "bugsnaxAP": "https://github.com/robofett28/bugsnax_ap_world/releases/download/v0.1.0-alpha/BugsnaxMod.zip",
 
-    "cuApworld": "https://github.com/Nichologeam/CUAP/releases/download/v0.11.0/casualtiesunknown.apworld",
-    "cuBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
-    "cuAP": "https://github.com/Nichologeam/CUAP/releases/download/v0.11.0/CUAPClientModv0.11.0.zip",
+    "cudemoApworld": "https://github.com/Nichologeam/CUAP/releases/download/v0.11.0/casualtiesunknown.apworld",
+    "cudemoBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+    "cudemoAP": "https://github.com/Nichologeam/CUAP/releases/download/v0.11.0/CUAPClientModv0.11.0.zip",
 
     "celesteowAP": "https://github.com/PoryGoneDev/Celeste-Archipelago-Open-World/releases/download/v1.1.2/Archipelago_Open_World.zip",
     "celesteowEverest": "https://gamebanana.com/dl/1083425",
