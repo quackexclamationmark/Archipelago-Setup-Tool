@@ -7,7 +7,7 @@
 "[HEADER] Installation Infos",
 "kill",
 "When you click 'START SETUP' in the 'SETUP' tab, endermagnolia.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. 
-The AP Mod folder will then be downloaded inside 'ENDER MAGNOLIA\EnderMagnolia\Binaries\Win64'.",
+The AP Mod folder will then be downloaded inside 'ENDER MAGNOLIA\\EnderMagnolia\\Binaries\\Win64'.",
 "kill",
 "[HEADER] apworld / yaml Infos",
 "kill",
