@@ -24,7 +24,7 @@
     
     "r2modmanDL": "https://thunderstore.io/c/lethal-company/p/ebkr/r2modman/",
 
-    "poptrackerWinDL": "https://github.com/black-sliver/PopTracker/releases/download/v0.35.3/poptracker_0-35-3_win64.zip",
+    "poptrackerWinDL": "https://github.com/black-sliver/PopTracker/releases/download/v0.35.4-rc2/poptracker_0-35-4-rc2_win64.zip",
     "poptrackerLinuxUbuntu2204": "https://github.com/black-sliver/PopTracker/releases/download/v0.35.3/poptracker_0-35-3_ubuntu-22-04-x86_64.tar.xz",
     "poptrackerLinuxAppImage": "https://github.com/black-sliver/PopTracker/releases/download/v0.35.3/PopTracker-0.35.3-x86_64.AppImage",
     "poptrackerLinuxAarch64": "https://github.com/black-sliver/PopTracker/releases/download/v0.35.3/poptracker_0-35-3_ubuntu-22-04-aarch64.tar.xz",
