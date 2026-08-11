@@ -502,6 +502,12 @@
     "tcgApworld": "https://github.com/FyreDay/Archipelago-TCGCardShopSimulator/releases/download/v1.2.0-pre.1/tcg_card_shop_simulator.apworld",
     "tcgAP": "https://github.com/FyreDay/TCG-CardShop-Sim-APClient/releases/download/v1.2.0-prerelease.1/TCG_AP_Client_v1.2.0-pre1.zip",
 
+    "thscApworld": "https://github.com/funjeff/HenryStickminArchipelagoIntegration/releases/download/release3/henry.apworld",
+    "thscAP1": "https://github.com/funjeff/HenryStickminArchipelagoIntegration/releases/download/release3/Henry.swf",
+    "thscAP2": "https://github.com/funjeff/HenryStickminArchipelagoIntegration/releases/download/release3/HenryCtM.swf",
+    "thscAP3": "https://github.com/funjeff/HenryStickminArchipelagoIntegration/releases/download/release3/HenryCtM2.swf",
+    "thscAP4": "https://github.com/funjeff/HenryStickminArchipelagoIntegration/releases/download/release3/HenryFtC.swf",
+
     "tloztmcApworld": "https://github.com/eternalcode0/Archipelago/releases/download/v0.3.1/tmc.apworld",
     "tloztmcBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
