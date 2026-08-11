@@ -430,6 +430,10 @@
     "roguelegacy2AP": "https://github.com/zaphim12/RL2Archipelago/releases/download/v1.1.2/RL2Archipelago.zip",
     "roguelegacy2Apworld": "https://github.com/zaphim12/RL2Archipelago/releases/download/v1.1.2/rogue_legacy_2.apworld",
 
+    "swhApworld": "https://github.com/Chainsawkitten/SayonaraWildHeartsAP/releases/download/1.0.0/sayonarawildhearts.apworld",
+    "swhAP": "https://github.com/Chainsawkitten/SayonaraWildHeartsAP/releases/download/1.0.0/SayonaraWildHeartsRandomizer_1.0.zip",
+    "swhBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+
     "scheduleAP": "https://thunderstore.io/package/download/Narcopelago/Narcopelago/1.5.4/",
     "scheduleApworld": "https://github.com/MacH8s/Narcopelago/releases/download/v3.6.3/Schedule_I.apworld",
     "scheduleMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
