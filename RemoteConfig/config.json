@@ -490,6 +490,9 @@
     "version": "5a6b930"
     },
 
+    "smbApworld": "https://github.com/PixelShake92/Super-Meat-Boy-AP/releases/download/Alpha_2/super_meat_boy.apworld",
+    "smbAP": "https://github.com/PixelShake92/Super-Meat-Boy-AP/releases/download/Alpha_2/SMB_Archipelago_Client.exe",
+
     "supermarketsimApworld": "https://github.com/Lemix028/SupermarketSimulator-Archipelago/releases/download/v0.3.1/supermarket_simulator.apworld",
     "supermarketsimAP": "https://github.com/Lemix028/SupermarketSimulator-Archipelago/releases/download/v0.3.1/SupermarketArchipelago_Client_v0.3.1.zip",
     "supermarketsimBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
