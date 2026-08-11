@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• Archipelago saves (Henry.swf, HenryCtM2.swf, HenryFtC.swf and HenryCtM.swf)\n• henry.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, henry.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. The Archipelago 100% saves will be installed inside the game's core directory and backups of the vanilla saves will be created inside a new 'BackupSaves' folder in the game's Steam directory.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"BO3 is not a core Archipelago game, it needs a custom world file. When 'henry.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, launch the game. Once the game is open, boot-up the Archipelago Launcher and open the 'Henry Client', then, connect to it as you would normally do with any other text client. Finally, you can start playing!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will simply delete the 100% Archipelago saves and will restore the backups inside the 'BackupSaves' folder.",
+"clear"
+
+]
