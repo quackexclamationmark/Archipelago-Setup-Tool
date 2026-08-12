@@ -1,0 +1,25 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• EnderMagnolia.Randomizer & version.dll (Archipelago Mod)\n• endermagnolia.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, endermagnolia.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. 
+The AP Mod folder will then be downloaded inside 'ENDER MAGNOLIA\\EnderMagnolia\\Binaries\\Win64'.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"EMBITM is not a core Archipelago game, it needs a custom world file. When 'endermagnolia.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, a new 'Randomizer' window should appear in the top-left corner of the main menu. Click the 'Archipelago' button of the Randomizer window.\n\nIn the 'Host' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Port', enter the name assigned to your YAML file.\n\nThe 'Pass' field is for the password, it is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect' and then, you can start a new run!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will delete the Randomizer folder and its dependency file.",
+"clear"
+
+]
