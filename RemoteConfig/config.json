@@ -24,10 +24,10 @@
     
     "r2modmanDL": "https://thunderstore.io/c/lethal-company/p/ebkr/r2modman/",
 
-    "poptrackerWinDL": "https://github.com/black-sliver/PopTracker/releases/download/v0.35.4-rc2/poptracker_0-35-4-rc2_win64.zip",
-    "poptrackerLinuxUbuntu2204": "https://github.com/black-sliver/PopTracker/releases/download/v0.35.3/poptracker_0-35-3_ubuntu-22-04-x86_64.tar.xz",
-    "poptrackerLinuxAppImage": "https://github.com/black-sliver/PopTracker/releases/download/v0.35.3/PopTracker-0.35.3-x86_64.AppImage",
-    "poptrackerLinuxAarch64": "https://github.com/black-sliver/PopTracker/releases/download/v0.35.3/poptracker_0-35-3_ubuntu-22-04-aarch64.tar.xz",
+    "poptrackerWinDL": "https://github.com/black-sliver/PopTracker/releases/download/v0.35.4/poptracker_0-35-4_win64.zip",
+    "poptrackerLinuxUbuntu2204": "https://github.com/black-sliver/PopTracker/releases/download/v0.35.4/poptracker_0-35-4_ubuntu-22-04-x86_64.tar.xz",
+    "poptrackerLinuxAppImage": "https://github.com/black-sliver/PopTracker/releases/download/v0.35.4/PopTracker-0.35.4-x86_64.AppImage",
+    "poptrackerLinuxAarch64": "https://github.com/black-sliver/PopTracker/releases/download/v0.35.4/poptracker_0-35-4_ubuntu-22-04-aarch64.tar.xz",
         
     "coe33poptrackerDL": "https://github.com/Demorck/ClairObscur-Archipelago-Poptracker/releases/download/v0.2.4/ClairObscurAP_Poptracker.zip",
     "subnauticapoptrackerDL": "https://github.com/lurch9229/SubnauticaAP_maptracker_lurch9229/archive/refs/tags/0.2.1.zip",
