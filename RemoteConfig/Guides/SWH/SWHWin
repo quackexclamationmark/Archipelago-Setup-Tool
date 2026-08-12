@@ -14,7 +14,7 @@
 "kill",
 "[HEADER] Connection Infos",
 "kill",
-"Once everything is set up, open the 'APInfo.json' file that can be found in the game's folder.\n\nIn the 'hostname' field, type 'archipelago.gg'.\n\nIn 'port', enter the port, this is a 5-digit number that can be found on the Archipelago website after opening a new room.\n\nIn 'slot', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\ne.g. '{"hostname":"archipelago","port":38281,"slot":"YOURNAME","password":""}'.\n\nFinally, you can launch the game and start a new run!",
+"Once everything is set up, open the 'APInfo.json' file that can be found in the game's folder.\n\nIn the 'hostname' field, type 'archipelago.gg'.\n\nIn 'port', enter the port, this is a 5-digit number that can be found on the Archipelago website after opening a new room.\n\nIn 'slot', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\ne.g. '{\"hostname\":\"archipelago\",\"port\":38281,\"slot\":\"YOURNAME\",\"password\":\"\"}'.\n\nFinally, you can launch the game and start a new run!",
 "kill",
 "[HEADER] Revert Infos",
 "kill",
