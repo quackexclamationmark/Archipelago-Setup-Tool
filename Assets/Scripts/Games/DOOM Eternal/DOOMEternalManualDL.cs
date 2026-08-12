@@ -28,6 +28,7 @@ public class DOOMEternalManualDL : MonoBehaviour
 
     [Header("LAUNCH OPTIONS")]
     public Toggle secondLaunchToggle;
+    public Toggle launchInjectorAfterSetupToggle;
 
     [Header("REVERT OPTIONS")]
     public Toggle removeAPModsOnlyToggle;
@@ -43,6 +44,8 @@ public class DOOMEternalManualDL : MonoBehaviour
     public GameObject infoPanel;
     public TextMeshProUGUI infoText;
     public Button infoOkButton;
+
+    private const string DOOM_ETERNAL_STEAM_APPID = "782330";
 
     private Process doometernalProcess;
     private string doometernalPath;
@@ -80,6 +83,9 @@ public class DOOMEternalManualDL : MonoBehaviour
 
         if (secondLaunchToggle != null)
             secondLaunchToggle.isOn = false;
+
+        if (launchInjectorAfterSetupToggle != null)
+            launchInjectorAfterSetupToggle.isOn = false;
 
         if (confirmationPanel != null)
             confirmationPanel.SetActive(false);
@@ -179,6 +185,11 @@ public class DOOMEternalManualDL : MonoBehaviour
             return;
         }
 
+        if (needsGamePath)
+        {
+            CreateSteamAppIdFile();
+        }
+
         int count =
             (modInjector ? 1 : 0) +
             (ap ? 1 : 0) +
@@ -218,6 +229,66 @@ public class DOOMEternalManualDL : MonoBehaviour
         StartCoroutine(InstallFlow());
     }
 
+    // Cree le fichier steam_appid.txt dans le dossier du jeu avec l'AppID de DOOM Eternal
+    void CreateSteamAppIdFile()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(doometernalPath))
+                return;
+
+            if (!Directory.Exists(doometernalPath))
+                Directory.CreateDirectory(doometernalPath);
+
+            string appIdPath = Path.Combine(doometernalPath, "steam_appid.txt");
+            File.WriteAllText(appIdPath, DOOM_ETERNAL_STEAM_APPID);
+
+            UnityEngine.Debug.Log("steam_appid.txt created at: " + appIdPath);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to create steam_appid.txt: " + e.Message);
+        }
+    }
+
+    // Lance start_injector_windows.bat avec les permissions administrateur
+    void LaunchInjectorAsAdmin()
+    {
+        string injectorPath = Path.Combine(documentsPath, "DOOM Eternal Archipelago", "client", "start_injector_windows.bat");
+
+        if (!File.Exists(injectorPath))
+        {
+            UnityEngine.Debug.LogWarning("Injector script not found at: " + injectorPath);
+            ShowInfo("ERROR: start_injector_windows.bat not found!");
+            return;
+        }
+
+        try
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = injectorPath,
+                WorkingDirectory = Path.GetDirectoryName(injectorPath),
+                UseShellExecute = true,
+                Verb = "runas"
+            };
+
+            Process.Start(startInfo);
+            UnityEngine.Debug.Log("Launched injector as admin: " + injectorPath);
+        }
+        catch (System.ComponentModel.Win32Exception e)
+        {
+            // Generalement declenche si l'utilisateur refuse l'invite UAC
+            UnityEngine.Debug.LogWarning("Injector launch cancelled or failed (UAC): " + e.Message);
+            ShowInfo("Injector launch was cancelled.");
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to launch injector as admin: " + e.Message);
+            ShowInfo("ERROR: Failed to launch injector\n" + e.Message);
+        }
+    }
+
     IEnumerator APWorldOnlyFlow()
     {
         yield return new WaitUntil(() => configLoaded);
@@ -232,6 +303,13 @@ public class DOOMEternalManualDL : MonoBehaviour
             ShowInfo("Launching DOOM Eternal...");
             LaunchDOOMEternal();
             yield return new WaitForSeconds(2f);
+        }
+
+        if (launchInjectorAfterSetupToggle != null && launchInjectorAfterSetupToggle.isOn)
+        {
+            ShowInfo("Launching Injector (Admin)...");
+            LaunchInjectorAsAdmin();
+            yield return new WaitForSeconds(1f);
         }
 
         ShowInfo("Installation complete!");
@@ -265,8 +343,9 @@ public class DOOMEternalManualDL : MonoBehaviour
 
             ShowInfo("Removing DOOM Eternal AP mods...");
 
-            // Remove only the DoomEternalArchipelagoPreAlpha.zip file from Mods
-            SafeDeleteFile(Path.Combine(modsPath, "DoomEternalArchipelagoPreAlpha.zip"));
+            // Supprime le zip AP en se basant sur le marqueur (nom variable), plus fiable qu'un nom fixe
+            RemoveOldAPModZip();
+            SafeDeleteFile(Path.Combine(modsPath, "apmod_zip_name.txt"));
 
             DeleteOldVersionFiles();
 
@@ -323,6 +402,9 @@ public class DOOMEternalManualDL : MonoBehaviour
         // Remove version files
         DeleteOldVersionFiles();
 
+        // Remove steam_appid.txt
+        SafeDeleteFile(Path.Combine(doometernalPath, "steam_appid.txt"));
+
         ShowInfo("Full clean completed!");
     }
 
@@ -330,6 +412,13 @@ public class DOOMEternalManualDL : MonoBehaviour
     {
         if (!Directory.Exists(modsPath))
             return false;
+
+        string knownApZipName = "";
+        string markerPath = Path.Combine(modsPath, "apmod_zip_name.txt");
+        if (File.Exists(markerPath))
+        {
+            try { knownApZipName = File.ReadAllText(markerPath).Trim(); } catch { }
+        }
 
         string[] files = Directory.GetFiles(modsPath);
         string[] dirs = Directory.GetDirectories(modsPath);
@@ -341,6 +430,13 @@ public class DOOMEternalManualDL : MonoBehaviour
             if (name.StartsWith("DOOM Eternal APMod Version") && name.EndsWith(".txt"))
                 continue;
 
+            if (name == "apmod_zip_name.txt")
+                continue;
+
+            if (!string.IsNullOrEmpty(knownApZipName) && name == knownApZipName)
+                continue;
+
+            // Compat rétro : ancien nom fixe
             if (name == "DoomEternalArchipelagoPreAlpha.zip")
                 continue;
 
@@ -391,6 +487,13 @@ public class DOOMEternalManualDL : MonoBehaviour
             ShowInfo("Launching DOOM Eternal...");
             LaunchDOOMEternal();
             yield return new WaitForSeconds(2f);
+        }
+
+        if (launchInjectorAfterSetupToggle != null && launchInjectorAfterSetupToggle.isOn)
+        {
+            ShowInfo("Launching Injector (Admin)...");
+            LaunchInjectorAsAdmin();
+            yield return new WaitForSeconds(1f);
         }
 
         ShowInfo("Installation complete!");
@@ -466,7 +569,6 @@ public class DOOMEternalManualDL : MonoBehaviour
 
         string apInstallPath = Path.Combine(documentsPath, "DOOM Eternal Archipelago");
         string downloadedFile = Path.Combine(Application.persistentDataPath, "DoomEternalArchipelago.zip");
-        string zipName = "DoomEternalArchipelagoPreAlpha.zip";
 
         UnityEngine.Debug.Log("Downloading DOOM Eternal AP from: " + doometernalAP.url);
 
@@ -500,39 +602,39 @@ public class DOOMEternalManualDL : MonoBehaviour
             yield break;
         }
 
-        string apZipInApFolder = "";
+        // On cherche le .zip qui se trouve A L'INTERIEUR du zip qu'on vient d'extraire,
+        // c'est celui-ci (et non le zip téléchargé lui-même) qui doit aller dans Mods.
+        string nestedZipPath = "";
         try
         {
-            apZipInApFolder = FindFile(apInstallPath, zipName);
-            if (!string.IsNullOrEmpty(apZipInApFolder))
-                UnityEngine.Debug.Log("Found AP zip inside DOOM Eternal Archipelago: " + apZipInApFolder);
+            nestedZipPath = FindFirstZip(apInstallPath);
+
+            if (!string.IsNullOrEmpty(nestedZipPath))
+                UnityEngine.Debug.Log("Found nested zip inside extracted AP folder: " + nestedZipPath);
             else
-                UnityEngine.Debug.Log("AP zip not found inside DOOM Eternal Archipelago; will fall back to downloaded zip.");
+                UnityEngine.Debug.LogWarning("No .zip found inside extracted AP folder.");
         }
         catch (System.Exception e)
         {
-            UnityEngine.Debug.LogWarning("Error while searching for AP zip inside folder: " + e.Message);
-            apZipInApFolder = "";
+            UnityEngine.Debug.LogWarning("Error while searching for nested zip: " + e.Message);
+            nestedZipPath = "";
         }
 
-        string sourceZipToCopy = !string.IsNullOrEmpty(apZipInApFolder) ? apZipInApFolder : downloadedFile;
-
-        try
+        if (string.IsNullOrEmpty(nestedZipPath))
         {
-            if (sourceZipToCopy == downloadedFile)
+            UnityEngine.Debug.LogWarning("Nothing to copy to Mods folder (no nested zip found).");
+
+            try
             {
-                string destInApFolder = Path.Combine(apInstallPath, zipName);
-                if (File.Exists(destInApFolder))
-                    File.Delete(destInApFolder);
-                File.Copy(downloadedFile, destInApFolder, true);
-                UnityEngine.Debug.Log("Copied downloaded zip into DOOM Eternal Archipelago folder: " + destInApFolder);
-                sourceZipToCopy = destInApFolder;
+                if (File.Exists(downloadedFile))
+                    File.Delete(downloadedFile);
             }
+            catch { }
+
+            yield break;
         }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogWarning("Could not copy downloaded zip into DOOM Eternal Archipelago folder: " + e.Message);
-        }
+
+        string modZipFileName = Path.GetFileName(nestedZipPath);
 
         try
         {
@@ -544,12 +646,18 @@ public class DOOMEternalManualDL : MonoBehaviour
                 modsPath = Path.Combine(doometernalPath, "Mods");
                 Directory.CreateDirectory(modsPath);
 
-                string modsZipPath = Path.Combine(modsPath, zipName);
+                // Nettoie l'éventuel ancien zip AP installé (le nom peut changer d'une version à l'autre)
+                RemoveOldAPModZip();
+
+                string modsZipPath = Path.Combine(modsPath, modZipFileName);
                 if (File.Exists(modsZipPath))
                     File.Delete(modsZipPath);
 
-                File.Copy(sourceZipToCopy, modsZipPath, true);
-                UnityEngine.Debug.Log("Copied AP zip into DOOM Eternal Mods folder: " + modsZipPath);
+                File.Copy(nestedZipPath, modsZipPath, true);
+                UnityEngine.Debug.Log("Copied nested AP zip into DOOM Eternal Mods folder: " + modsZipPath);
+
+                // Mémorise le nom exact du zip installé pour le revert et la détection d'autres mods
+                File.WriteAllText(Path.Combine(modsPath, "apmod_zip_name.txt"), modZipFileName);
             }
             else
             {
@@ -771,6 +879,13 @@ public class DOOMEternalManualDL : MonoBehaviour
             yield return new WaitForSeconds(2f);
         }
 
+        if (launchInjectorAfterSetupToggle != null && launchInjectorAfterSetupToggle.isOn)
+        {
+            ShowInfo("Launching Injector (Admin)...");
+            LaunchInjectorAsAdmin();
+            yield return new WaitForSeconds(1f);
+        }
+
         ShowInfo("Installation complete!");
     }
 
@@ -784,6 +899,13 @@ public class DOOMEternalManualDL : MonoBehaviour
             ShowInfo("Launching DOOM Eternal...");
             LaunchDOOMEternal();
             yield return new WaitForSeconds(2f);
+        }
+
+        if (launchInjectorAfterSetupToggle != null && launchInjectorAfterSetupToggle.isOn)
+        {
+            ShowInfo("Launching Injector (Admin)...");
+            LaunchInjectorAsAdmin();
+            yield return new WaitForSeconds(1f);
         }
 
         ShowInfo("Installation complete!");
@@ -805,6 +927,13 @@ public class DOOMEternalManualDL : MonoBehaviour
         {
             LaunchDOOMEternal();
             yield return new WaitForSeconds(2f);
+        }
+
+        if (launchInjectorAfterSetupToggle != null && launchInjectorAfterSetupToggle.isOn)
+        {
+            ShowInfo("Launching Injector (Admin)...");
+            LaunchInjectorAsAdmin();
+            yield return new WaitForSeconds(1f);
         }
 
         ShowInfo("Installation complete!");
@@ -842,7 +971,7 @@ public class DOOMEternalManualDL : MonoBehaviour
 
     void LaunchDOOMEternal()
     {
-        string exePath = Path.Combine(doometernalPath, "DOOMEternalx64.exe");
+        string exePath = Path.Combine(doometernalPath, "DOOMEternalx64vk.exe");
 
         if (!File.Exists(exePath))
             exePath = Path.Combine(doometernalPath, "DOOMEternal.exe");
@@ -936,6 +1065,43 @@ public class DOOMEternalManualDL : MonoBehaviour
         catch { }
 
         return "";
+    }
+
+    // Cherche le premier fichier .zip trouvé dans le dossier (recherche récursive)
+    string FindFirstZip(string root)
+    {
+        try
+        {
+            foreach (string file in Directory.GetFiles(root, "*.zip", SearchOption.AllDirectories))
+                return file;
+        }
+        catch { }
+
+        return "";
+    }
+
+    // Supprime l'ancien zip AP installé dans Mods, en se basant sur le marqueur
+    // (le nom du zip imbriqué peut changer d'une version à l'autre)
+    void RemoveOldAPModZip()
+    {
+        if (!Directory.Exists(modsPath))
+            return;
+
+        string markerPath = Path.Combine(modsPath, "apmod_zip_name.txt");
+
+        if (File.Exists(markerPath))
+        {
+            try
+            {
+                string oldName = File.ReadAllText(markerPath).Trim();
+                if (!string.IsNullOrEmpty(oldName))
+                    SafeDeleteFile(Path.Combine(modsPath, oldName));
+            }
+            catch { }
+        }
+
+        // Compat rétro : au cas où l'ancien nom fixe traîne encore d'une version précédente
+        SafeDeleteFile(Path.Combine(modsPath, "DoomEternalArchipelagoPreAlpha.zip"));
     }
 
     void CreateVersionFile(string modInjectorUrl, string apUrl, string meathookUrl)

@@ -178,6 +178,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Bomb Rush Cyberfunk", new List<string> { "Bomb", "Rush", "Cyberfunk", "Cyber", "Funk", "BRC" }));
         games.Add(CreateGame("Borderlands 2", new List<string> { "Borderlands", "2", "Borderlands2" }));
         games.Add(CreateGame("Bugsnax", new List<string> { "Bug", "Snax" }));
+        games.Add(CreateGame("Casualties: Unknown Demo", new List<string> { "Casualties", "Unknown", "CU", "Demo" }));
         games.Add(CreateGame("Celeste (Open World)", new List<string> { "Celeste", "Open", "World", "(Open World)" }));
         games.Add(CreateGame("Choo-Choo Charles", new List<string> { "Choo", "ChooChoo", "Choo-Choo", "Charles", "CCC" }));
         games.Add(CreateGame("Clair Obscur: Expedition 33", new List<string> { "Clair", "Obscur", "Expedition", "33", "COE33", "E33" }));
@@ -193,6 +194,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("DOOM Eternal", new List<string> { "Doom", "Eternal", "DoomEternal" }));
         games.Add(CreateGame("DREDGE", new List<string> { "Dredge" }));
         games.Add(CreateGame("Easy Delivery Co.", new List<string> { "Easy", "Delivery", "Co", "Co.", "EDC" }));
+        games.Add(CreateGame("ENDER MAGNOLIA: Bloom in the Mist", new List<string> { "ENDER", "MAGNOLIA", "Bloom", "In", "The", "Mist", "EMBITM" }));
         games.Add(CreateGame("Fez", new List<string> { "Fez" }));
         games.Add(CreateGame("Funi Raccoon Game", new List<string> { "Funi", "Raccoon", "Racoon", "Game", "FRG" }));
         games.Add(CreateGame("Garfield Kart - Furious Racing", new List<string> { "Garfield", "Kart", "Furious", "Racing", "GK", "FR" }));
@@ -247,6 +249,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Rift of the Necrodancer", new List<string> { "Rift", "Necrodancer", "ROtnD", "ROtN" }));
         games.Add(CreateGame("Risk Of Rain 2", new List<string> { "Risk", "Rain", "2", "II", "ROR2", "ROR", "ROR 2" }));
         games.Add(CreateGame("Rogue Legacy 2", new List<string> { "Rogue", "Legacy", "2", "RL", "RL2", "RL 2" }));
+        games.Add(CreateGame("Sayonara Wild Hearts", new List<string> { "Sayonara", "Wild", "Hearts", "SWH" }));
         games.Add(CreateGame("Schedule I", new List<string> { "Schedule", "1", "I" }));
         games.Add(CreateGame("Scritchy Scratchy", new List<string> { "Scritchy", "Scratchy", "SS", "ScritchyScratchy" }));
         games.Add(CreateGame("Skul: The Hero Slayer", new List<string> { "Skul", "Hero", "Slayer", "STHS" }));
@@ -259,9 +262,11 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Subnautica", new List<string> { "Subnautica" }));
         games.Add(CreateGame("SULFUR", new List<string> { "SULFUR" }));
         games.Add(CreateGame("Super Mario 64", new List<string> { "Super", "Mario", "64", "SM", "SM64" }));
+        games.Add(CreateGame("Super Meat Boy", new List<string> { "Super", "Meat", "Boy", "SMB" }));
         games.Add(CreateGame("Supermarket Simulator", new List<string> { "Supermarket", "Simulator", "SMS", "Super", "Market" }));
         games.Add(CreateGame("Super Smash Bros. Brawl - The Subspace Emissary", new List<string> { "Super", "Smash", "Bros", "Bros.", "Brawl", "Subspace", "Emissary", "The", "SSBB" }));
         games.Add(CreateGame("TCG Card Shop Simulator", new List<string> { "TCG", "Card", "Shop", "Simulator", "Trading", "TCGCSS" }));
+        games.Add(CreateGame("The Henry Stickmin Collection", new List<string> { "The", "Henry", "Stickmin", "Collection", "Stickman", "THSC", "HSC" }));
         games.Add(CreateGame("The Legend of Zelda: The Minish Cap", new List<string> { "Legend", "Zelda", "Minish", "Cap", "TLOZ", "TMC", "TLOZTMC", "TLOZ TMC", "The" }));
         games.Add(CreateGame("The Legend of Zelda: The Wind Waker", new List<string> { "Legend", "Zelda", "Wind", "Waker", "TLOZ", "WW", "TLOZWW", "TWW", "TLOZTWW", "The" }));
         games.Add(CreateGame("The Legend of Zelda: Twilight Princess", new List<string> { "Legend", "Zelda", "Twilight", "Princess", "TLOZ", "TP", "TLOZTP" }));

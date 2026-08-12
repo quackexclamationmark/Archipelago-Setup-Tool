@@ -110,6 +110,11 @@ public class GamePanelManager : MonoBehaviour
     public GameObject bugsnaxPanel;
     public GameObject mkddPanel;
     public GameObject metfusPanel;
+    public GameObject magnoliaPanel;
+    public GameObject cudemoPanel;
+    public GameObject thscPanel;
+    public GameObject smbPanel;
+    public GameObject swhPanel;
 
     void Start()
     {
@@ -443,6 +448,21 @@ public class GamePanelManager : MonoBehaviour
             case "MetroidFusion":
                 metfusPanel.SetActive(true);
                 break;
+            case "ENDERMAGNOLIA":
+                magnoliaPanel.SetActive(true);
+                break;
+            case "CasualtiesUnknownDemo":
+                cudemoPanel.SetActive(true);
+                break;
+            case "TheHenryStickminCollection":
+                thscPanel.SetActive(true);
+                break;
+            case "SuperMeatBoy":
+                smbPanel.SetActive(true);
+                break;
+            case "SayonaraWildHearts":
+                swhPanel.SetActive(true);
+                break;
         }
     }
 
@@ -555,5 +575,10 @@ public class GamePanelManager : MonoBehaviour
         if (bugsnaxPanel != null) bugsnaxPanel.SetActive(false);
         if (mkddPanel != null) mkddPanel.SetActive(false);
         if (metfusPanel != null) metfusPanel.SetActive(false);
+        if (magnoliaPanel != null) magnoliaPanel.SetActive(false);
+        if (cudemoPanel != null) cudemoPanel.SetActive(false);
+        if (thscPanel != null) thscPanel.SetActive(false);
+        if (smbPanel != null) smbPanel.SetActive(false);
+        if (swhPanel != null) swhPanel.SetActive(false);
     }
 }
