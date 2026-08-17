@@ -114,7 +114,7 @@
     "bo3AP": "https://github.com/colin969/bo3_archipelago/releases/download/0.5.7/BO3APMod-CurrentPatch.zip",
     "bo3APDownpatch": "https://github.com/colin969/bo3_archipelago/releases/download/0.5.7/BO3APMod-Downgraded.zip",
 
-    "btd6AP": "https://github.com/Matt41321/BloonsArchipelago/releases/download/0.9.0/BloonsArchipelago.dll",
+    "btd6AP": "https://github.com/Matt41321/BloonsArchipelago/releases/download/0.9.1/BloonsArchipelago.dll",
     "btd6MelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
     "btd6Apworld": "https://github.com/Matt41321/Archipelago/releases/download/v0.7.1/bloonstd6.apworld",
     "btd6ModHelper": "https://github.com/gurrenm3/BTD-Mod-Helper/releases/download/3.6.8/Btd6ModHelper.dll",
@@ -256,8 +256,8 @@
     "lethalcompanyMonoDetourBep5": "https://thunderstore.io/package/download/MonoDetour/MonoDetour_BepInEx_5/0.7.15/",
     "lethalcompanyMonoDetour": "https://thunderstore.io/package/download/MonoDetour/MonoDetour/0.7.15/",
     
-    "librarianAP": "https://github.com/Str8UpWHITE64/Librarian-AP/releases/download/2.0.0/Librarian-AP_v2.0.0.zip",
-    "librarianApworld": "https://github.com/Str8UpWHITE64/Librarian-AP/releases/download/2.0.0/librarian.apworld",
+    "librarianAP": "https://github.com/Str8UpWHITE64/Librarian-AP/releases/download/2.0.1/Librarian-AP_v2.0.1.zip",
+    "librarianApworld": "https://github.com/Str8UpWHITE64/Librarian-AP/releases/download/2.0.1/librarian.apworld",
 
     "luigismansionApworld": "https://github.com/BootsinSoots/Archipelago/releases/download/V0.6.4/luigismansion.apworld",
     "luigismansionDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
@@ -366,8 +366,8 @@
     "pokeparkwiiApworld": "https://github.com/Mekurushi/Archipelago_Pokepark/releases/download/1.2.5/pokepark.apworld",
     "pokeparkwiiDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
-    "portal2AP": "https://github.com/GlassToadstool/Portal2ArchipelagoMod/releases/download/0.8.0/Portal2Archipelago.zip",
-    "portal2Apworld": "https://github.com/GlassToadstool/Portal2ArchipelagoMod/releases/download/0.8.0/portal2.apworld",
+    "portal2AP": "https://github.com/GlassToadstool/Portal2ArchipelagoMod/releases/download/0.8.1/Portal2Archipelago.zip",
+    "portal2Apworld": "https://github.com/GlassToadstool/Portal2ArchipelagoMod/releases/download/0.8.1/portal2.apworld",
 
     "powerwashAP": "https://github.com/SWCreeperKing/PowerwashSimAP/releases/download/v0.5.14/SW_CreeperKing.ArchipelagoMod.zip",
     "powerwashBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v6.0.0-pre.1/BepInEx_UnityIL2CPP_x64_6.0.0-pre.1.zip",
@@ -379,8 +379,8 @@
 
     "raftAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-RMLL-Raft.zip",
 
-    "refunctAP": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.3.2/practice-windows.zip",
-    "refunctApworld": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.3.2/refunct.apworld",
+    "refunctAP": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v.1.4.0/practice-windows.zip",
+    "refunctApworld": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v.1.4.0/refunct.apworld",
 
     "repoPathName": "REPO",
     "repoAP": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.3/RepoAP.zip",
@@ -454,11 +454,11 @@
     "skulAP": "https://github.com/Jeffdev-Archipelago-Implementations/SkulAPMod/releases/download/1.0.0/SkulAPMod.zip",
     "skulBepInEx": "https://thunderstore.io/package/download/BepInEx/BepInExPack_Skul/5.4.2100/",
 
-    "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/1.0.0/sts2-client.zip",
-    "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/1.0.0/spire2.apworld",
+    "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/1.0.1/sts2-client.zip",
+    "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/1.0.1/spire2.apworld",
 
-    "slimerancherAP": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.2/Slimipelago.zip",
-    "slimerancherApworld": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.2/slime_rancher.apworld",
+    "slimerancherAP": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.2.1/Slimipelago.zip",
+    "slimerancherApworld": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.2.1/slime_rancher.apworld",
     "slimerancherMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.1/MelonLoader.x64.zip",
 
     "slimerancher2AP": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.12.2/SlimeRancher2-AP.zip",
@@ -501,8 +501,8 @@
     "smbApworld": "https://github.com/PixelShake92/Super-Meat-Boy-AP/releases/download/Alpha_2/super_meat_boy.apworld",
     "smbAP": "https://github.com/PixelShake92/Super-Meat-Boy-AP/releases/download/Alpha_2/SMB_Archipelago_Client.exe",
 
-    "supermarketsimApworld": "https://github.com/Lemix028/SupermarketSimulator-Archipelago/releases/download/v0.3.1/supermarket_simulator.apworld",
-    "supermarketsimAP": "https://github.com/Lemix028/SupermarketSimulator-Archipelago/releases/download/v0.3.1/SupermarketArchipelago_Client_v0.3.1.zip",
+    "supermarketsimApworld": "https://github.com/Lemix028/SupermarketSimulator-Archipelago/releases/download/v0.3.2/supermarket_simulator.apworld",
+    "supermarketsimAP": "https://github.com/Lemix028/SupermarketSimulator-Archipelago/releases/download/v0.3.2/SupermarketArchipelago_Client_v0.3.2.zip",
     "supermarketsimBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
 
     "ssbbMinus": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Minus%20Launcher.elf",
