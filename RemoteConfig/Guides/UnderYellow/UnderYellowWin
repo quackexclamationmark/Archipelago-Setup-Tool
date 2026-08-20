@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• Undertale Yellow copy\n• undertale_yellow.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, undertale_yellow.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. Then, a copy of Undertale Yellow will be installed in the Archipelago directory too.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Undertale Yellow is not a core Archipelago game, it needs a custom world file. When 'undertale_yellow.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, (re)open the Archipelago Launcher and open the 'Undertale Yellow Client'.\n\nIn the bottom input field type '/patch' and once the game was patched, you can connect to the client as you would normally do with any other text client. Finally, go back to my tool and on the Undertale Yellow setup tab, click the orange folder icon, this should take you to the Archipelago directory, go to the folder that is called something like 'Undertale Yellow v-x-x-x' and launch 'Undertale Yellow.exe'.",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will simply delete the Undertale Yellow copy that was downloaded.",
+"clear"
+
+]
