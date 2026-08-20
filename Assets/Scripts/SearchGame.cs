@@ -203,6 +203,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Hi-Fi Rush", new List<string> { "HiFi", "Hi-Fi", "Hi", "Fi", "Rush" }));
         games.Add(CreateGame("HITMAN: World of Assassination", new List<string> { "Hitman", "World", "Assassination", "WoA" }));
         games.Add(CreateGame("Hollow Knight", new List<string> { "Hollow", "Knight", "HK" }));
+        games.Add(CreateGame("Hollow Knight", new List<string> { "Hollow", "Knight", "Silksong", "HKS", "HK" }));
         games.Add(CreateGame("HuniePop", new List<string> { "Hunie", "Pop", "HuniePop 1", "HuniePop1", "Hunie Pop", "Hunie Pop 1" }));
         games.Add(CreateGame("HuniePop 2: Double Date", new List<string> { "Hunie", "Pop", "HuniePop 2", "HuniePop2", "Hunie Pop", "Hunie Pop 2", "Double Date", "HuniePop Double Date", "Double", "Date", "Hunie Pop Double Date", "HuniePop 2 Double Date", "Hunie Pop 2 Double Date" }));
         games.Add(CreateGame("I Am Your Beast", new List<string> { "I", "Am", "Your", "Beast", "IAYB", "IAMYB", "IAmYourBeast" }));
@@ -263,8 +264,9 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("SULFUR", new List<string> { "SULFUR" }));
         games.Add(CreateGame("Super Mario 64", new List<string> { "Super", "Mario", "64", "SM", "SM64" }));
         games.Add(CreateGame("Super Meat Boy", new List<string> { "Super", "Meat", "Boy", "SMB" }));
-        games.Add(CreateGame("Supermarket Simulator", new List<string> { "Supermarket", "Simulator", "SMS", "Super", "Market" }));
         games.Add(CreateGame("Super Smash Bros. Brawl - The Subspace Emissary", new List<string> { "Super", "Smash", "Bros", "Bros.", "Brawl", "Subspace", "Emissary", "The", "SSBB" }));
+        games.Add(CreateGame("SUPERHOT", new List<string> { "SUPER", "HOT", "SH" }));
+        games.Add(CreateGame("Supermarket Simulator", new List<string> { "Supermarket", "Simulator", "SMS", "Super", "Market" }));
         games.Add(CreateGame("TCG Card Shop Simulator", new List<string> { "TCG", "Card", "Shop", "Simulator", "Trading", "TCGCSS" }));
         games.Add(CreateGame("The Henry Stickmin Collection", new List<string> { "The", "Henry", "Stickmin", "Collection", "Stickman", "THSC", "HSC" }));
         games.Add(CreateGame("The Legend of Zelda: The Minish Cap", new List<string> { "Legend", "Zelda", "Minish", "Cap", "TLOZ", "TMC", "TLOZTMC", "TLOZ TMC", "The" }));
@@ -277,6 +279,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("TUNIC", new List<string> { "Tunic" }));
         games.Add(CreateGame("Ultimate Custom Night", new List<string> { "Ultimate", "Custom", "Night", "UCN", "UltimateCustom", "FNAF", "Five", "Nights", "at", "Freddy", "Freddy's", "FNAF UCN" }));
         games.Add(CreateGame("ULTRAKILL", new List<string> { "Ultra", "Kill" }));
+        games.Add(CreateGame("Undertale Yellow", new List<string> { "Undertale", "Yellow" }));
         games.Add(CreateGame("Unfair Flips", new List<string> { "Unfair", "Flips" }));
         games.Add(CreateGame("Untitled Goose Game", new List<string> { "Untitled", "Goose", "Game", "UGG" }));
         games.Add(CreateGame("Voices Of The Void", new List<string> { "Voices", "Void", "Votv" }));

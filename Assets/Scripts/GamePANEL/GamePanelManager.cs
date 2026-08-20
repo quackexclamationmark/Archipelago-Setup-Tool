@@ -115,6 +115,9 @@ public class GamePanelManager : MonoBehaviour
     public GameObject thscPanel;
     public GameObject smbPanel;
     public GameObject swhPanel;
+    public GameObject silksongPanel;
+    public GameObject superhotPanel;
+    public GameObject undertaleyellowPanel;
 
     void Start()
     {
@@ -463,6 +466,15 @@ public class GamePanelManager : MonoBehaviour
             case "SayonaraWildHearts":
                 swhPanel.SetActive(true);
                 break;
+            case "HollowKnightSilksong":
+                silksongPanel.SetActive(true);
+                break;
+            case "SUPERHOT":
+                superhotPanel.SetActive(true);
+                break;
+            case "UndertaleYellow":
+                undertaleyellowPanel.SetActive(true);
+                break;
         }
     }
 
@@ -580,5 +592,8 @@ public class GamePanelManager : MonoBehaviour
         if (thscPanel != null) thscPanel.SetActive(false);
         if (smbPanel != null) smbPanel.SetActive(false);
         if (swhPanel != null) swhPanel.SetActive(false);
+        if (silksongPanel != null) silksongPanel.SetActive(false);
+        if (superhotPanel != null) superhotPanel.SetActive(false);
+        if (undertaleyellowPanel != null) undertaleyellowPanel.SetActive(false);
     }
 }
