@@ -182,7 +182,7 @@
 
     "doom2AP": "https://github.com/Daivuk/apdoom/releases/download/1.2.0/APDOOM-1_2_0-Win32.zip",
 
-    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.3.9/DoomEternalArchipelagoPlayableTest-v0.3.9-alpha.zip",
+    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.4.0/DoomEternalArchipelago-v0.4.0-beta.4-windows-x86_64.zip",
     "doometernalMeathook": "https://github.com/brongo/m3337ho0o0ok/releases/download/v7.2/XINPUT1_3.dll",
     "doometernalModInjector": "https://gamebanana.com/dl/1765017",
     "doometernalApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/doometernal.apworld",
@@ -362,7 +362,7 @@
     "pokemonsnapApworld": "https://github.com/nielrenned/PokemonSnap_Archipelago/releases/download/v0.6.1/pokemon_snap.apworld",
     "pokemonsnapProject64": "https://www.pj64-emu.com/file/setup-project64-3-0-1-5664-2df3434/",
 
-    "pokeparkwiiAP": "https://github.com/Mekurushi/pokeparkrando/releases/download/1.2.3/windows-x64.zip",
+    "pokeparkwiiAP": "https://github.com/Mekurushi/pokeparkrando/releases/download/1.2.4/windows-x64.zip",
     "pokeparkwiiApworld": "https://github.com/Mekurushi/Archipelago_Pokepark/releases/download/1.2.5/pokepark.apworld",
     "pokeparkwiiDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
@@ -474,7 +474,7 @@
     "spelunky2Apworld": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.4.0/spelunky2.apworld",
     "spelunky2Playlunky": "https://github.com/spelunky-fyi/Playlunky/releases/download/nightly/playlunky_nightly_63FB520.zip",
 
-    "stardewvalleyAP": "https://github.com/agilbert1412/StardewArchipelago/releases/download/8.0.26/StardewArchipelago.8.0.26.zip",
+    "stardewvalleyAP": "https://github.com/agilbert1412/StardewArchipelago/releases/download/8.1.0/StardewArchipelago.8.1.0.zip",
     "stardewvalleyPreloaded": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-SV-Archipelago.zip",
     
     "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.3/Archipelago_193.zip",
