@@ -2,11 +2,11 @@
 
 "[HEADER] Downloaded",
 "kill",
-"• DOOM Eternal Mod Injector (Mods, new files in 'base', EternalModInjector.bat, EternalModManager.exe)\n• DOOM Eternal Archipelago (Archipelago Mod)\n• Meathook framework (XINPUT1_3.dll)\n• doometernal.apworld",
+"• DOOM Eternal Archipelago (Archipelago Mod)\n• doometernal.apworld",
 "kill",
 "[HEADER] Installation Infos",
 "kill",
-"When you click 'START SETUP' in the 'SETUP' tab, doometernal.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. The Mod Injector and XINPUT1_3.dll (Meathook) will be installed inside the game's core directory, then, the AP Mod client (DOOM Eternal Archipelago) is installed inside 'Documents' and the '.zip' mod pack will be moved to the 'Mods' folder inside the game's folder.",
+"When you click 'START SETUP' in the 'SETUP' tab, doometernal.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. Then, the AP Mod client (DOOM Eternal Archipelago) is installed inside 'Documents'.",
 "kill",
 "[HEADER] apworld / yaml Infos",
 "kill",
@@ -14,7 +14,7 @@
 "kill",
 "[HEADER] Connection Infos",
 "kill",
-"Once everything is setup, (re)start the Archipelago Launcher, look for 'DOOM Eternal Client' and open it. It will ask you to select:\n\n- The AP Client directory\n(should be: Documents\DOOM Eternal Archipelago\client)\n\n- DOOM Eternal's installation\n(should be: C:\Program Files (x86)\Steam\steamapps\common\DOOMEternal)\n\n- DOOM Saved Games\n(should be: C:\Users\YOUR NAME\Saved Games\id Software\DOOMEternal)\n\nAfter that, it will open a Text Client, connect to it like you'd normally do with any client.\n\nWhen you're connected, launch DOOM Eternal through Steam and if it opens the launcher, select 'Play DOOM Eternal' NOT WITH MODS!\n\nAfter launching the game, go to 'DOOM Eternal Archipelago\client' folder inside your Documents directory and double-click 'start_injector_windows.bat'.\n\nYou can go back to the game, start a new save and in the command console opened by start_injector_windows.bat, a message saying 'RPC Memory OPEN' (CLOSED if you pause) should show up.\n\nIf it shows up, it should be working :)\n\nIf the message doesn't show up, check the 'Troubleshoot' section.",
+"Once everything is setup, go to the 'DOOM Eternal Archipelago' folder in your 'Documents' directory and open 'DoomEternalArchipelagoLauncher.exe'. Go to the 'JOIN ROOM' tab.\n\nIn the 'SERVER' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'PLAYER', enter the name assigned to your YAML file.\n\nThe 'PASSWORD' field is optional.\n\nFinally, click 'CONNECT', doing so should take you to the 'SESSION' tab. On this window, press 'INSTALL MOD', it should open a new command window, skip everything and go back to the 'DOOM Eternal Archipelago Launcher' to complete the setup (if you get a red/error message on the ModIjector window, see the 'Troubleshoot' window).\n\nAfter everything is complete, you will have to start the game through Steam (NOT 'With Mods' if it starts with the launcher). Once on the game, start a fresh new save and you can start playing!",
 "kill",
 "[HEADER] Revert Infos",
 "kill",
@@ -22,7 +22,7 @@
 "kill",
 "[HEADER] Troubleshoot",
 "kill",
-"If the 'RPC memory gate OPEN' message doesn't show up and/or that you're not receiving any check, you can try 3 things:\n\n1- Close everthing and verify the game's files through the games 'Properties' on Steam and try again.\n\n2- Open the game using the 'EternalModInjector.bat' file present in your game files and try again.\n\n3- If none of them work disconnect from the Multiworld and move the 'DOOM Eternal Archipelago' folder inside Documents to another directory. Then, delete the 'ap_config.json' file inside 'DOOM Eternal Archipelago\\client' and restart the client on the Archipelago Launcher.",
+"If the 'ModInjector' command prompt shows a red message after trying to install the mods with the launcher, simply verify DOOM Eternal's files integrity in your Steam library. Then, go back to the DOOM Eternal AP Launcher and retry the installation.",
 "clear"
 
 ]
