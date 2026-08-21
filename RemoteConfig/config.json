@@ -106,8 +106,8 @@
     "balatroLovely": "https://github.com/ethangreen-dev/lovely-injector/releases/download/v0.9.0/lovely-x86_64-pc-windows-msvc.zip",
     "balatroSteamodded": "https://github.com/Steamodded/smods/archive/refs/tags/1.0.0-beta-1620a.zip",
 
-    "batimApworld": "https://github.com/Lorecrafter703/BendyAndTheArchipelagoMachine/releases/download/v1.2.1/batim.apworld",
-    "batimAP": "https://github.com/Lorecrafter703/BendyAndTheArchipelagoMachine/releases/download/v1.2.1/Lorecrafter703-Bendy_and_the_Archipelago_Machine.zip",
+    "batimApworld": "https://github.com/Lorecrafter703/BendyAndTheArchipelagoMachine/releases/download/v1.3.0-Prerelease/batim.apworld",
+    "batimAP": "https://github.com/Lorecrafter703/BendyAndTheArchipelagoMachine/releases/download/v1.3.0-Prerelease/Lorecrafter703-Bendy_and_the_Archipelago_Machine.zip",
     "batimBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
     "bo3Apworld": "https://github.com/colin969/bo3_archipelago/releases/download/0.5.7/cod_bo3.apworld",
@@ -163,7 +163,7 @@
     "contentwarningBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "contentwarningMycelium": "https://github.com/RugbugRedfern/Mycelium-Networking-For-Content-Warning/releases/download/v1.0.14/MyceliumNetworkingForCW-Debug.dll",
 
-    "cupheadAP": "https://github.com/JKLeckr/CupheadArchipelagoMod/releases/download/alpha03g.2/CupheadArchipelago-alpha03g.2_win64.zip",
+    "cupheadAP": "https://github.com/JKLeckr/CupheadArchipelagoMod/releases/download/alpha03g.3/CupheadArchipelago-alpha03g.3_win64.zip",
     "cupheadApworld": "https://github.com/JKLeckr/Archipelago-cuphead/releases/download/alpha03i/cuphead.apworld",
     "cupheadBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
@@ -191,8 +191,8 @@
     "dredgeApworld": "https://github.com/alextric234/ArchipelagoDredge/releases/download/dredge_0.5.1/dredge.apworld",
 
     "easydeliverycoBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
-    "easydeliverycoAP": "https://github.com/Aeromaze/Archipelago/releases/download/v0.2.0/EasyDeliveryAP-0.2.0.zip",
-    "easydeliverycoApworld": "https://github.com/Aeromaze/Archipelago/releases/download/v0.2.0/easy_delivery_co.apworld",
+    "easydeliverycoAP": "https://github.com/Aeromaze/Archipelago/releases/download/v0.2.1/EasyDeliveryAP-0.2.1.zip",
+    "easydeliverycoApworld": "https://github.com/Aeromaze/Archipelago/releases/download/v0.2.1/easy_delivery_co.apworld",
     "easydeliverycoAPI": "https://github.com/foxfoxfoxgay/EasyDeliveryAPI/releases/download/1.0.0/EasyDeliveryAPI.zip.zip",
 
     "endermagnoliaApworld": "https://github.com/Trexounay/EnderLilies.Archipelago/releases/download/endermagnolia-v0.1.2/endermagnolia.apworld",
@@ -237,8 +237,8 @@
     "huniepop2Apworld": "https://github.com/DotsofdarknessArchipelago/HuniePop2Archipelago/releases/download/v3.1.0/huniepop2.apworld",
 
     "iaybBepInEx": "https://thunderstore.io/package/download/BepInEx/BepInExPack/5.4.2305/",
-    "iaybAP": "https://github.com/petiboy7/IAYBArchipelago/releases/download/0.3.3a/IAmYourBeast.zip",
-    "iaybApworld": "https://github.com/petiboy7/IAYBArchipelago/releases/download/0.3.3a/i_am_your_beast.apworld",
+    "iaybAP": "https://github.com/petiboy7/IAYBArchipelago/releases/download/0.3.4/IAmYourBeast.zip",
+    "iaybApworld": "https://github.com/petiboy7/IAYBArchipelago/releases/download/0.3.4/i_am_your_beast.apworld",
 
     "kspAP": "https://github.com/nickdavies/KSP1-Archipelago-client/releases/download/v0.8.0/KSPArchipelago.zip",
     "kspApworld": "https://github.com/nickdavies/Archipelago/releases/download/v0.8.4/ksp1.apworld",
@@ -318,9 +318,9 @@
     "pmttydApworld": "https://github.com/jamesbrq/ArchipelagoTTYD/releases/download/v0.12.1a/ttyd.apworld",
     "pmttydDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
-    "peakAP": "https://github.com/Mickemoose/peak-archipelago/releases/download/0.6.0/peakpelago_0.6.0.zip",
+    "peakAP": "https://github.com/Mickemoose/peak-archipelago/releases/download/0.6.1/peakpelago_0.6.1.zip",
     "peakBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
-    "peakApworld": "https://github.com/Mickemoose/peak-archipelago/releases/download/0.6.0/peak.apworld",
+    "peakApworld": "https://github.com/Mickemoose/peak-archipelago/releases/download/0.6.1/peak.apworld",
     
     "peaksofyoreAP": "https://thunderstore.io/package/download/c0der23/PeaksOfArchipelago/2.2.1/",
     "peaksofyoreBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
@@ -554,7 +554,7 @@
     "ultrakillBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "ultrakillPluginConfigurator": "https://thunderstore.io/package/download/EternalsTeam/PluginConfigurator/1.10.2/",
 
-    "undertaleyellowApworld": "https://github.com/Pugie38/Undertale-Yellow-AP/releases/download/v0.2.1/undertale_yellow.apworld",
+    "undertaleyellowApworld": "https://github.com/Pugie38/Undertale-Yellow-AP/releases/download/v0.2.2/undertale_yellow.apworld",
     "undertaleyellowDL": "https://github.com/quackexclamationTesting/Preloaded-Archipelago-Setup-Tool-Mods/releases/download/UndertaleYellow/undertale-yellow-v-1-3-1.zip",
 
     "unfairflipsApworld": "https://github.com/xMcacutt-Archipelago/Archipelago-UnfairFlips/releases/download/1.2.1/unfair_flips.apworld",
