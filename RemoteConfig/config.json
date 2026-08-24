@@ -23,7 +23,9 @@
     ],
 
     "xboxSearchPaths": [
-        "XboxGames"
+        "XboxGames",
+        "Program Files (x86)\\XboxGames",
+        "Program Files\\XboxGames",
     ],
     
     "r2modmanDL": "https://thunderstore.io/c/lethal-company/p/ebkr/r2modman/",
