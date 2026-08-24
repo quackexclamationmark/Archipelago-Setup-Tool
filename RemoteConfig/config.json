@@ -153,7 +153,8 @@
 
     "cccharlesAP": "https://github.com/lgbarrere/CCCharles-Random/releases/download/v0.0.3-beta/CCCharles_Random.zip",
 
-    "clairobscurAP": "https://github.com/Demorck/ClairObscurArchipelagoRandomizer/releases/download/v0.3.1/COE33_Client_Steam.zip",
+    "clairobscurAPSteam": "https://github.com/Demorck/ClairObscurArchipelagoRandomizer/releases/download/v0.3.1/COE33_Client_Steam.zip",
+    "clairobscurAPXBOX": "https://github.com/Demorck/ClairObscurArchipelagoRandomizer/releases/download/v0.3.1/COE33_Client_Gamepass.zip",
     "clairobscurApworld": "https://github.com/Demorck/ClairObscur_APWorld/releases/download/v0.2.1/clair_obscur.apworld",
 
     "cloverpitAP": "https://thunderstore.io/package/download/Syntheal/CloverPit_Archipelago/1.2.2/",
@@ -388,8 +389,8 @@
 
     "raftAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-RMLL-Raft.zip",
 
-    "refunctAP": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.5.0a/practice-windows.zip",
-    "refunctApworld": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.5.0a/refunct.apworld",
+    "refunctAP": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.5.1/practice-windows.zip",
+    "refunctApworld": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.5.1/refunct.apworld",
 
     "repoPathName": "REPO",
     "repoAP": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.3/RepoAP.zip",
