@@ -1,0 +1,28 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• LOP Archipelago Mod\n• liesofp.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, liesofp.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. The AP Mod files will then be downloaded into the game's core files.\nDownloading the mods will place them inside already existing folders but it can be reverted (check revert infos). Using UE4SS for mod loading.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Lies of P is not a core Archipelago game, it needs a custom world file. When 'liesofp.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, start a fresh NEW save.\n\nOnce you have created a new save, press 'ENTER' or '/', then, type '/connect archipelago.gg:XXXXX [slotname]'\n\nXXXXX is the room’s port. You can find this number on the website after creating a new room.\n\n'[slotname]' is the name assigned to your yaml file.\n\nYou can also type the password at the end (after the slot name if the host set one).\n\nFinally, press enter and you should see a few messages appear on the right-side of your screen saying that you're connected or, that there was an error.",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will revert all the changes that were made to the game's files. As simple as that.",
+"kill",
+"[HEADER] PopTracker Infos",
+"kill",
+"Some games have a PopTracker integration for Archipelago which allows you to track all possible Locations, Items, Upgrades, Zones, Hints and more depending on the game.\n\nFor the setup there are 3 different cases:\n\n\t• If the selected directory does not contain a PopTracker folder (or any similarly named folder), a new 'poptracker' folder will be created and the pack will be downloaded to poptracker\\packs.\n\n\t• If the selected directory already contains a folder with 'PopTracker' in its name, the installer will look for a poptracker.exe file. If one is found, the pack will be downloaded to its packs folder. If no poptracker.exe is found, the folder will be renamed to 'poptracker' and any missing files or folders will be created.\n\n\t• If the selected directory is already a PopTracker folder (for example: C:\\Users\\magni\\Documents\\poptracker), its contents will be validated. If everything is present, the pack will simply be downloaded to poptracker\\packs. Otherwise, the folder will be repaired before the pack is installed.",
+"clear"
+
+]
