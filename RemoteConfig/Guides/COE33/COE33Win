@@ -6,7 +6,7 @@
 "kill",
 "[HEADER] Installation Infos",
 "kill",
-"When you click 'START SETUP' in the 'SETUP' tab, clair_obscur.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. The AP Mod folder will then be downloaded into the game's core files.\nDownloading the mods will place them inside already existing folders but it can be reverted (check revert infos).",
+"When you click 'START SETUP' in the 'SETUP' tab, clair_obscur.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. The AP Mod folder will then be downloaded into the game's core files.\nDownloading the mods will place them inside already existing folders but it can be reverted (check revert infos). Using UE4SS for mod loading.",
 "kill",
 "[HEADER] apworld / yaml Infos",
 "kill",
