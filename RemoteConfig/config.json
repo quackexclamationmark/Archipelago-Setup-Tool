@@ -282,6 +282,10 @@
     "mkwiiAP": "https://github.com/toent/Archipelago-MKWii/releases/download/v0.2.3/mkwii_client_win_v0.2.3.zip",
     "mkwiiDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
+    "metalhellApworld": "https://github.com/DanielSchaack/ArchipelagoMetalHellsinger/releases/download/1.0.0/metal_hellsinger.apworld",
+    "metalhellAP": "https://github.com/DanielSchaack/Metal-Hellsinger-AP-Mod/releases/download/1.0.1/MetalHellsingerApMod.zip",
+    "metalhellBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
+
     "metfusApworld": "https://github.com/StalledStorm/ArchipelagoMine/releases/download/v1.22.4/metroidfusion.apworld",
     "metfusBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
