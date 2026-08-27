@@ -600,6 +600,9 @@
     "votvDL": "https://r2.votv.dev/archive/votv/090n.7z",
     "votvFileName": "Voices Of The Void v0.9.0n",
 
+    "ytgvAP": "https://github.com/soopercool101/YellowTaxiAP/releases/download/v0.6.0/YTGVAP.v0.6.0.zip",
+    "ytgvApworld": "https://github.com/soopercool101/Archipelago/releases/download/YTGV.v0.6.1/yellowtaxi.apworld",
+
     "toolVersions": {
         "0.2.0": "obsolete",
         "0.2.1": "obsolete",
