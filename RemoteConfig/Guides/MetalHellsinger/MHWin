@@ -2,12 +2,11 @@
 
 "[HEADER] Downloaded",
 "kill",
-"• BepInEx (+ dotnet, .doorstop_version, doorstop_config.ini, changelog.txt & winhttp.dll)\n• MetalHellsinger Archipelago folder + MMHOOK (Archipelago Mod)\n• metal_hellsinger.apworld",
+"• BepInEx (+ dotnet, .doorstop_version, doorstop_config.ini, changelog.txt & winhttp.dll)\n• MetalHellsinger Archipelago folder\n• metal_hellsinger.apworld",
 "kill",
 "[HEADER] Installation Infos",
 "kill",
-"When you click 'START SETUP' in the 'SETUP' tab, metal_hellsinger.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. 
-BepInEx will then be downloaded into the Metal Hellsinger core files, along with the AP Mod and the MMHOOK folders, which will be placed in BepInEx\\plugins.",
+"When you click 'START SETUP' in the 'SETUP' tab, metal_hellsinger.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. BepInEx will then be downloaded into the Metal Hellsinger core files, along with the AP Mod folder, which will be placed in BepInEx\\plugins.",
 "kill",
 "[HEADER] apworld / yaml Infos",
 "kill",
