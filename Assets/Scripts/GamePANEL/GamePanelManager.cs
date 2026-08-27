@@ -118,6 +118,12 @@ public class GamePanelManager : MonoBehaviour
     public GameObject silksongPanel;
     public GameObject superhotPanel;
     public GameObject undertaleyellowPanel;
+    public GameObject tabsPanel;
+    public GameObject lopPanel;
+    public GameObject p5rPanel;
+    public GameObject vsPanel;
+    public GameObject metalhPanel;
+    public GameObject ytgvPanel;
 
     void Start()
     {
@@ -475,6 +481,24 @@ public class GamePanelManager : MonoBehaviour
             case "UndertaleYellow":
                 undertaleyellowPanel.SetActive(true);
                 break;
+            case "TotallyAccurateBattleSimulator":
+                tabsPanel.SetActive(true);
+                break;
+            case "LiesOfP":
+                lopPanel.SetActive(true);
+                break;
+            case "Persona5Royal":
+                p5rPanel.SetActive(true);
+                break;
+            case "VampireSurvivors":
+                vsPanel.SetActive(true);
+                break;
+            case "MetalHellsinger":
+                metalhPanel.SetActive(true);
+                break;
+            case "YellowTaxiGoesVroom":
+                ytgvPanel.SetActive(true);
+                break;
         }
     }
 
@@ -595,5 +619,11 @@ public class GamePanelManager : MonoBehaviour
         if (silksongPanel != null) silksongPanel.SetActive(false);
         if (superhotPanel != null) superhotPanel.SetActive(false);
         if (undertaleyellowPanel != null) undertaleyellowPanel.SetActive(false);
+        if (tabsPanel != null) tabsPanel.SetActive(false);
+        if (lopPanel != null) lopPanel.SetActive(false);
+        if (p5rPanel != null) p5rPanel.SetActive(false);
+        if (vsPanel != null) vsPanel.SetActive(false);
+        if (metalhPanel != null) metalhPanel.SetActive(false);
+        if (ytgvPanel != null) ytgvPanel.SetActive(false);
     }
 }

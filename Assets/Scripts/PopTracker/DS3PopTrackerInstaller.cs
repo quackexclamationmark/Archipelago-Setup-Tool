@@ -334,7 +334,7 @@ public class DS3PopTrackerInstaller : MonoBehaviour
             Directory.CreateDirectory(packsPath);
 
         // COPIER LE ZIP DIRECTEMENT DANS packs/ AVEC LE BON NOM
-        string packDestZipPath = Path.Combine(packsPath, "DS3APPoptracker.zip");
+        string packDestZipPath = Path.Combine(packsPath, "DS3PTPack.zip");
         File.Copy(gamepackZipPath, packDestZipPath, true);
         Debug.Log("Pack copied to: " + packDestZipPath);
 

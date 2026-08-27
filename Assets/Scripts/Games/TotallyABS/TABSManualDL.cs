@@ -1,0 +1,1322 @@
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using System.IO;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+
+public class TABSManualDL : MonoBehaviour
+{
+    public FileDownloader downloader;
+
+    [Header("TABS FILES")]
+    public FileDownloader.FileData tabsApworld;
+    public FileDownloader.FileData tabsAP;
+    public FileDownloader.FileData tabsBepInEx;
+
+    [Header("PLATFORM SELECTION")]
+    public Button steamButton;
+    public Button epicButton;
+    public TextMeshProUGUI platformStatus;
+
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "Totally Accurate Battle Simulator";
+    public string epicGameFolderName = "TABS";
+
+    [Header("FEATURE TOGGLES")]
+    public Toggle installAPWorldToggle;
+    public Toggle installAPModToggle;
+    public Toggle installBepInExToggle;
+
+    [Header("LAUNCH OPTIONS")]
+    public Toggle launchGameToggle;
+
+    [Header("REVERT OPTIONS")]
+    public Toggle fullClearBepInExToggle;
+    public Toggle clearAPModsToggle;
+
+    [Header("CONFIRMATION PANEL")]
+    public GameObject confirmationPanel;
+    public TextMeshProUGUI confirmationMessage;
+    public Button confirmButton;
+    public Button cancelButton;
+
+    [Header("INFO PANEL")]
+    public GameObject infoPanel;
+    public TextMeshProUGUI infoText;
+    public Button infoOkButton;
+
+    private string gamePath;
+    private string pendingAction;
+    private bool pendingFullCleanConfirmation = false;
+    private GameConfig remoteConfig;
+    private bool configLoaded = false;
+    private InstalledFilesManifest currentManifest;
+    private bool isEpic = false;
+
+    [System.Serializable]
+    public class GameConfig
+    {
+        public string tabsAP;
+        public string tabsApworld;
+        public string tabsBepInEx;
+        public string[] steamSearchPaths;
+        public string[] epicSearchPaths;
+    }
+
+    [System.Serializable]
+    public class InstalledFilesManifest
+    {
+        public string gameInstallPath = "";
+        public List<string> installedFiles = new List<string>();
+        public List<string> installedDirectories = new List<string>();
+    }
+
+    void Start()
+    {
+        // Platform buttons
+        if (steamButton != null)
+            steamButton.onClick.AddListener(OnSteamButtonClicked);
+        if (epicButton != null)
+            epicButton.onClick.AddListener(OnEpicButtonClicked);
+
+        SelectSteam();
+
+        gamePath = GetGamePath();
+        StartCoroutine(LoadRemoteConfig());
+
+        if (infoPanel != null)
+            infoPanel.SetActive(false);
+
+        if (infoOkButton != null)
+            infoOkButton.onClick.AddListener(CloseInfoPanel);
+
+        if (launchGameToggle != null)
+            launchGameToggle.isOn = false;
+
+        if (installAPWorldToggle != null)
+            installAPWorldToggle.isOn = true;
+
+        if (installAPModToggle != null)
+            installAPModToggle.isOn = true;
+
+        if (installBepInExToggle != null)
+            installBepInExToggle.isOn = true;
+
+        if (fullClearBepInExToggle != null)
+        {
+            fullClearBepInExToggle.isOn = false;
+            fullClearBepInExToggle.onValueChanged.AddListener(OnFullClearChanged);
+        }
+
+        if (clearAPModsToggle != null)
+            clearAPModsToggle.isOn = true;
+
+        if (confirmationPanel != null)
+            confirmationPanel.SetActive(false);
+
+        if (confirmButton != null)
+            confirmButton.onClick.AddListener(OnConfirm);
+
+        if (cancelButton != null)
+            cancelButton.onClick.AddListener(OnCancel);
+    }
+
+    // Platform button handlers
+    void OnSteamButtonClicked() { SelectSteam(); }
+    void OnEpicButtonClicked() { SelectEpic(); }
+
+    void SelectSteam()
+    {
+        isEpic = false;
+        gamePath = GetGamePath();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Steam - Path: " + gamePath);
+    }
+
+    void SelectEpic()
+    {
+        isEpic = true;
+        gamePath = GetGamePath();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Epic - Path: " + gamePath);
+    }
+
+    void UpdatePlatformStatus()
+    {
+        if (platformStatus != null)
+        {
+            string platform = isEpic ? "Epic Games" : "Steam";
+            string status = string.IsNullOrEmpty(gamePath) ? "Not Found" : "Found";
+            platformStatus.text = $"Platform: {platform}\n{status}";
+        }
+    }
+
+    void OnFullClearChanged(bool value)
+    {
+        if (clearAPModsToggle != null)
+        {
+            clearAPModsToggle.isOn = !value ? clearAPModsToggle.isOn : false;
+            clearAPModsToggle.interactable = !value;
+        }
+    }
+
+    void CleanupProcesses()
+    {
+        CloseGame();
+    }
+
+    void ApplyGameConfig()
+    {
+        if (remoteConfig == null)
+            return;
+
+        tabsAP.url = remoteConfig.tabsAP;
+        tabsApworld.url = remoteConfig.tabsApworld;
+        tabsBepInEx.url = remoteConfig.tabsBepInEx;
+    }
+
+    public void RunSetup()
+    {
+        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+    }
+
+    public void RevertAll()
+    {
+        bool fullClear = fullClearBepInExToggle != null && fullClearBepInExToggle.isOn;
+        bool clearAPMods = clearAPModsToggle != null && clearAPModsToggle.isOn;
+
+        if (!fullClear && !clearAPMods)
+        {
+            ShowInfo("Please select at least one revert option.");
+            return;
+        }
+
+        ShowConfirmation("Are you sure you want to revert?", "Revert");
+    }
+
+    private void ShowConfirmation(string message, string action)
+    {
+        pendingAction = action;
+        if (confirmationMessage != null)
+            confirmationMessage.text = message;
+        if (confirmationPanel != null)
+            confirmationPanel.SetActive(true);
+    }
+
+    private void OnConfirm()
+    {
+        if (confirmationPanel != null)
+            confirmationPanel.SetActive(false);
+
+        if (string.IsNullOrEmpty(pendingAction))
+            return;
+
+        switch (pendingAction)
+        {
+            case "Setup":
+                ExecuteSetup();
+                break;
+
+            case "Revert":
+                ExecuteRevert();
+                break;
+
+            case "ForceFullClean":
+                ExecuteRevert();
+                break;
+        }
+    }
+
+    private void OnCancel()
+    {
+        if (confirmationPanel != null)
+            confirmationPanel.SetActive(false);
+        pendingFullCleanConfirmation = false;
+        pendingAction = "";
+    }
+
+    private void ExecuteSetup()
+    {
+        gamePath = GetGamePath();
+
+        bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
+        bool apmod = installAPModToggle == null || installAPModToggle.isOn;
+        bool bepinex = installBepInExToggle == null || installBepInExToggle.isOn;
+
+        bool needsGamePath = bepinex || apmod || apworld; // APWorld might not require gamePath but keep safe
+
+        if (needsGamePath && (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath)))
+        {
+            string platform = isEpic ? "Epic" : "Steam";
+            ShowInfo("Game path not found on " + platform + ". Please check your installation.");
+            return;
+        }
+
+        int count = (apworld ? 1 : 0) + (apmod ? 1 : 0) + (bepinex ? 1 : 0);
+
+        if (apworld && count == 1)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
+        StartCoroutine(SetupWithTracking(apworld, apmod, bepinex));
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing AP World...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallTABSAPWorld();
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            ShowInfo("Launching game...");
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
+    }
+
+    IEnumerator SetupWithTracking(bool installAPWorld, bool installAPMod, bool installBepInEx)
+    {
+        ShowInfo("Initializing installation tracker...");
+        yield return new WaitForSeconds(0.5f);
+
+        currentManifest = new InstalledFilesManifest();
+        currentManifest.gameInstallPath = gamePath;
+
+        ShowInfo("Preparing backup and downloading files...");
+
+        // Only backup Newtonsoft if we're installing BepInEx or the AP mod (not for APWorld-only)
+        if (installAPMod || installBepInEx)
+            BackupNewtonsoft();
+
+        ShowInfo("Downloading and installing files...");
+
+        yield return InstallFlow(installAPWorld, installAPMod, installBepInEx);
+
+        SaveInstalledFilesManifest(currentManifest);
+
+        ShowInfo("Installation complete!");
+        yield return new WaitForSeconds(1f);
+    }
+
+    private void ExecuteRevert()
+    {
+        gamePath = GetGamePath();
+
+        if (string.IsNullOrEmpty(gamePath))
+            return;
+
+        DeleteOldVersionFiles();
+
+        string pluginsPath = Path.Combine(gamePath, "BepInEx", "plugins");
+
+        bool clearAP = clearAPModsToggle != null && clearAPModsToggle.isOn;
+        bool fullClean = fullClearBepInExToggle != null && fullClearBepInExToggle.isOn;
+
+        if (!clearAP && !fullClean)
+        {
+            ShowInfo("Please select at least one revert option.");
+            return;
+        }
+
+        if (clearAP)
+        {
+            // Remove TABS Archipelago folder and version files, restore Newtonsoft and remove Backup
+            ShowInfo("Removing Archipelago mods...");
+
+            string tabsArchipelagoPath = Path.Combine(pluginsPath, "TABS Archipelago");
+            SafeDeleteDirectory(tabsArchipelagoPath);
+
+            DeleteOldVersionFiles();
+
+            RestoreNewtonsoft();
+
+            ShowInfo("AP mods removed successfully!");
+            return;
+        }
+
+        bool hasOtherMods = HasOtherMods(pluginsPath);
+
+        if (fullClean && hasOtherMods && !pendingFullCleanConfirmation)
+        {
+            pendingFullCleanConfirmation = true;
+            ShowConfirmation(
+                "Other mods were detected in BepInEx\\plugins.\nDo you REALLY want to fully delete BepInEx and related files?",
+                "ForceFullClean"
+            );
+            return;
+        }
+
+        pendingFullCleanConfirmation = false;
+
+        ShowInfo("Removing AP mods...");
+
+        string archipelagoModPath = Path.Combine(pluginsPath, "TABS Archipelago");
+        SafeDeleteDirectory(archipelagoModPath);
+
+        hasOtherMods = HasOtherMods(pluginsPath);
+
+        if (fullClean)
+        {
+            ShowInfo("Cleaning BepInEx...");
+
+            SafeDeleteDirectory(Path.Combine(gamePath, "BepInEx"));
+            SafeDeleteFile(Path.Combine(gamePath, "changelog.txt"));
+            SafeDeleteFile(Path.Combine(gamePath, ".doorstop_version"));
+            SafeDeleteFile(Path.Combine(gamePath, "doorstop_config.ini"));
+            SafeDeleteFile(Path.Combine(gamePath, "winhttp.dll"));
+
+            DeleteOldVersionFiles();
+
+            // Restore Newtonsoft.Json.dll from Backup and delete Backup when empty
+            RestoreNewtonsoft();
+
+            ShowInfo("Full clean completed!");
+            return;
+        }
+
+        if (!hasOtherMods)
+        {
+            ShowInfo("Cleaning BepInEx (no other mods detected)...");
+
+            SafeDeleteDirectory(Path.Combine(gamePath, "BepInEx"));
+            SafeDeleteFile(Path.Combine(gamePath, "changelog.txt"));
+            SafeDeleteFile(Path.Combine(gamePath, ".doorstop_version"));
+            SafeDeleteFile(Path.Combine(gamePath, "doorstop_config.ini"));
+            SafeDeleteFile(Path.Combine(gamePath, "winhttp.dll"));
+
+            DeleteOldVersionFiles();
+
+            RestoreNewtonsoft();
+
+            ShowInfo("Revert completed!");
+        }
+    }
+
+    bool HasOtherMods(string pluginsPath)
+    {
+        if (!Directory.Exists(pluginsPath))
+            return false;
+
+        string[] dirs = Directory.GetDirectories(pluginsPath);
+
+        foreach (string dir in dirs)
+        {
+            string dirName = Path.GetFileName(dir);
+
+            if (dirName == "TABS Archipelago")
+                continue;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    IEnumerator InstallFlow(bool installAPWorld, bool installAPMod, bool installBepInEx)
+    {
+        if (installBepInEx)
+        {
+            ShowInfo("Installing BepInEx...");
+            yield return InstallTABSBepInEx();
+        }
+
+        if (installAPMod)
+        {
+            ShowInfo("Installing AP Mod (TABS Archipelago)...");
+            yield return InstallTABSAP();
+        }
+
+        if (installAPWorld)
+        {
+            ShowInfo("Installing APWorld...");
+            yield return InstallTABSAPWorld();
+        }
+
+        CreateVersionFile(tabsAP.url, tabsApworld.url, tabsBepInEx.url);
+
+        yield return new WaitForSeconds(2f);
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            ShowInfo("Launching game...");
+            yield return new WaitForSeconds(1f);
+            LaunchGame();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
+
+        yield return null;
+    }
+
+    IEnumerator InstallTABSBepInEx()
+    {
+        string extractPath = Path.Combine(Application.persistentDataPath, "TABSBepInExTemp");
+
+        yield return downloader.DownloadAndExtract(tabsBepInEx, Application.persistentDataPath, extractPath);
+
+        if (!Directory.Exists(extractPath))
+        {
+            ShowInfo("ERROR: BepInEx extraction failed!");
+            yield break;
+        }
+
+        try
+        {
+            CopyAllFromExtract(extractPath, gamePath);
+            ShowInfo("BepInEx installed successfully!");
+        }
+        catch (System.Exception e)
+        {
+            ShowInfo("ERROR: Failed to install BepInEx\n" + e.Message);
+            UnityEngine.Debug.LogError("BepInEx installation error: " + e.Message);
+        }
+
+        SafeDeleteDirectory(extractPath);
+        yield return new WaitForSeconds(1f);
+    }
+
+    IEnumerator InstallTABSAP()
+    {
+        string extractPath = Path.Combine(Application.persistentDataPath, "TABSAPModTemp");
+
+        yield return downloader.DownloadAndExtract(tabsAP, Application.persistentDataPath, extractPath);
+
+        if (!Directory.Exists(extractPath))
+        {
+            ShowInfo("ERROR: AP Mod extraction failed!");
+            yield break;
+        }
+
+        string pluginsPath = Path.Combine(gamePath, "BepInEx", "plugins");
+        string tabsArchipelagoTargetPath = Path.Combine(pluginsPath, "TABS Archipelago");
+
+        try
+        {
+            Directory.CreateDirectory(pluginsPath);
+            Directory.CreateDirectory(tabsArchipelagoTargetPath);
+
+            foreach (string file in Directory.GetFiles(extractPath, "*", SearchOption.AllDirectories))
+            {
+                string relativePath = file.Substring(extractPath.Length).TrimStart(Path.DirectorySeparatorChar);
+                string dest = Path.Combine(tabsArchipelagoTargetPath, relativePath);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(dest));
+
+                if (File.Exists(dest))
+                    File.Delete(dest);
+
+                File.Move(file, dest);
+
+                if (currentManifest != null)
+                    currentManifest.installedFiles.Add(dest);
+            }
+
+            if (currentManifest != null)
+                currentManifest.installedDirectories.Add(tabsArchipelagoTargetPath);
+
+            ShowInfo("AP Mod installed successfully!");
+        }
+        catch (System.Exception e)
+        {
+            ShowInfo("ERROR: Failed to install AP Mod\n" + e.Message);
+            UnityEngine.Debug.LogError("AP Mod installation error: " + e.Message);
+        }
+
+        SafeDeleteDirectory(extractPath);
+        yield return new WaitForSeconds(1f);
+    }
+
+    IEnumerator InstallTABSAPWorld()
+    {
+        while (!configLoaded)
+        {
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + tabsApworld.url);
+
+        if (string.IsNullOrEmpty(tabsApworld.url))
+        {
+            ShowInfo("ERROR: APWorld URL is empty!");
+            UnityEngine.Debug.LogError("APWorld URL not set!");
+            yield break;
+        }
+
+        string fileName = tabsApworld.fileName;
+        if (string.IsNullOrEmpty(fileName))
+        {
+            fileName = tabsApworld.url.Substring(tabsApworld.url.LastIndexOf('/') + 1);
+
+            if (fileName.Contains("?"))
+                fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
+        }
+
+        string localPath = Path.Combine(Application.persistentDataPath, fileName);
+
+        UnityEngine.Debug.Log("Downloading APWorld from: " + tabsApworld.url);
+        UnityEngine.Debug.Log("Saving to: " + localPath);
+
+        yield return DownloadFile(tabsApworld.url, localPath);
+
+        if (!File.Exists(localPath))
+        {
+            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
+            ShowInfo("ERROR: APWorld download failed!");
+            yield break;
+        }
+
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
+
+        string[] targetPaths = new string[]
+        {
+            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
+        };
+
+        string target = "";
+        foreach (string path in targetPaths)
+        {
+            try
+            {
+                string dir = Path.GetDirectoryName(path);
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+                target = path;
+                UnityEngine.Debug.Log("Using target path: " + target);
+                break;
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
+            }
+        }
+
+        if (string.IsNullOrEmpty(target))
+        {
+            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
+            UnityEngine.Debug.LogError("No valid target directory found!");
+            yield break;
+        }
+
+        UnityEngine.Debug.Log("Target path: " + target);
+
+        if (File.Exists(target))
+        {
+            try
+            {
+                File.Delete(target);
+                UnityEngine.Debug.Log("Deleted old apworld file");
+            }
+            catch { }
+        }
+
+        try
+        {
+            File.Copy(localPath, target, true);
+
+            UnityEngine.Debug.Log("APWorld file copied to: " + target);
+
+            if (currentManifest != null)
+                currentManifest.installedFiles.Add(target);
+
+            ShowInfo("APWorld installed successfully!");
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
+            ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
+        }
+    }
+
+    IEnumerator DownloadFile(string url, string savePath)
+    {
+        UnityEngine.Debug.Log("Starting download from: " + url);
+
+        using (UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url))
+        {
+            request.downloadHandler = new UnityEngine.Networking.DownloadHandlerFile(savePath);
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+            {
+                UnityEngine.Debug.LogError("Download error: " + request.error);
+                UnityEngine.Debug.LogError("Response code: " + request.responseCode);
+            }
+            else
+            {
+                UnityEngine.Debug.Log("Download complete! File size: " + new System.IO.FileInfo(savePath).Length + " bytes");
+            }
+        }
+    }
+
+    void SafeDeleteFile(string path)
+    {
+        StartCoroutine(DeleteFileForce(path));
+    }
+
+    IEnumerator DeleteFileForce(string path)
+    {
+        float timer = 0f;
+
+        while (File.Exists(path) && timer < 6f)
+        {
+            try
+            {
+                File.SetAttributes(path, FileAttributes.Normal);
+                File.Delete(path);
+
+                if (!File.Exists(path))
+                    yield break;
+            }
+            catch { }
+
+            timer += 0.5f;
+            yield return new WaitForSeconds(0.5f);
+        }
+    }
+
+    IEnumerator LoadRemoteConfig()
+    {
+        // Keep the existing remote config location or change as needed.
+        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
+
+        UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url);
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+        {
+            UnityEngine.Debug.LogWarning("Config load failed (this is OK, config is optional): " + request.error);
+            configLoaded = true;
+            UpdatePlatformStatus();
+            yield break;
+        }
+
+        try
+        {
+            remoteConfig = JsonUtility.FromJson<GameConfig>(request.downloadHandler.text);
+            UnityEngine.Debug.Log("Remote config loaded successfully");
+            ApplyGameConfig();
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Config parsing failed (this is OK, config is optional): " + e.Message);
+        }
+
+        configLoaded = true;
+
+        gamePath = GetGamePath();
+        UpdatePlatformStatus();
+    }
+
+    void LaunchGame()
+    {
+        string currentGamePath = GetGamePath();
+        UnityEngine.Debug.Log("LaunchGame called. GamePath: " + currentGamePath);
+
+        if (string.IsNullOrEmpty(currentGamePath))
+        {
+            ShowInfo("Game path not found. Cannot launch.");
+            UnityEngine.Debug.LogError("GamePath is empty!");
+            return;
+        }
+
+        string[] possiblePaths = new string[]
+        {
+            Path.Combine(currentGamePath, "TotallyAccurateBattleSimulator.exe"),
+        };
+
+        string exePath = "";
+        foreach (string path in possiblePaths)
+        {
+            if (File.Exists(path))
+            {
+                exePath = path;
+                break;
+            }
+        }
+
+        if (string.IsNullOrEmpty(exePath))
+        {
+            ShowInfo("Game executable not found. Checked:\n" + string.Join("\n", possiblePaths));
+            UnityEngine.Debug.LogError("Executable not found!");
+            return;
+        }
+
+        UnityEngine.Debug.Log("Checking exe at: " + exePath);
+
+        try
+        {
+            UnityEngine.Debug.Log("Starting process...");
+            var psi = new ProcessStartInfo
+            {
+                FileName = exePath,
+                WorkingDirectory = Path.GetDirectoryName(exePath),
+                UseShellExecute = true
+            };
+            Process.Start(psi);
+            UnityEngine.Debug.Log("Game launched successfully from: " + exePath);
+        }
+        catch (System.Exception e)
+        {
+            ShowInfo("Error launching game:\n" + e.Message);
+            UnityEngine.Debug.LogError("Launch error: " + e);
+        }
+    }
+
+    void CloseGame()
+    {
+        try
+        {
+            Process[] processes = Process.GetProcessesByName("TotallyAccurateBattleSimulator");
+            foreach (Process p in processes)
+            {
+                if (!p.HasExited)
+                {
+                    p.Kill();
+                    p.Dispose();
+                }
+            }
+        }
+        catch { }
+    }
+
+    void SafeDeleteDirectory(string path)
+    {
+        try
+        {
+            if (Directory.Exists(path))
+                Directory.Delete(path, true);
+        }
+        catch { }
+    }
+
+    void CopyAllFromExtract(string extractPath, string targetPath)
+    {
+        UnityEngine.Debug.Log("START CopyAllFromExtract");
+
+        if (!Directory.Exists(extractPath))
+            return;
+
+        try
+        {
+            if (!Directory.Exists(targetPath))
+                Directory.CreateDirectory(targetPath);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Failed to ensure target root directory: " + targetPath + " - " + e.Message);
+        }
+
+        foreach (string dir in Directory.GetDirectories(extractPath, "*", SearchOption.AllDirectories))
+        {
+            string rel = dir.Substring(extractPath.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            string destDir = Path.Combine(targetPath, rel);
+            try
+            {
+                if (Directory.Exists(destDir))
+                    SafeDeleteDirectory(destDir);
+                Directory.CreateDirectory(destDir);
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogWarning("Failed to create dest dir: " + destDir + " - " + e.Message);
+            }
+        }
+
+        foreach (string file in Directory.GetFiles(extractPath, "*", SearchOption.AllDirectories))
+        {
+            string rel = file.Substring(extractPath.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            string dest = Path.Combine(targetPath, rel);
+            try
+            {
+                string destDirName = Path.GetDirectoryName(dest);
+
+                if (!string.IsNullOrWhiteSpace(destDirName))
+                {
+                    Directory.CreateDirectory(destDirName);
+                }
+                else
+                {
+                    if (!Directory.Exists(targetPath))
+                        Directory.CreateDirectory(targetPath);
+                }
+
+                if (File.Exists(dest))
+                    File.Delete(dest);
+
+                File.Copy(file, dest, true);
+                UnityEngine.Debug.Log("Copied file: " + dest);
+
+                if (currentManifest != null)
+                    currentManifest.installedFiles.Add(dest);
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogWarning("Failed to copy file: " + file + " - " + e.Message);
+            }
+        }
+
+        try
+        {
+            if (currentManifest != null && !string.IsNullOrEmpty(targetPath))
+            {
+                if (!currentManifest.installedDirectories.Contains(targetPath))
+                    currentManifest.installedDirectories.Add(targetPath);
+            }
+        }
+        catch { }
+
+        UnityEngine.Debug.Log("END CopyAllFromExtract");
+    }
+
+    void SaveInstalledFilesManifest(InstalledFilesManifest manifest)
+    {
+        string manifestPath = Path.Combine(Application.persistentDataPath, "TABSInstalledFilesManifest.json");
+        string json = JsonUtility.ToJson(manifest, true);
+
+        try
+        {
+            File.WriteAllText(manifestPath, json);
+            UnityEngine.Debug.Log("Installation manifest saved: " + manifestPath);
+            UnityEngine.Debug.Log("Tracked " + manifest.installedFiles.Count + " files for future revert");
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to save manifest: " + e.Message);
+        }
+    }
+
+    void ShowInfo(string message)
+    {
+        if (infoPanel == null || infoText == null)
+            return;
+
+        infoText.text = message;
+        infoPanel.SetActive(true);
+    }
+
+    void CloseInfoPanel()
+    {
+        if (infoPanel != null)
+            infoPanel.SetActive(false);
+    }
+
+    string GetGamePath()
+    {
+        return isEpic ? GetEpicPath() : GetSteamPath();
+    }
+
+    string GetSteamPath()
+    {
+        string[] quickPaths = new string[]
+        {
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
+        };
+
+        foreach (string path in quickPaths)
+        {
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
+                    return path;
+                }
+            }
+            catch { }
+        }
+
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
+        return "";
+    }
+
+    string GetEpicPath()
+    {
+        string[] quickPaths = new string[]
+        {
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Epic Games", epicGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Epic Games", epicGameFolderName),
+        };
+
+        foreach (string path in quickPaths)
+        {
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    UnityEngine.Debug.Log("Found Game (Epic) at: " + path);
+                    return path;
+                }
+            }
+            catch { }
+        }
+
+        // Try Epic manifests (common method)
+        try
+        {
+            string epicBaseDir = Path.Combine(
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonApplicationData),
+                "Epic", "EpicGamesLauncher", "Data", "Manifests"
+            );
+
+            if (Directory.Exists(epicBaseDir))
+            {
+                string[] manifests = Directory.GetFiles(epicBaseDir, "*.item");
+                foreach (string manifest in manifests)
+                {
+                    try
+                    {
+                        string content = File.ReadAllText(manifest);
+                        if (content.Contains(epicGameFolderName) || content.Contains(epicGameFolderName.Replace(" ", "")))
+                        {
+                            System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"""InstallLocation"":""([^""]+)""");
+                            System.Text.RegularExpressions.Match match = regex.Match(content);
+
+                            if (match.Success)
+                            {
+                                string epicPath = match.Groups[1].Value;
+                                if (Directory.Exists(epicPath))
+                                {
+                                    UnityEngine.Debug.Log("Found Game (Epic) at: " + epicPath);
+                                    return epicPath;
+                                }
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+        }
+        catch { }
+
+        if (remoteConfig != null && remoteConfig.epicSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.epicSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, epicGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Epic, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Game (Epic) not found.");
+        return "";
+    }
+
+    // =========================================================
+    // VERSION FILE MANAGEMENT (TABS)
+    // =========================================================
+
+    void CreateVersionFile(string apModUrl, string apworldUrl, string bepinexUrl)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath))
+            {
+                UnityEngine.Debug.LogWarning("CreateVersionFile: gamePath is empty or doesn't exist. Skipping version file creation.");
+                return;
+            }
+
+            string apModVersion = ExtractVersionFromUrl(apModUrl, "");
+            string apworldVersion = ExtractVersionFromUrl(apworldUrl, "");
+            string bepinexVersion = ExtractVersionFromUrl(bepinexUrl, "");
+
+            string versionFileName = "TABS AP Version " + apModVersion + ".txt";
+            string content = "Archipelago Setup Tool (TABS) by quack!\n";
+            content += "https://github.com/quackexclamationmark/Archipelago-Setup-Tool\n";
+            content += "\n";
+            content += "=== AP MOD ===\n";
+            content += "Downloaded from: " + apModUrl + "\n";
+            content += "Version: " + apModVersion + "\n";
+            content += "\n";
+            content += "=== APWORLD ===\n";
+            content += "Downloaded from: " + apworldUrl + "\n";
+            content += "Version: " + apworldVersion + "\n";
+            content += "\n";
+            content += "=== BEPINEX ===\n";
+            content += "Downloaded from: " + bepinexUrl + "\n";
+            content += "Version: " + bepinexVersion + "\n";
+            content += "\n";
+            content += "Downloaded at: " + System.DateTime.Now + "\n";
+
+            DeleteOldVersionFiles();
+
+            string versionPath = Path.Combine(gamePath, versionFileName);
+            File.WriteAllText(versionPath, content);
+            UnityEngine.Debug.Log("Version file created: " + versionPath);
+
+            if (currentManifest != null)
+                currentManifest.installedFiles.Add(versionPath);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error creating version file: " + e.Message);
+        }
+    }
+
+    void DeleteOldVersionFiles()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath))
+            {
+                UnityEngine.Debug.LogWarning("DeleteOldVersionFiles: gamePath is empty or doesn't exist. Skipping cleanup of old version files.");
+                return;
+            }
+
+            System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"TABS AP Version .+\.txt");
+
+            string[] rootFiles = Directory.GetFiles(gamePath);
+            foreach (string file in rootFiles)
+            {
+                string fileName = Path.GetFileName(file);
+                if (pattern.IsMatch(fileName))
+                {
+                    try
+                    {
+                        File.Delete(file);
+                        UnityEngine.Debug.Log("Deleted old version file: " + fileName);
+                    }
+                    catch (System.Exception e)
+                    {
+                        UnityEngine.Debug.LogWarning("Could not delete old version file: " + e.Message);
+                    }
+                }
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Error cleaning up old version files: " + e.Message);
+        }
+    }
+
+    string ExtractVersionFromUrl(string url, string pattern)
+    {
+        // Thunderstore pattern: https://thunderstore.io/package/download/Author/Package/VERSION/
+        System.Text.RegularExpressions.Regex thunderstorePattern = new System.Text.RegularExpressions.Regex(@"thunderstore\.io/package/download/[^/]+/[^/]+/([^/]+)/?$");
+        System.Text.RegularExpressions.Match thunderstoreMatch = thunderstorePattern.Match(url);
+
+        if (thunderstoreMatch.Success)
+            return thunderstoreMatch.Groups[1].Value;
+
+        System.Text.RegularExpressions.Regex githubPattern = new System.Text.RegularExpressions.Regex(@"/releases/download/([^/]+)/");
+        System.Text.RegularExpressions.Match githubMatch = githubPattern.Match(url);
+
+        if (githubMatch.Success)
+            return githubMatch.Groups[1].Value;
+
+        return "Unknown";
+    }
+
+    // =========================================================
+    // Backup / Restore Newtonsoft.Json.dll handling
+    // =========================================================
+
+    void BackupNewtonsoft()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath))
+                return;
+
+            string managedPath = Path.Combine(gamePath, "TotallyAccurateBattleSimulator_Data", "Managed");
+            string jsonFileName = "Newtonsoft.Json.dll";
+            string jsonSource = Path.Combine(managedPath, jsonFileName);
+
+            if (!File.Exists(jsonSource))
+            {
+                UnityEngine.Debug.Log("Newtonsoft.Json.dll not found in Managed; no backup necessary.");
+                return;
+            }
+
+            string backupDir = Path.Combine(gamePath, "Backup");
+            Directory.CreateDirectory(backupDir);
+
+            string backupTarget = Path.Combine(backupDir, jsonFileName);
+
+            // If there's already a backup, avoid overwriting (but we can overwrite to ensure latest)
+            try
+            {
+                if (File.Exists(backupTarget))
+                    File.Delete(backupTarget);
+
+                File.Move(jsonSource, backupTarget);
+                UnityEngine.Debug.Log("Backed up Newtonsoft.Json.dll to: " + backupTarget);
+
+                if (currentManifest != null)
+                    currentManifest.installedFiles.Add(backupTarget);
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogWarning("Failed to backup Newtonsoft.Json.dll: " + e.Message);
+            }
+        }
+        catch { }
+    }
+
+    void RestoreNewtonsoft()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath))
+                return;
+
+            string managedPath = Path.Combine(gamePath, "TotallyAccurateBattleSimulator_Data", "Managed");
+            string jsonFileName = "Newtonsoft.Json.dll";
+            string backupDir = Path.Combine(gamePath, "Backup");
+            string backupFile = Path.Combine(backupDir, jsonFileName);
+
+            if (!File.Exists(backupFile))
+            {
+                UnityEngine.Debug.Log("No backup Newtonsoft.Json.dll found to restore.");
+                // try to delete backup dir if empty
+                TryDeleteBackupIfEmpty(backupDir);
+                return;
+            }
+
+            try
+            {
+                Directory.CreateDirectory(managedPath);
+
+                string dest = Path.Combine(managedPath, jsonFileName);
+
+                if (File.Exists(dest))
+                {
+                    try
+                    {
+                        File.SetAttributes(dest, FileAttributes.Normal);
+                        File.Delete(dest);
+                    }
+                    catch { }
+                }
+
+                File.Move(backupFile, dest);
+                UnityEngine.Debug.Log("Restored Newtonsoft.Json.dll to Managed: " + dest);
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogWarning("Failed to restore Newtonsoft.Json.dll: " + e.Message);
+            }
+
+            // Try to remove Backup folder if it's empty
+            TryDeleteBackupIfEmpty(backupDir);
+        }
+        catch { }
+    }
+
+    void TryDeleteBackupIfEmpty(string backupDir)
+    {
+        try
+        {
+            if (!Directory.Exists(backupDir))
+                return;
+
+            bool hasFiles = Directory.GetFiles(backupDir, "*", SearchOption.TopDirectoryOnly).Length > 0;
+            bool hasDirs = Directory.GetDirectories(backupDir, "*", SearchOption.TopDirectoryOnly).Length > 0;
+
+            if (!hasFiles && !hasDirs)
+            {
+                Directory.Delete(backupDir);
+                UnityEngine.Debug.Log("Deleted empty Backup folder: " + backupDir);
+            }
+            else
+            {
+                UnityEngine.Debug.Log("Backup folder not empty; not deleting: " + backupDir);
+            }
+        }
+        catch { }
+    }
+}

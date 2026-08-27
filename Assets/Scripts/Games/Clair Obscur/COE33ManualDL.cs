@@ -17,6 +17,12 @@ public class COE33ManualDL : MonoBehaviour
 
     [Header("GAME FOLDER NAMES")]
     public string steamGameFolderName = "Expedition 33";
+    public string xboxGameFolderName = "Expedition 33";
+
+    [Header("PLATFORM SELECTION")]
+    public Button steamButton;
+    public Button xboxButton;
+    public TextMeshProUGUI platformStatus;
 
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
@@ -42,6 +48,7 @@ public class COE33ManualDL : MonoBehaviour
     private GameConfig remoteConfig;
     private bool configLoaded = false;
     private InstalledFilesManifest currentManifest;
+    private bool isXbox = false;
 
     [System.Serializable]
     public class GameConfig
@@ -49,6 +56,7 @@ public class COE33ManualDL : MonoBehaviour
         public string clairobscurAP;
         public string clairobscurApworld;
         public string[] steamSearchPaths;
+        public string[] xboxSearchPaths;
     }
 
     [System.Serializable]
@@ -60,6 +68,15 @@ public class COE33ManualDL : MonoBehaviour
 
     void Start()
     {
+        // Platform buttons
+        if (steamButton != null)
+            steamButton.onClick.AddListener(OnSteamButtonClicked);
+        if (xboxButton != null)
+            xboxButton.onClick.AddListener(OnXboxButtonClicked);
+
+        // Default to Steam
+        SelectSteam();
+
         gamePath = GetGamePath();
         StartCoroutine(LoadRemoteConfig());
 
@@ -86,6 +103,36 @@ public class COE33ManualDL : MonoBehaviour
 
         if (cancelButton != null)
             cancelButton.onClick.AddListener(OnCancel);
+    }
+
+    // PLATFORM selection handlers
+    void OnSteamButtonClicked() { SelectSteam(); }
+    void OnXboxButtonClicked() { SelectXbox(); }
+
+    void SelectSteam()
+    {
+        isXbox = false;
+        gamePath = GetGamePath();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Steam - Path: " + gamePath);
+    }
+
+    void SelectXbox()
+    {
+        isXbox = true;
+        gamePath = GetGamePath();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Xbox - Path: " + gamePath);
+    }
+
+    void UpdatePlatformStatus()
+    {
+        if (platformStatus != null)
+        {
+            string platform = isXbox ? "Xbox" : "Steam";
+            string status = string.IsNullOrEmpty(gamePath) ? "Not Found" : "Found";
+            platformStatus.text = $"Platform: {platform} \n {status}";
+        }
     }
 
     void CleanupProcesses()
@@ -650,6 +697,7 @@ public class COE33ManualDL : MonoBehaviour
         configLoaded = true;
 
         gamePath = GetGamePath();
+        UpdatePlatformStatus();
     }
 
     void LaunchGame()
@@ -783,6 +831,11 @@ public class COE33ManualDL : MonoBehaviour
 
     string GetGamePath()
     {
+        return isXbox ? GetXboxPath() : GetSteamPath();
+    }
+
+    string GetSteamPath()
+    {
         string[] quickPaths = new string[]
         {
             Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
@@ -835,6 +888,45 @@ public class COE33ManualDL : MonoBehaviour
         }
 
         UnityEngine.Debug.LogWarning("Game (Steam) not found.");
+        return "";
+    }
+
+    string GetXboxPath()
+    {
+        if (remoteConfig != null && remoteConfig.xboxSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.xboxSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            // Build: drive + relativePath + xboxGameFolderName
+                            string path = Path.Combine(drive.Name, relativePath, xboxGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Xbox, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Game (Xbox) not found.");
         return "";
     }
 

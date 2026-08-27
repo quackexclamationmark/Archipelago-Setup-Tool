@@ -210,9 +210,11 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Kerbal Space Program", new List<string> { "Kerbal", "Space", "Program", "KSP", "KSP1", "KSP 1", "1" }));
         games.Add(CreateGame("Lethal Company", new List<string> { "Lethal", "Company", "LC" }));
         games.Add(CreateGame("Librarian Tidy Up the Arcane Library", new List<string> { "Librarian", "Tidy", "Up", "Arcane", "Library", "LTUTAL" }));
+        games.Add(CreateGame("Lies of P", new List<string> { "Lies", "Of", "P", "Pinocchio", "LOP" }));
         games.Add(CreateGame("Luigi's Mansion", new List<string> { "Luigi", "Luigi's", "Mansion", "LM", "Mario" }));
         games.Add(CreateGame("Mario Kart Double Dash!!", new List<string> { "Mario", "Kart", "MK", "Double", "Dash", "MKDD", "M K DD", "M KDD", "DD" }));
         games.Add(CreateGame("Mario Kart Wii", new List<string> { "Mario", "Kart", "Wii", "MK", "MKWii", "M K Wii", "M KWii"}));
+        games.Add(CreateGame("Metal Hellsinger", new List<string> { "Metal", "Hellsinger", "MH" }));
         games.Add(CreateGame("Metroid Fusion", new List<string> { "Metroid", "Fusion", "MetFus" }));
         games.Add(CreateGame("Minecraft", new List<string> { "Minecraft", "Mine", "Craft", "MC" }));
         games.Add(CreateGame("Neon White", new List<string> { "Neon", "White", "nw" }));
@@ -228,6 +230,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Paper Mario: The Thousand-Year Door", new List<string> { "Paper", "Mario", "The", "Thousand", "Year", "Thousand-Year", "Door", "PM", "PMTTYD", "PM TTYD", "TTYD" }));
         games.Add(CreateGame("PEAK", new List<string> { "Peak" }));
         games.Add(CreateGame("Peaks Of Yore", new List<string> { "Peaks", "Yore", "POY" }));
+        games.Add(CreateGame("Persona 5 Royal", new List<string> { "Persona", "5", "Royal", "P5R", "Persona5Royal" }));
         games.Add(CreateGame("Pikmin 2", new List<string> { "Pikmin", "2", "Pikmin2" }));
         games.Add(CreateGame("Pikuniku", new List<string> { "Pikuniku", "pn" }));
         games.Add(CreateGame("Placid Plastic Duck Simulator", new List<string> { "Placid", "Plastic", "Duck", "Simulator", "Sim", "PPDS", "PlacidPlasticDuckSimulator" }));
@@ -275,14 +278,17 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("The Simpsons Hit & Run", new List<string> { "Simpsons", "Hit", "And", "Run", "SHAR" }));
         games.Add(CreateGame("The WereCleaner", new List<string> { "The", "WereCleaner", "Were", "Cleaner", "TWC" }));
         games.Add(CreateGame("The Witness", new List<string> { "Witness" }));
-        games.Add(CreateGame("TOEM: A Photo Adventure", new List<string> { "TOEM", "A", "Photo", "Adventure", ":", "TOEM:" }));
+        games.Add(CreateGame("TOEM: A Photo Adventure", new List<string> { "TOEM", "A", "Photo", "Adventure", "TOEM:" }));
+        games.Add(CreateGame("Totally Accurate Battle Simulator", new List<string> { "TABS", "Totally", "Accurate", "Battle", "Simulator" }));
         games.Add(CreateGame("TUNIC", new List<string> { "Tunic" }));
         games.Add(CreateGame("Ultimate Custom Night", new List<string> { "Ultimate", "Custom", "Night", "UCN", "UltimateCustom", "FNAF", "Five", "Nights", "at", "Freddy", "Freddy's", "FNAF UCN" }));
         games.Add(CreateGame("ULTRAKILL", new List<string> { "Ultra", "Kill" }));
         games.Add(CreateGame("Undertale Yellow", new List<string> { "Undertale", "Yellow" }));
         games.Add(CreateGame("Unfair Flips", new List<string> { "Unfair", "Flips" }));
         games.Add(CreateGame("Untitled Goose Game", new List<string> { "Untitled", "Goose", "Game", "UGG" }));
+        games.Add(CreateGame("Vampire Survivors", new List<string> { "Vampire", "Survivors", "VS" }));
         games.Add(CreateGame("Voices Of The Void", new List<string> { "Voices", "Void", "Votv" }));
+        games.Add(CreateGame("Yellow Taxi Goes Vroom", new List<string> { "Yellow", "Taxi", "Goes", "Vroom", "YTGV" }));
     }
 
     private GameButtonConfig CreateGame(string name, List<string> aliases)

@@ -1027,7 +1027,7 @@ public class SUPERHOTManualDL : MonoBehaviour
 
     IEnumerator LoadRemoteConfig()
     {
-        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/superhot_config.json";
+        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
 
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {

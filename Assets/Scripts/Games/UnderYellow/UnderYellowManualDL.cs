@@ -11,15 +11,12 @@ public class UnderYellowManualDL : MonoBehaviour
     public FileDownloader downloader;
 
     [Header("UNDERTALE YELLOW FILES")]
-    public FileDownloader.FileData undertaleyellowApworld; // undertale_yellow.apworld
-    public FileDownloader.FileData undertaleyellowDL;      // zip containing the game/installer
+    public FileDownloader.FileData undertaleyellowApworld;
+    public FileDownloader.FileData undertaleyellowDL;
 
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installUndertaleYellowToggle;
-
-    [Header("LAUNCH OPTIONS")]
-    public Toggle secondLaunchToggle;
 
     [Header("CONFIRMATION PANEL")]
     public GameObject confirmationPanel;
@@ -32,10 +29,25 @@ public class UnderYellowManualDL : MonoBehaviour
     public TextMeshProUGUI infoText;
     public Button infoOkButton;
 
+    [Header("LAUNCH")]
+    // assign this in the Inspector to provide a one-click "Launch Undertale Yellow" button
+    public Button launchButton;
+
     private const string InstalledFoldersKey = "UndertaleYellow_InstalledFolders";
 
     private string archipelagoPath;
     private string pendingAction;
+
+    // --- Remote config support (inspired by SUPERHOTManualDL)
+    [System.Serializable]
+    public class UndertaleYellowConfig
+    {
+        public string undertaleyellowApworld;
+        public string undertaleyellowDL;
+    }
+
+    private UndertaleYellowConfig remoteConfig;
+    private bool configLoaded = false;
 
     void Start()
     {
@@ -47,9 +59,6 @@ public class UnderYellowManualDL : MonoBehaviour
         if (infoOkButton != null)
             infoOkButton.onClick.AddListener(CloseInfoPanel);
 
-        if (secondLaunchToggle != null)
-            secondLaunchToggle.isOn = false;
-
         if (confirmationPanel != null)
             confirmationPanel.SetActive(false);
 
@@ -58,6 +67,13 @@ public class UnderYellowManualDL : MonoBehaviour
 
         if (cancelButton != null)
             cancelButton.onClick.AddListener(OnCancel);
+
+        // Wire the optional launch button (if assigned in Inspector)
+        if (launchButton != null)
+            launchButton.onClick.AddListener(OnLaunchButtonClicked);
+
+        // Start loading optional remote config (non-blocking)
+        StartCoroutine(LoadRemoteConfig());
     }
 
     // ---------------------------------------------------------------
@@ -112,6 +128,25 @@ public class UnderYellowManualDL : MonoBehaviour
     }
 
     // ---------------------------------------------------------------
+    // LAUNCH BUTTON HANDLER
+    // ---------------------------------------------------------------
+
+    // Called by the UI button (assign launchButton in Inspector)
+    public void OnLaunchButtonClicked()
+    {
+        archipelagoPath = GetArchipelagoPath();
+
+        if (string.IsNullOrEmpty(archipelagoPath) || !Directory.Exists(archipelagoPath))
+        {
+            ShowInfo("Archipelago folder not found.");
+            return;
+        }
+
+        ShowInfo("Launching Undertale Yellow...");
+        LaunchUndertaleYellow();
+    }
+
+    // ---------------------------------------------------------------
     // SETUP
     // ---------------------------------------------------------------
 
@@ -150,21 +185,18 @@ public class UnderYellowManualDL : MonoBehaviour
             ShowInfo("Downloading Undertale Yellow...");
             yield return InstallUndertaleYellowDL();
         }
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-        {
-            ShowInfo("Launching Undertale Yellow...");
-            yield return new WaitForSeconds(1f);
-            LaunchUndertaleYellow();
-        }
-        else
-        {
-            ShowInfo("Installation complete!");
-        }
+        ShowInfo("Installation complete!");
     }
 
     IEnumerator InstallAPWorld()
     {
+        // Wait for optional remote config to load so we use updated URLs if available
+        while (!configLoaded)
+        {
+            UnityEngine.Debug.Log("Waiting for remote config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
+
         string url = undertaleyellowApworld.url;
 
         if (string.IsNullOrEmpty(url))
@@ -248,6 +280,10 @@ public class UnderYellowManualDL : MonoBehaviour
     IEnumerator InstallUndertaleYellowDL()
     {
         UnityEngine.Debug.Log("START InstallUndertaleYellowDL");
+
+        // Wait for optional remote config so the DL url can be updated if present
+        while (!configLoaded)
+            yield return null;
 
         if (string.IsNullOrEmpty(undertaleyellowDL.url))
         {
@@ -411,7 +447,7 @@ public class UnderYellowManualDL : MonoBehaviour
             else
             {
                 UnityEngine.Debug.LogError("Undertale Yellow.exe not found under: " + archipelagoPath);
-                ShowInfo("ERROR: Undertale Yellow.exe not found!");
+                ShowInfo("Undertale Yellow.exe not found! Please make sure you setup first!");
             }
         }
         catch (System.Exception e)
@@ -577,5 +613,50 @@ public class UnderYellowManualDL : MonoBehaviour
 
         UnityEngine.Debug.LogWarning("Could not find or create an Archipelago folder.");
         return "";
+    }
+
+    // ---------------------------------------------------------------
+    // Remote config loader (optional)
+    // ---------------------------------------------------------------
+    IEnumerator LoadRemoteConfig()
+    {
+        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                UnityEngine.Debug.LogWarning("Undertale Yellow config load failed (this is OK, config is optional): " + request.error);
+                configLoaded = true;
+                yield break;
+            }
+
+            try
+            {
+                remoteConfig = JsonUtility.FromJson<UndertaleYellowConfig>(request.downloadHandler.text);
+                UnityEngine.Debug.Log("Undertale Yellow remote config loaded successfully");
+                ApplyUndertaleYellowConfig();
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogWarning("Undertale Yellow config parsing failed (this is OK, config is optional): " + e.Message);
+            }
+
+            configLoaded = true;
+        }
+    }
+
+    void ApplyUndertaleYellowConfig()
+    {
+        if (remoteConfig == null)
+            return;
+
+        if (undertaleyellowApworld != null && !string.IsNullOrEmpty(remoteConfig.undertaleyellowApworld))
+            undertaleyellowApworld.url = remoteConfig.undertaleyellowApworld;
+
+        if (undertaleyellowDL != null && !string.IsNullOrEmpty(remoteConfig.undertaleyellowDL))
+            undertaleyellowDL.url = remoteConfig.undertaleyellowDL;
     }
 }

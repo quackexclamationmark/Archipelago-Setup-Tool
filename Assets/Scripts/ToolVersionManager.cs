@@ -9,7 +9,7 @@ using System.Diagnostics;
 public class ToolVersionManager : MonoBehaviour
 {
     [Header("VERSION CONFIG")]
-    public string currentToolVersion = "2.0.2"; // À mettre à jour à chaque nouvelle version
+    public string currentToolVersion = ""; // À mettre à jour à chaque nouvelle version
 
     [Header("UPDATE PANEL")]
     public GameObject updatePanel;

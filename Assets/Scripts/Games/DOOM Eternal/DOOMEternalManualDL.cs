@@ -12,23 +12,17 @@ public class DOOMEternalManualDL : MonoBehaviour
     public FileDownloader downloader;
 
     [Header("DOOM ETERNAL FILES")]
-    public FileDownloader.FileData doometernalModInjector;
     public FileDownloader.FileData doometernalAP;
-    public FileDownloader.FileData doometernalMeathook;
-    public FileDownloader.FileData doometernalApworld;
 
     [Header("GAME FOLDER NAMES")]
     public string steamGameFolderName = "DOOMEternal";
 
     [Header("FEATURE TOGGLES")]
-    public Toggle installModInjectorToggle;
     public Toggle installAPToggle;
-    public Toggle installMeathookToggle;
     public Toggle installAPWorldToggle;
 
     [Header("LAUNCH OPTIONS")]
-    public Toggle secondLaunchToggle;
-    public Toggle launchInjectorAfterSetupToggle;
+    public Toggle launchDoomLauncherAfterSetupToggle;
 
     [Header("REVERT OPTIONS")]
     public Toggle removeAPModsOnlyToggle;
@@ -45,8 +39,6 @@ public class DOOMEternalManualDL : MonoBehaviour
     public TextMeshProUGUI infoText;
     public Button infoOkButton;
 
-    private const string DOOM_ETERNAL_STEAM_APPID = "782330";
-
     private Process doometernalProcess;
     private string doometernalPath;
     private string doometernalBasePath;
@@ -60,10 +52,7 @@ public class DOOMEternalManualDL : MonoBehaviour
     [System.Serializable]
     public class DOOMEternalConfig
     {
-        public string doometernalModInjector;
         public string doometernalAP;
-        public string doometernalMeathook;
-        public string doometernalApworld;
         public string[] steamSearchPaths;
     }
 
@@ -81,11 +70,8 @@ public class DOOMEternalManualDL : MonoBehaviour
         if (infoOkButton != null)
             infoOkButton.onClick.AddListener(CloseInfoPanel);
 
-        if (secondLaunchToggle != null)
-            secondLaunchToggle.isOn = false;
-
-        if (launchInjectorAfterSetupToggle != null)
-            launchInjectorAfterSetupToggle.isOn = false;
+        if (launchDoomLauncherAfterSetupToggle != null)
+            launchDoomLauncherAfterSetupToggle.isOn = false;
 
         if (confirmationPanel != null)
             confirmationPanel.SetActive(false);
@@ -116,10 +102,7 @@ public class DOOMEternalManualDL : MonoBehaviour
         if (remoteConfig == null)
             return;
 
-        doometernalModInjector.url = remoteConfig.doometernalModInjector;
         doometernalAP.url = remoteConfig.doometernalAP;
-        doometernalMeathook.url = remoteConfig.doometernalMeathook;
-        doometernalApworld.url = remoteConfig.doometernalApworld;
     }
 
     public void RunSetup()
@@ -173,44 +156,22 @@ public class DOOMEternalManualDL : MonoBehaviour
     {
         doometernalPath = GetDOOMEternalPath();
 
-        bool modInjector = installModInjectorToggle == null || installModInjectorToggle.isOn;
         bool ap = installAPToggle != null && installAPToggle.isOn;
-        bool meathook = installMeathookToggle != null && installMeathookToggle.isOn;
         bool apworld = installAPWorldToggle != null && installAPWorldToggle.isOn;
-        bool needsGamePath = modInjector || ap || meathook;
 
-        if (needsGamePath && (string.IsNullOrEmpty(doometernalPath) || !Directory.Exists(doometernalPath)))
+        if ((ap || apworld) && (string.IsNullOrEmpty(doometernalPath) || !Directory.Exists(doometernalPath)))
         {
             ShowInfo("Game path not found. Please check your installation.");
             return;
         }
 
-        if (needsGamePath)
-        {
-            CreateSteamAppIdFile();
-        }
-
         int count =
-            (modInjector ? 1 : 0) +
             (ap ? 1 : 0) +
-            (meathook ? 1 : 0) +
             (apworld ? 1 : 0);
-
-        if (modInjector && count == 1)
-        {
-            StartCoroutine(ModInjectorOnlyFlow());
-            return;
-        }
 
         if (ap && count == 1)
         {
             StartCoroutine(APOnlyFlow());
-            return;
-        }
-
-        if (meathook && count == 1)
-        {
-            StartCoroutine(MeathookOnlyFlow());
             return;
         }
 
@@ -229,66 +190,6 @@ public class DOOMEternalManualDL : MonoBehaviour
         StartCoroutine(InstallFlow());
     }
 
-    // Cree le fichier steam_appid.txt dans le dossier du jeu avec l'AppID de DOOM Eternal
-    void CreateSteamAppIdFile()
-    {
-        try
-        {
-            if (string.IsNullOrEmpty(doometernalPath))
-                return;
-
-            if (!Directory.Exists(doometernalPath))
-                Directory.CreateDirectory(doometernalPath);
-
-            string appIdPath = Path.Combine(doometernalPath, "steam_appid.txt");
-            File.WriteAllText(appIdPath, DOOM_ETERNAL_STEAM_APPID);
-
-            UnityEngine.Debug.Log("steam_appid.txt created at: " + appIdPath);
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogError("Failed to create steam_appid.txt: " + e.Message);
-        }
-    }
-
-    // Lance start_injector_windows.bat avec les permissions administrateur
-    void LaunchInjectorAsAdmin()
-    {
-        string injectorPath = Path.Combine(documentsPath, "DOOM Eternal Archipelago", "client", "start_injector_windows.bat");
-
-        if (!File.Exists(injectorPath))
-        {
-            UnityEngine.Debug.LogWarning("Injector script not found at: " + injectorPath);
-            ShowInfo("ERROR: start_injector_windows.bat not found!");
-            return;
-        }
-
-        try
-        {
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                FileName = injectorPath,
-                WorkingDirectory = Path.GetDirectoryName(injectorPath),
-                UseShellExecute = true,
-                Verb = "runas"
-            };
-
-            Process.Start(startInfo);
-            UnityEngine.Debug.Log("Launched injector as admin: " + injectorPath);
-        }
-        catch (System.ComponentModel.Win32Exception e)
-        {
-            // Generalement declenche si l'utilisateur refuse l'invite UAC
-            UnityEngine.Debug.LogWarning("Injector launch cancelled or failed (UAC): " + e.Message);
-            ShowInfo("Injector launch was cancelled.");
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogError("Failed to launch injector as admin: " + e.Message);
-            ShowInfo("ERROR: Failed to launch injector\n" + e.Message);
-        }
-    }
-
     IEnumerator APWorldOnlyFlow()
     {
         yield return new WaitUntil(() => configLoaded);
@@ -298,17 +199,10 @@ public class DOOMEternalManualDL : MonoBehaviour
 
         yield return InstallAPWorld();
 
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        if (launchDoomLauncherAfterSetupToggle != null && launchDoomLauncherAfterSetupToggle.isOn)
         {
-            ShowInfo("Launching DOOM Eternal...");
-            LaunchDOOMEternal();
-            yield return new WaitForSeconds(2f);
-        }
-
-        if (launchInjectorAfterSetupToggle != null && launchInjectorAfterSetupToggle.isOn)
-        {
-            ShowInfo("Launching Injector (Admin)...");
-            LaunchInjectorAsAdmin();
+            ShowInfo("Launching DOOM Eternal Archipelago Launcher...");
+            LaunchDoomEternalArchipelagoLauncher();
             yield return new WaitForSeconds(1f);
         }
 
@@ -343,7 +237,6 @@ public class DOOMEternalManualDL : MonoBehaviour
 
             ShowInfo("Removing DOOM Eternal AP mods...");
 
-            // Supprime le zip AP en se basant sur le marqueur (nom variable), plus fiable qu'un nom fixe
             RemoveOldAPModZip();
             SafeDeleteFile(Path.Combine(modsPath, "apmod_zip_name.txt"));
 
@@ -372,12 +265,6 @@ public class DOOMEternalManualDL : MonoBehaviour
 
         ShowInfo("Removing all mod files...");
 
-        // Remove Mod Injector files from root
-        SafeDeleteFile(Path.Combine(doometernalPath, "EternalModInjector Settings.txt"));
-        SafeDeleteFile(Path.Combine(doometernalPath, "EternalModInjector.bat"));
-        SafeDeleteFile(Path.Combine(doometernalPath, "XINPUT1_3.dll"));
-        SafeDeleteFile(Path.Combine(doometernalPath, "EternalModManager.exe"));
-
         // Remove files from base directory
         SafeDeleteFile(Path.Combine(doometernalBasePath, "BlangParser.dll"));
         SafeDeleteFile(Path.Combine(doometernalBasePath, "DEternal_loadMods.exe"));
@@ -401,9 +288,6 @@ public class DOOMEternalManualDL : MonoBehaviour
 
         // Remove version files
         DeleteOldVersionFiles();
-
-        // Remove steam_appid.txt
-        SafeDeleteFile(Path.Combine(doometernalPath, "steam_appid.txt"));
 
         ShowInfo("Full clean completed!");
     }
@@ -456,22 +340,10 @@ public class DOOMEternalManualDL : MonoBehaviour
 
     IEnumerator InstallFlow()
     {
-        if (installModInjectorToggle == null || installModInjectorToggle.isOn)
-        {
-            ShowInfo("Installing Mod Injector...");
-            yield return InstallModInjector();
-        }
-
         if (installAPToggle != null && installAPToggle.isOn)
         {
             ShowInfo("Installing DOOM Eternal Archipelago...");
             yield return InstallDOOMEternalAP();
-        }
-
-        if (installMeathookToggle != null && installMeathookToggle.isOn)
-        {
-            ShowInfo("Installing Meathook...");
-            yield return InstallMeathook();
         }
 
         if (installAPWorldToggle != null && installAPWorldToggle.isOn)
@@ -480,86 +352,17 @@ public class DOOMEternalManualDL : MonoBehaviour
             yield return InstallAPWorld();
         }
 
-        CreateVersionFile(doometernalModInjector.url, doometernalAP.url, doometernalMeathook.url);
+        CreateVersionFile(doometernalAP.url);
 
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        if (launchDoomLauncherAfterSetupToggle != null && launchDoomLauncherAfterSetupToggle.isOn)
         {
-            ShowInfo("Launching DOOM Eternal...");
-            LaunchDOOMEternal();
-            yield return new WaitForSeconds(2f);
-        }
-
-        if (launchInjectorAfterSetupToggle != null && launchInjectorAfterSetupToggle.isOn)
-        {
-            ShowInfo("Launching Injector (Admin)...");
-            LaunchInjectorAsAdmin();
+            ShowInfo("Launching DOOM Eternal Archipelago Launcher...");
+            LaunchDoomEternalArchipelagoLauncher();
             yield return new WaitForSeconds(1f);
         }
 
         ShowInfo("Installation complete!");
         yield break;
-    }
-
-    IEnumerator InstallModInjector()
-    {
-        while (!configLoaded)
-            yield return null;
-
-        UnityEngine.Debug.Log("Config loaded. Mod Injector URL: " + doometernalModInjector.url);
-
-        if (string.IsNullOrEmpty(doometernalModInjector.url))
-        {
-            ShowInfo("ERROR: Mod Injector URL is empty!");
-            UnityEngine.Debug.LogError("Mod Injector URL not set!");
-            yield break;
-        }
-
-        string fileName = doometernalModInjector.fileName;
-        if (string.IsNullOrEmpty(fileName))
-        {
-            fileName = "EternalModInjector.zip";
-        }
-
-        string localPath = Path.Combine(Application.persistentDataPath, fileName);
-
-        UnityEngine.Debug.Log("Downloading Mod Injector from: " + doometernalModInjector.url);
-
-        yield return DownloadFile(doometernalModInjector.url, localPath);
-
-        if (!File.Exists(localPath))
-        {
-            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
-            ShowInfo("ERROR: Mod Injector download failed!");
-            yield break;
-        }
-
-        FileInfo fileInfo = new FileInfo(localPath);
-        UnityEngine.Debug.Log("File downloaded successfully: " + localPath + " (size: " + fileInfo.Length + " bytes)");
-
-        try
-        {
-            if (!Directory.Exists(doometernalPath))
-                Directory.CreateDirectory(doometernalPath);
-
-            System.IO.Compression.ZipFile.ExtractToDirectory(localPath, doometernalPath, true);
-            UnityEngine.Debug.Log("ZIP extracted to: " + doometernalPath);
-
-            UnityEngine.Debug.Log("Mod Injector installed to: " + doometernalPath);
-            ShowInfo("Mod Injector installed successfully!");
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogError("Failed to install Mod Injector: " + e.Message);
-            UnityEngine.Debug.LogError("Stack trace: " + e.StackTrace);
-            ShowInfo("ERROR: Failed to install Mod Injector\n" + e.Message);
-            yield break;
-        }
-
-        try
-        {
-            File.Delete(localPath);
-        }
-        catch { }
     }
 
     IEnumerator InstallDOOMEternalAP()
@@ -602,73 +405,6 @@ public class DOOMEternalManualDL : MonoBehaviour
             yield break;
         }
 
-        // On cherche le .zip qui se trouve A L'INTERIEUR du zip qu'on vient d'extraire,
-        // c'est celui-ci (et non le zip téléchargé lui-même) qui doit aller dans Mods.
-        string nestedZipPath = "";
-        try
-        {
-            nestedZipPath = FindFirstZip(apInstallPath);
-
-            if (!string.IsNullOrEmpty(nestedZipPath))
-                UnityEngine.Debug.Log("Found nested zip inside extracted AP folder: " + nestedZipPath);
-            else
-                UnityEngine.Debug.LogWarning("No .zip found inside extracted AP folder.");
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogWarning("Error while searching for nested zip: " + e.Message);
-            nestedZipPath = "";
-        }
-
-        if (string.IsNullOrEmpty(nestedZipPath))
-        {
-            UnityEngine.Debug.LogWarning("Nothing to copy to Mods folder (no nested zip found).");
-
-            try
-            {
-                if (File.Exists(downloadedFile))
-                    File.Delete(downloadedFile);
-            }
-            catch { }
-
-            yield break;
-        }
-
-        string modZipFileName = Path.GetFileName(nestedZipPath);
-
-        try
-        {
-            if (string.IsNullOrEmpty(doometernalPath))
-                doometernalPath = GetDOOMEternalPath();
-
-            if (!string.IsNullOrEmpty(doometernalPath))
-            {
-                modsPath = Path.Combine(doometernalPath, "Mods");
-                Directory.CreateDirectory(modsPath);
-
-                // Nettoie l'éventuel ancien zip AP installé (le nom peut changer d'une version à l'autre)
-                RemoveOldAPModZip();
-
-                string modsZipPath = Path.Combine(modsPath, modZipFileName);
-                if (File.Exists(modsZipPath))
-                    File.Delete(modsZipPath);
-
-                File.Copy(nestedZipPath, modsZipPath, true);
-                UnityEngine.Debug.Log("Copied nested AP zip into DOOM Eternal Mods folder: " + modsZipPath);
-
-                // Mémorise le nom exact du zip installé pour le revert et la détection d'autres mods
-                File.WriteAllText(Path.Combine(modsPath, "apmod_zip_name.txt"), modZipFileName);
-            }
-            else
-            {
-                UnityEngine.Debug.LogWarning("DOOM Eternal path not found; skipped copying AP zip to Mods folder.");
-            }
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogWarning("Could not copy zip into DOOM Eternal Mods folder: " + e.Message);
-        }
-
         try
         {
             if (File.Exists(downloadedFile))
@@ -679,50 +415,6 @@ public class DOOMEternalManualDL : MonoBehaviour
         yield break;
     }
 
-    IEnumerator InstallMeathook()
-    {
-        while (!configLoaded)
-            yield return null;
-
-        UnityEngine.Debug.Log("Config loaded. Meathook URL: " + doometernalMeathook.url);
-
-        if (string.IsNullOrEmpty(doometernalMeathook.url))
-        {
-            ShowInfo("ERROR: Meathook URL is empty!");
-            UnityEngine.Debug.LogError("Meathook URL not set!");
-            yield break;
-        }
-
-        string fileName = "XINPUT1_3.dll";
-        string localPath = Path.Combine(Application.persistentDataPath, fileName);
-
-        UnityEngine.Debug.Log("Downloading Meathook from: " + doometernalMeathook.url);
-
-        yield return DownloadFile(doometernalMeathook.url, localPath);
-
-        if (!File.Exists(localPath))
-        {
-            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
-            ShowInfo("ERROR: Meathook download failed!");
-            yield break;
-        }
-
-        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
-
-        try
-        {
-            string targetPath = Path.Combine(doometernalPath, fileName);
-            File.Copy(localPath, targetPath, true);
-            UnityEngine.Debug.Log("Meathook copied to: " + targetPath);
-            ShowInfo("Meathook installed successfully!");
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogError("Failed to copy Meathook: " + e.Message);
-            ShowInfo("ERROR: Failed to install Meathook\n" + e.Message);
-        }
-    }
-
     IEnumerator InstallAPWorld()
     {
         while (!configLoaded)
@@ -731,48 +423,28 @@ public class DOOMEternalManualDL : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
         }
 
-        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + doometernalApworld.url);
+        string apInstallPath = Path.Combine(documentsPath, "DOOM Eternal Archipelago");
 
-        if (string.IsNullOrEmpty(doometernalApworld.url))
+        UnityEngine.Debug.Log("Looking for APWorld file in: " + apInstallPath);
+
+        // Find the doometernal.apworld file in subdirectories
+        string apworldFilePath = FindApworldFile(apInstallPath);
+
+        if (string.IsNullOrEmpty(apworldFilePath))
         {
-            ShowInfo("ERROR: APWorld URL is empty!");
-            UnityEngine.Debug.LogError("APWorld URL not set!");
+            UnityEngine.Debug.LogError("doometernal.apworld file not found in AP installation!");
+            ShowInfo("ERROR: doometernal.apworld file not found in the AP installation!");
             yield break;
         }
 
-        string fileName = doometernalApworld.fileName;
-        if (string.IsNullOrEmpty(fileName))
-        {
-            fileName = doometernalApworld.url.Substring(doometernalApworld.url.LastIndexOf('/') + 1);
-
-            if (fileName.Contains("?"))
-                fileName = fileName.Substring(0, fileName.IndexOf("?"));
-
-            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
-        }
-
-        string localPath = Path.Combine(Application.persistentDataPath, fileName);
-
-        UnityEngine.Debug.Log("Downloading APWorld from: " + doometernalApworld.url);
-        UnityEngine.Debug.Log("Saving to: " + localPath);
-
-        yield return DownloadFile(doometernalApworld.url, localPath);
-
-        if (!File.Exists(localPath))
-        {
-            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
-            ShowInfo("ERROR: APWorld download failed!");
-            yield break;
-        }
-
-        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
+        UnityEngine.Debug.Log("Found doometernal.apworld at: " + apworldFilePath);
 
         // Target paths
         string[] targetPaths = new string[]
         {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
+            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", "doometernal.apworld"),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", "doometernal.apworld"),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", "doometernal.apworld"),
         };
 
         string target = "";
@@ -814,7 +486,7 @@ public class DOOMEternalManualDL : MonoBehaviour
 
         try
         {
-            File.Copy(localPath, target, true);
+            File.Copy(apworldFilePath, target, true);
 
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
 
@@ -825,19 +497,6 @@ public class DOOMEternalManualDL : MonoBehaviour
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
             yield break;
-        }
-
-        try
-        {
-            if (File.Exists(localPath))
-            {
-                File.Delete(localPath);
-                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
-            }
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -863,80 +522,21 @@ public class DOOMEternalManualDL : MonoBehaviour
         }
     }
 
-    IEnumerator ModInjectorOnlyFlow()
-    {
-        doometernalPath = GetDOOMEternalPath();
-
-        if (string.IsNullOrEmpty(doometernalPath))
-            yield break;
-
-        ShowInfo("Installing Mod Injector...");
-        yield return InstallModInjector();
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-        {
-            LaunchDOOMEternal();
-            yield return new WaitForSeconds(2f);
-        }
-
-        if (launchInjectorAfterSetupToggle != null && launchInjectorAfterSetupToggle.isOn)
-        {
-            ShowInfo("Launching Injector (Admin)...");
-            LaunchInjectorAsAdmin();
-            yield return new WaitForSeconds(1f);
-        }
-
-        ShowInfo("Installation complete!");
-    }
-
     IEnumerator APOnlyFlow()
     {
         ShowInfo("Installing DOOM Eternal Archipelago...");
         yield return InstallDOOMEternalAP();
 
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        if (launchDoomLauncherAfterSetupToggle != null && launchDoomLauncherAfterSetupToggle.isOn)
         {
-            ShowInfo("Launching DOOM Eternal...");
-            LaunchDOOMEternal();
-            yield return new WaitForSeconds(2f);
-        }
-
-        if (launchInjectorAfterSetupToggle != null && launchInjectorAfterSetupToggle.isOn)
-        {
-            ShowInfo("Launching Injector (Admin)...");
-            LaunchInjectorAsAdmin();
+            ShowInfo("Launching DOOM Eternal Archipelago Launcher...");
+            LaunchDoomEternalArchipelagoLauncher();
             yield return new WaitForSeconds(1f);
         }
 
         ShowInfo("Installation complete!");
 
         yield break;
-    }
-
-    IEnumerator MeathookOnlyFlow()
-    {
-        doometernalPath = GetDOOMEternalPath();
-
-        if (string.IsNullOrEmpty(doometernalPath))
-            yield break;
-
-        ShowInfo("Installing Meathook...");
-        yield return InstallMeathook();
-
-        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-        {
-            LaunchDOOMEternal();
-            yield return new WaitForSeconds(2f);
-        }
-
-        if (launchInjectorAfterSetupToggle != null && launchInjectorAfterSetupToggle.isOn)
-        {
-            ShowInfo("Launching Injector (Admin)...");
-            LaunchInjectorAsAdmin();
-            yield return new WaitForSeconds(1f);
-        }
-
-        ShowInfo("Installation complete!");
     }
 
     IEnumerator LoadRemoteConfig()
@@ -969,15 +569,28 @@ public class DOOMEternalManualDL : MonoBehaviour
         doometernalPath = GetDOOMEternalPath();
     }
 
-    void LaunchDOOMEternal()
+    void LaunchDoomEternalArchipelagoLauncher()
     {
-        string exePath = Path.Combine(doometernalPath, "DOOMEternalx64vk.exe");
+        string apInstallPath = Path.Combine(documentsPath, "DOOM Eternal Archipelago", "DoomEternalArchipelago");
+        string launcherPath = Path.Combine(apInstallPath, "DoomEternalArchipelagoLauncher.exe");
 
-        if (!File.Exists(exePath))
-            exePath = Path.Combine(doometernalPath, "DOOMEternal.exe");
+        if (!File.Exists(launcherPath))
+        {
+            UnityEngine.Debug.LogWarning("DoomEternalArchipelagoLauncher.exe not found at: " + launcherPath);
+            ShowInfo("ERROR: DoomEternalArchipelagoLauncher.exe not found!");
+            return;
+        }
 
-        if (File.Exists(exePath))
-            doometernalProcess = Process.Start(exePath);
+        try
+        {
+            Process.Start(launcherPath);
+            UnityEngine.Debug.Log("Launched DoomEternalArchipelagoLauncher: " + launcherPath);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to launch DoomEternalArchipelagoLauncher: " + e.Message);
+            ShowInfo("ERROR: Failed to launch DoomEternalArchipelagoLauncher\n" + e.Message);
+        }
     }
 
     void CloseDOOMEternal()
@@ -1054,26 +667,16 @@ public class DOOMEternalManualDL : MonoBehaviour
         }
     }
 
-    string FindFile(string root, string fileName)
+    // Cherche le fichier doometernal.apworld dans les sous-dossiers
+    string FindApworldFile(string root)
     {
         try
         {
-            foreach (string file in Directory.GetFiles(root, "*", SearchOption.AllDirectories))
-                if (Path.GetFileName(file) == fileName)
+            foreach (string file in Directory.GetFiles(root, "*.apworld", SearchOption.AllDirectories))
+            {
+                if (Path.GetFileName(file).ToLower() == "doometernal.apworld")
                     return file;
-        }
-        catch { }
-
-        return "";
-    }
-
-    // Cherche le premier fichier .zip trouvé dans le dossier (recherche récursive)
-    string FindFirstZip(string root)
-    {
-        try
-        {
-            foreach (string file in Directory.GetFiles(root, "*.zip", SearchOption.AllDirectories))
-                return file;
+            }
         }
         catch { }
 
@@ -1081,7 +684,6 @@ public class DOOMEternalManualDL : MonoBehaviour
     }
 
     // Supprime l'ancien zip AP installé dans Mods, en se basant sur le marqueur
-    // (le nom du zip imbriqué peut changer d'une version à l'autre)
     void RemoveOldAPModZip()
     {
         if (!Directory.Exists(modsPath))
@@ -1104,29 +706,19 @@ public class DOOMEternalManualDL : MonoBehaviour
         SafeDeleteFile(Path.Combine(modsPath, "DoomEternalArchipelagoPreAlpha.zip"));
     }
 
-    void CreateVersionFile(string modInjectorUrl, string apUrl, string meathookUrl)
+    void CreateVersionFile(string apUrl)
     {
         try
         {
-            string modInjectorVersion = ExtractVersionFromUrl(modInjectorUrl, @"/([^/]+)\.zip");
             string apVersion = ExtractVersionFromUrl(apUrl, @"/([^/]+)\.zip");
-            string meathookVersion = "XINPUT1_3.dll";
 
             string versionFileName = "DOOM Eternal APMod Version " + apVersion + ".txt";
             string content = "DOOM Eternal Archipelago Setup Tool by quack!\n";
             content += "https://github.com/quackexclamationmark/DOOM-Eternal-Setup-Tool\n";
             content += "\n";
-            content += "=== MOD INJECTOR ===\n";
-            content += "Downloaded from: " + modInjectorUrl + "\n";
-            content += "Version: " + modInjectorVersion + "\n";
-            content += "\n";
             content += "=== DOOM ETERNAL ARCHIPELAGO ===\n";
             content += "Downloaded from: " + apUrl + "\n";
             content += "Version: " + apVersion + "\n";
-            content += "\n";
-            content += "=== MEATHOOK ===\n";
-            content += "File: " + meathookVersion + "\n";
-            content += "Downloaded from: " + meathookUrl + "\n";
             content += "\n";
             content += "Downloaded at: " + System.DateTime.Now + "\n";
 
