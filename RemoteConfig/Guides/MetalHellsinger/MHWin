@@ -11,7 +11,7 @@ BepInEx will then be downloaded into the Metal Hellsinger core files, along with
 "kill",
 "[HEADER] apworld / yaml Infos",
 "kill",
-"HuniePop 2 is not a core Archipelago game, it needs a custom world file. When 'metal_hellsinger.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"Metal Hellsinger is not a core Archipelago game, it needs a custom world file. When 'metal_hellsinger.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
 "kill",
 "[HEADER] Connection Infos",
 "kill",
