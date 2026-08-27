@@ -187,6 +187,10 @@
     "drdrREFramework": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/dinput8.dll",
     "drdrLuaAPClient": "https://github.com/TheRealSolidusSnake/RE3R_AP_Client/raw/refs/heads/main/lua-apclientpp.dll",
 
+    "demontidesMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
+    "demontidesAP": "https://github.com/estradiol-valerate/DemonTidesAP/releases/download/v0.0.1/DemonTidesAP.zip",
+    "demontidesApworld": "https://github.com/RobertSPratley/DemonTidesAPWorld/releases/download/v0.0.1/demontides.apworld",
+
     "doomAP": "https://github.com/Daivuk/apdoom/releases/download/1.2.0/APDOOM-1_2_0-Win32.zip",
 
     "doom2AP": "https://github.com/Daivuk/apdoom/releases/download/1.2.0/APDOOM-1_2_0-Win32.zip",
