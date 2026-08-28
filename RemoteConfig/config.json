@@ -241,7 +241,7 @@
 
     "hksilksongBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "hksilksongAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/SilksongRandomizer.zip",
-    "hksilksongApworld": "https://github.com/Batatvideogames/silksong-archipelago-randomizer/releases/download/v0.4.3/silksong.apworld",
+    "hksilksongApworld": "https://github.com/Batatvideogames/silksong-archipelago-randomizer/releases/download/v0.4.4/silksong.apworld",
 
     "huniepopAP": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V2.3.1/Hunie.Pop.Archipelago.plugin.v2.3.1.zip",
     "huniepopApworld": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V2.3.1/huniepop.apworld",
@@ -292,6 +292,9 @@
 
     "metfusApworld": "https://github.com/StalledStorm/ArchipelagoMine/releases/download/v1.22.4/metroidfusion.apworld",
     "metfusBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
+
+    "mthApworld": "https://github.com/FyreDay/Archipelago-MinaTheHollower/releases/download/v1.0.1/mina_the_hollower.apworld",
+    "mthAP": "https://github.com/Axertin/mth-apclient/releases/download/v1.1.0/mth-apclient-v1.1.0-windows.zip",
 
     "minecraftApworld": "https://github.com/qixils/NeoForgeAP/releases/download/v2.1.3/minecraft.apworld",
 
