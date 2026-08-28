@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• apclient folder (Archipelago Mod)\n• mina_the_hollower.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, mina_the_hollower.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. Then, the AP Mod folder will be installed inside the game's mod directory ("AppData\\Roaming\\Yacht Club Games\\Mina the Hollower\\mods").",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"SUPERHOT is not a core Archipelago game, it needs a custom world file. When 'superhot.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, do NOT start the game directly, instead, go to your Steam library, right-click 'Mina the Hollower', go to 'Properties', then go to 'Game Versions and Betas' and select the 'experimental-modding' version.\n\nNow, go back to the setup tool and click the controller icon on Mina's setup window, it will launch the game through Steam using the right launch options.\n\nOnce in the main menu, you should be able to see a new 'Archipelago Connection' window.\n\nIn the 'Server' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Slot', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect' and you can start playing!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will simply delete the mod folder.",
+"clear"
+
+]
