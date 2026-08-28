@@ -189,6 +189,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("DARK SOULS II", new List<string> { "Dark", "Souls", "II", "2", "Scholar", "First", "Sin", "DS", "DS2", "DS 2", "DarkSouls", "DarkSouls2" }));
         games.Add(CreateGame("DARK SOULS III", new List<string> { "Dark", "Souls", "III", "3", "DS", "DS3", "DS 3", "DarkSouls", "DarkSouls3" }));
         games.Add(CreateGame("Dead Rising Deluxe Remaster", new List<string> { "Dead", "Rising", "Deluxe", "Remaster", "DR", "DR 1", "DR1", "DRDR", "Remake" }));
+        games.Add(CreateGame("Demon Tides", new List<string> { "Demon", "Tides", "DT" }));
         games.Add(CreateGame("DOOM (1993)", new List<string> { "Doom", "1", "I", "1993", "(1993)" }));
         games.Add(CreateGame("DOOM II", new List<string> { "Doom", "II", "2" }));
         games.Add(CreateGame("DOOM Eternal", new List<string> { "Doom", "Eternal", "DoomEternal" }));
@@ -216,6 +217,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Mario Kart Wii", new List<string> { "Mario", "Kart", "Wii", "MK", "MKWii", "M K Wii", "M KWii"}));
         games.Add(CreateGame("Metal Hellsinger", new List<string> { "Metal", "Hellsinger", "MH" }));
         games.Add(CreateGame("Metroid Fusion", new List<string> { "Metroid", "Fusion", "MetFus" }));
+        games.Add(CreateGame("Mina the Hollower", new List<string> { "Mina", "The", "Hollower", "MTH" }));
         games.Add(CreateGame("Minecraft", new List<string> { "Minecraft", "Mine", "Craft", "MC" }));
         games.Add(CreateGame("Neon White", new List<string> { "Neon", "White", "nw" }));
         games.Add(CreateGame("New Super Mario Bros. Wii", new List<string> { "New", "Super", "Mario", "Bros.", "Bros", "Wii", "NSMBW" }));

@@ -124,6 +124,8 @@ public class GamePanelManager : MonoBehaviour
     public GameObject vsPanel;
     public GameObject metalhPanel;
     public GameObject ytgvPanel;
+    public GameObject dtPanel;
+    public GameObject mthPanel;
 
     void Start()
     {
@@ -499,6 +501,12 @@ public class GamePanelManager : MonoBehaviour
             case "YellowTaxiGoesVroom":
                 ytgvPanel.SetActive(true);
                 break;
+            case "DemonTides":
+                dtPanel.SetActive(true);
+                break;
+            case "MinaTheHollower":
+                mthPanel.SetActive(true);
+                break;
         }
     }
 
@@ -625,5 +633,7 @@ public class GamePanelManager : MonoBehaviour
         if (vsPanel != null) vsPanel.SetActive(false);
         if (metalhPanel != null) metalhPanel.SetActive(false);
         if (ytgvPanel != null) ytgvPanel.SetActive(false);
+        if (dtPanel != null) dtPanel.SetActive(false);
+        if (mthPanel != null) mthPanel.SetActive(false);
     }
 }
