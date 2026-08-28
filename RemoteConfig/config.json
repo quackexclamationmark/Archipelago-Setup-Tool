@@ -187,6 +187,10 @@
     "drdrREFramework": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/dinput8.dll",
     "drdrLuaAPClient": "https://github.com/TheRealSolidusSnake/RE3R_AP_Client/raw/refs/heads/main/lua-apclientpp.dll",
 
+    "demontidesMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
+    "demontidesAP": "https://github.com/estradiol-valerate/DemonTidesAP/releases/download/v0.0.1/DemonTidesAP.zip",
+    "demontidesApworld": "https://github.com/RobertSPratley/DemonTidesAPWorld/releases/download/v0.0.1/demontides.apworld",
+
     "doomAP": "https://github.com/Daivuk/apdoom/releases/download/1.2.0/APDOOM-1_2_0-Win32.zip",
 
     "doom2AP": "https://github.com/Daivuk/apdoom/releases/download/1.2.0/APDOOM-1_2_0-Win32.zip",
@@ -208,8 +212,8 @@
     "endermagnoliaAP": "https://github.com/Trexounay/EnderMagnolia.Randomizer/releases/download/endermagnolia-v0.1.2/EnderMagnolia.Randomizer.zip",
 
     "fezHAT": "https://github.com/FEZModding/HAT/releases/download/v1.2.1/HAT.zip",
-    "fezAP": "https://github.com/nhyldmar/fez-ap/releases/download/v0.5.0/fezap.zip",
-    "fezApworld": "https://github.com/nhyldmar/fez-ap/releases/download/v0.5.0/fez.apworld",
+    "fezAP": "https://github.com/nhyldmar/fez-ap/releases/download/v0.6.0/FezAP.zip",
+    "fezApworld": "https://github.com/nhyldmar/fez-ap/releases/download/v0.6.0/fez.apworld",
 
     "funiraccoonAP": "https://github.com/Jeffdev-Archipelago-Implementations/FuniRaccoonAP/releases/download/1.6.1/FuniRaccoonAP.zip",
     "funiraccoonApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-Funi/releases/download/1.6.3/funi_raccoon.apworld",
@@ -230,14 +234,14 @@
     "hifirushApworld": "https://github.com/TRPG0/HbkArchipelago/releases/download/0.3.1/hi_fi_rush.apworld",
 
     "hitmanwoaAP": "https://github.com/BenDipp/Archipelago/releases/download/0.8.2/archipelago.plugin.js",
-    "hitmanwoaPeacock": "https://github.com/thepeacockproject/Peacock/releases/download/v8.8.1/Peacock-v8.8.1.zip",
+    "hitmanwoaPeacock": "https://github.com/thepeacockproject/Peacock/releases/download/v8.9.0/Peacock-v8.9.0.zip",
     "hitmanwoaApworld": "https://github.com/BenDipp/Archipelago/releases/download/0.8.2/hitman_woa.apworld",
 
     "hollowknightAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-Lumafly-HKAP.zip",
 
     "hksilksongBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "hksilksongAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/SilksongRandomizer.zip",
-    "hksilksongApworld": "https://github.com/Batatvideogames/silksong-archipelago-randomizer/releases/download/v0.4.3/silksong.apworld",
+    "hksilksongApworld": "https://github.com/Batatvideogames/silksong-archipelago-randomizer/releases/download/v0.4.4/silksong.apworld",
 
     "huniepopAP": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V2.3.1/Hunie.Pop.Archipelago.plugin.v2.3.1.zip",
     "huniepopApworld": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V2.3.1/huniepop.apworld",
@@ -289,6 +293,9 @@
     "metfusApworld": "https://github.com/StalledStorm/ArchipelagoMine/releases/download/v1.22.4/metroidfusion.apworld",
     "metfusBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
+    "mthApworld": "https://github.com/FyreDay/Archipelago-MinaTheHollower/releases/download/v1.0.1/mina_the_hollower.apworld",
+    "mthAP": "https://github.com/Axertin/mth-apclient/releases/download/v1.1.0/mth-apclient-v1.1.0-windows.zip",
+
     "minecraftApworld": "https://github.com/qixils/NeoForgeAP/releases/download/v2.1.3/minecraft.apworld",
 
     "neonwhiteMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.6.1/MelonLoader.x64.zip",
@@ -332,7 +339,7 @@
     "oniApworld": "https://github.com/ShadowKitty42/ONI-Archipelago/releases/download/v0.9.11/oni.apworld",
     "oniAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/ArchipelagoNotIncluded__0.9.11.zip",
 
-    "pmttydApworld": "https://github.com/jamesbrq/ArchipelagoTTYD/releases/download/v0.13.0/ttyd.apworld",
+    "pmttydApworld": "https://github.com/jamesbrq/ArchipelagoTTYD/releases/download/v0.13.0a/ttyd.apworld",
     "pmttydDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "peakAP": "https://github.com/Mickemoose/peak-archipelago/releases/download/0.6.1/peakpelago_0.6.1.zip",
@@ -347,8 +354,8 @@
     "p5rAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/P5R_Archipelago0.0.4.zip",
     "p5rApworld": "https://github.com/Daphoa/ArchipelagoP5RMod/releases/download/v0.1.4/p5r.apworld",
 
-    "pikmin2Apworld": "https://github.com/chpas0/Pikmin2Archipelago/releases/download/v0.8.0/pikmin2.apworld",
-    "pikmin2AP": "https://github.com/chpas0/Pikmin2Archipelago/releases/download/v0.8.0/archipelago-pikmin2-universal-v0.8.0.zip",
+    "pikmin2Apworld": "https://github.com/chpas0/Pikmin2Archipelago/releases/download/v0.8.1/pikmin2.apworld",
+    "pikmin2AP": "https://github.com/chpas0/Pikmin2Archipelago/releases/download/v0.8.1/archipelago-pikmin2-universal-v0.8.1.zip",
     "pikmin2Dolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "pikunikuAP": "https://github.com/Jeffdev-Archipelago-Implementations/PikuAPMod/releases/download/0.3.5/PikuAPMod.zip",
@@ -375,7 +382,7 @@
     "pokemonemeraldBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
     "pokemonfrlgBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
-    "pokemonfrlgApworld": "https://github.com/vyneras/Archipelago/releases/download/1.1.1/pokemon_frlg.apworld",
+    "pokemonfrlgApworld": "https://github.com/vyneras/Archipelago/releases/download/1.1.2/pokemon_frlg.apworld",
 
     "pokemonplatinumApworld": "https://github.com/ljtpetersen/platinum_archipelago/releases/download/v0.1.8/pokemon_platinum.apworld",
     "pokemonplatinumBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
@@ -495,7 +502,7 @@
     "spelunky2Apworld": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.4.0/spelunky2.apworld",
     "spelunky2Playlunky": "https://github.com/spelunky-fyi/Playlunky/releases/download/nightly/playlunky_nightly_63FB520.zip",
 
-    "stardewvalleyAP": "https://github.com/agilbert1412/StardewArchipelago/releases/download/7.4.26/StardewArchipelago.7.4.26.zip",
+    "stardewvalleyAP": "https://github.com/agilbert1412/StardewArchipelago/releases/download/8.1.3/StardewArchipelago.8.1.3.zip",
     "stardewvalleyPreloaded": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-SV-Archipelago.zip",
     
     "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.3/Archipelago_193.zip",
@@ -599,6 +606,9 @@
     "votvAP": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.5.0/votv_ap-main.zip",
     "votvDL": "https://r2.votv.dev/archive/votv/090n.7z",
     "votvFileName": "Voices Of The Void v0.9.0n",
+
+    "ytgvAP": "https://github.com/soopercool101/YellowTaxiAP/releases/download/v0.6.0/YTGVAP.v0.6.0.zip",
+    "ytgvApworld": "https://github.com/soopercool101/Archipelago/releases/download/YTGV.v0.6.1/yellowtaxi.apworld",
 
     "toolVersions": {
         "0.2.0": "obsolete",
