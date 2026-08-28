@@ -141,8 +141,8 @@ Currently, the following games are supported (115):
 
 Features to (maybe) add in the future:
 
-* Adding support for Microsoft Store, XBOX launcher!
-* Adding support for other OS (Linux).
+* ~Adding support for Microsoft Store, XBOX launcher!~
+* Adding support for other OS (Linux). (WORK IN PROGRESS!)
 
 I don't own all the games so some game path can be wrong and lead to a "Path not found" but I'm trying as hard as I can to get the right path name. If you get this error, feel free to report it to me on the [Discord server](https://discord.gg/hxsNCmFpcH)!
 
