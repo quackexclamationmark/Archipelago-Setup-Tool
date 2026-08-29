@@ -293,8 +293,8 @@
     "metfusApworld": "https://github.com/StalledStorm/ArchipelagoMine/releases/download/v1.22.4/metroidfusion.apworld",
     "metfusBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
-    "mthApworld": "https://github.com/FyreDay/Archipelago-MinaTheHollower/releases/download/v1.0.1/mina_the_hollower.apworld",
-    "mthAP": "https://github.com/Axertin/mth-apclient/releases/download/v1.1.0/mth-apclient-v1.1.0-windows.zip",
+    "mthApworld": "https://github.com/FyreDay/Archipelago-MinaTheHollower/releases/download/pre-v1.1.0-beta.1/mina_the_hollower.apworld",
+    "mthAP": "https://github.com/Axertin/mth-apclient/releases/download/v1.2.0-beta.3/mth-apclient-v1.2.0-beta.3-windows.zip",
 
     "minecraftApworld": "https://github.com/qixils/NeoForgeAP/releases/download/v2.1.3/minecraft.apworld",
 
