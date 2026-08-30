@@ -184,7 +184,7 @@
 
     "deadcellsApworld": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.1.8/dead_cells.apworld",
     "deadcellsAP": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.1.8/mods.zip",
-    "deadcellsCoreModding": "https://github.com/dead-cells-core-modding/core/releases/download/v35.13.3/win-x64.zip",
+    "deadcellsCoreModding": "https://github.com/dead-cells-core-modding/core/releases/download/v35.13.4/win-x64.zip",
 
     "drdrApworld": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.0/drdr.apworld",
     "drdrAP": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.0/DRAP_1.1.0.zip",
@@ -290,14 +290,14 @@
     "mkwiiAP": "https://github.com/toent/Archipelago-MKWii/releases/download/v0.2.3/mkwii_client_win_v0.2.3.zip",
     "mkwiiDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
-    "metalhellApworld": "https://github.com/DanielSchaack/ArchipelagoMetalHellsinger/releases/download/1.1.0/metal_hellsinger.apworld",
-    "metalhellAP": "https://github.com/DanielSchaack/Metal-Hellsinger-AP-Mod/releases/download/1.1.0/MetalHellsingerApMod.zip",
+    "metalhellApworld": "https://github.com/DanielSchaack/ArchipelagoMetalHellsinger/releases/download/1.1.1/metal_hellsinger.apworld",
+    "metalhellAP": "https://github.com/DanielSchaack/Metal-Hellsinger-AP-Mod/releases/download/1.1.1/MetalHellsingerApMod.zip",
     "metalhellBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
 
     "metfusApworld": "https://github.com/StalledStorm/ArchipelagoMine/releases/download/v1.22.4/metroidfusion.apworld",
     "metfusBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
-    "mthApworld": "https://github.com/FyreDay/Archipelago-MinaTheHollower/releases/download/pre-v1.1.0-beta.2/mina_the_hollower.apworld",
+    "mthApworld": "https://github.com/FyreDay/Archipelago-MinaTheHollower/releases/download/v1.1.0/mina_the_hollower.apworld",
     "mthAP": "https://github.com/Axertin/mth-apclient/releases/download/v1.2.0/mth-apclient-v1.2.0-windows.zip",
 
     "minecraftApworld": "https://github.com/qixils/NeoForgeAP/releases/download/v2.1.3/minecraft.apworld",
