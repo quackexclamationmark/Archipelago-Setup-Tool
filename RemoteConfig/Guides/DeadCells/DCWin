@@ -14,7 +14,7 @@
 "kill",
 "[HEADER] Manual Launch Infos",
 "kill",
-"Only do this if the launch after setup option doesn't work for you can launch it that way (do NOT launch the base game .exe it won't work with the mods):\n\n- Go to 'Dead Cells\coremod\core\host\startup' and start 'DeadCellsModding.exe', if it doesn't work, try to launch it as admin.\n\n- If the previous one doesn't work, in the Windows search bar type 'Command Prompt' and open it as admin, in there type 'cd' followed by the full path to your Dead Cells 'startup' directory, should be something like 'C:\Program Files (x86)\Steam\steamapps\common\Dead Cells\coremod\core\host\startup' and press enter. Once the previous command was entered, type 'DeadCellsModding.exe' and it should work.",
+"Only do this if the launch after setup option doesn't work for you. If so, you can launch it that way (do NOT launch the base game .exe it won't work with the mods):\n\n- Go to 'Dead Cells\\coremod\\core\\host\\startup' and start 'DeadCellsModding.exe', if it doesn't work, try to launch it as admin.\n\n- If the previous one doesn't work, in the Windows search bar type 'Command Prompt' and open it as admin, in there type 'cd' followed by the full path to your Dead Cells 'startup' directory, should be something like 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Dead Cells\\coremod\\core\\host\\startup' and press enter. Once the previous command was entered, type 'DeadCellsModding.exe' and it should work.",
 "kill",
 "[HEADER] Connection Infos",
 "kill",
