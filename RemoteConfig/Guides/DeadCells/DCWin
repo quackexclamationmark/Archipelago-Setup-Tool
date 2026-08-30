@@ -1,0 +1,28 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• Core Modding API (coremod folder)\n• DeadCellsArchipelago (Archipelago Mod)\n• dead_cells.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, dead_cells.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. Core Modding will then be installed into the game's core folder. The AP Mod folder will be installed in 'Dead Cells\\coremod\\mods' directory.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Dead Cells is not a core Archipelago game, it needs a custom world file. When 'dead_cells.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Manual Launch Infos",
+"kill",
+"Only do this if the launch after setup option doesn't work for you can launch it that way (do NOT launch the base game .exe it won't work with the mods):\n\n- Go to 'Dead Cells\coremod\core\host\startup' and start 'DeadCellsModding.exe', if it doesn't work, try to launch it as admin.\n\n- If the previous one doesn't work, in the Windows search bar type 'Command Prompt' and open it as admin, in there type 'cd' followed by the full path to your Dead Cells 'startup' directory, should be something like 'C:\Program Files (x86)\Steam\steamapps\common\Dead Cells\coremod\core\host\startup' and press enter. Once the previous command was entered, type 'DeadCellsModding.exe' and it should work.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"I RECOMMEND YOU TO LEAVE THE LAUNCH AFTER SETUP TOGGLE ON. IF THE LAUNCH AFTER SETUP DOESN'T WORK, CHECK OUT THE 'Manual Launch Infos' SECTION ABOVE.\n\nOnce everything is set up, a new Archipelago connection window should appear in the main menu in the top-right.\n\nIn the 'Address' field, enter 'archipelago.gg'.\n\nIn 'Slot', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect' and then you can start playing!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"You have 2 revert options, both can't be enabled at the same time.\n\nIf you use the 'Clear AP Mods' option it will only delete the mods that are required for Dead Cells Archipelago.\n\nIf you use the 'Full Clear CoreModding' option it will delete everything related to Core Modding API and mods. If other mods are detected an additionnal confirmation will appear.",
+"clear"
+
+]
