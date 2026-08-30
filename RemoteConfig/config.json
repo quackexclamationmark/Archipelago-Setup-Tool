@@ -212,8 +212,8 @@
     "endermagnoliaAP": "https://github.com/Trexounay/EnderMagnolia.Randomizer/releases/download/endermagnolia-v0.1.2/EnderMagnolia.Randomizer.zip",
 
     "fezHAT": "https://github.com/FEZModding/HAT/releases/download/v1.2.1/HAT.zip",
-    "fezAP": "https://github.com/nhyldmar/fez-ap/releases/download/v0.6.0/FezAP.zip",
-    "fezApworld": "https://github.com/nhyldmar/fez-ap/releases/download/v0.6.0/fez.apworld",
+    "fezAP": "https://github.com/nhyldmar/fez-ap/releases/download/v0.6.1/FezAP.zip",
+    "fezApworld": "https://github.com/nhyldmar/fez-ap/releases/download/v0.6.1/fez.apworld",
 
     "funiraccoonAP": "https://github.com/Jeffdev-Archipelago-Implementations/FuniRaccoonAP/releases/download/1.6.1/FuniRaccoonAP.zip",
     "funiraccoonApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-Funi/releases/download/1.6.3/funi_raccoon.apworld",
@@ -286,15 +286,15 @@
     "mkwiiAP": "https://github.com/toent/Archipelago-MKWii/releases/download/v0.2.3/mkwii_client_win_v0.2.3.zip",
     "mkwiiDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
-    "metalhellApworld": "https://github.com/DanielSchaack/ArchipelagoMetalHellsinger/releases/download/1.0.0/metal_hellsinger.apworld",
-    "metalhellAP": "https://github.com/DanielSchaack/Metal-Hellsinger-AP-Mod/releases/download/1.0.1/MetalHellsingerApMod.zip",
+    "metalhellApworld": "https://github.com/DanielSchaack/ArchipelagoMetalHellsinger/releases/download/1.1.0/metal_hellsinger.apworld",
+    "metalhellAP": "https://github.com/DanielSchaack/Metal-Hellsinger-AP-Mod/releases/download/1.1.0/MetalHellsingerApMod.zip",
     "metalhellBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
 
     "metfusApworld": "https://github.com/StalledStorm/ArchipelagoMine/releases/download/v1.22.4/metroidfusion.apworld",
     "metfusBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
-    "mthApworld": "https://github.com/FyreDay/Archipelago-MinaTheHollower/releases/download/pre-v1.1.0-beta.1/mina_the_hollower.apworld",
-    "mthAP": "https://github.com/Axertin/mth-apclient/releases/download/v1.2.0-beta.3/mth-apclient-v1.2.0-beta.3-windows.zip",
+    "mthApworld": "https://github.com/FyreDay/Archipelago-MinaTheHollower/releases/download/pre-v1.1.0-beta.2/mina_the_hollower.apworld",
+    "mthAP": "https://github.com/Axertin/mth-apclient/releases/download/v1.2.0/mth-apclient-v1.2.0-windows.zip",
 
     "minecraftApworld": "https://github.com/qixils/NeoForgeAP/releases/download/v2.1.3/minecraft.apworld",
 
@@ -326,7 +326,7 @@
     "oriblindAP": "https://github.com/c-ostic/OriBFArchipelago/releases/download/v0.4.0/OriBFArchipelago.zip",
     "oriblindApworld": "https://github.com/c-ostic/Archipelago/releases/download/v0.4.2/oribf.apworld",
 
-    "oriwispsApworld": "https://github.com/Satisha10/APwotw_release/releases/download/v0.6.4/ori_wotw.apworld",
+    "oriwispsApworld": "https://github.com/Satisha10/APwotw_release/releases/download/v0.6.5/ori_wotw.apworld",
 
     "outerwildsAP": "https://github.com/Ixrec/OuterWildsArchipelagoRandomizer/releases/download/v1.3.0/Ixrec.ArchipelagoRandomizer.zip",
     "outerwildsApworld": "https://github.com/Ixrec/OuterWildsArchipelagoRandomizer/releases/download/v1.3.0/outer_wilds.apworld",
@@ -387,11 +387,11 @@
     "pokemonplatinumApworld": "https://github.com/ljtpetersen/platinum_archipelago/releases/download/v0.1.8/pokemon_platinum.apworld",
     "pokemonplatinumBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
-    "pokemonsnapApworld": "https://github.com/nielrenned/PokemonSnap_Archipelago/releases/download/v0.6.1/pokemon_snap.apworld",
+    "pokemonsnapApworld": "https://github.com/nielrenned/PokemonSnap_Archipelago/releases/download/v0.6.2/pokemon_snap.apworld",
     "pokemonsnapProject64": "https://www.pj64-emu.com/file/setup-project64-3-0-1-5664-2df3434/",
 
     "pokeparkwiiAP": "https://github.com/Mekurushi/pokeparkrando/releases/download/1.2.4/windows-x64.zip",
-    "pokeparkwiiApworld": "https://github.com/Mekurushi/Archipelago_Pokepark/releases/download/1.2.6/pokepark.apworld",
+    "pokeparkwiiApworld": "https://github.com/Mekurushi/Archipelago_Pokepark/releases/download/1.2.7/pokepark.apworld",
     "pokeparkwiiDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "portal2AP": "https://github.com/GlassToadstool/Portal2ArchipelagoMod/releases/download/0.8.1/Portal2Archipelago.zip",
