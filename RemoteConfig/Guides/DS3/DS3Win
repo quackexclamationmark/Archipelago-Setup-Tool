@@ -12,8 +12,6 @@
 "kill",
 "Dark Souls 3 is an Archipelago core game, meaning it does not require a custom world file (.apworld).\nBecause of this, aside from installing the mods, all you need to do is create your YAML file using the 'Options Creator' in the AP Launcher and send it to the person hosting the AP multiworld.",
 "kill",
-"[HEADER] Launch Infos",
-"kill",
 "[HEADER] Connection Infos",
 "kill",
 "Once everything is set up, open the DS3-Archipelago folder inside you game's folder. First, you'll need to run 'DS3Randomizer.exe' (inside 'randomizer').\n\nIn the 'Room URL' field, enter archipelago.gg: followed by the port, this is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Player name', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, press 'Load' and you can go to the last step.\n\n. To launch the modded game simply go back to the setup tool and click the controller icon on the DS3 setup tab \n\n/!\\ MAKE SURE THAT YOU ARE OFFLINE ON DARK SOULS 3 BEFORE STARTING /!\\",
