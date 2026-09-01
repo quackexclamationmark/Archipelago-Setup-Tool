@@ -188,6 +188,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Cuphead", new List<string> { "Cup", "Head", "Cuphead" }));
         games.Add(CreateGame("DARK SOULS II", new List<string> { "Dark", "Souls", "II", "2", "Scholar", "First", "Sin", "DS", "DS2", "DS 2", "DarkSouls", "DarkSouls2" }));
         games.Add(CreateGame("DARK SOULS III", new List<string> { "Dark", "Souls", "III", "3", "DS", "DS3", "DS 3", "DarkSouls", "DarkSouls3" }));
+        games.Add(CreateGame("Dead Cells", new List<string> { "Dead", "Cells", "DC" }));
         games.Add(CreateGame("Dead Rising Deluxe Remaster", new List<string> { "Dead", "Rising", "Deluxe", "Remaster", "DR", "DR 1", "DR1", "DRDR", "Remake" }));
         games.Add(CreateGame("Demon Tides", new List<string> { "Demon", "Tides", "DT" }));
         games.Add(CreateGame("DOOM (1993)", new List<string> { "Doom", "1", "I", "1993", "(1993)" }));

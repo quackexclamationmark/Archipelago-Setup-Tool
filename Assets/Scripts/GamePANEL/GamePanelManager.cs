@@ -126,6 +126,7 @@ public class GamePanelManager : MonoBehaviour
     public GameObject ytgvPanel;
     public GameObject dtPanel;
     public GameObject mthPanel;
+    public GameObject deadcellsPanel;
 
     void Start()
     {
@@ -507,6 +508,9 @@ public class GamePanelManager : MonoBehaviour
             case "MinaTheHollower":
                 mthPanel.SetActive(true);
                 break;
+            case "DeadCells":
+                deadcellsPanel.SetActive(true);
+                break;
         }
     }
 
@@ -635,5 +639,6 @@ public class GamePanelManager : MonoBehaviour
         if (ytgvPanel != null) ytgvPanel.SetActive(false);
         if (dtPanel != null) dtPanel.SetActive(false);
         if (mthPanel != null) mthPanel.SetActive(false);
+        if (deadcellsPanel != null) deadcellsPanel.SetActive(false);
     }
 }

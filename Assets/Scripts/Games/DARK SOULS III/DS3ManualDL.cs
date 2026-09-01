@@ -1,8 +1,9 @@
+using System.Collections;
+using System.Diagnostics;
+using System.IO;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using System.IO;
-using System.Collections;
 
 public class DS3ManualDL : MonoBehaviour
 {
@@ -248,6 +249,55 @@ public class DS3ManualDL : MonoBehaviour
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogWarning("Could not delete directory " + path + " - " + e.Message);
+        }
+    }
+
+    public void LaunchDS3Game()
+    {
+        ds3Path = GetDS3Path();
+
+        if (string.IsNullOrEmpty(ds3Path))
+        {
+            ShowInfo("DS3 path not found. Cannot launch.");
+            return;
+        }
+
+        string targetPath = Path.Combine(ds3Path, "DS3-Archipelago");
+        string batFile = Path.Combine(targetPath, "launch-ds3.bat");
+
+        if (!Directory.Exists(targetPath))
+        {
+            ShowInfo("DS3-Archipelago folder not found. Please run Setup first.");
+            return;
+        }
+
+        if (!File.Exists(batFile))
+        {
+            ShowInfo("launch-ds3.bat not found in DS3-Archipelago folder.");
+            return;
+        }
+
+        try
+        {
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments = $"/K \"cd /d \"{targetPath}\" && launch-ds3.bat\"",
+                UseShellExecute = true,
+                Verb = "runas"
+            };
+
+            Process.Start(psi);
+        }
+        catch (System.ComponentModel.Win32Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Admin elevation denied or failed: " + e.Message);
+            ShowInfo("Launch cancelled (administrator elevation denied).");
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to launch DS3-Archipelago: " + e.Message);
+            ShowInfo("ERROR: Failed to launch DS3-Archipelago\n" + e.Message);
         }
     }
 

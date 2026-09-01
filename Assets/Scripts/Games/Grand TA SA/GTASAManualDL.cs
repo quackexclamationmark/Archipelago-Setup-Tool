@@ -490,50 +490,35 @@ public class GTASAManualDL : MonoBehaviour
             yield break;
         }
 
-        string fileName = "Archipelago.SA.asi";
-        string localPath = Path.Combine(Application.persistentDataPath, fileName);
+        string extractPath = Path.Combine(Application.persistentDataPath, "APModTemp");
 
         UnityEngine.Debug.Log("Downloading AP Mod from: " + gtasaAP.url);
-        UnityEngine.Debug.Log("Saving to: " + localPath);
 
-        yield return DownloadFile(gtasaAP.url, localPath);
+        yield return downloader.DownloadAndExtract(gtasaAP, Application.persistentDataPath, extractPath);
 
-        if (!File.Exists(localPath))
+        if (!Directory.Exists(extractPath))
         {
-            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
-            ShowInfo("ERROR: AP Mod download failed!");
+            UnityEngine.Debug.LogError("Extract failed for AP Mod");
+            ShowInfo("ERROR: AP Mod extraction failed!");
             yield break;
         }
 
         try
         {
             string scriptsPath = Path.Combine(gtasaPath, "scripts");
-            Directory.CreateDirectory(scriptsPath);
-            string targetASI = Path.Combine(scriptsPath, fileName);
-            if (File.Exists(targetASI)) File.Delete(targetASI);
-            File.Copy(localPath, targetASI, true);
-            UnityEngine.Debug.Log("Archipelago.SA.asi copied to: " + targetASI);
+            if (!Directory.Exists(scriptsPath))
+                Directory.CreateDirectory(scriptsPath);
 
+            MoveDirectory(extractPath, scriptsPath);
+            SafeDeleteDirectory(extractPath);
+
+            UnityEngine.Debug.Log("AP Mod files moved to: " + scriptsPath);
             ShowInfo("AP Mod installed successfully!");
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to install AP Mod: " + e.Message);
             ShowInfo("ERROR: Failed to install AP Mod\n" + e.Message);
-            yield break;
-        }
-
-        try
-        {
-            if (File.Exists(localPath))
-            {
-                File.Delete(localPath);
-                UnityEngine.Debug.Log("Cleaned up temporary AP Mod file: " + localPath);
-            }
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogWarning("Could not delete temporary AP Mod file: " + e.Message);
         }
     }
 
@@ -701,7 +686,7 @@ public class GTASAManualDL : MonoBehaviour
             string apworldVersion = ExtractVersionFromUrl(apworldUrl, @"/([^/]+)\.apworld");
             string asiVersion = "vorbisFile.dll";
             string widescreenVersion = ExtractVersionFromUrl(widescreenUrl, @"/([^/]+)\.zip");
-            string apVersion = ExtractVersionFromUrl(apUrl, @"/([^/]+)\.asi");
+            string apVersion = ExtractVersionFromUrl(apUrl, @"/([^/]+)\.zip");
 
             string versionFileName = "GTA SA Archipelago Version " + apVersion + ".txt";
             string content = "GTA San Andreas Archipelago Setup Tool\n\n";
