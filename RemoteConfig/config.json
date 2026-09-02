@@ -97,6 +97,7 @@
     "lopPopTracker": "https://github.com/CaFlavien/Lies-of-P-Poptracker/releases/download/v0.1.10/Lies-of-P-Poptracker-v0.1.10.zip",
     "p5rPopTracker": "https://github.com/AkagiCritMagnet/P5R-poptracker-pack-for-AP/releases/download/V0.3b/P5R.Pack.zip",
     "cyberpunk2077PopTracker": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/0.7.1/cyberpunk2077_poptracker_.0.7.0.zip",
+    "inscryptionPopTracker": "https://github.com/empathy-mp3/Archipelago_Inscryption/releases/download/v1.5.4/InscryptionTracker_v2.0.zip",
     
 
     "adofaiPathName": "A Dance of Fire and Ice",
@@ -271,6 +272,10 @@
     "iaybBepInEx": "https://thunderstore.io/package/download/BepInEx/BepInExPack/5.4.2305/",
     "iaybAP": "https://github.com/petiboy7/IAYBArchipelago/releases/download/0.3.4/IAmYourBeast.zip",
     "iaybApworld": "https://github.com/petiboy7/IAYBArchipelago/releases/download/0.3.4/i_am_your_beast.apworld",
+
+    "inscryptionAP": "https://github.com/empathy-mp3/Archipelago_Inscryption/releases/download/v1.5.4/Ballin_Inc-ArchipelagoMod.zip",
+    "inscryptionApworld": "https://github.com/empathy-mp3/Archipelago_Inscryption/releases/download/v1.5.4/inscryption_beta.apworld",
+    "inscryptionBepInEx": "https://thunderstore.io/package/download/BepInEx/BepInExPack_Inscryption/5.4.2305/",
 
     "kspAP": "https://github.com/nickdavies/KSP1-Archipelago-client/releases/download/v0.8.0/KSPArchipelago.zip",
     "kspApworld": "https://github.com/nickdavies/Archipelago/releases/download/v0.8.4/ksp1.apworld",
