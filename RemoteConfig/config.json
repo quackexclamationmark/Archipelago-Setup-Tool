@@ -380,6 +380,7 @@
 
     "peakAP": "https://github.com/Mickemoose/peak-archipelago/releases/download/0.6.1/peakpelago_0.6.1.zip",
     "peakBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+    "peakBepInExLinux": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_linux_x64_5.4.23.5.zip",
     "peakApworld": "https://github.com/Mickemoose/peak-archipelago/releases/download/0.6.1/peak.apworld",
     
     "peaksofyoreAP": "https://thunderstore.io/package/download/c0der23/PeaksOfArchipelago/2.2.1/",
