@@ -17,11 +17,11 @@
     "steamSearchPathsLinuxHome": [
         ".steam/debian-installation/steamapps/common",
         ".steam/ubuntu12_32/steamapps/common",
-        ".steam/steam/steamapps/common",
+        ".steam/steam/steamapps/common"
     ],
 
     "steamSearchPathsLinuxExt": [
-        "SteamLibrary/steamapps/common",
+        "SteamLibrary/steamapps/common"
     ],
 
     "epicSearchPaths": [
