@@ -29,7 +29,9 @@
     ],
 
     "msSearchPaths": [
-        "Games"
+        "Games",
+        "Program Files (x86)\\Games",
+        "Program Files\\Games"
     ],
     
     "r2modmanDL": "https://thunderstore.io/c/lethal-company/p/ebkr/r2modman/",
