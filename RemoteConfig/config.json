@@ -14,6 +14,16 @@
         "SteamLibrarySSD\\steamapps\\common"
     ],
 
+    "steamSearchPathsLinuxHome": [
+        ".steam/debian-installation/steamapps/common",
+        ".steam/ubuntu12_32/steamapps/common",
+        ".steam/steam/steamapps/common",
+    ],
+
+    "steamSearchPathsLinuxExt": [
+        "SteamLibrary/steamapps/common",
+    ],
+
     "epicSearchPaths": [
         "Epic",
         "Epic Games",
