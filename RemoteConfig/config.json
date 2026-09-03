@@ -639,6 +639,11 @@
     "untitledApworld": "https://github.com/PixelShake92/Untitled-Goose-Game-Archipelago/releases/download/Alpha_2.2/untitled_goose_game.apworld",
     "untitledBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.9/BepInEx_x64_5.4.9.0.zip",
 
+    "valheimApworld": "https://github.com/xyzzy44/ValheimArchipelagoRandomizer/releases/download/0.2.3/valheim.apworld",
+    "valheimAP": "https://github.com/xyzzy44/ValheimArchipelagoRandomizer/releases/download/0.2.3/ValheimRandomizer-0.2.3.zip",
+    "valheimBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+    "valheimJotunn": "https://thunderstore.io/package/download/ValheimModding/Jotunn/2.29.2/",
+
     "vsApworld": "https://github.com/SWCreeperKing/ArchipelagoSurvivors/releases/download/v0.3.5.1/vampire_survivors.apworld",
     "vsMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.2/MelonLoader.x64.zip",
     "vsAP": "https://github.com/SWCreeperKing/ArchipelagoSurvivors/releases/download/v0.3.5.1/ArchipelagoSurvivors.zip",
