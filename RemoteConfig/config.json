@@ -21,7 +21,10 @@
     ],
 
     "steamSearchPathsLinuxExt": [
-        "SteamLibrary/steamapps/common"
+        "SteamLibrary/steamapps/common",
+        "Games/Steam/steamapps/common",
+        "Games/SteamLibrary/steamapps/common",
+        "steamapps/common"
     ],
 
     "epicSearchPaths": [
