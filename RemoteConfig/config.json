@@ -199,7 +199,7 @@
     "contentwarningMycelium": "https://github.com/RugbugRedfern/Mycelium-Networking-For-Content-Warning/releases/download/v1.0.14/MyceliumNetworkingForCW-Debug.dll",
 
     "cupheadAP": "https://github.com/JKLeckr/CupheadArchipelagoMod/releases/download/alpha03h/CupheadArchipelago-alpha03h_win64.zip",
-    "cupheadApworld": "https://github.com/JKLeckr/Archipelago-cuphead/releases/download/alpha03j/cuphead.apworld",
+    "cupheadApworld": "https://github.com/JKLeckr/Archipelago-cuphead/releases/download/alpha03k/cuphead.apworld",
     "cupheadBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
     "cyberpunk2077AP": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/0.7.1/CyberpunkArchipelagoMod_.0.7.0.zip",
@@ -262,8 +262,8 @@
     "garfieldkartApworld": "https://github.com/FeluciaPS/Archipelago/releases/download/1.0.2/garfkart.apworld",
     "garfieldkartBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
-    "gtasaAP": "https://github.com/awakenbad/SanAndreasAP/releases/download/v0.8.2/SanAndreasAP-v0.8.2.zip",
-    "gtasaApworld": "https://github.com/awakenbad/SanAndreasAP/releases/download/v0.8.2/gta_sa.apworld",
+    "gtasaAP": "https://github.com/awakenbad/SanAndreasAP/releases/download/v0.8.3/SanAndreasAP-v0.8.3.zip",
+    "gtasaApworld": "https://github.com/awakenbad/SanAndreasAP/releases/download/v0.8.3/gta_sa.apworld",
     "gtasaWidescreen": "https://github.com/ThirteenAG/WidescreenFixesPack/releases/download/gtasa/GTASA.WidescreenFix.zip",
     "gtasaASI": "https://github.com/GTAmodding/ASI-Loader/releases/download/v1.3.0/vorbisFile.dll",
 
@@ -287,7 +287,7 @@
 
     "hksilksongBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "hksilksongAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/SilksongRandomizer.zip",
-    "hksilksongApworld": "https://github.com/Batatvideogames/silksong-archipelago-randomizer/releases/download/v0.4.5/silksong.apworld",
+    "hksilksongApworld": "https://github.com/Batatvideogames/silksong-archipelago-randomizer/releases/download/v0.4.5-Hotfix/silksong.apworld",
 
     "huniepopAP": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V2.3.1/Hunie.Pop.Archipelago.plugin.v2.3.1.zip",
     "huniepopApworld": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V2.3.1/huniepop.apworld",
@@ -392,10 +392,10 @@
     "pmttydApworld": "https://github.com/jamesbrq/ArchipelagoTTYD/releases/download/v0.13.0a/ttyd.apworld",
     "pmttydDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
-    "peakAP": "https://github.com/Mickemoose/peak-archipelago/releases/download/0.6.1/peakpelago_0.6.1.zip",
+    "peakAP": "https://github.com/Mickemoose/peak-archipelago/releases/download/0.6.2/peakpelago_0.6.2.zip",
     "peakBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "peakBepInExLinux": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_linux_x64_5.4.23.5.zip",
-    "peakApworld": "https://github.com/Mickemoose/peak-archipelago/releases/download/0.6.1/peak.apworld",
+    "peakApworld": "https://github.com/Mickemoose/peak-archipelago/releases/download/0.6.2/peak.apworld",
     "peakVersion": "https://thunderstore.io/package/download/kirigiri/PeakVersionBypass/1.0.2/",
     
     "peaksofyoreAP": "https://thunderstore.io/package/download/c0der23/PeaksOfArchipelago/2.2.1/",
