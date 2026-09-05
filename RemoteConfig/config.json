@@ -184,7 +184,7 @@
 
     "clairobscurAPSteam": "https://github.com/Demorck/ClairObscurArchipelagoRandomizer/releases/download/v0.4.4-l/COE33_Client_Steam.zip",
     "clairobscurAPXBOX": "https://github.com/Demorck/ClairObscurArchipelagoRandomizer/releases/download/v0.4.4-l/COE33_Client_Gamepass.zip",
-    "clairobscurApworld": "https://github.com/Demorck/ClairObscur_APWorld/releases/download/v0.4.2/clair_obscur.apworld",
+    "clairobscurApworld": "https://github.com/Demorck/ClairObscur_APWorld/releases/download/v0.4.3/clair_obscur.apworld",
 
     "cloverpitAP": "https://thunderstore.io/package/download/Syntheal/CloverPit_Archipelago/1.2.2/",
     "cloverpitApworld": "https://github.com/Syntheal/CloverPit.Archipelago/releases/download/v1.2.2/cloverpit.apworld",
@@ -287,7 +287,7 @@
 
     "hksilksongBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "hksilksongAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/SilksongRandomizer.zip",
-    "hksilksongApworld": "https://github.com/Batatvideogames/silksong-archipelago-randomizer/releases/download/v0.4.4/silksong.apworld",
+    "hksilksongApworld": "https://github.com/Batatvideogames/silksong-archipelago-randomizer/releases/download/v0.4.5/silksong.apworld",
 
     "huniepopAP": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V2.3.1/Hunie.Pop.Archipelago.plugin.v2.3.1.zip",
     "huniepopApworld": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V2.3.1/huniepop.apworld",
@@ -336,8 +336,8 @@
     "mkwiiAP": "https://github.com/toent/Archipelago-MKWii/releases/download/v0.2.3/mkwii_client_win_v0.2.3.zip",
     "mkwiiDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
-    "metalhellApworld": "https://github.com/DanielSchaack/ArchipelagoMetalHellsinger/releases/download/1.1.1/metal_hellsinger.apworld",
-    "metalhellAP": "https://github.com/DanielSchaack/Metal-Hellsinger-AP-Mod/releases/download/1.1.1/MetalHellsingerApMod.zip",
+    "metalhellApworld": "https://github.com/DanielSchaack/Metal-Hellsinger-AP-Mod/releases/download/1.1.2/metal_hellsinger.apworld",
+    "metalhellAP": "https://github.com/DanielSchaack/Metal-Hellsinger-AP-Mod/releases/download/1.1.2/MetalHellsingerApMod.zip",
     "metalhellBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
 
     "metfusApworld": "https://github.com/StalledStorm/ArchipelagoMine/releases/download/v1.22.4/metroidfusion.apworld",
