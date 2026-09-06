@@ -1,4 +1,10 @@
 {
+    "apSearchPaths": [
+        "ProgramData\\Archipelago",
+        "Archipelago",
+        "Archipelago\\Archipelago"
+    ],
+    
     "steamSearchPaths": [
         "SteamLibrary\\steamapps\\common",
         "Steam\\steamapps\\common",
