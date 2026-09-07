@@ -10,13 +10,18 @@ public class PEAKManualDL : MonoBehaviour
 {
     public FileDownloader downloader;
 
+    [Header("PLATFORM")]
+    public PlatformSelection platformSelection;
+
     [Header("PEAK FILES")]
     public FileDownloader.FileData peakapworld;
     public FileDownloader.FileData bepInEx;
     public FileDownloader.FileData peakAP;
+    public FileDownloader.FileData peakVersion;
 
     [Header("GAME FOLDER NAMES")]
     public string steamGameFolderName = "PEAK";
+    public string steamAppId = "3527290";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installPeakapworldToggle;
@@ -53,12 +58,19 @@ public class PEAKManualDL : MonoBehaviour
     {
         public string peakApworld;
         public string peakBepInEx;
+        public string peakBepInExLinux;
         public string peakAP;
+        public string peakVersion;
         public string[] steamSearchPaths;
+        public string[] steamSearchPathsLinuxHome;
+        public string[] steamSearchPathsLinuxExt;
     }
 
     void Start()
     {
+        if (platformSelection == null)
+            platformSelection = FindFirstObjectByType<PlatformSelection>();
+
         peakPath = GetPEAKPath();
         StartCoroutine(LoadRemoteConfig());
 
@@ -101,8 +113,14 @@ public class PEAKManualDL : MonoBehaviour
             return;
 
         peakapworld.url = remoteConfig.peakApworld;
-        bepInEx.url = remoteConfig.peakBepInEx;
+
+        bool isLinux = platformSelection != null && platformSelection.isLinux;
+        bepInEx.url = (isLinux && !string.IsNullOrEmpty(remoteConfig.peakBepInExLinux))
+            ? remoteConfig.peakBepInExLinux
+            : remoteConfig.peakBepInEx;
+
         peakAP.url = remoteConfig.peakAP;
+        peakVersion.url = remoteConfig.peakVersion;
     }
 
     public void RunSetup()
@@ -360,6 +378,9 @@ public class PEAKManualDL : MonoBehaviour
         {
             ShowInfo("Installing PEAK AP Mod...");
             yield return InstallPEAKAP();
+
+            ShowInfo("Installing Version Bypass...");
+            yield return InstallPeakVersionBypass();
         }
 
         CreateVersionFile(peakapworld.url, bepInEx.url, peakAP.url);
@@ -514,6 +535,19 @@ public class PEAKManualDL : MonoBehaviour
         MoveDirectory(extractPath, peakPath);
 
         SafeDeleteDirectory(extractPath);
+
+        string pluginsPath = Path.Combine(peakPath, "BepInEx", "plugins");
+        if (!Directory.Exists(pluginsPath))
+        {
+            Directory.CreateDirectory(pluginsPath);
+            UnityEngine.Debug.Log("plugins folder was missing from the archive, created manually at: " + pluginsPath);
+        }
+
+        bool isLinux = platformSelection != null && platformSelection.isLinux;
+        if (isLinux)
+        {
+            ChmodExecutable(Path.Combine(peakPath, "run_bepinex.sh"));
+        }
     }
 
     IEnumerator InstallPEAKAP()
@@ -525,8 +559,24 @@ public class PEAKManualDL : MonoBehaviour
 
         yield return downloader.DownloadAndExtract(peakAP, Application.persistentDataPath, extractPath);
 
-        // Find the peakpelago folder
+        if (Directory.Exists(extractPath))
+        {
+            UnityEngine.Debug.Log("=== PEAKAP extracted content of: " + extractPath + " ===");
+            foreach (string f in Directory.GetFiles(extractPath, "*", SearchOption.AllDirectories))
+                UnityEngine.Debug.Log("  FILE: " + f);
+            foreach (string d in Directory.GetDirectories(extractPath, "*", SearchOption.AllDirectories))
+                UnityEngine.Debug.Log("  DIR:  " + d);
+        }
+        else
+        {
+            UnityEngine.Debug.LogError("PEAKAP extractPath does not exist after extraction: " + extractPath);
+            ShowInfo("ERROR: PEAK AP Mod extraction failed, folder missing!");
+            yield break;
+        }
+
         string peakpelagoFolder = FindPeakpelagoFolder(extractPath);
+
+        UnityEngine.Debug.Log("PEAKAP peakpelagoFolder result: '" + peakpelagoFolder + "'");
 
         if (string.IsNullOrEmpty(peakpelagoFolder))
         {
@@ -536,27 +586,8 @@ public class PEAKManualDL : MonoBehaviour
             yield break;
         }
 
-        // Look for plugins directory inside peakpelago
-        string pluginSourcePath = Path.Combine(peakpelagoFolder, "plugins");
-
-        if (!Directory.Exists(pluginSourcePath))
-        {
-            UnityEngine.Debug.LogError("plugins directory not found in peakpelago folder!");
-            ShowInfo("ERROR: plugins directory not found in peakpelago folder!");
-            SafeDeleteDirectory(extractPath);
-            yield break;
-        }
-
-        // Look for the peakpelago subfolder inside plugins
-        string peakpelagoPluginFolder = Path.Combine(pluginSourcePath, "peakpelago");
-
-        if (!Directory.Exists(peakpelagoPluginFolder))
-        {
-            UnityEngine.Debug.LogError("peakpelago subfolder not found in plugins directory!");
-            ShowInfo("ERROR: peakpelago subfolder not found in plugins directory!");
-            SafeDeleteDirectory(extractPath);
-            yield break;
-        }
+        int filesToMove = Directory.GetFiles(peakpelagoFolder, "*", SearchOption.AllDirectories).Length;
+        UnityEngine.Debug.Log("PEAKAP files found to move from peakpelagoFolder: " + filesToMove);
 
         string pluginsPath = Path.Combine(peakPath, "BepInEx", "plugins");
         Directory.CreateDirectory(pluginsPath);
@@ -570,13 +601,71 @@ public class PEAKManualDL : MonoBehaviour
             if (Directory.Exists(targetPath))
                 SafeDeleteDirectory(targetPath);
 
-            MoveDirectory(peakpelagoPluginFolder, targetPath);
-            UnityEngine.Debug.Log("PEAKArchipelago installed to: " + targetPath);
+            MoveDirectory(peakpelagoFolder, targetPath);
+
+            int filesMoved = Directory.Exists(targetPath) ? Directory.GetFiles(targetPath, "*", SearchOption.AllDirectories).Length : 0;
+            UnityEngine.Debug.Log("PEAKArchipelago installed to: " + targetPath + " (files present after move: " + filesMoved + ")");
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to install PEAKArchipelago: " + e.Message);
             ShowInfo("ERROR: Failed to install PEAKArchipelago\n" + e.Message);
+        }
+
+        SafeDeleteDirectory(extractPath);
+    }
+
+    IEnumerator InstallPeakVersionBypass()
+    {
+        while (!configLoaded)
+            yield return null;
+
+        if (string.IsNullOrEmpty(peakVersion.url))
+        {
+            UnityEngine.Debug.LogWarning("peakVersion URL not set, skipping PeakVersionBypass install.");
+            yield break;
+        }
+
+        string extractPath = Path.Combine(Application.persistentDataPath, "PeakVersionTemp");
+
+        yield return downloader.DownloadAndExtract(peakVersion, Application.persistentDataPath, extractPath);
+
+        if (!Directory.Exists(extractPath))
+        {
+            UnityEngine.Debug.LogError("PeakVersionBypass extractPath does not exist after extraction: " + extractPath);
+            ShowInfo("ERROR: PeakVersionBypass extraction failed!");
+            yield break;
+        }
+
+        string dllPath = FindFileByName(extractPath, "PeakVersionBypass.dll");
+
+        UnityEngine.Debug.Log("PeakVersionBypass.dll found at: '" + dllPath + "'");
+
+        if (string.IsNullOrEmpty(dllPath))
+        {
+            UnityEngine.Debug.LogError("PeakVersionBypass.dll not found in downloaded package!");
+            ShowInfo("ERROR: PeakVersionBypass.dll not found in package!");
+            SafeDeleteDirectory(extractPath);
+            yield break;
+        }
+
+        string pluginsPath = Path.Combine(peakPath, "BepInEx", "plugins");
+        Directory.CreateDirectory(pluginsPath);
+
+        string targetPath = Path.Combine(pluginsPath, "PeakVersionBypass.dll");
+
+        try
+        {
+            if (File.Exists(targetPath))
+                File.Delete(targetPath);
+
+            File.Copy(dllPath, targetPath, true);
+            UnityEngine.Debug.Log("PeakVersionBypass.dll installed to: " + targetPath);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to install PeakVersionBypass.dll: " + e.Message);
+            ShowInfo("ERROR: Failed to install PeakVersionBypass.dll\n" + e.Message);
         }
 
         SafeDeleteDirectory(extractPath);
@@ -610,6 +699,9 @@ public class PEAKManualDL : MonoBehaviour
 
         ShowInfo("Installing PEAK AP Mod...");
         yield return InstallPEAKAP();
+
+        ShowInfo("Installing Version Bypass...");
+        yield return InstallPeakVersionBypass();
 
         CreateVersionFile(peakapworld.url, bepInEx.url, peakAP.url);
 
@@ -652,12 +744,87 @@ public class PEAKManualDL : MonoBehaviour
         peakPath = GetPEAKPath();
     }
 
+    void ChmodExecutable(string path)
+    {
+        if (!File.Exists(path))
+            return;
+
+        try
+        {
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = "chmod",
+                Arguments = "+x \"" + path + "\"",
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using (Process p = Process.Start(psi))
+            {
+                p.WaitForExit();
+            }
+
+            UnityEngine.Debug.Log("chmod +x applied to: " + path);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Failed to chmod +x " + path + ": " + e.Message);
+        }
+    }
+
     void LaunchPEAK()
     {
+        bool isLinux = platformSelection != null && platformSelection.isLinux;
+
+        if (isLinux)
+        {
+            LaunchPEAKLinux();
+            return;
+        }
+
         string exePath = Path.Combine(peakPath, "PEAK.exe");
 
         if (File.Exists(exePath))
             peakProcess = Process.Start(exePath);
+    }
+
+    void LaunchPEAKLinux()
+    {
+        string steamUrl = "steam://run/" + steamAppId;
+
+        try
+        {
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = steamUrl,
+                UseShellExecute = true
+            };
+
+            peakProcess = Process.Start(psi);
+            UnityEngine.Debug.Log("Launching PEAK via Steam (Linux): " + steamUrl);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Process.Start(UseShellExecute) failed for steam:// url, trying xdg-open: " + e.Message);
+
+            try
+            {
+                ProcessStartInfo psi = new ProcessStartInfo
+                {
+                    FileName = "xdg-open",
+                    Arguments = steamUrl,
+                    UseShellExecute = false
+                };
+
+                peakProcess = Process.Start(psi);
+                UnityEngine.Debug.Log("Launching PEAK via xdg-open: " + steamUrl);
+            }
+            catch (System.Exception e2)
+            {
+                UnityEngine.Debug.LogError("Failed to launch PEAK via Steam on Linux: " + e2.Message);
+                ShowInfo("ERROR: Failed to launch PEAK via Steam\n" + e2.Message);
+            }
+        }
     }
 
     void ClosePEAK()
@@ -753,6 +920,16 @@ public class PEAKManualDL : MonoBehaviour
             removeAPModsOnlyToggle.isOn = false;
             removeAPModsOnlyToggle.interactable = !value;
         }
+    }
+
+    string FindFileByName(string root, string fileName)
+    {
+        string[] matches = Directory.GetFiles(root, fileName, SearchOption.AllDirectories);
+
+        if (matches.Length > 0)
+            return matches[0];
+
+        return "";
     }
 
     string FindPeakpelagoFolder(string root)
@@ -856,6 +1033,11 @@ public class PEAKManualDL : MonoBehaviour
 
     string GetPEAKPath()
     {
+        bool isLinux = platformSelection != null && platformSelection.isLinux;
+
+        if (isLinux)
+            return GetPEAKPathLinux();
+
         string[] quickPaths = new string[]
         {
             Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
@@ -908,6 +1090,69 @@ public class PEAKManualDL : MonoBehaviour
         }
 
         UnityEngine.Debug.LogWarning("Game (Steam) not found.");
+        return "";
+    }
+
+    string GetPEAKPathLinux()
+    {
+        string homeDir = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+
+        // 1. Recherche dans /home/(User)/...
+        if (remoteConfig != null && remoteConfig.steamSearchPathsLinuxHome != null)
+        {
+            foreach (string relativePath in remoteConfig.steamSearchPathsLinuxHome)
+            {
+                if (string.IsNullOrEmpty(relativePath))
+                    continue;
+
+                try
+                {
+                    string path = Path.Combine(homeDir, relativePath, steamGameFolderName);
+                    if (Directory.Exists(path))
+                    {
+                        UnityEngine.Debug.Log("Found Game (Steam, Linux home) at: " + path);
+                        return path;
+                    }
+                }
+                catch { }
+            }
+        }
+
+        // 2. Recherche dans /mnt/(disque externe)/...
+        if (remoteConfig != null && remoteConfig.steamSearchPathsLinuxExt != null)
+        {
+            try
+            {
+                string mntRoot = "/mnt";
+                if (Directory.Exists(mntRoot))
+                {
+                    string[] mountedDrives = Directory.GetDirectories(mntRoot);
+
+                    foreach (string drive in mountedDrives)
+                    {
+                        foreach (string relativePath in remoteConfig.steamSearchPathsLinuxExt)
+                        {
+                            if (string.IsNullOrEmpty(relativePath))
+                                continue;
+
+                            try
+                            {
+                                string path = Path.Combine(drive, relativePath, steamGameFolderName);
+                                if (Directory.Exists(path))
+                                {
+                                    UnityEngine.Debug.Log("Found Game (Steam, Linux ext) at: " + path);
+                                    return path;
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Game (Steam, Linux) not found.");
         return "";
     }
 }

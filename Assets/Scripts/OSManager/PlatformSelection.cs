@@ -1,15 +1,13 @@
 using UnityEngine;
-
 public class PlatformSelection : MonoBehaviour
 {
     [Header("Platform Selection (choisir dans l'inspecteur)")]
     [SerializeField] private bool selectWindows = true;
-
     [Header("State (accessible depuis d'autres scripts)")]
     public bool isWindows = false;
     public bool isLinux = false;
 
-    void Start()
+    void Awake()
     {
         if (selectWindows)
         {

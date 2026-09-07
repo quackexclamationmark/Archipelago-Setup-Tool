@@ -186,6 +186,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Clustertruck", new List<string> { "Cluster", "Truck", "ClusterTruck", "CT" }));
         games.Add(CreateGame("Content Warning", new List<string> { "Content", "Warning", "CW" }));
         games.Add(CreateGame("Cuphead", new List<string> { "Cup", "Head", "Cuphead" }));
+        games.Add(CreateGame("Cyberpunk 2077", new List<string> { "Cyberpunk", "2077", "Cyber", "Punk", "CP" }));
         games.Add(CreateGame("DARK SOULS II", new List<string> { "Dark", "Souls", "II", "2", "Scholar", "First", "Sin", "DS", "DS2", "DS 2", "DarkSouls", "DarkSouls2" }));
         games.Add(CreateGame("DARK SOULS III", new List<string> { "Dark", "Souls", "III", "3", "DS", "DS3", "DS 3", "DarkSouls", "DarkSouls3" }));
         games.Add(CreateGame("Dead Cells", new List<string> { "Dead", "Cells", "DC" }));
@@ -200,7 +201,8 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Fez", new List<string> { "Fez" }));
         games.Add(CreateGame("Funi Raccoon Game", new List<string> { "Funi", "Raccoon", "Racoon", "Game", "FRG" }));
         games.Add(CreateGame("Garfield Kart - Furious Racing", new List<string> { "Garfield", "Kart", "Furious", "Racing", "GK", "FR" }));
-        games.Add(CreateGame("Grand Theft Auto San Andreas", new List<string> { "Grand", "Theft", "Auto", "San", "Andreas", "GTA", "GTA SA", "GTASA" }));
+        games.Add(CreateGame("Grand Theft Auto San Andreas", new List<string> { "Grand", "Theft", "Auto", "San", "Andreas", "GTA", "SA", "GTASA" }));
+        games.Add(CreateGame("Grand Theft Auto Vice City", new List<string> { "Grand", "Theft", "Auto", "Vice", "City", "GTA", "VC", "GTAVC" }));
         games.Add(CreateGame("Hades", new List<string> { "Hades", "1", "I" }));
         games.Add(CreateGame("Hi-Fi Rush", new List<string> { "HiFi", "Hi-Fi", "Hi", "Fi", "Rush" }));
         games.Add(CreateGame("HITMAN: World of Assassination", new List<string> { "Hitman", "World", "Assassination", "WoA" }));
@@ -209,6 +211,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("HuniePop", new List<string> { "Hunie", "Pop", "HuniePop 1", "HuniePop1", "Hunie Pop", "Hunie Pop 1" }));
         games.Add(CreateGame("HuniePop 2: Double Date", new List<string> { "Hunie", "Pop", "HuniePop 2", "HuniePop2", "Hunie Pop", "Hunie Pop 2", "Double Date", "HuniePop Double Date", "Double", "Date", "Hunie Pop Double Date", "HuniePop 2 Double Date", "Hunie Pop 2 Double Date" }));
         games.Add(CreateGame("I Am Your Beast", new List<string> { "I", "Am", "Your", "Beast", "IAYB", "IAMYB", "IAmYourBeast" }));
+        games.Add(CreateGame("Inscryption", new List<string> { "Inscryption" }));
         games.Add(CreateGame("Kerbal Space Program", new List<string> { "Kerbal", "Space", "Program", "KSP", "KSP1", "KSP 1", "1" }));
         games.Add(CreateGame("Lethal Company", new List<string> { "Lethal", "Company", "LC" }));
         games.Add(CreateGame("Librarian Tidy Up the Arcane Library", new List<string> { "Librarian", "Tidy", "Up", "Arcane", "Library", "LTUTAL" }));
@@ -237,6 +240,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Pikmin 2", new List<string> { "Pikmin", "2", "Pikmin2" }));
         games.Add(CreateGame("Pikuniku", new List<string> { "Pikuniku", "pn" }));
         games.Add(CreateGame("Placid Plastic Duck Simulator", new List<string> { "Placid", "Plastic", "Duck", "Simulator", "Sim", "PPDS", "PlacidPlasticDuckSimulator" }));
+        games.Add(CreateGame("Plague Inc: Evolved", new List<string> { "Plague", "Inc", "Evolved" }));
         games.Add(CreateGame("Plants Vs. Zombies GOTY", new List<string> { "Plants", "vs", "Zombies", "GOTY", "Game", "Year", "PVZ" }));
         games.Add(CreateGame("Plants Vs. Zombies Replanted", new List<string> { "Plants", "vs", "Zombies", "Replanted", "Remake", "PVZ", "PVZR" }));
         games.Add(CreateGame("Pokémon Black and White", new List<string> { "Pokemon", "Pokémon", "Black", "And", "White", "BW", "B&W" }));
@@ -256,6 +260,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Rift of the Necrodancer", new List<string> { "Rift", "Necrodancer", "ROtnD", "ROtN" }));
         games.Add(CreateGame("Risk Of Rain 2", new List<string> { "Risk", "Rain", "2", "II", "ROR2", "ROR", "ROR 2" }));
         games.Add(CreateGame("Rogue Legacy 2", new List<string> { "Rogue", "Legacy", "2", "RL", "RL2", "RL 2" }));
+        games.Add(CreateGame("Saints Row 2", new List<string> { "Saints", "Row", "2", "SR", "SR2" }));
         games.Add(CreateGame("Sayonara Wild Hearts", new List<string> { "Sayonara", "Wild", "Hearts", "SWH" }));
         games.Add(CreateGame("Schedule I", new List<string> { "Schedule", "1", "I" }));
         games.Add(CreateGame("Scritchy Scratchy", new List<string> { "Scritchy", "Scratchy", "SS", "ScritchyScratchy" }));
@@ -289,6 +294,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Undertale Yellow", new List<string> { "Undertale", "Yellow" }));
         games.Add(CreateGame("Unfair Flips", new List<string> { "Unfair", "Flips" }));
         games.Add(CreateGame("Untitled Goose Game", new List<string> { "Untitled", "Goose", "Game", "UGG" }));
+        games.Add(CreateGame("Valheim", new List<string> { "Valheim" }));
         games.Add(CreateGame("Vampire Survivors", new List<string> { "Vampire", "Survivors", "VS" }));
         games.Add(CreateGame("Voices Of The Void", new List<string> { "Voices", "Void", "Votv" }));
         games.Add(CreateGame("Yellow Taxi Goes Vroom", new List<string> { "Yellow", "Taxi", "Goes", "Vroom", "YTGV" }));

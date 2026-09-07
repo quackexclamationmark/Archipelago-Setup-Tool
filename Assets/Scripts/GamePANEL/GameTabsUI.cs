@@ -26,6 +26,14 @@ public class GameTabsUI : MonoBehaviour
     public GameObject romPanel;
     public Button romPanelButton;
 
+    [Header("PLATFORM SELECTION")]
+    [Tooltip("Si laissé vide, sera cherché automatiquement dans la scène via FindObjectOfType.")]
+    public PlatformSelection platformSelection;
+
+    [Header("LINUX SETUP PANEL (optionnel)")]
+    [Tooltip("N'a d'effet que si isLinux = true ET que ce champ est assigné dans l'inspecteur. Sinon le setupPanel par défaut (Windows) est utilisé.")]
+    public GameObject linuxSetupPanel;
+
     [Header("COLORS")]
     public Color activeColor = Color.white;
     public Color inactiveColor = Color.gray;
@@ -37,12 +45,13 @@ public class GameTabsUI : MonoBehaviour
     private bool downloadIsActive = false;
     private bool romIsActive = false;
 
+    // Panel réellement utilisé pour l'onglet "setup" (Windows par défaut, ou Linux si applicable)
+    private GameObject activeSetupPanel;
+
     void Awake()
     {
-        // Singleton-ish convenience
         Instance = this;
 
-        // Ensure an EventSystem exists so UI receives clicks
         if (EventSystem.current == null)
         {
             var es = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
@@ -52,7 +61,12 @@ public class GameTabsUI : MonoBehaviour
 
     void Start()
     {
-        // Add hover events
+        // IMPORTANT : appelé ici (et non dans Awake) car PlatformSelection fixe isWindows/isLinux
+        // dans son propre Awake(). Comme tous les Awake() de la scène s'exécutent avant tous les
+        // Start(), on est garanti que platformSelection.isWindows/isLinux sont déjà à jour ici,
+        // quel que soit l'ordre relatif des Awake() entre les deux scripts.
+        ResolveSetupPanel();
+
         AddHoverEvents(setupButton, "setup");
         AddHoverEvents(infosButton, "infos");
 
@@ -65,7 +79,6 @@ public class GameTabsUI : MonoBehaviour
         if (romPanelButton != null)
             AddHoverEvents(romPanelButton, "rom");
 
-        // Bind onClick handlers so clicks change tabs
         if (setupButton != null)
         {
             setupButton.onClick.RemoveListener(OpenSetup);
@@ -96,7 +109,6 @@ public class GameTabsUI : MonoBehaviour
             romPanelButton.onClick.AddListener(OpenRomPanel);
         }
 
-        // Default: if romPanel is assigned -> show romPanel by default, else setup
         if (romPanel != null)
             OpenRomPanel();
         else
@@ -111,6 +123,46 @@ public class GameTabsUI : MonoBehaviour
             OpenSetup();
     }
 
+    // ---------------- PLATFORM / SETUP PANEL RESOLUTION ----------------
+
+    // Détermine quel panel de setup utiliser en fonction de PlatformSelection.
+    // - isLinux == true ET linuxSetupPanel assigné  -> on utilise linuxSetupPanel, le setupPanel par défaut est désactivé/écarté du flow.
+    // - isWindows == true (ou linuxSetupPanel non assigné) -> on utilise setupPanel par défaut, linuxSetupPanel est désactivé s'il existe.
+    void ResolveSetupPanel()
+    {
+        if (platformSelection == null)
+            platformSelection = FindFirstObjectByType<PlatformSelection>();
+
+        bool useLinuxPanel = platformSelection != null
+                              && platformSelection.isLinux
+                              && linuxSetupPanel != null;
+
+        if (useLinuxPanel)
+        {
+            activeSetupPanel = linuxSetupPanel;
+
+            // Le setup panel par défaut est "supprimé" du flow : on le désactive et on ne le
+            // réutilisera plus tant que Linux est actif.
+            if (setupPanel != null)
+                setupPanel.SetActive(false);
+
+            Debug.Log("[GameTabsUI] Linux détecté + linuxSetupPanel assigné -> utilisation du setup panel Linux.");
+        }
+        else
+        {
+            activeSetupPanel = setupPanel;
+
+            // Le panel Linux (s'il existe) n'est pas utilisé dans ce cas.
+            if (linuxSetupPanel != null)
+                linuxSetupPanel.SetActive(false);
+
+            if (platformSelection != null && platformSelection.isLinux && linuxSetupPanel == null)
+                Debug.Log("[GameTabsUI] Linux détecté mais linuxSetupPanel non assigné -> fallback sur le setup panel par défaut.");
+            else
+                Debug.Log("[GameTabsUI] Windows détecté (ou par défaut) -> utilisation du setup panel par défaut.");
+        }
+    }
+
     // ---------------- TABS ----------------
 
     public void OpenSetup()
@@ -121,7 +173,7 @@ public class GameTabsUI : MonoBehaviour
         downloadIsActive = false;
         romIsActive = false;
 
-        if (setupPanel != null) setupPanel.SetActive(true);
+        if (activeSetupPanel != null) activeSetupPanel.SetActive(true);
         if (infosPanel != null) infosPanel.SetActive(false);
         if (popTrackerPanel != null) popTrackerPanel.SetActive(false);
         if (downloadPanel != null) downloadPanel.SetActive(false);
@@ -141,7 +193,7 @@ public class GameTabsUI : MonoBehaviour
         downloadIsActive = false;
         romIsActive = false;
 
-        if (setupPanel != null) setupPanel.SetActive(false);
+        if (activeSetupPanel != null) activeSetupPanel.SetActive(false);
         if (infosPanel != null) infosPanel.SetActive(true);
         if (popTrackerPanel != null) popTrackerPanel.SetActive(false);
         if (downloadPanel != null) downloadPanel.SetActive(false);
@@ -161,7 +213,7 @@ public class GameTabsUI : MonoBehaviour
         downloadIsActive = false;
         romIsActive = false;
 
-        if (setupPanel != null) setupPanel.SetActive(false);
+        if (activeSetupPanel != null) activeSetupPanel.SetActive(false);
         if (infosPanel != null) infosPanel.SetActive(false);
         if (popTrackerPanel != null) popTrackerPanel.SetActive(true);
         if (downloadPanel != null) downloadPanel.SetActive(false);
@@ -181,7 +233,7 @@ public class GameTabsUI : MonoBehaviour
         downloadIsActive = true;
         romIsActive = false;
 
-        if (setupPanel != null) setupPanel.SetActive(false);
+        if (activeSetupPanel != null) activeSetupPanel.SetActive(false);
         if (infosPanel != null) infosPanel.SetActive(false);
         if (popTrackerPanel != null) popTrackerPanel.SetActive(false);
         if (downloadPanel != null) downloadPanel.SetActive(true);
@@ -201,7 +253,7 @@ public class GameTabsUI : MonoBehaviour
         downloadIsActive = false;
         romIsActive = true;
 
-        if (setupPanel != null) setupPanel.SetActive(false);
+        if (activeSetupPanel != null) activeSetupPanel.SetActive(false);
         if (infosPanel != null) infosPanel.SetActive(false);
         if (popTrackerPanel != null) popTrackerPanel.SetActive(false);
         if (downloadPanel != null) downloadPanel.SetActive(false);
@@ -220,10 +272,8 @@ public class GameTabsUI : MonoBehaviour
     {
         romIsActive = active;
 
-        // Si le romPanel a été fermé de l'extérieur, on retombe sur Setup par défaut (ou on laisse tout fermé)
         if (!active)
         {
-            // Nous choisissons de désélectionner le bouton ROM et de garder les autres inactifs
             setupIsActive = false;
             infosIsActive = false;
             popTrackerIsActive = false;

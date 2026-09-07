@@ -127,6 +127,12 @@ public class GamePanelManager : MonoBehaviour
     public GameObject dtPanel;
     public GameObject mthPanel;
     public GameObject deadcellsPanel;
+    public GameObject cp2077Panel;
+    public GameObject inscryptionPanel;
+    public GameObject plagueincPanel;
+    public GameObject valheimPanel;
+    public GameObject gtavcPanel;
+    public GameObject saintsrow2Panel;
 
     void Start()
     {
@@ -511,6 +517,24 @@ public class GamePanelManager : MonoBehaviour
             case "DeadCells":
                 deadcellsPanel.SetActive(true);
                 break;
+            case "Cyberpunk2077":
+                cp2077Panel.SetActive(true);
+                break;
+            case "Inscryption":
+                inscryptionPanel.SetActive(true);
+                break;
+            case "PlagueIncEvolved":
+                plagueincPanel.SetActive(true);
+                break;
+            case "Valheim":
+                valheimPanel.SetActive(true);
+                break;
+            case "GrandTheftAutoViceCity":
+                gtavcPanel.SetActive(true);
+                break;
+            case "SaintsRow2":
+                saintsrow2Panel.SetActive(true);
+                break;
         }
     }
 
@@ -640,5 +664,11 @@ public class GamePanelManager : MonoBehaviour
         if (dtPanel != null) dtPanel.SetActive(false);
         if (mthPanel != null) mthPanel.SetActive(false);
         if (deadcellsPanel != null) deadcellsPanel.SetActive(false);
+        if (cp2077Panel != null) cp2077Panel.SetActive(false);
+        if (inscryptionPanel != null) inscryptionPanel.SetActive(false);
+        if (plagueincPanel != null) plagueincPanel.SetActive(false);
+        if (valheimPanel != null) valheimPanel.SetActive(false);
+        if (gtavcPanel != null) gtavcPanel.SetActive(false);
+        if (saintsrow2Panel != null) saintsrow2Panel.SetActive(false);
     }
 }

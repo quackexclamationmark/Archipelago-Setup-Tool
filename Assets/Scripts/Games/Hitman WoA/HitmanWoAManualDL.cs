@@ -54,6 +54,9 @@ public class HitmanWoAManualDL : MonoBehaviour
     private string pendingAction;
     private InstalledFilesManifest currentManifest;
     private bool isEpic = false;
+    private bool lastApWorldInstallSuccess = false;
+
+    private string currentPeacockFolderName = "";
 
     private HitmanConfig remoteConfig;
     private bool configLoaded = false;
@@ -62,6 +65,7 @@ public class HitmanWoAManualDL : MonoBehaviour
     public class InstalledFilesManifest
     {
         public string gameInstallPath = "";
+        public string peacockFolderName = "";
         public List<string> installedFiles = new List<string>();
     }
 
@@ -73,6 +77,7 @@ public class HitmanWoAManualDL : MonoBehaviour
         public string hitmanwoaApworld;
         public string[] steamSearchPaths;
         public string[] epicSearchPaths;
+        public string[] apSearchPaths;
     }
 
     void Start()
@@ -206,7 +211,7 @@ public class HitmanWoAManualDL : MonoBehaviour
         {
             bool allowed = true;
             if (installPeacockToggle != null)
-                allowed = installPeacockToggle.isOn || Directory.Exists(Path.Combine(gamePath ?? "", "Peacock-v8.8.1"));
+                allowed = installPeacockToggle.isOn || !string.IsNullOrEmpty(GetPeacockFolderPath());
             removePluginOnlyToggle.interactable = allowed && !(fullCleanToggle != null && fullCleanToggle.isOn);
             if (!removePluginOnlyToggle.interactable)
                 removePluginOnlyToggle.isOn = false;
@@ -328,10 +333,19 @@ public class HitmanWoAManualDL : MonoBehaviour
     {
         yield return new WaitUntil(() => configLoaded);
 
-        ShowInfo("Installing APWorld...");
+        ShowInfo("Installing AP World...");
         yield return new WaitForSeconds(1f);
 
         yield return InstallAPWorld();
+
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
+        if (launchGameAfterPeacockToggle == null || launchGameAfterPeacockToggle.isOn)
+        {
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
 
         ShowInfo("Installation complete!");
     }
@@ -371,7 +385,15 @@ public class HitmanWoAManualDL : MonoBehaviour
     IEnumerator RemovePluginOnlyAsync()
     {
         string pluginFileName = (hitmanwoaAP != null && !string.IsNullOrEmpty(hitmanwoaAP.fileName)) ? hitmanwoaAP.fileName : "archipelago.plugin.js";
-        string pluginPath = Path.Combine(gamePath, "Peacock-v8.8.1", "plugins", pluginFileName);
+
+        string peacockFolder = GetPeacockFolderPath();
+        if (string.IsNullOrEmpty(peacockFolder))
+        {
+            ShowInfo("Peacock not found. Cannot remove the plugin.");
+            yield break;
+        }
+
+        string pluginPath = Path.Combine(peacockFolder, "plugins", pluginFileName);
 
         ShowInfo("Removing Archipelago plugin...");
         yield return new WaitForSeconds(0.3f);
@@ -421,13 +443,13 @@ public class HitmanWoAManualDL : MonoBehaviour
         ShowInfo("Performing full clean of Peacock...");
         yield return new WaitForSeconds(0.3f);
 
-        string peacockFolder = Path.Combine(gamePath, "Peacock-v8.8.1");
+        string peacockFolder = GetPeacockFolderPath();
 
         // Stop any started processes
         CleanupProcesses();
 
         // Delete Peacock folder
-        if (Directory.Exists(peacockFolder))
+        if (!string.IsNullOrEmpty(peacockFolder) && Directory.Exists(peacockFolder))
         {
             try
             {
@@ -443,8 +465,10 @@ public class HitmanWoAManualDL : MonoBehaviour
         }
         else
         {
-            UnityEngine.Debug.Log("Peacock folder not present: " + peacockFolder);
+            UnityEngine.Debug.Log("Peacock folder not present or could not be located.");
         }
+
+        currentPeacockFolderName = "";
 
         // Remove manifest if it only contained Peacock/plugin entries (safe to remove manifest for full clean)
         string manifestPath = Path.Combine(Application.persistentDataPath, "InstalledFilesManifest_HitmanWoA.json");
@@ -544,21 +568,44 @@ public class HitmanWoAManualDL : MonoBehaviour
 
         yield return downloader.DownloadAndExtract(hitmanPeacock, Application.persistentDataPath, extractPath);
 
-        string sourceFolder = Path.Combine(extractPath, "Peacock-v8.8.1");
-
-        if (!Directory.Exists(sourceFolder))
+        if (!Directory.Exists(extractPath))
         {
-            ShowInfo("ERROR: Peacock folder not found in extraction!");
-            SafeDeleteDirectory(extractPath);
+            ShowInfo("ERROR: Peacock extraction folder not found!");
             yield break;
         }
 
-        string targetFolder = Path.Combine(gamePath, "Peacock-v8.8.1");
+        // On ne se base plus sur un nom de fichier/dossier fixe. On prend le contenu
+        // réel de l'archive : si elle contient un unique sous-dossier englobant
+        // (et aucun fichier à la racine), ce sous-dossier est la vraie racine du
+        // contenu Peacock, quel que soit son nom. Sinon on prend directement
+        // le contenu extrait tel quel.
+        string sourceFolder = extractPath;
 
-        // Move the Peacock folder to game root (copy/move files)
+        string[] topLevelFiles = Directory.GetFiles(extractPath);
+        string[] topLevelDirs = Directory.GetDirectories(extractPath);
+
+        if (topLevelFiles.Length == 0 && topLevelDirs.Length == 1)
+        {
+            sourceFolder = topLevelDirs[0];
+        }
+
+        // Nom final utilisé pour le dossier Peacock côté jeu : celui du dossier
+        // source détecté si disponible, sinon un nom générique par défaut.
+        string folderName = (sourceFolder != extractPath) ? Path.GetFileName(sourceFolder) : "Peacock";
+        if (string.IsNullOrEmpty(folderName))
+            folderName = "Peacock";
+
+        currentPeacockFolderName = folderName;
+
+        string targetFolder = Path.Combine(gamePath, folderName);
+
+        // Move the Peacock folder content to game root (copy/move files)
         MoveDirectoryAndTrack(sourceFolder, targetFolder);
 
         SafeDeleteDirectory(extractPath);
+
+        if (currentManifest != null)
+            currentManifest.peacockFolderName = folderName;
 
         ShowInfo("Peacock installed successfully!");
         yield return new WaitForSeconds(0.5f);
@@ -575,10 +622,17 @@ public class HitmanWoAManualDL : MonoBehaviour
             yield break;
         }
 
-        string peacockFolder = Path.Combine(gamePath, "Peacock-v8.8.1");
+        string peacockFolder = GetPeacockFolderPath();
+
+        // Si aucun dossier Peacock n'a été trouvé/installé, on en crée un avec un nom générique.
+        if (string.IsNullOrEmpty(peacockFolder))
+        {
+            currentPeacockFolderName = "Peacock";
+            peacockFolder = Path.Combine(gamePath, currentPeacockFolderName);
+        }
+
         string pluginsFolder = Path.Combine(peacockFolder, "plugins");
 
-        // Ensure parent and plugins folder exist
         try
         {
             if (!Directory.Exists(peacockFolder))
@@ -595,12 +649,14 @@ public class HitmanWoAManualDL : MonoBehaviour
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("InstallPlugin: could not create folders: " + e.Message);
-            ShowInfo("ERROR: impossible de créer les dossiers Peacock/plugins:\n" + e.Message);
+            ShowInfo("ERROR: could not create Peacock/plugins folders:\n" + e.Message);
             yield break;
         }
 
-        // Download directly as a single file
-        string fileName = "archipelago.plugin.js"; // Force le nom du fichier
+        if (currentManifest != null)
+            currentManifest.peacockFolderName = currentPeacockFolderName;
+
+        string fileName = "archipelago.plugin.js";
 
         string tempFile = Path.Combine(Application.persistentDataPath, "plugin_tmp_file");
         try { if (File.Exists(tempFile)) File.Delete(tempFile); } catch { }
@@ -617,12 +673,12 @@ public class HitmanWoAManualDL : MonoBehaviour
                 File.SetAttributes(dest, FileAttributes.Normal);
                 if (currentManifest != null) currentManifest.installedFiles.Add(dest);
                 UnityEngine.Debug.Log("InstallPlugin: plugin copied -> " + dest);
-                ShowInfo("Plugin installé !");
+                ShowInfo("Plugin installed successfully!");
             }
             catch (System.Exception e)
             {
                 UnityEngine.Debug.LogError("InstallPlugin: failed to copy downloaded plugin: " + e.Message);
-                ShowInfo("ERROR: impossible de copier le plugin:\n" + e.Message);
+                ShowInfo("ERROR: could not copy the plugin:\n" + e.Message);
             }
             finally
             {
@@ -632,7 +688,7 @@ public class HitmanWoAManualDL : MonoBehaviour
         else
         {
             UnityEngine.Debug.LogError("InstallPlugin: no file found after download.");
-            ShowInfo("ERROR: plugin introuvable après téléchargement.");
+            ShowInfo("ERROR: plugin not found after download.");
         }
 
         yield return null;
@@ -640,12 +696,20 @@ public class HitmanWoAManualDL : MonoBehaviour
 
     IEnumerator InstallAPWorld()
     {
-        while (!configLoaded)
-            yield return null;
+        lastApWorldInstallSuccess = false;
 
-        if (hitmanwoaApworld == null || string.IsNullOrEmpty(hitmanwoaApworld.url))
+        while (!configLoaded)
         {
-            ShowInfo("APWorld data not configured.");
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + hitmanwoaApworld.url);
+
+        if (string.IsNullOrEmpty(hitmanwoaApworld.url))
+        {
+            ShowInfo("ERROR: APWorld URL is empty!");
+            UnityEngine.Debug.LogError("APWorld URL not set!");
             yield break;
         }
 
@@ -653,69 +717,74 @@ public class HitmanWoAManualDL : MonoBehaviour
         if (string.IsNullOrEmpty(fileName))
         {
             fileName = hitmanwoaApworld.url.Substring(hitmanwoaApworld.url.LastIndexOf('/') + 1);
+
             if (fileName.Contains("?"))
                 fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
         }
 
         string localPath = Path.Combine(Application.persistentDataPath, fileName);
+
+        UnityEngine.Debug.Log("Downloading APWorld from: " + hitmanwoaApworld.url);
+        UnityEngine.Debug.Log("Saving to: " + localPath);
+
         yield return DownloadFile(hitmanwoaApworld.url, localPath);
 
         if (!File.Exists(localPath))
         {
-            UnityEngine.Debug.LogError("APWorld download failed: file not found at " + localPath);
+            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
             ShowInfo("ERROR: APWorld download failed!");
             yield break;
         }
 
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string target = "";
-        foreach (string p in targetPaths)
+        string customWorldsDir = GetApCustomWorldsPath();
+
+        if (string.IsNullOrEmpty(customWorldsDir))
+        {
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
+            yield break;
+        }
+
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
+
+        if (File.Exists(target))
         {
             try
             {
-                string dir = Path.GetDirectoryName(p);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = p;
-                break;
+                File.Delete(target);
+                UnityEngine.Debug.Log("Deleted old apworld file");
             }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(p) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            yield break;
+            catch { }
         }
 
         try
         {
-            if (File.Exists(target))
-                File.Delete(target);
-
             File.Copy(localPath, target, true);
 
-            if (currentManifest != null)
-                currentManifest.installedFiles.Add(target);
+            UnityEngine.Debug.Log("APWorld file copied to: " + target);
 
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
@@ -735,8 +804,8 @@ public class HitmanWoAManualDL : MonoBehaviour
         ShowInfo("Starting Peacock services...");
         yield return new WaitForSeconds(0.3f);
 
-        string peacockFolder = Path.Combine(gamePath, "Peacock-v8.8.1");
-        if (!Directory.Exists(peacockFolder))
+        string peacockFolder = GetPeacockFolderPath();
+        if (string.IsNullOrEmpty(peacockFolder))
         {
             ShowInfo("Peacock folder not found. Cannot start services.");
             yield break;
@@ -745,7 +814,6 @@ public class HitmanWoAManualDL : MonoBehaviour
         string patcherExe = Path.Combine(peacockFolder, "PeacockPatcher.exe");
         string serverCmd = Path.Combine(peacockFolder, "Start Server.cmd");
 
-        // Start PeacockPatcher.exe if present
         if (File.Exists(patcherExe))
         {
             try
@@ -769,7 +837,6 @@ public class HitmanWoAManualDL : MonoBehaviour
             UnityEngine.Debug.LogWarning("PeacockPatcher.exe not found: " + patcherExe);
         }
 
-        // Then start Start Server.cmd with admin privileges
         if (File.Exists(serverCmd))
         {
             try
@@ -930,6 +997,12 @@ public class HitmanWoAManualDL : MonoBehaviour
 
     void SaveInstalledFilesManifest(InstalledFilesManifest manifest)
     {
+        // S'assure que le nom du dossier Peacock résolu dynamiquement est bien
+        // persisté dans le manifest, même si ExecuteRevert/InstallPlugin/InstallPeacock
+        // ont mis à jour currentPeacockFolderName sans repasser par ce point.
+        if (manifest != null && string.IsNullOrEmpty(manifest.peacockFolderName) && !string.IsNullOrEmpty(currentPeacockFolderName))
+            manifest.peacockFolderName = currentPeacockFolderName;
+
         string manifestPath = Path.Combine(Application.persistentDataPath, "InstalledFilesManifest_HitmanWoA.json");
         string json = JsonUtility.ToJson(manifest, true);
 
@@ -977,7 +1050,7 @@ public class HitmanWoAManualDL : MonoBehaviour
         try
         {
             remoteConfig = JsonUtility.FromJson<HitmanConfig>(request.downloadHandler.text);
-            UnityEngine.Debug.Log("Remote config loaded successfully");
+            UnityEngine.Debug.Log("Hitman Remote config loaded successfully");
             ApplyHitmanConfig();
         }
         catch (System.Exception e)
@@ -1000,7 +1073,7 @@ public class HitmanWoAManualDL : MonoBehaviour
         {
             hitmanPeacock.url = remoteConfig.hitmanwoaPeacock;
             if (string.IsNullOrEmpty(hitmanPeacock.fileName))
-                hitmanPeacock.fileName = "Peacock-v8.8.1.zip";
+                hitmanPeacock.fileName = "Peacock";
         }
 
         if (hitmanwoaApworld != null)
@@ -1016,6 +1089,72 @@ public class HitmanWoAManualDL : MonoBehaviour
             if (string.IsNullOrEmpty(hitmanwoaAP.fileName))
                 hitmanwoaAP.fileName = "archipelago.plugin.js";
         }
+    }
+
+    // =========================================================
+    // PEACOCK FOLDER RESOLUTION (dynamique, aucun nom hardcodé)
+    // =========================================================
+
+    /// <summary>
+    /// Retrouve le chemin réel du dossier Peacock installé dans le dossier du jeu,
+    /// sans jamais dépendre d'un nom de dossier fixe (ex: "Peacock-v8.8.1").
+    /// Ordre de résolution :
+    ///  1. Nom déjà connu en mémoire pour cette session.
+    ///  2. Nom persisté dans le manifest d'installation.
+    ///  3. Scan du dossier du jeu à la recherche d'un sous-dossier contenant
+    ///     des fichiers caractéristiques de Peacock (PeacockPatcher.exe, Start Server.cmd).
+    /// Retourne une chaîne vide si rien n'est trouvé.
+    /// </summary>
+    private string GetPeacockFolderPath()
+    {
+        if (string.IsNullOrEmpty(gamePath))
+            return "";
+
+        // 1. Nom déjà connu en mémoire
+        if (!string.IsNullOrEmpty(currentPeacockFolderName))
+        {
+            string p = Path.Combine(gamePath, currentPeacockFolderName);
+            if (Directory.Exists(p))
+                return p;
+        }
+
+        // 2. Nom persisté dans le manifest
+        string manifestPath = Path.Combine(Application.persistentDataPath, "InstalledFilesManifest_HitmanWoA.json");
+        if (File.Exists(manifestPath))
+        {
+            try
+            {
+                string json = File.ReadAllText(manifestPath);
+                InstalledFilesManifest manifest = JsonUtility.FromJson<InstalledFilesManifest>(json);
+                if (manifest != null && !string.IsNullOrEmpty(manifest.peacockFolderName))
+                {
+                    string p = Path.Combine(gamePath, manifest.peacockFolderName);
+                    if (Directory.Exists(p))
+                    {
+                        currentPeacockFolderName = manifest.peacockFolderName;
+                        return p;
+                    }
+                }
+            }
+            catch { }
+        }
+
+        // 3. Fallback : scan du dossier du jeu à la recherche d'un dossier "Peacock-like"
+        try
+        {
+            foreach (string dir in Directory.GetDirectories(gamePath))
+            {
+                if (File.Exists(Path.Combine(dir, "PeacockPatcher.exe")) ||
+                    File.Exists(Path.Combine(dir, "Start Server.cmd")))
+                {
+                    currentPeacockFolderName = Path.GetFileName(dir);
+                    return dir;
+                }
+            }
+        }
+        catch { }
+
+        return "";
     }
 
     // =========================================================
@@ -1178,6 +1317,44 @@ public class HitmanWoAManualDL : MonoBehaviour
         }
 
         UnityEngine.Debug.LogWarning("Game (Epic) not found.");
+        return "";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
         return "";
     }
 }

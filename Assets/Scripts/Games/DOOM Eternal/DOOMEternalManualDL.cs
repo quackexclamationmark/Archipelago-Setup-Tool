@@ -16,6 +16,12 @@ public class DOOMEternalManualDL : MonoBehaviour
 
     [Header("GAME FOLDER NAMES")]
     public string steamGameFolderName = "DOOMEternal";
+    public string msGameFolderName = "DOOM Eternal - PC";
+
+    [Header("PLATFORM SELECTION")]
+    public Button steamButton;
+    public Button msButton;
+    public TextMeshProUGUI platformStatus;
 
     [Header("FEATURE TOGGLES")]
     public Toggle installAPToggle;
@@ -48,17 +54,26 @@ public class DOOMEternalManualDL : MonoBehaviour
     private bool pendingFullCleanConfirmation = false;
     private DOOMEternalConfig remoteConfig;
     private bool configLoaded = false;
+    private bool isMS = false;
 
     [System.Serializable]
     public class DOOMEternalConfig
     {
         public string doometernalAP;
         public string[] steamSearchPaths;
+        public string[] msSearchPaths;
     }
 
     void Start()
     {
-        doometernalPath = GetDOOMEternalPath();
+        if (steamButton != null)
+            steamButton.onClick.AddListener(OnSteamButtonClicked);
+        if (msButton != null)
+            msButton.onClick.AddListener(OnMSButtonClicked);
+
+        SelectSteam();
+
+        doometernalPath = GetGamePath();
         doometernalBasePath = Path.Combine(doometernalPath, "base");
         modsPath = Path.Combine(doometernalPath, "Mods");
         documentsPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
@@ -90,6 +105,40 @@ public class DOOMEternalManualDL : MonoBehaviour
 
         if (fullCleanModsToggle != null)
             fullCleanModsToggle.onValueChanged.AddListener(OnFullCleanChanged);
+    }
+
+    // PLATFORM selection handlers
+    void OnSteamButtonClicked() { SelectSteam(); }
+    void OnMSButtonClicked() { SelectMS(); }
+
+    void SelectSteam()
+    {
+        isMS = false;
+        doometernalPath = GetGamePath();
+        doometernalBasePath = Path.Combine(doometernalPath, "base");
+        modsPath = Path.Combine(doometernalPath, "Mods");
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Steam - Path: " + doometernalPath);
+    }
+
+    void SelectMS()
+    {
+        isMS = true;
+        doometernalPath = GetGamePath();
+        doometernalBasePath = Path.Combine(doometernalPath, "base");
+        modsPath = Path.Combine(doometernalPath, "Mods");
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to MS - Path: " + doometernalPath);
+    }
+
+    void UpdatePlatformStatus()
+    {
+        if (platformStatus != null)
+        {
+            string platform = isMS ? "MS" : "Steam";
+            string status = string.IsNullOrEmpty(doometernalPath) ? "Not Found" : "Found";
+            platformStatus.text = $"Platform: {platform} \n {status}";
+        }
     }
 
     void CleanupProcesses()
@@ -154,7 +203,7 @@ public class DOOMEternalManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        doometernalPath = GetDOOMEternalPath();
+        doometernalPath = GetGamePath();
 
         bool ap = installAPToggle != null && installAPToggle.isOn;
         bool apworld = installAPWorldToggle != null && installAPWorldToggle.isOn;
@@ -211,7 +260,7 @@ public class DOOMEternalManualDL : MonoBehaviour
 
     private void ExecuteRevert()
     {
-        doometernalPath = GetDOOMEternalPath();
+        doometernalPath = GetGamePath();
 
         doometernalBasePath = Path.Combine(doometernalPath, "base");
         modsPath = Path.Combine(doometernalPath, "Mods");
@@ -427,7 +476,6 @@ public class DOOMEternalManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("Looking for APWorld file in: " + apInstallPath);
 
-        // Find the doometernal.apworld file in subdirectories
         string apworldFilePath = FindApworldFile(apInstallPath);
 
         if (string.IsNullOrEmpty(apworldFilePath))
@@ -439,7 +487,6 @@ public class DOOMEternalManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("Found doometernal.apworld at: " + apworldFilePath);
 
-        // Target paths
         string[] targetPaths = new string[]
         {
             Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", "doometernal.apworld"),
@@ -566,7 +613,10 @@ public class DOOMEternalManualDL : MonoBehaviour
 
         configLoaded = true;
 
-        doometernalPath = GetDOOMEternalPath();
+        doometernalPath = GetGamePath();
+        doometernalBasePath = Path.Combine(doometernalPath, "base");
+        modsPath = Path.Combine(doometernalPath, "Mods");
+        UpdatePlatformStatus();
     }
 
     void LaunchDoomEternalArchipelagoLauncher()
@@ -683,7 +733,6 @@ public class DOOMEternalManualDL : MonoBehaviour
         return "";
     }
 
-    // Supprime l'ancien zip AP installé dans Mods, en se basant sur le marqueur
     void RemoveOldAPModZip()
     {
         if (!Directory.Exists(modsPath))
@@ -702,7 +751,6 @@ public class DOOMEternalManualDL : MonoBehaviour
             catch { }
         }
 
-        // Compat rétro : au cas où l'ancien nom fixe traîne encore d'une version précédente
         SafeDeleteFile(Path.Combine(modsPath, "DoomEternalArchipelagoPreAlpha.zip"));
     }
 
@@ -724,7 +772,6 @@ public class DOOMEternalManualDL : MonoBehaviour
 
             DeleteOldVersionFiles();
 
-            // Create in mods directory
             Directory.CreateDirectory(modsPath);
             string modsVersionPath = Path.Combine(modsPath, versionFileName);
             File.WriteAllText(modsVersionPath, content);
@@ -780,7 +827,12 @@ public class DOOMEternalManualDL : MonoBehaviour
         return "Unknown";
     }
 
-    string GetDOOMEternalPath()
+    string GetGamePath()
+    {
+        return isMS ? GetMSPath() : GetSteamPath();
+    }
+
+    string GetSteamPath()
     {
         string[] quickPaths = new string[]
         {
@@ -834,6 +886,51 @@ public class DOOMEternalManualDL : MonoBehaviour
         }
 
         UnityEngine.Debug.LogWarning("Game (Steam) not found.");
+        return "";
+    }
+
+    string GetMSPath()
+    {
+        if (remoteConfig != null && remoteConfig.msSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.msSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, msGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                string contentPath = Path.Combine(path, "Content");
+
+                                if (Directory.Exists(contentPath))
+                                {
+                                    UnityEngine.Debug.Log("Found Game (MS, via remote config) at: " + contentPath);
+                                    return contentPath;
+                                }
+
+                                UnityEngine.Debug.LogWarning("Found \"" + msGameFolderName + "\" but its Content subfolder is missing: " + contentPath);
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Game (MS) not found.");
         return "";
     }
 }
