@@ -1,8 +1,0 @@
-DOOM Eternal Archipelago Setup Tool by quack!
-https://github.com/quackexclamationmark/DOOM-Eternal-Setup-Tool
-
-=== DOOM ETERNAL ARCHIPELAGO ===
-Downloaded from: https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.4.0/DoomEternalArchipelago-v0.4.0-beta.4-windows-x86_64.zip
-Version: DoomEternalArchipelago-v0.4.0-beta.4-windows-x86_64
-
-Downloaded at: 02/09/2026 12:14:26
