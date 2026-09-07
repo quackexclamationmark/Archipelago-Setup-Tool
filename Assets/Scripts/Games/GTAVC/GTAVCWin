@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• ASI-Loader\n• WidescreenFix\n• CLEO Mod Loader\n• Version 1.0 gta-vc.exe file\n• gta_vice_city.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, gta_vice_city.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. ASI-Loader's .dll, the CLEO folder and its .asi file will then be installed into the game's core folder. Then WidescreenFix scripts will be downloaded inside GAMEDIRECTORY\\scripts. A backup of the original 'gta-vc.exe' file will be created to replace it with the necessary executable and will be restored when reverting.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"GTA VC is not a core Archipelago game, it needs a custom world file. When 'gta_vice_city.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, launch the Archipelago Launcher and open the 'GTA Vice City Client'. When the client is open you can connect to it as you normally would with any text client. It should ask you to select your game's directory (where the game's executable is).\n\nOnce you're connected, it will launch the game and you should be able to start a new save and play!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will simply delete all the mods scripts and will restore the original version of the 'gta-vc.exe' file.",
+"clear"
+
+]
