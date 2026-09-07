@@ -150,8 +150,8 @@
     "batimAP": "https://github.com/Lorecrafter703/BendyAndTheArchipelagoMachine/releases/download/v1.3.0-Prerelease/Lorecrafter703-Bendy_and_the_Archipelago_Machine.zip",
     "batimBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
-    "bo3Apworld": "https://github.com/colin969/bo3_archipelago/releases/download/0.5.7/cod_bo3.apworld",
-    "bo3AP": "https://github.com/colin969/bo3_archipelago/releases/download/0.5.7/BO3APMod-CurrentPatch.zip",
+    "bo3Apworld": "https://github.com/colin969/bo3_archipelago/releases/download/0.5.9/cod_bo3.apworld",
+    "bo3AP": "https://github.com/colin969/bo3_archipelago/releases/download/0.5.9/BO3APMod-CurrentPatch.zip",
     "bo3APDownpatch": "https://github.com/colin969/bo3_archipelago/releases/download/0.5.7/BO3APMod-Downgraded.zip",
 
     "btd6AP": "https://github.com/Matt41321/BloonsArchipelago/releases/download/0.9.1/BloonsArchipelago.dll",
@@ -212,7 +212,7 @@
     "cyberpunk2077Apworld": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/0.7.1/cyberpunk2077-0.7.1.apworld",
     "cyberpunk2077RedScript": "https://github.com/jac3km4/redscript/releases/download/v0.5.31/redscript-v0.5.31-windows.zip",
     "cyberpunk2077TweakXL": "https://github.com/psiberx/cp2077-tweak-xl/releases/download/v1.11.4/TweakXL-1.11.4.zip",
-    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.27.1/ArchiveXL-1.27.1.zip",
+    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.27.3/ArchiveXL-1.27.3.zip",
     "cyberpunk2077CET": "https://github.com/maximegmd/CyberEngineTweaks/releases/download/v1.37.1/cet_1.37.1.zip",
     "cyberpunk2077Codeware": "https://github.com/psiberx/cp2077-codeware/releases/download/v1.20.3/Codeware-1.20.3.zip",
     "cyberpunk2077RED4ext": "https://github.com/wopss/RED4ext/releases/download/v1.30.0/red4ext-1.30.0.zip",
@@ -428,7 +428,7 @@
     "plagueincAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Plaguepelago.zip",
     "plagueincMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
 
-    "pvzgotyAP": "https://github.com/vicr123/PvZ-Stable-Decompile-AP/releases/download/v1.9.1/PlantsVsZombies-GOTY-AP-x64.zip",
+    "pvzgotyAP": "https://github.com/vicr123/PvZ-Stable-Decompile-AP/releases/download/v1.9%2C2/PlantsVsZombies-GOTY-AP-x64.zip",
     "pvzgotyApworld": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.9.1/pvzr.apworld",
     
     "pvzreplantedAP": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.9.1/replanted_archipelago_v1.9.1.zip",
@@ -557,8 +557,8 @@
     "slimerancherApworld": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.2.1/slime_rancher.apworld",
     "slimerancherMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.1/MelonLoader.x64.zip",
 
-    "slimerancher2AP": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.13.1/SlimeRancher2-AP.zip",
-    "slimerancher2Apworld": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.12.2/slime_rancher_2.apworld",
+    "slimerancher2AP": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.14.0/SlimeRancher2-AP.zip",
+    "slimerancher2Apworld": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.14.0/slime_rancher_2.apworld",
     "slimerancher2BepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
     "slimerancher2Interop": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/interop.zip",
 
