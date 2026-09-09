@@ -570,7 +570,7 @@
     "spelunky2Apworld": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.4.0/spelunky2.apworld",
     "spelunky2Playlunky": "https://github.com/spelunky-fyi/Playlunky/releases/download/nightly/playlunky_nightly_63FB520.zip",
 
-    "stardewvalleyAP": "https://github.com/agilbert1412/StardewArchipelago/releases/download/8.15/StardewArchipelago.8.1.5.zip",
+    "stardewvalleyAP": "https://github.com/agilbert1412/StardewArchipelago/releases/download/8.1.6/StardewArchipelago.8.1.6.zip",
     "stardewvalleyPreloaded": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-SV-Archipelago.zip",
     
     "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.3/Archipelago_193.zip",
@@ -605,8 +605,8 @@
     "superhotAP": "https://thunderstore.io/package/download/Archihot/SuperhotArchipelago/0.2.1/",
     "superhotApworld": "https://github.com/My-Key-Morris/SUPERHOT_Archipelago/releases/download/v0.2.1/superhot.apworld",
 
-    "supermarketsimApworld": "https://github.com/Lemix028/SupermarketSimulator-Archipelago/releases/download/v0.3.4/supermarket_simulator.apworld",
-    "supermarketsimAP": "https://github.com/Lemix028/SupermarketSimulator-Archipelago/releases/download/v0.3.4/SupermarketArchipelago_Client_v0.3.4.zip",
+    "supermarketsimApworld": "https://github.com/Lemix028/SupermarketSimulator-Archipelago/releases/download/v0.3.5/supermarket_simulator.apworld",
+    "supermarketsimAP": "https://github.com/Lemix028/SupermarketSimulator-Archipelago/releases/download/v0.3.5/SupermarketArchipelago_Client_v0.3.5.zip",
     "supermarketsimBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
 
     "tcgBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
@@ -665,8 +665,8 @@
     "untitledApworld": "https://github.com/PixelShake92/Untitled-Goose-Game-Archipelago/releases/download/Alpha_2.2/untitled_goose_game.apworld",
     "untitledBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.9/BepInEx_x64_5.4.9.0.zip",
 
-    "valheimApworld": "https://github.com/xyzzy44/ValheimArchipelagoRandomizer/releases/download/0.2.4/valheim.apworld",
-    "valheimAP": "https://github.com/xyzzy44/ValheimArchipelagoRandomizer/releases/download/0.2.4/ValheimRandomizer-0.2.4.zip",
+    "valheimApworld": "https://github.com/xyzzy44/ValheimArchipelagoRandomizer/releases/download/0.2.5/valheim.apworld",
+    "valheimAP": "https://github.com/xyzzy44/ValheimArchipelagoRandomizer/releases/download/0.2.5/ValheimRandomizer-0.2.5.zip",
     "valheimBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "valheimJotunn": "https://thunderstore.io/package/download/ValheimModding/Jotunn/2.29.2/",
 
