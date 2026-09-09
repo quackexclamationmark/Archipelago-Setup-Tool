@@ -412,7 +412,7 @@
     "p5rAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/P5R_Archipelago0.0.4.zip",
     "p5rApworld": "https://github.com/Daphoa/ArchipelagoP5RMod/releases/download/v0.1.4/p5r.apworld",
 
-    "pikmin2Apworld": "https://github.com/chpas0/Pikmin2Archipelago/releases/download/v0.8.1/pikmin2.apworld",
+    "pikmin2Apworld": "https://github.com/chpas/Pikmin2Archipelago/releases/download/v0.9.1/pikmin2.apworld",
     "pikmin2AP": "https://github.com/chpas/Pikmin2Archipelago/releases/download/v0.9.0/archipelago-pikmin2-windows-v0.9.0.zip",
     "pikmin2Dolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
@@ -668,7 +668,7 @@
     "valheimApworld": "https://github.com/xyzzy44/ValheimArchipelagoRandomizer/releases/download/0.2.5/valheim.apworld",
     "valheimAP": "https://github.com/xyzzy44/ValheimArchipelagoRandomizer/releases/download/0.2.5/ValheimRandomizer-0.2.5.zip",
     "valheimBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
-    "valheimJotunn": "https://thunderstore.io/package/download/ValheimModding/Jotunn/2.29.2/",
+    "valheimJotunn": "https://thunderstore.io/package/download/ValheimModding/Jotunn/2.30.0/",
 
     "vsApworld": "https://github.com/SWCreeperKing/ArchipelagoSurvivors/releases/download/v0.3.5.1/vampire_survivors.apworld",
     "vsMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.2/MelonLoader.x64.zip",
