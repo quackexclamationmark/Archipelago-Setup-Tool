@@ -146,8 +146,8 @@
     "balatroLovely": "https://github.com/ethangreen-dev/lovely-injector/releases/download/v0.9.0/lovely-x86_64-pc-windows-msvc.zip",
     "balatroSteamodded": "https://github.com/Steamodded/smods/archive/refs/tags/1.0.0-beta-1620a.zip",
 
-    "batimApworld": "https://github.com/Lorecrafter703/BendyAndTheArchipelagoMachine/releases/download/v1.3.0-Prerelease/batim.apworld",
-    "batimAP": "https://github.com/Lorecrafter703/BendyAndTheArchipelagoMachine/releases/download/v1.3.0-Prerelease/Lorecrafter703-Bendy_and_the_Archipelago_Machine.zip",
+    "batimApworld": "https://github.com/Lorecrafter703/BendyAndTheArchipelagoMachine/releases/download/v2.0.0/batim.apworld",
+    "batimAP": "https://github.com/Lorecrafter703/BendyAndTheArchipelagoMachine/releases/download/v2.0.0/Lorecrafter703-Bendy_and_the_Archipelago_Machine.zip",
     "batimBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
     "bo3Apworld": "https://github.com/colin969/bo3_archipelago/releases/download/0.5.9/cod_bo3.apworld",
@@ -241,7 +241,7 @@
 
     "doom2AP": "https://github.com/Daivuk/apdoom/releases/download/1.2.0/APDOOM-1_2_0-Win32.zip",
 
-    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.5.1/DoomEternalArchipelago-v0.5.1-windows-x86_64.zip",
+    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.5.2/DoomEternalArchipelago-v0.5.2-windows-x86_64.zip",
     "doometernalMeathook": "https://github.com/brongo/m3337ho0o0ok/releases/download/v7.2/XINPUT1_3.dll",
     "doometernalModInjector": "https://gamebanana.com/dl/1765017",
     "doometernalApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/doometernal.apworld",
@@ -413,7 +413,7 @@
     "p5rApworld": "https://github.com/Daphoa/ArchipelagoP5RMod/releases/download/v0.1.4/p5r.apworld",
 
     "pikmin2Apworld": "https://github.com/chpas0/Pikmin2Archipelago/releases/download/v0.8.1/pikmin2.apworld",
-    "pikmin2AP": "https://github.com/chpas0/Pikmin2Archipelago/releases/download/v0.8.1/archipelago-pikmin2-universal-v0.8.1.zip",
+    "pikmin2AP": "https://github.com/chpas/Pikmin2Archipelago/releases/download/v0.9.0/archipelago-pikmin2-windows-v0.9.0.zip",
     "pikmin2Dolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "pikunikuAP": "https://github.com/Jeffdev-Archipelago-Implementations/PikuAPMod/releases/download/0.3.5/PikuAPMod.zip",
@@ -550,8 +550,8 @@
     "skulAP": "https://github.com/Jeffdev-Archipelago-Implementations/SkulAPMod/releases/download/1.0.0/SkulAPMod.zip",
     "skulBepInEx": "https://thunderstore.io/package/download/BepInEx/BepInExPack_Skul/5.4.2100/",
 
-    "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/1.1.0/sts2-client.zip",
-    "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/1.1.0/spire2.apworld",
+    "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/1.1.1/Archipelago.zip",
+    "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/1.1.1/spire2.apworld",
 
     "slimerancherAP": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.2.1/Slimipelago.zip",
     "slimerancherApworld": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.2.1/slime_rancher.apworld",
