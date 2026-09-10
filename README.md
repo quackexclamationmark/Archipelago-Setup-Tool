@@ -21,7 +21,7 @@ Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could
 
 After setting up a game, all credits can be found in the game's directory, inside the game's directory.
 
-Currently, the following games are supported (124):
+Currently, the following games are supported (130):
 
 - Clair Obscur: Expedition 33
 - Lethal Company
@@ -147,10 +147,16 @@ Currently, the following games are supported (124):
 - Demon Tides
 - Mina the Hollower
 - Dead Cells
+- Cyberpunk 2077
+- Inscryption
+- Plague Inc: Evolved
+- Valheim
+- Grand Theft Auto: Vice City
+- Saints Row 2
 
-Features to (maybe) add in the future:
+Features to add in the future:
 
-* Adding support for other OS (Linux).
+* Adding support for other OS (Linux). (W.I.P!!)
 
 I don't own all the games so some game path can be wrong and lead to a "Path not found" but I'm trying as hard as I can to get the right path name. If you get this error, feel free to report it to me on the [Discord server](https://discord.gg/hxsNCmFpcH)!
 
@@ -163,3 +169,5 @@ I don't own all the games so some game path can be wrong and lead to a "Path not
 [UnitySimpleFileBrowser](https://github.com/yasirkula/UnitySimpleFileBrowser) | by **yasirkula**
 
 My friends *AquaBolt, Unlucky_Lynx, RealMim, TheInfectedDuckii, Mikkel* for testing some of my setups!
+
+Every other people who are kindly testing, reporting bugs, suggesting etc...
