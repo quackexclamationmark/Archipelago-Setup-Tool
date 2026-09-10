@@ -309,7 +309,7 @@
     "inscryptionApworld": "https://github.com/empathy-mp3/Archipelago_Inscryption/releases/download/v1.5.4/inscryption_beta.apworld",
     "inscryptionBepInEx": "https://thunderstore.io/package/download/BepInEx/BepInExPack_Inscryption/5.4.2305/",
 
-    "kspAP": "https://github.com/nickdavies/KSP1-Archipelago-client/releases/download/v0.9.2/KSPArchipelago.zip",
+    "kspAP": "https://github.com/nickdavies/KSP1-Archipelago-client/releases/download/v0.9.3/KSPArchipelago.zip",
     "kspApworld": "https://github.com/nickdavies/Archipelago/releases/download/v0.9.1/ksp1.apworld",
 
     "lethalcompanyAP": "https://thunderstore.io/package/download/APLC/APLC/0.7.13/",
@@ -552,6 +552,7 @@
 
     "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/1.1.1/Archipelago.zip",
     "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/1.1.1/spire2.apworld",
+    "sts2RitsuLib": "https://github.com/BAKAOLC/STS2-RitsuLib/releases/download/v0.5.20/STS2.RitsuLib.Compat.0.107.1.0.5.20.github.zip",
 
     "slimerancherAP": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.2.1/Slimipelago.zip",
     "slimerancherApworld": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.2.1/slime_rancher.apworld",
