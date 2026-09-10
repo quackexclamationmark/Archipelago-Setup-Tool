@@ -2,11 +2,11 @@
 
 "[HEADER] Downloaded",
 "kill",
-"• Archipelago Mod folder (+ all required files inside)",
+"• Archipelago Mod folder (+ all required files inside)\n• RitsuLib\n• spire2.apworld",
 "kill",
 "[HEADER] Installation Infos",
 "kill",
-"When you start the mods setup, sts2.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. The Archipelago mod folder will be downloaded into the mods folder inside Slay The Spire 2's core directory. If this folder doesn't exist, it will be created automatically.",
+"When you start the mods setup, sts2.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. The Archipelago mod and the 'RitsuLib' folders will be downloaded into the 'mods' folder inside Slay The Spire 2's core directory. If this folder doesn't exist, it will be created automatically.",
 "kill",
 "[HEADER] apworld / yaml Infos",
 "kill",
@@ -14,11 +14,11 @@
 "kill",
 "[HEADER] Connection Infos",
 "kill",
-"Once everything is set up, a new 'Archipelago' button should appear in the main menu.\n\nIn 'Slot Name', enter the name assigned to your YAML file.\n\nIn the 'Server URL' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect' and start a new run!",
+"Once everything is set up, a new 'Archipelago' text should appear in the main menu (it means that the mod is loaded).\nTo start playing, press 'Play', it should ask you to pick a save, pick a fresh new one and then an Archipelago connection window should appear.\n\nIn 'Slot Name', enter the name assigned to your YAML file.\n\nIn the 'Server URL' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect' and start a new run!",
 "kill",
 "[HEADER] Revert Infos",
 "kill",
-"Reverting will simply delete the Archipelago mod folder (with the toggle enabled).",
+"You have 2 revert options, both can't be enabled at the same time.\n\nIf you use the 'Clear AP Mods' option it will only delete the mods that are required for Slay the Spire 2 Archipelago.\n\nIf you use the 'Full Clear' option it will delete everything related to the mods. If other mods are detected an additionnal confirmation will appear.",
 "clear"
 
 ]
