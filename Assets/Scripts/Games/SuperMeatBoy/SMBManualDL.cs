@@ -43,6 +43,7 @@ public class SMBManualDL : MonoBehaviour
     private string pendingAction;
     private GameConfig remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
 
     private const string SaveFileName = "savegame.dat";
     private const string UserDataFolderName = "UserData";
@@ -55,6 +56,7 @@ public class SMBManualDL : MonoBehaviour
         public string smbApworld;
         public string smbAP;
         public string[] steamSearchPaths;
+        public string[] apSearchPaths;
     }
 
     void Start()
@@ -187,15 +189,23 @@ public class SMBManualDL : MonoBehaviour
     {
         yield return new WaitUntil(() => configLoaded);
 
-        ShowInfo("Installing AP World...");
+        ShowInfo("Installing APWorld...");
         yield return new WaitForSeconds(1f);
 
-        yield return InstallApworld();
+        yield return InstallAPWorld();
 
-        if (launchGameToggle != null && launchGameToggle.isOn)
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
         {
-            ShowInfo("Launching Super Meat Boy...");
             LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        if (launchClientToggle == null || launchClientToggle.isOn)
+        {
+            LaunchClient();
             yield return new WaitForSeconds(2f);
         }
 
@@ -229,7 +239,6 @@ public class SMBManualDL : MonoBehaviour
             string savegamePath = Path.Combine(userDataPath, SaveFileName);
             string backupSavegamePath = Path.Combine(backupPath, SaveFileName);
 
-            // Remove the installed AP client exe
             try
             {
                 if (File.Exists(clientExePath))
@@ -243,9 +252,6 @@ public class SMBManualDL : MonoBehaviour
                 UnityEngine.Debug.LogWarning("Failed to delete file: " + clientExePath + " - " + e.Message);
             }
 
-            // Restore the backed up vanilla save, if a backup exists.
-            // The current savegame.dat in UserData (if present) is always deleted
-            // first, right before restoring, to guarantee it never lingers.
             if (Directory.Exists(backupPath))
             {
                 try
@@ -285,7 +291,6 @@ public class SMBManualDL : MonoBehaviour
             }
             else
             {
-                // No backup to restore, but still remove the current save if present.
                 try
                 {
                     if (File.Exists(savegamePath))
@@ -335,7 +340,7 @@ public class SMBManualDL : MonoBehaviour
     IEnumerator InstallFlow()
     {
         if (installApworldToggle == null || installApworldToggle.isOn)
-            yield return InstallApworld();
+            yield return InstallAPWorld();
 
         if (installAPToggle == null || installAPToggle.isOn)
             yield return InstallAP();
@@ -399,7 +404,6 @@ public class SMBManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        // Back up the vanilla save before doing anything else
         string userDataPath = Path.Combine(gamePath, UserDataFolderName);
         string savegamePath = Path.Combine(userDataPath, SaveFileName);
         string backupPath = Path.Combine(gamePath, "SaveBackup");
@@ -430,7 +434,6 @@ public class SMBManualDL : MonoBehaviour
             yield break;
         }
 
-        // Copy the newly downloaded client exe into the game folder
         string targetExePath = Path.Combine(gamePath, ClientExeName);
 
         try
@@ -468,20 +471,22 @@ public class SMBManualDL : MonoBehaviour
         yield return new WaitForSeconds(1f);
     }
 
-    IEnumerator InstallApworld()
+    IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
         {
             UnityEngine.Debug.Log("Waiting for config to load...");
             yield return new WaitForSeconds(0.5f);
         }
 
-        UnityEngine.Debug.Log("Config loaded. Apworld URL: " + smbApworld.url);
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + smbApworld.url);
 
         if (string.IsNullOrEmpty(smbApworld.url))
         {
-            ShowInfo("ERROR: Apworld URL is empty!");
-            UnityEngine.Debug.LogError("Apworld URL not set!");
+            ShowInfo("ERROR: APWorld URL is empty!");
+            UnityEngine.Debug.LogError("APWorld URL not set!");
             yield break;
         }
 
@@ -498,7 +503,7 @@ public class SMBManualDL : MonoBehaviour
 
         string localPath = Path.Combine(Application.persistentDataPath, fileName);
 
-        UnityEngine.Debug.Log("Downloading Apworld from: " + smbApworld.url);
+        UnityEngine.Debug.Log("Downloading APWorld from: " + smbApworld.url);
         UnityEngine.Debug.Log("Saving to: " + localPath);
 
         yield return DownloadFile(smbApworld.url, localPath);
@@ -506,45 +511,24 @@ public class SMBManualDL : MonoBehaviour
         if (!File.Exists(localPath))
         {
             UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
-            ShowInfo("ERROR: Apworld download failed!");
+            ShowInfo("ERROR: APWorld download failed!");
             yield break;
         }
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        string target = "";
-        foreach (string path in targetPaths)
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
 
-        UnityEngine.Debug.Log("Target path: " + target);
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
 
         if (File.Exists(target))
         {
@@ -560,17 +544,24 @@ public class SMBManualDL : MonoBehaviour
         {
             File.Copy(localPath, target, true);
 
-            UnityEngine.Debug.Log("Apworld file copied to: " + target);
+            UnityEngine.Debug.Log("APWorld file copied to: " + target);
 
-            ShowInfo("Apworld installed successfully!");
+            ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
-            UnityEngine.Debug.LogError("Failed to copy Apworld: " + e.Message);
-            ShowInfo("ERROR: Failed to install Apworld\n" + e.Message);
+            UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
+            ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
@@ -604,27 +595,6 @@ public class SMBManualDL : MonoBehaviour
             {
                 UnityEngine.Debug.Log("Download complete! File size: " + new System.IO.FileInfo(savePath).Length + " bytes");
             }
-        }
-    }
-
-    IEnumerator DeleteFileForce(string path)
-    {
-        float timer = 0f;
-
-        while (File.Exists(path) && timer < 6f)
-        {
-            try
-            {
-                File.SetAttributes(path, FileAttributes.Normal);
-                File.Delete(path);
-
-                if (!File.Exists(path))
-                    yield break;
-            }
-            catch { }
-
-            timer += 0.5f;
-            yield return new WaitForSeconds(0.5f);
         }
     }
 
@@ -819,6 +789,44 @@ public class SMBManualDL : MonoBehaviour
         }
 
         UnityEngine.Debug.LogWarning("Game (Steam) not found.");
+        return "";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
         return "";
     }
 }

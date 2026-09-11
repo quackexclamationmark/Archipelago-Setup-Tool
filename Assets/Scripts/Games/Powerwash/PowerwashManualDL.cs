@@ -47,6 +47,7 @@ public class PowerwashManualDL : MonoBehaviour
     private bool pendingFullCleanConfirmation = false;
     private PowerwashConfig remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
 
     [System.Serializable]
     public class PowerwashConfig
@@ -55,6 +56,7 @@ public class PowerwashManualDL : MonoBehaviour
         public string powerwashBepInEx;
         public string powerwashApworld;
         public string[] steamSearchPaths;
+        public string[] apSearchPaths;
     }
 
     void Start()
@@ -118,7 +120,7 @@ public class PowerwashManualDL : MonoBehaviour
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+        ShowConfirmation("Are you sure you want to setup?", "Setup");
     }
 
     public void RevertAll()
@@ -203,14 +205,16 @@ public class PowerwashManualDL : MonoBehaviour
     {
         yield return new WaitUntil(() => configLoaded);
 
-        ShowInfo("Installing AP World...");
+        ShowInfo("Installing APWorld...");
         yield return new WaitForSeconds(1f);
 
         yield return InstallAPWorld();
 
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
-            ShowInfo("Launching Peaks of Yore...");
             LaunchPowerwash();
             yield return new WaitForSeconds(2f);
         }
@@ -328,7 +332,6 @@ public class PowerwashManualDL : MonoBehaviour
         {
             string fileName = Path.GetFileName(file);
 
-            // Ignorer les fichiers de version PowerWash APMod
             if (fileName.StartsWith("PowerWash APMod Version") && fileName.EndsWith(".txt"))
                 continue;
 
@@ -387,6 +390,8 @@ public class PowerwashManualDL : MonoBehaviour
 
     IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
         {
             UnityEngine.Debug.Log("Waiting for config to load...");
@@ -429,59 +434,18 @@ public class PowerwashManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string targetFolder = null;
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        string[] possiblePaths =
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Archipelago", "custom_worlds"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds"),
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds"),
-        };
-
-        foreach (string path in possiblePaths)
-        {
-            try
-            {
-                if (!Directory.Exists(path))
-                    Directory.CreateDirectory(path);
-
-                targetFolder = path;
-                UnityEngine.Debug.Log("Using target folder: " + targetFolder);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + path + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(targetFolder))
-        {
-            foreach (DriveInfo drive in DriveInfo.GetDrives())
-            {
-                try
-                {
-                    string path = Path.Combine(drive.RootDirectory.FullName, "Archipelago", "custom_worlds");
-
-                    if (!Directory.Exists(path))
-                        Directory.CreateDirectory(path);
-
-                    targetFolder = path;
-                    UnityEngine.Debug.Log("Using target folder on drive: " + targetFolder);
-                    break;
-                }
-                catch { }
-            }
-        }
-
-        if (string.IsNullOrEmpty(targetFolder))
-        {
-            ShowInfo("Archipelago Launcher is not installed.\nPlease install it before using APWorld.");
-            UnityEngine.Debug.LogError("No valid Archipelago folder found!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
 
-        string target = Path.Combine(targetFolder, fileName);
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
 
         if (File.Exists(target))
         {
@@ -496,16 +460,25 @@ public class PowerwashManualDL : MonoBehaviour
         try
         {
             File.Copy(localPath, target, true);
+
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
+
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
-            UnityEngine.Debug.LogError("APWorld install failed: " + e.Message);
-            ShowInfo("Failed to install APWorld.");
+            UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
+            ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
@@ -938,5 +911,43 @@ public class PowerwashManualDL : MonoBehaviour
             return match.Groups[1].Value;
 
         return "Unknown";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
+        return "";
     }
 }

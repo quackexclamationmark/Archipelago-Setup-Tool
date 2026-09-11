@@ -17,9 +17,6 @@ public class CUDEMOManualDL : MonoBehaviour
     public FileDownloader.FileData cudemoAP;
     public FileDownloader.FileData cudemoApworld;
 
-    // URL fixe pour l'apworld (pas géré via le remote config)
-    private const string CUDEMO_APWORLD_URL = "https://github.com/Nichologeam/CUAP/releases/download/v0.11.0/casualtiesunknown.apworld";
-
     [Header("GAME FOLDER NAMES")]
     public string steamGameFolderName = "Casualties Unknown Demo";
 
@@ -51,13 +48,16 @@ public class CUDEMOManualDL : MonoBehaviour
     private string pendingAction;
     private RoR2Config remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
 
     [System.Serializable]
     public class RoR2Config
     {
         public string cudemoBepInEx;
         public string cudemoAP;
+        public string cudemoApworld;
         public string[] steamSearchPaths;
+        public string[] apSearchPaths;
     }
 
     void Start()
@@ -113,7 +113,7 @@ public class CUDEMOManualDL : MonoBehaviour
         cudemoAP.url = remoteConfig.cudemoAP;
         cudemoAP.fileName = "CUAP.zip";
 
-        cudemoApworld.url = CUDEMO_APWORLD_URL;
+        cudemoApworld.url = remoteConfig.cudemoApworld;
         cudemoApworld.fileName = "casualtiesunknown.apworld";
     }
 
@@ -200,9 +200,11 @@ public class CUDEMOManualDL : MonoBehaviour
 
         yield return InstallAPWorld();
 
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
-            ShowInfo("Launching Casualties Unknown Demo...");
             LaunchCUDEMO();
             yield return new WaitForSeconds(2f);
         }
@@ -306,7 +308,6 @@ public class CUDEMOManualDL : MonoBehaviour
 
         yield return downloader.DownloadAndExtract(cudemoBepInEx, Application.persistentDataPath, extractPath);
 
-        // Extraire tout le contenu du .zip dans le dossier racine du jeu
         string bepInExSourcePath = Path.Combine(extractPath, "BepInEx");
         string bepInExTargetPath = Path.Combine(cudemoPath, "BepInEx");
 
@@ -318,7 +319,6 @@ public class CUDEMOManualDL : MonoBehaviour
             MoveDirectory(bepInExSourcePath, bepInExTargetPath);
         }
 
-        // Copier les fichiers .dll et .ini
         string[] dllFiles = Directory.GetFiles(extractPath, "*.dll");
         foreach (string dll in dllFiles)
         {
@@ -346,13 +346,11 @@ public class CUDEMOManualDL : MonoBehaviour
 
         string pluginsPath = Path.Combine(cudemoPath, "BepInEx", "plugins");
 
-        // Créer le dossier "plugins" s'il n'existe pas
         if (!Directory.Exists(pluginsPath))
             Directory.CreateDirectory(pluginsPath);
 
         if (Directory.Exists(extractPath))
         {
-            // Le contenu du .zip va directement dans BepInEx\plugins
             string[] apDirs = Directory.GetDirectories(extractPath);
             foreach (string apDir in apDirs)
             {
@@ -384,73 +382,129 @@ public class CUDEMOManualDL : MonoBehaviour
 
     IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
-            yield return null;
-
-        string fileName = "casualtiesunknown.apworld";
-
-        string tempDownloadPath = Path.Combine(Application.persistentDataPath, "APWorldTemp");
-        Directory.CreateDirectory(tempDownloadPath);
-
-        yield return downloader.DownloadToFolder(cudemoApworld, tempDownloadPath);
-
-        string[] apWorldFiles = Directory.GetFiles(tempDownloadPath, "*.apworld");
-
-        if (apWorldFiles.Length == 0)
         {
-            UnityEngine.Debug.LogWarning("casualtiesunknown.apworld not found in download");
-            SafeDeleteDirectory(tempDownloadPath);
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + cudemoApworld.url);
+
+        if (string.IsNullOrEmpty(cudemoApworld.url))
+        {
+            ShowInfo("ERROR: APWorld URL is empty!");
+            UnityEngine.Debug.LogError("APWorld URL not set!");
             yield break;
         }
 
-        string sourceFile = apWorldFiles[0];
-
-        string[] targetPaths = new string[]
+        string fileName = cudemoApworld.fileName;
+        if (string.IsNullOrEmpty(fileName))
         {
-        Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+            fileName = cudemoApworld.url.Substring(cudemoApworld.url.LastIndexOf('/') + 1);
 
-        string target = "";
-        foreach (string path in targetPaths)
+            if (fileName.Contains("?"))
+                fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
+        }
+
+        string localPath = Path.Combine(Application.persistentDataPath, fileName);
+
+        UnityEngine.Debug.Log("Downloading APWorld from: " + cudemoApworld.url);
+        UnityEngine.Debug.Log("Saving to: " + localPath);
+
+        yield return DownloadFile(cudemoApworld.url, localPath);
+
+        if (!File.Exists(localPath))
+        {
+            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
+            ShowInfo("ERROR: APWorld download failed!");
+            yield break;
+        }
+
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
+
+        string customWorldsDir = GetApCustomWorldsPath();
+
+        if (string.IsNullOrEmpty(customWorldsDir))
+        {
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
+            yield break;
+        }
+
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
+
+        if (File.Exists(target))
         {
             try
             {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
+                File.Delete(target);
+                UnityEngine.Debug.Log("Deleted old apworld file");
             }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
-            SafeDeleteDirectory(tempDownloadPath);
-            yield break;
+            catch { }
         }
 
         try
         {
-            File.Copy(sourceFile, target, true);
+            File.Copy(localPath, target, true);
+
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
+
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
+            yield break;
         }
 
-        SafeDeleteDirectory(tempDownloadPath);
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
+        }
+    }
+
+    IEnumerator DownloadFile(string url, string savePath)
+    {
+        UnityEngine.Debug.Log("Starting download from: " + url);
+
+        using (UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url))
+        {
+            request.downloadHandler = new UnityEngine.Networking.DownloadHandlerFile(savePath);
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+            {
+                UnityEngine.Debug.LogError("Download error: " + request.error);
+                UnityEngine.Debug.LogError("Response code: " + request.responseCode);
+            }
+            else
+            {
+                UnityEngine.Debug.Log("Download complete! File size: " + new System.IO.FileInfo(savePath).Length + " bytes");
+            }
+        }
     }
 
     IEnumerator LoadRemoteConfig()
@@ -804,5 +858,43 @@ public class CUDEMOManualDL : MonoBehaviour
             return githubMatch.Groups[1].Value;
 
         return "Unknown";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
+        return "";
     }
 }

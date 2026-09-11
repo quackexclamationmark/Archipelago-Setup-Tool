@@ -3,9 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.IO;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 public class DOOMManualDL : MonoBehaviour
 {
@@ -18,7 +16,7 @@ public class DOOMManualDL : MonoBehaviour
     public string steamGameFolderName = "Ultimate Doom";
 
     [Header("FEATURE TOGGLES")]
-    public Toggle installDOOMAPToggle;
+    public Toggle installAPModToggle;
 
     [Header("LAUNCH OPTIONS")]
     public Toggle launchGameToggle;
@@ -34,26 +32,23 @@ public class DOOMManualDL : MonoBehaviour
     public TextMeshProUGUI infoText;
     public Button infoOkButton;
 
+    [Header("WAD COPY (separate button, not part of the setup flow)")]
+    public Button copyWadFilesButton;
+
     private Process gameProcess;
     private string gamePath;
     private string pendingAction;
     private GameConfig remoteConfig;
     private bool configLoaded = false;
-    private InstalledFilesManifest currentManifest;
+
+    private string DoomArchipelagoPath =>
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "DOOM & Heretic AP");
 
     [System.Serializable]
     public class GameConfig
     {
         public string doomAP;
         public string[] steamSearchPaths;
-    }
-
-    [System.Serializable]
-    public class InstalledFilesManifest
-    {
-        public string gameInstallPath = "";
-        public string doomArchipelagoPath = "";
-        public List<string> installedFiles = new List<string>();
     }
 
     void Start()
@@ -70,8 +65,8 @@ public class DOOMManualDL : MonoBehaviour
         if (launchGameToggle != null)
             launchGameToggle.isOn = false;
 
-        if (installDOOMAPToggle != null)
-            installDOOMAPToggle.isOn = true;
+        if (installAPModToggle != null)
+            installAPModToggle.isOn = true;
 
         if (confirmationPanel != null)
             confirmationPanel.SetActive(false);
@@ -81,6 +76,9 @@ public class DOOMManualDL : MonoBehaviour
 
         if (cancelButton != null)
             cancelButton.onClick.AddListener(OnCancel);
+
+        if (copyWadFilesButton != null)
+            copyWadFilesButton.onClick.AddListener(CopyWadFiles);
     }
 
     void CleanupProcesses()
@@ -98,12 +96,12 @@ public class DOOMManualDL : MonoBehaviour
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to install DOOM Archipelago?", "Setup");
+        ShowConfirmation("Are you sure you want to setup?", "Setup");
     }
 
     public void RevertAll()
     {
-        ShowConfirmation("Are you sure you want to revert and remove DOOM Archipelago?", "Revert");
+        ShowConfirmation("Are you sure you want to revert?", "Revert");
     }
 
     private void ShowConfirmation(string message, string action)
@@ -140,8 +138,6 @@ public class DOOMManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        gamePath = GetGamePath();
-
         if (!configLoaded)
         {
             ShowInfo("Loading configuration, please wait...");
@@ -149,28 +145,22 @@ public class DOOMManualDL : MonoBehaviour
             return;
         }
 
-        if (string.IsNullOrEmpty(gamePath))
+        bool installAPMod = installAPModToggle == null || installAPModToggle.isOn;
+
+        if (!installAPMod)
         {
-            ShowInfo("Game path not found. Please check Steam installation.");
+            ShowInfo("Please select at least one option to install.");
             return;
         }
 
-        StartCoroutine(SetupWithTracking());
+        StartCoroutine(SetupCoroutine());
     }
 
-    IEnumerator SetupWithTracking()
+    IEnumerator SetupCoroutine()
     {
-        ShowInfo("Initializing installation tracker...");
-        yield return new WaitForSeconds(0.5f);
-
-        currentManifest = new InstalledFilesManifest();
-        currentManifest.gameInstallPath = gamePath;
-
         ShowInfo("Downloading and installing files...");
 
         yield return InstallFlow();
-
-        SaveInstalledFilesManifest(currentManifest);
 
         ShowInfo("Installation complete!");
         yield return new WaitForSeconds(1f);
@@ -178,7 +168,11 @@ public class DOOMManualDL : MonoBehaviour
 
     private void ExecuteRevert()
     {
-        gamePath = GetGamePath();
+        if (!Directory.Exists(DoomArchipelagoPath))
+        {
+            ShowInfo("DOOM Archipelago folder found.\nPlease setup again if needed.");
+            return;
+        }
 
         CleanupProcesses();
         StartCoroutine(RemoveInstalledFilesAsync());
@@ -186,37 +180,19 @@ public class DOOMManualDL : MonoBehaviour
 
     IEnumerator RemoveInstalledFilesAsync()
     {
-        ShowInfo("Reverting DOOM Archipelago...");
+        ShowInfo("Reverting modifications...");
         yield return new WaitForSeconds(0.5f);
 
         try
         {
-            string doomArchipelagoPath = Path.Combine(gamePath, "DOOM Archipelago");
-
-            // Remove the DOOM Archipelago folder entirely
-            if (Directory.Exists(doomArchipelagoPath))
+            if (Directory.Exists(DoomArchipelagoPath))
             {
-                try
-                {
-                    Directory.Delete(doomArchipelagoPath, true);
-                    UnityEngine.Debug.Log("Deleted DOOM Archipelago folder: " + doomArchipelagoPath);
-                }
-                catch (System.Exception e)
-                {
-                    UnityEngine.Debug.LogWarning("Failed to delete DOOM Archipelago folder: " + e.Message);
-                    ShowInfo("Error during revert:\n" + e.Message);
-                    yield break;
-                }
-            }
-            else
-            {
-                UnityEngine.Debug.LogWarning("DOOM Archipelago folder not found at: " + doomArchipelagoPath);
-                ShowInfo("DOOM Archipelago folder not found.");
-                yield break;
+                Directory.Delete(DoomArchipelagoPath, true);
+                UnityEngine.Debug.Log("Deleted DOOM Archipelago folder: " + DoomArchipelagoPath);
             }
 
-            ShowInfo("DOOM Archipelago removed successfully!");
-            UnityEngine.Debug.Log("Revert complete");
+            ShowInfo("Revert complete!");
+            UnityEngine.Debug.Log("Revert complete.");
         }
         catch (System.Exception e)
         {
@@ -227,275 +203,118 @@ public class DOOMManualDL : MonoBehaviour
 
     IEnumerator InstallFlow()
     {
-        gamePath = GetGamePath();
+        bool installAPMod = installAPModToggle == null || installAPModToggle.isOn;
 
-        if (string.IsNullOrEmpty(gamePath))
+        if (installAPMod)
         {
-            ShowInfo("ERROR: Game path not found!");
-            yield break;
+            yield return InstallDoomArchipelago();
         }
-
-        yield return InstallDOOMAP();
-
-        CreateVersionFile(doomAP.url);
 
         yield return new WaitForSeconds(2f);
 
         if (launchGameToggle == null || launchGameToggle.isOn)
         {
-            ShowInfo("Launching DOOM Archipelago...");
+            ShowInfo("Launching game...");
             yield return new WaitForSeconds(1f);
             LaunchGame();
         }
     }
 
-    IEnumerator InstallDOOMAP()
+    IEnumerator InstallDoomArchipelago()
     {
-        while (!configLoaded)
-        {
-            UnityEngine.Debug.Log("Waiting for config to load...");
-            yield return new WaitForSeconds(0.5f);
-        }
+        string extractPath = Path.Combine(Application.persistentDataPath, "DOOMModFilesTemp");
 
-        UnityEngine.Debug.Log("Config loaded. DOOMAP URL: " + doomAP.url);
+        yield return downloader.DownloadAndExtract(doomAP, Application.persistentDataPath, extractPath);
 
-        if (string.IsNullOrEmpty(doomAP.url))
+        if (!Directory.Exists(extractPath))
         {
-            ShowInfo("ERROR: DOOMAP URL is empty!");
-            UnityEngine.Debug.LogError("DOOMAP URL not set!");
+            ShowInfo("ERROR: Extraction failed, folder not found!");
             yield break;
         }
 
-        // Create DOOM Archipelago folder
-        string doomArchipelagoPath = Path.Combine(gamePath, "DOOM Archipelago");
-        bool isExistingInstallation = false;
+        Directory.CreateDirectory(DoomArchipelagoPath);
 
-        if (Directory.Exists(doomArchipelagoPath))
-        {
-            // Check if APDoomLauncher.exe exists
-            string launcherPath = Path.Combine(doomArchipelagoPath, "APDoomLauncher.exe");
-            if (File.Exists(launcherPath))
-            {
-                UnityEngine.Debug.Log("DOOM Archipelago folder already exists with launcher. Skipping extraction, only copying doom.wad");
-                isExistingInstallation = true;
-            }
-        }
+        MoveDirectoryContents(extractPath, DoomArchipelagoPath);
 
-        if (!isExistingInstallation)
-        {
-            if (!Directory.Exists(doomArchipelagoPath))
-            {
-                Directory.CreateDirectory(doomArchipelagoPath);
-                UnityEngine.Debug.Log("Created DOOM Archipelago folder: " + doomArchipelagoPath);
-            }
+        CreateVersionFile(doomAP.url);
 
-            currentManifest.doomArchipelagoPath = doomArchipelagoPath;
+        SafeDeleteDirectory(extractPath);
 
-            string fileName = doomAP.fileName;
-            if (string.IsNullOrEmpty(fileName))
-            {
-                fileName = doomAP.url.Substring(doomAP.url.LastIndexOf('/') + 1);
-
-                if (fileName.Contains("?"))
-                    fileName = fileName.Substring(0, fileName.IndexOf("?"));
-
-                UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
-            }
-
-            string localPath = Path.Combine(Application.persistentDataPath, fileName);
-            string extractPath = Path.Combine(Application.persistentDataPath, "DOOMAPTemp");
-
-            UnityEngine.Debug.Log("Downloading DOOMAP from: " + doomAP.url);
-            UnityEngine.Debug.Log("Saving to: " + localPath);
-
-            yield return DownloadFile(doomAP.url, localPath);
-
-            // Verify file exists
-            if (!File.Exists(localPath))
-            {
-                UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
-                ShowInfo("ERROR: DOOMAP download failed!");
-                yield break;
-            }
-
-            UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
-
-            // Extract zip
-            yield return downloader.DownloadAndExtract(doomAP, Application.persistentDataPath, extractPath);
-
-            // Copy all contents from extraction to DOOM Archipelago folder
-            if (Directory.Exists(extractPath))
-            {
-                try
-                {
-                    foreach (string file in Directory.GetFiles(extractPath, "*", SearchOption.AllDirectories))
-                    {
-                        string relativePath = file.Substring(extractPath.Length + 1);
-                        string targetFile = Path.Combine(doomArchipelagoPath, relativePath);
-
-                        Directory.CreateDirectory(Path.GetDirectoryName(targetFile));
-                        File.Copy(file, targetFile, true);
-
-                        if (currentManifest != null)
-                            currentManifest.installedFiles.Add(targetFile);
-
-                        UnityEngine.Debug.Log("Copied: " + targetFile);
-                    }
-
-                    SafeDeleteDirectory(extractPath);
-                }
-                catch (System.Exception e)
-                {
-                    UnityEngine.Debug.LogError("Error extracting files: " + e.Message);
-                    ShowInfo("ERROR: Failed to extract DOOMAP files\n" + e.Message);
-                    yield break;
-                }
-            }
-
-            // Clean up downloaded file
-            try
-            {
-                if (File.Exists(localPath))
-                    File.Delete(localPath);
-            }
-            catch { }
-        }
-
-        // Copy doom.wad to DOOM Archipelago folder (always do this)
-        string doomWadPath = Path.Combine(gamePath, "doom.wad");
-        if (File.Exists(doomWadPath))
-        {
-            try
-            {
-                string targetWadPath = Path.Combine(doomArchipelagoPath, "doom.wad");
-                File.Copy(doomWadPath, targetWadPath, true);
-
-                if (currentManifest != null)
-                    currentManifest.installedFiles.Add(targetWadPath);
-
-                UnityEngine.Debug.Log("Copied doom.wad to: " + targetWadPath);
-                ShowInfo("doom.wad copied successfully!");
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogError("Failed to copy doom.wad: " + e.Message);
-                ShowInfo("WARNING: Failed to copy doom.wad\n" + e.Message);
-            }
-        }
-        else
-        {
-            UnityEngine.Debug.LogWarning("doom.wad not found at: " + doomWadPath);
-            ShowInfo("WARNING: doom.wad not found!\nPlease verify your game installation.");
-        }
-
-        ShowInfo("DOOM Archipelago installed successfully!");
+        ShowInfo("Installation verified successfully!");
         yield return new WaitForSeconds(1f);
     }
 
-    IEnumerator DownloadFile(string url, string savePath)
+    // =========================================================
+    // WAD COPY — dedicated to a SEPARATE button, not part of RunSetup/RevertAll
+    // =========================================================
+
+    public void CopyWadFiles()
     {
-        UnityEngine.Debug.Log("Starting download from: " + url);
+        gamePath = GetGamePath();
 
-        using (UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url))
+        if (string.IsNullOrEmpty(gamePath))
         {
-            request.downloadHandler = new UnityEngine.Networking.DownloadHandlerFile(savePath);
-
-            yield return request.SendWebRequest();
-
-            if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
-            {
-                UnityEngine.Debug.LogError("Download error: " + request.error);
-                UnityEngine.Debug.LogError("Response code: " + request.responseCode);
-            }
-            else
-            {
-                UnityEngine.Debug.Log("Download complete! File size: " + new System.IO.FileInfo(savePath).Length + " bytes");
-            }
+            ShowInfo("Ultimate Doom install not found. Please check your Steam installation.");
+            return;
         }
-    }
 
-    void SafeDeleteFile(string path)
-    {
-        StartCoroutine(DeleteFileForce(path));
-    }
+        string doomWadSource = Path.Combine(gamePath, "base", "DOOM.wad");
+        string doom2WadSource = Path.Combine(gamePath, "base", "doom2", "DOOM2.wad");
 
-    IEnumerator DeleteFileForce(string path)
-    {
-        float timer = 0f;
-
-        while (File.Exists(path) && timer < 6f)
+        if (!File.Exists(doomWadSource))
         {
-            try
-            {
-                File.SetAttributes(path, FileAttributes.Normal);
-                File.Delete(path);
-
-                if (!File.Exists(path))
-                    yield break;
-            }
-            catch { }
-
-            timer += 0.5f;
-            yield return new WaitForSeconds(0.5f);
+            ShowInfo("DOOM.wad not found at:\n" + doomWadSource);
+            return;
         }
-    }
 
-    IEnumerator LoadRemoteConfig()
-    {
-        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
-
-        UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url);
-        yield return request.SendWebRequest();
-
-        if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+        if (!File.Exists(doom2WadSource))
         {
-            UnityEngine.Debug.LogError("Config load failed: " + request.error);
-            configLoaded = true;
-            yield break;
+            ShowInfo("DOOM2.wad not found at:\n" + doom2WadSource);
+            return;
         }
 
         try
         {
-            remoteConfig = JsonUtility.FromJson<GameConfig>(request.downloadHandler.text);
-            UnityEngine.Debug.Log("Remote config loaded successfully");
-            ApplyGameConfig();
+            Directory.CreateDirectory(DoomArchipelagoPath);
+
+            string doomWadTarget = Path.Combine(DoomArchipelagoPath, "DOOM.wad");
+            string doom2WadTarget = Path.Combine(DoomArchipelagoPath, "DOOM2.wad");
+
+            File.Copy(doomWadSource, doomWadTarget, true);
+            File.Copy(doom2WadSource, doom2WadTarget, true);
+
+            ShowInfo("WAD files copied successfully!");
+            UnityEngine.Debug.Log("Copied DOOM.wad and DOOM2.wad to: " + DoomArchipelagoPath);
         }
         catch (System.Exception e)
         {
-            UnityEngine.Debug.LogError("Failed to parse config: " + e.Message);
+            ShowInfo("Error copying WAD files:\n" + e.Message);
+            UnityEngine.Debug.LogError("WAD copy error: " + e);
         }
-
-        configLoaded = true;
-
-        gamePath = GetGamePath();
     }
 
     void LaunchGame()
     {
-        string doomArchipelagoPath = Path.Combine(gamePath, "DOOM Archipelago");
+        string exePath = Path.Combine(DoomArchipelagoPath, "apdoom-launcher.exe");
 
-        UnityEngine.Debug.Log("LaunchGame called. DOOM Archipelago Path: " + doomArchipelagoPath);
-
-        string exePath = Path.Combine(doomArchipelagoPath, "APDoomLauncher.exe");
+        UnityEngine.Debug.Log("LaunchGame called. ExePath: " + exePath);
 
         if (!File.Exists(exePath))
         {
-            ShowInfo("APDoomLauncher.exe not found at:\n" + exePath);
-            UnityEngine.Debug.LogError("APDoomLauncher.exe not found!");
+            ShowInfo("Game executable not found. Checked:\n" + exePath);
+            UnityEngine.Debug.LogError("Executable not found!");
             return;
         }
-
-        UnityEngine.Debug.Log("Checking exe at: " + exePath);
 
         try
         {
             UnityEngine.Debug.Log("Starting process...");
             gameProcess = Process.Start(exePath);
-            UnityEngine.Debug.Log("DOOM Archipelago launched successfully from: " + exePath);
+            UnityEngine.Debug.Log("Game launched successfully from: " + exePath);
         }
         catch (System.Exception e)
         {
-            ShowInfo("Error launching DOOM Archipelago:\n" + e.Message);
+            ShowInfo("Error launching game:\n" + e.Message);
             UnityEngine.Debug.LogError("Launch error: " + e);
         }
     }
@@ -524,20 +343,28 @@ public class DOOMManualDL : MonoBehaviour
         catch { }
     }
 
-    void SaveInstalledFilesManifest(InstalledFilesManifest manifest)
+    // Moves ALL contents (files + subfolders) of "source" directly into "target",
+    // preserving the relative structure, and tracks every moved file for revert.
+    void MoveDirectoryContents(string source, string target)
     {
-        string manifestPath = Path.Combine(Application.persistentDataPath, "DOOMInstalledFilesManifest.json");
-        string json = JsonUtility.ToJson(manifest, true);
+        if (!Directory.Exists(source))
+            return;
 
-        try
+        Directory.CreateDirectory(target);
+
+        foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
         {
-            File.WriteAllText(manifestPath, json);
-            UnityEngine.Debug.Log("Installation manifest saved: " + manifestPath);
-            UnityEngine.Debug.Log("Tracked " + manifest.installedFiles.Count + " files for future revert");
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogError("Failed to save manifest: " + e.Message);
+            string relativePath = file.Substring(source.Length)
+                .TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+            string dest = Path.Combine(target, relativePath);
+
+            Directory.CreateDirectory(Path.GetDirectoryName(dest));
+
+            if (File.Exists(dest))
+                File.Delete(dest);
+
+            File.Move(file, dest);
         }
     }
 
@@ -562,7 +389,7 @@ public class DOOMManualDL : MonoBehaviour
             yield return new WaitForSeconds(0.1f);
 
         CloseInfoPanel();
-        ShowConfirmation("Are you sure you want to install DOOM Archipelago?", "Setup");
+        ShowConfirmation("Are you sure you want to install all the files?", "Setup");
     }
 
     string GetGamePath()
@@ -626,31 +453,27 @@ public class DOOMManualDL : MonoBehaviour
     // VERSION FILE MANAGEMENT
     // =========================================================
 
-    void CreateVersionFile(string doomAPUrl)
+    void CreateVersionFile(string modsUrl)
     {
         try
         {
-            string doomAPVersion = ExtractVersionFromUrl(doomAPUrl, "");
+            string modsVersion = ExtractVersionFromUrl(modsUrl, "");
 
-            string versionFileName = "DOOM Archipelago Version " + doomAPVersion + ".txt";
+            string versionFileName = "DOOM APMod Version " + modsVersion + ".txt";
             string content = "Archipelago Setup Tool by quack!\n";
             content += "https://github.com/quackexclamationmark/Archipelago-Setup-Tool\n";
             content += "\n";
-            content += "=== DOOM ARCHIPELAGO ===\n";
-            content += "Downloaded from: " + doomAPUrl + "\n";
-            content += "Version: " + doomAPVersion + "\n";
+            content += "=== RANDOMIZER MOD ===\n";
+            content += "Downloaded from: " + modsUrl + "\n";
+            content += "Version: " + modsVersion + "\n";
             content += "\n";
             content += "Downloaded at: " + System.DateTime.Now + "\n";
 
             DeleteOldVersionFiles();
 
-            string doomArchipelagoPath = Path.Combine(gamePath, "DOOM Archipelago");
-            string versionPath = Path.Combine(doomArchipelagoPath, versionFileName);
+            string versionPath = Path.Combine(DoomArchipelagoPath, versionFileName);
             File.WriteAllText(versionPath, content);
             UnityEngine.Debug.Log("Version file created: " + versionPath);
-
-            if (currentManifest != null)
-                currentManifest.installedFiles.Add(versionPath);
         }
         catch (System.Exception e)
         {
@@ -662,15 +485,13 @@ public class DOOMManualDL : MonoBehaviour
     {
         try
         {
-            string doomArchipelagoPath = Path.Combine(gamePath, "DOOM Archipelago");
-
-            if (!Directory.Exists(doomArchipelagoPath))
+            if (!Directory.Exists(DoomArchipelagoPath))
                 return;
 
-            System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"DOOM Archipelago Version .+\.txt");
+            System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"DOOM APMod Version .+\.txt");
 
-            string[] files = Directory.GetFiles(doomArchipelagoPath);
-            foreach (string file in files)
+            string[] rootFiles = Directory.GetFiles(DoomArchipelagoPath);
+            foreach (string file in rootFiles)
             {
                 string fileName = Path.GetFileName(file);
                 if (pattern.IsMatch(fileName))
@@ -695,14 +516,13 @@ public class DOOMManualDL : MonoBehaviour
 
     string ExtractVersionFromUrl(string url, string pattern)
     {
-        // Pattern for Thunderstore: https://thunderstore.io/package/download/Author/Package/VERSION/
+        // Pattern pour Thunderstore: https://thunderstore.io/package/download/Author/Package/VERSION/
         System.Text.RegularExpressions.Regex thunderstorePattern = new System.Text.RegularExpressions.Regex(@"thunderstore\.io/package/download/[^/]+/[^/]+/([^/]+)/?$");
         System.Text.RegularExpressions.Match thunderstoreMatch = thunderstorePattern.Match(url);
 
         if (thunderstoreMatch.Success)
             return thunderstoreMatch.Groups[1].Value;
 
-        // Pattern for GitHub releases: /releases/download/VERSION/
         System.Text.RegularExpressions.Regex githubPattern = new System.Text.RegularExpressions.Regex(@"/releases/download/([^/]+)/");
         System.Text.RegularExpressions.Match githubMatch = githubPattern.Match(url);
 
@@ -710,5 +530,35 @@ public class DOOMManualDL : MonoBehaviour
             return githubMatch.Groups[1].Value;
 
         return "Unknown";
+    }
+
+    IEnumerator LoadRemoteConfig()
+    {
+        string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
+
+        UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url);
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+        {
+            UnityEngine.Debug.LogError("Config load failed: " + request.error);
+            configLoaded = true;
+            yield break;
+        }
+
+        try
+        {
+            remoteConfig = JsonUtility.FromJson<GameConfig>(request.downloadHandler.text);
+            UnityEngine.Debug.Log("Remote config loaded successfully");
+            ApplyGameConfig();
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to parse config: " + e.Message);
+        }
+
+        configLoaded = true;
+
+        gamePath = GetGamePath();
     }
 }

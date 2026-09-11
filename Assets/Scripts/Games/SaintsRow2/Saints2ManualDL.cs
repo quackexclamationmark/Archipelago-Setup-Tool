@@ -51,6 +51,7 @@ public class Saints2ManualDL : MonoBehaviour
     private string pendingAction;
     private GameConfig remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
     private InstalledFilesManifest currentManifest;
 
     [System.Serializable]
@@ -62,6 +63,7 @@ public class Saints2ManualDL : MonoBehaviour
         public string saints2ASI;
         public string saints2Exe;
         public string[] steamSearchPaths;
+        public string[] apSearchPaths;
     }
 
     [System.Serializable]
@@ -223,9 +225,11 @@ public class Saints2ManualDL : MonoBehaviour
 
         yield return InstallAPWorld();
 
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
         if (launchGameToggle == null || launchGameToggle.isOn)
         {
-            ShowInfo("Launching Saints Row 2...");
             LaunchGame();
             yield return new WaitForSeconds(2f);
         }
@@ -395,7 +399,6 @@ public class Saints2ManualDL : MonoBehaviour
         SafeDeleteDirectory(extractPath);
     }
 
-    // Extraction generique d'un .zip dont on garde tout le contenu, deplace vers le dossier du jeu
     IEnumerator InstallZipContentsToGamePath(FileDownloader.FileData file, string tempFolderName, string logLabel)
     {
         string extractPath = Path.Combine(Application.persistentDataPath, tempFolderName);
@@ -417,11 +420,15 @@ public class Saints2ManualDL : MonoBehaviour
 
     IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
         {
             UnityEngine.Debug.Log("Waiting for config to load...");
             yield return new WaitForSeconds(0.5f);
         }
+
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + saints2Apworld.url);
 
         if (string.IsNullOrEmpty(saints2Apworld.url))
         {
@@ -437,9 +444,14 @@ public class Saints2ManualDL : MonoBehaviour
 
             if (fileName.Contains("?"))
                 fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
         }
 
         string localPath = Path.Combine(Application.persistentDataPath, fileName);
+
+        UnityEngine.Debug.Log("Downloading APWorld from: " + saints2Apworld.url);
+        UnityEngine.Debug.Log("Saving to: " + localPath);
 
         yield return DownloadFile(saints2Apworld.url, localPath);
 
@@ -450,39 +462,28 @@ public class Saints2ManualDL : MonoBehaviour
             yield break;
         }
 
-        string[] targetPaths = new string[]
-        {
-        Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string target = "";
-        foreach (string path in targetPaths)
-        {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        if (string.IsNullOrEmpty(target))
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
+
         if (File.Exists(target))
         {
-            try { File.Delete(target); }
+            try
+            {
+                File.Delete(target);
+                UnityEngine.Debug.Log("Deleted old apworld file");
+            }
             catch { }
         }
 
@@ -490,22 +491,31 @@ public class Saints2ManualDL : MonoBehaviour
         {
             File.Copy(localPath, target, true);
 
-            if (currentManifest != null)
-                currentManifest.installedFiles.Add(target);
+            UnityEngine.Debug.Log("APWorld file copied to: " + target);
 
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
+            {
                 File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
         }
         catch (System.Exception e)
         {
@@ -517,12 +527,10 @@ public class Saints2ManualDL : MonoBehaviour
     // BACKUP MANAGEMENT
     // =========================================================
 
-    // Deplace le fichier original vers /Backup avant un telechargement qui va le remplacer.
-    // Si un backup existe deja, on ne l'ecrase pas (on garde le tout premier original).
     void BackupFile(string fileName)
     {
         try
-        {
+        { 
             string source = Path.Combine(gamePath, fileName);
 
             if (!File.Exists(source))
@@ -535,7 +543,6 @@ public class Saints2ManualDL : MonoBehaviour
 
             if (File.Exists(backupTarget))
             {
-                // Un backup existe deja: on retire juste la copie actuelle pour laisser la place au nouveau fichier
                 File.Delete(source);
             }
             else
@@ -1047,5 +1054,43 @@ public class Saints2ManualDL : MonoBehaviour
         configLoaded = true;
 
         gamePath = GetGamePath();
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
+        return "";
     }
 }

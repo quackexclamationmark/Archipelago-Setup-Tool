@@ -30,7 +30,6 @@ public class UnderYellowManualDL : MonoBehaviour
     public Button infoOkButton;
 
     [Header("LAUNCH")]
-    // assign this in the Inspector to provide a one-click "Launch Undertale Yellow" button
     public Button launchButton;
 
     private const string InstalledFoldersKey = "UndertaleYellow_InstalledFolders";
@@ -38,16 +37,18 @@ public class UnderYellowManualDL : MonoBehaviour
     private string archipelagoPath;
     private string pendingAction;
 
-    // --- Remote config support (inspired by SUPERHOTManualDL)
+    private UndertaleYellowConfig remoteConfig;
+    private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
+
     [System.Serializable]
     public class UndertaleYellowConfig
     {
         public string undertaleyellowApworld;
         public string undertaleyellowDL;
+        public string[] apSearchPaths;
     }
 
-    private UndertaleYellowConfig remoteConfig;
-    private bool configLoaded = false;
 
     void Start()
     {
@@ -68,11 +69,9 @@ public class UnderYellowManualDL : MonoBehaviour
         if (cancelButton != null)
             cancelButton.onClick.AddListener(OnCancel);
 
-        // Wire the optional launch button (if assigned in Inspector)
         if (launchButton != null)
             launchButton.onClick.AddListener(OnLaunchButtonClicked);
 
-        // Start loading optional remote config (non-blocking)
         StartCoroutine(LoadRemoteConfig());
     }
 
@@ -82,12 +81,12 @@ public class UnderYellowManualDL : MonoBehaviour
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to setup Undertale Yellow?", "Setup");
+        ShowConfirmation("Are you sure you want to setup?", "Setup");
     }
 
     public void RevertAll()
     {
-        ShowConfirmation("Are you sure you want to remove the installed Undertale Yellow folder?", "Revert");
+        ShowConfirmation("Are you sure you want to revert?", "Revert");
     }
 
     private void ShowConfirmation(string message, string action)
@@ -131,7 +130,6 @@ public class UnderYellowManualDL : MonoBehaviour
     // LAUNCH BUTTON HANDLER
     // ---------------------------------------------------------------
 
-    // Called by the UI button (assign launchButton in Inspector)
     public void OnLaunchButtonClicked()
     {
         archipelagoPath = GetArchipelagoPath();
@@ -169,7 +167,28 @@ public class UnderYellowManualDL : MonoBehaviour
             return;
         }
 
+        if (apworld && !undertaleYellow)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
+
         StartCoroutine(InstallFlow(apworld, undertaleYellow));
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
+        ShowInfo("Installation complete!");
     }
 
     IEnumerator InstallFlow(bool apworld, bool undertaleYellow)
@@ -190,16 +209,17 @@ public class UnderYellowManualDL : MonoBehaviour
 
     IEnumerator InstallAPWorld()
     {
-        // Wait for optional remote config to load so we use updated URLs if available
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
         {
-            UnityEngine.Debug.Log("Waiting for remote config to load...");
+            UnityEngine.Debug.Log("Waiting for config to load...");
             yield return new WaitForSeconds(0.5f);
         }
 
-        string url = undertaleyellowApworld.url;
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + undertaleyellowApworld.url);
 
-        if (string.IsNullOrEmpty(url))
+        if (string.IsNullOrEmpty(undertaleyellowApworld.url))
         {
             ShowInfo("ERROR: APWorld URL is empty!");
             UnityEngine.Debug.LogError("APWorld URL not set!");
@@ -209,16 +229,20 @@ public class UnderYellowManualDL : MonoBehaviour
         string fileName = undertaleyellowApworld.fileName;
         if (string.IsNullOrEmpty(fileName))
         {
-            fileName = url.Substring(url.LastIndexOf('/') + 1);
+            fileName = undertaleyellowApworld.url.Substring(undertaleyellowApworld.url.LastIndexOf('/') + 1);
+
             if (fileName.Contains("?"))
                 fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
         }
 
         string localPath = Path.Combine(Application.persistentDataPath, fileName);
 
-        UnityEngine.Debug.Log("Downloading APWorld from: " + url);
+        UnityEngine.Debug.Log("Downloading APWorld from: " + undertaleyellowApworld.url);
+        UnityEngine.Debug.Log("Saving to: " + localPath);
 
-        yield return DownloadFile(url, localPath);
+        yield return DownloadFile(undertaleyellowApworld.url, localPath);
 
         if (!File.Exists(localPath))
         {
@@ -227,21 +251,20 @@ public class UnderYellowManualDL : MonoBehaviour
             yield break;
         }
 
-        string customWorldsDir = Path.Combine(archipelagoPath, "custom_worlds");
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        try
+        string customWorldsDir = GetApCustomWorldsPath();
+
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            if (!Directory.Exists(customWorldsDir))
-                Directory.CreateDirectory(customWorldsDir);
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogError("Cannot create custom_worlds directory: " + e.Message);
-            ShowInfo("ERROR: Cannot create custom_worlds folder!\n" + e.Message);
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
 
         string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
 
         if (File.Exists(target))
         {
@@ -256,20 +279,32 @@ public class UnderYellowManualDL : MonoBehaviour
         try
         {
             File.Copy(localPath, target, true);
+
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
+
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
+            {
                 File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
         }
         catch (System.Exception e)
         {
@@ -281,7 +316,6 @@ public class UnderYellowManualDL : MonoBehaviour
     {
         UnityEngine.Debug.Log("START InstallUndertaleYellowDL");
 
-        // Wait for optional remote config so the DL url can be updated if present
         while (!configLoaded)
             yield return null;
 
@@ -658,5 +692,43 @@ public class UnderYellowManualDL : MonoBehaviour
 
         if (undertaleyellowDL != null && !string.IsNullOrEmpty(remoteConfig.undertaleyellowDL))
             undertaleyellowDL.url = remoteConfig.undertaleyellowDL;
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
+        return "";
     }
 }

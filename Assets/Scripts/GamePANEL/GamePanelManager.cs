@@ -133,6 +133,7 @@ public class GamePanelManager : MonoBehaviour
     public GameObject valheimPanel;
     public GameObject gtavcPanel;
     public GameObject saintsrow2Panel;
+    public GameObject hereticPanel;
 
     void Start()
     {
@@ -535,6 +536,9 @@ public class GamePanelManager : MonoBehaviour
             case "SaintsRow2":
                 saintsrow2Panel.SetActive(true);
                 break;
+            case "Heretic":
+                hereticPanel.SetActive(true);
+                break;
         }
     }
 
@@ -670,5 +674,6 @@ public class GamePanelManager : MonoBehaviour
         if (valheimPanel != null) valheimPanel.SetActive(false);
         if (gtavcPanel != null) gtavcPanel.SetActive(false);
         if (saintsrow2Panel != null) saintsrow2Panel.SetActive(false);
+        if (hereticPanel != null) hereticPanel.SetActive(false);
     }
 }

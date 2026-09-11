@@ -46,8 +46,8 @@ public class YTGVManualDL : MonoBehaviour
     private bool pendingFullClearConfirmation = false;
     private YTGVConfig remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
 
-    // Both of these folders together make up the AP mod for YTGV.
     private static readonly string[] PluginFolderNames = new string[] { "YellowTaxiAP", "MMHOOK" };
 
     [System.Serializable]
@@ -56,6 +56,7 @@ public class YTGVManualDL : MonoBehaviour
         public string ytgvApworld;
         public string ytgvAP;
         public string[] steamSearchPaths;
+        public string[] apSearchPaths;
     }
 
     void Start()
@@ -174,6 +175,18 @@ public class YTGVManualDL : MonoBehaviour
 
         int count = (bep ? 1 : 0) + (ap ? 1 : 0) + (apworld ? 1 : 0);
 
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
+        if (apworld && count == 1 && !bep)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
+
         if (bep && count == 1)
         {
             StartCoroutine(BepInExOnlyFlow());
@@ -187,6 +200,27 @@ public class YTGVManualDL : MonoBehaviour
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            LaunchYTGV();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -213,7 +247,6 @@ public class YTGVManualDL : MonoBehaviour
 
             ShowInfo("Removing AP mods...");
 
-            // Remove both plugin folders that make up the AP mod
             foreach (string pluginName in PluginFolderNames)
             {
                 string pluginDir = Path.Combine(pluginsPath, pluginName);
@@ -321,8 +354,6 @@ public class YTGVManualDL : MonoBehaviour
         Application.Quit();
     }
 
-    // Looks for a plugin folder either directly under the extracted archive root,
-    // or nested under the game folder name, mirroring how the archive is packaged.
     string FindExtractedPluginDir(string extractPath, string pluginName)
     {
         string underGameFolder = Path.Combine(extractPath, "Yellow Taxi Goes Vroom", "BepInEx", "plugins", pluginName);
@@ -460,6 +491,8 @@ public class YTGVManualDL : MonoBehaviour
 
     IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
         {
             UnityEngine.Debug.Log("Waiting for config to load...");
@@ -502,39 +535,18 @@ public class YTGVManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        string target = "";
-        foreach (string path in targetPaths)
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
 
-        UnityEngine.Debug.Log("Target path: " + target);
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
 
         if (File.Exists(target))
         {
@@ -553,11 +565,32 @@ public class YTGVManualDL : MonoBehaviour
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
 
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
+            yield break;
+        }
+
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -1003,5 +1036,43 @@ public class YTGVManualDL : MonoBehaviour
         configLoaded = true;
 
         ytgvPath = GetYTGVPath();
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
+        return "";
     }
 }

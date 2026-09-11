@@ -55,6 +55,7 @@ public class DOOMEternalManualDL : MonoBehaviour
     private DOOMEternalConfig remoteConfig;
     private bool configLoaded = false;
     private bool isMS = false;
+    private bool lastApWorldInstallSuccess = false;
 
     [System.Serializable]
     public class DOOMEternalConfig
@@ -62,6 +63,7 @@ public class DOOMEternalManualDL : MonoBehaviour
         public string doometernalAP;
         public string[] steamSearchPaths;
         public string[] msSearchPaths;
+        public string[] apSearchPaths;
     }
 
     void Start()
@@ -156,7 +158,7 @@ public class DOOMEternalManualDL : MonoBehaviour
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+        ShowConfirmation("Are you sure you want to setup?", "Setup");
     }
 
     public void RevertAll()
@@ -243,10 +245,19 @@ public class DOOMEternalManualDL : MonoBehaviour
     {
         yield return new WaitUntil(() => configLoaded);
 
-        ShowInfo("Installing AP World...");
+        ShowInfo("Installing APWorld...");
         yield return new WaitForSeconds(1f);
 
+        yield return InstallDOOMEternalAP();
+
         yield return InstallAPWorld();
+
+        if (lastApWorldInstallSuccess)
+        {
+            string apInstallPath = Path.Combine(documentsPath, "DOOM Eternal Archipelago");
+            UnityEngine.Debug.Log("Cleaning up temporary AP install folder: " + apInstallPath);
+            SafeDeleteDirectory(apInstallPath);
+        }
 
         if (launchDoomLauncherAfterSetupToggle != null && launchDoomLauncherAfterSetupToggle.isOn)
         {
@@ -391,7 +402,7 @@ public class DOOMEternalManualDL : MonoBehaviour
     {
         if (installAPToggle != null && installAPToggle.isOn)
         {
-            ShowInfo("Installing DOOM Eternal Archipelago...");
+            ShowInfo("Installing AP Mod Client...");
             yield return InstallDOOMEternalAP();
         }
 
@@ -466,6 +477,8 @@ public class DOOMEternalManualDL : MonoBehaviour
 
     IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
         {
             UnityEngine.Debug.Log("Waiting for config to load...");
@@ -487,37 +500,17 @@ public class DOOMEternalManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("Found doometernal.apworld at: " + apworldFilePath);
 
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", "doometernal.apworld"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", "doometernal.apworld"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", "doometernal.apworld"),
-        };
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        string target = "";
-        foreach (string path in targetPaths)
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
+            ShowInfo("Archipelago custom_worlds directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
             yield break;
         }
+
+        string fileName = Path.GetFileName(apworldFilePath);
+        string target = Path.Combine(customWorldsDir, fileName);
 
         UnityEngine.Debug.Log("Target path: " + target);
 
@@ -538,6 +531,7 @@ public class DOOMEternalManualDL : MonoBehaviour
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
 
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
@@ -931,6 +925,44 @@ public class DOOMEternalManualDL : MonoBehaviour
         }
 
         UnityEngine.Debug.LogWarning("Game (MS) not found.");
+        return "";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
         return "";
     }
 }

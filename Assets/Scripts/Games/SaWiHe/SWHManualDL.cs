@@ -1,9 +1,9 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.IO;
 using System.Collections;
 using System.Diagnostics;
+using System.IO;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class SWHManualDL : MonoBehaviour
 {
@@ -42,6 +42,7 @@ public class SWHManualDL : MonoBehaviour
     private string pendingAction;
     private SWHConfig remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
 
     [System.Serializable]
     public class SWHConfig
@@ -50,6 +51,7 @@ public class SWHManualDL : MonoBehaviour
         public string swhBepInEx;
         public string swhAP;
         public string[] steamSearchPaths;
+        public string[] apSearchPaths;
     }
 
     void Start()
@@ -105,7 +107,7 @@ public class SWHManualDL : MonoBehaviour
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+        ShowConfirmation("Are you sure you want to setup?", "Setup");
     }
 
     public void RevertAll()
@@ -151,11 +153,11 @@ public class SWHManualDL : MonoBehaviour
     {
         gamePath = GetGamePath();
 
-        bool doApworld = installApworldToggle == null || installApworldToggle.isOn;
-        bool doBep = installBepInExToggle != null && installBepInExToggle.isOn;
-        bool doAp = installApToggle != null && installApToggle.isOn;
+        bool apworld = installApworldToggle == null || installApworldToggle.isOn;
+        bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
+        bool ap = installApToggle != null && installApToggle.isOn;
 
-        bool needsGamePath = doBep || doAp;
+        bool needsGamePath = bep || ap;
 
         if (needsGamePath && (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath)))
         {
@@ -163,13 +165,36 @@ public class SWHManualDL : MonoBehaviour
             return;
         }
 
-        if (!doApworld && !doBep && !doAp)
+        int count = (apworld ? 1 : 0) + (bep ? 1 : 0) + (ap ? 1 : 0);
+
+        if (!apworld && !bep && !ap)
         {
             ShowInfo("Please select at least one component to install.");
             return;
         }
 
-        StartCoroutine(InstallFlow(doApworld, doBep, doAp));
+        if (apworld && count == 1)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
+
+        StartCoroutine(InstallFlow(apworld, bep, ap));
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
+        ShowInfo("Installation complete!");
     }
 
     IEnumerator InstallFlow(bool doApworld, bool doBep, bool doAp)
@@ -179,7 +204,7 @@ public class SWHManualDL : MonoBehaviour
         if (doApworld)
         {
             ShowInfo("Installing APWorld...");
-            yield return InstallApworld();
+            yield return InstallAPWorld();
         }
 
         if (doBep)
@@ -211,10 +236,17 @@ public class SWHManualDL : MonoBehaviour
         ShowInfo("Installation complete!");
     }
 
-    IEnumerator InstallApworld()
+    IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
+        {
+            UnityEngine.Debug.Log("Waiting for config to load...");
             yield return new WaitForSeconds(0.5f);
+        }
+
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + swhApworld.url);
 
         if (string.IsNullOrEmpty(swhApworld.url))
         {
@@ -225,9 +257,19 @@ public class SWHManualDL : MonoBehaviour
 
         string fileName = swhApworld.fileName;
         if (string.IsNullOrEmpty(fileName))
-            fileName = "sayonarawildhearts.apworld";
+        {
+            fileName = swhApworld.url.Substring(swhApworld.url.LastIndexOf('/') + 1);
+
+            if (fileName.Contains("?"))
+                fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
+        }
 
         string localPath = Path.Combine(Application.persistentDataPath, fileName);
+
+        UnityEngine.Debug.Log("Downloading APWorld from: " + swhApworld.url);
+        UnityEngine.Debug.Log("Saving to: " + localPath);
 
         yield return DownloadFile(swhApworld.url, localPath);
 
@@ -238,57 +280,60 @@ public class SWHManualDL : MonoBehaviour
             yield break;
         }
 
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string target = "";
-        foreach (string path in targetPaths)
-        {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        if (string.IsNullOrEmpty(target))
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
+
         if (File.Exists(target))
         {
-            try { File.Delete(target); } catch { }
+            try
+            {
+                File.Delete(target);
+                UnityEngine.Debug.Log("Deleted old apworld file");
+            }
+            catch { }
         }
 
         try
         {
             File.Copy(localPath, target, true);
+
+            UnityEngine.Debug.Log("APWorld file copied to: " + target);
+
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
+            {
                 File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
         }
         catch (System.Exception e)
         {
@@ -305,7 +350,6 @@ public class SWHManualDL : MonoBehaviour
 
         yield return downloader.DownloadAndExtract(swhBepInEx, Application.persistentDataPath, extractPath);
 
-        // Whole zip content goes directly into the game root directory.
         MoveDirectory(extractPath, gamePath);
 
         SafeDeleteDirectory(extractPath);
@@ -323,7 +367,6 @@ public class SWHManualDL : MonoBehaviour
         string pluginsPath = Path.Combine(gamePath, "BepInEx", "plugins");
         Directory.CreateDirectory(pluginsPath);
 
-        // Whole zip content (including the SayonaraWildHeartsRandomizer folder) goes into BepInEx/plugins.
         MoveDirectory(extractPath, pluginsPath);
 
         SafeDeleteDirectory(extractPath);
@@ -622,6 +665,44 @@ public class SWHManualDL : MonoBehaviour
         }
 
         UnityEngine.Debug.LogWarning("Game (Steam) not found.");
+        return "";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
         return "";
     }
 }

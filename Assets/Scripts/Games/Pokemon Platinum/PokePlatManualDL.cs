@@ -35,24 +35,24 @@ public class PokePlatManualDL : MonoBehaviour
     private bool configLoaded = false;
     private RemoteConfig remoteConfig;
     private string pendingAction = "";
+    private bool lastApWorldInstallSuccess = false;
 
     [Serializable]
     public class RemoteConfig
     {
         public string pokemonplatinumBizHawk;
         public string pokemonplatinumApworld;
+        public string[] apSearchPaths;
     }
 
     void Start()
     {
-        // Info panel
         if (infoPanel != null)
             infoPanel.SetActive(false);
 
         if (infoOkButton != null)
             infoOkButton.onClick.AddListener(CloseInfoPanel);
 
-        // Confirmation panel
         if (confirmationPanel != null)
             confirmationPanel.SetActive(false);
 
@@ -62,16 +62,14 @@ public class PokePlatManualDL : MonoBehaviour
         if (cancelButton != null)
             cancelButton.onClick.AddListener(OnCancel);
 
-        // Toggles defaults
         if (installBizToggle != null)
             installBizToggle.isOn = true;
 
         if (installApworldToggle != null)
             installApworldToggle.isOn = true;
 
-        // Setup button
         if (runSetupButton != null)
-            runSetupButton.onClick.AddListener(() => ShowConfirmation("Are you sure you want to run setup with the selected options?", "Setup"));
+            runSetupButton.onClick.AddListener(() => ShowConfirmation("Are you sure you want to setup?", "Setup"));
 
         StartCoroutine(LoadRemoteConfig());
     }
@@ -129,11 +127,26 @@ public class PokePlatManualDL : MonoBehaviour
 
         if (apworld && count == 1)
         {
-            StartCoroutine(InstallAPWorld());
+            StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
+        ShowInfo("Installation complete!");
     }
 
     IEnumerator InstallFlow()
@@ -207,11 +220,9 @@ public class PokePlatManualDL : MonoBehaviour
             yield break;
         }
 
-        // Clean any existing temp
         SafeDeleteDirectory(extractPath);
         yield return null;
 
-        // Try to extract using ZipFile
         bool extractionFailed = false;
         string extractionError = null;
 
@@ -228,7 +239,6 @@ public class PokePlatManualDL : MonoBehaviour
             UnityEngine.Debug.LogWarning("Zip extraction failed: " + e.Message);
         }
 
-        // If extraction failed, attempt fallback extraction using downloader (but do this OUTSIDE the catch)
         if (extractionFailed)
         {
             UnityEngine.Debug.LogWarning("Attempting fallback extraction using downloader if available.");
@@ -243,7 +253,6 @@ public class PokePlatManualDL : MonoBehaviour
             }
         }
 
-        // Verify extraction produced something
         if (!Directory.Exists(extractPath) || (Directory.GetFiles(extractPath, "*", SearchOption.AllDirectories).Length == 0 && Directory.GetDirectories(extractPath).Length == 0))
         {
             ShowInfo("ERROR: Extraction produced no files.");
@@ -251,12 +260,10 @@ public class PokePlatManualDL : MonoBehaviour
             yield break;
         }
 
-        // Determine extracted root
         string[] topDirs = Directory.GetDirectories(extractPath);
         string[] topFiles = Directory.GetFiles(extractPath);
         string sourcePath = extractPath;
 
-        // If the zip produced a single root folder, use it
         if (topDirs.Length == 1 && topFiles.Length == 0)
             sourcePath = topDirs[0];
 
@@ -264,7 +271,6 @@ public class PokePlatManualDL : MonoBehaviour
         string targetFolderName = "BizHawk Latest Version";
         string targetPath = Path.Combine(docs, targetFolderName);
 
-        // Remove old target if exists
         try
         {
             if (Directory.Exists(targetPath))
@@ -277,7 +283,6 @@ public class PokePlatManualDL : MonoBehaviour
             UnityEngine.Debug.LogWarning("Failed to delete existing target: " + e.Message);
         }
 
-        // Move or copy extracted files to Documents
         try
         {
             if (Directory.Exists(sourcePath))
@@ -306,7 +311,6 @@ public class PokePlatManualDL : MonoBehaviour
             yield break;
         }
 
-        // Cleanup local temp and zip
         SafeDeleteDirectory(extractPath);
         try { if (File.Exists(localPath)) File.Delete(localPath); } catch { }
 
@@ -316,13 +320,15 @@ public class PokePlatManualDL : MonoBehaviour
 
     IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
         {
-            ShowInfo("Loading configuration, please wait...");
+            UnityEngine.Debug.Log("Waiting for config to load...");
             yield return new WaitForSeconds(0.5f);
         }
 
-        UnityEngine.Debug.Log("Config loaded. Platinum APWorld URL: " + pokemonplatinumApworld.url);
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + pokemonplatinumApworld.url);
 
         if (string.IsNullOrEmpty(pokemonplatinumApworld.url))
         {
@@ -334,9 +340,12 @@ public class PokePlatManualDL : MonoBehaviour
         string fileName = pokemonplatinumApworld.fileName;
         if (string.IsNullOrEmpty(fileName))
         {
-            // For Pokemon Platinum, default filename is pokemon_platinum.apworld
-            fileName = "pokemon_platinum.apworld";
-            UnityEngine.Debug.Log("Using default APWorld filename: " + fileName);
+            fileName = pokemonplatinumApworld.url.Substring(pokemonplatinumApworld.url.LastIndexOf('/') + 1);
+
+            if (fileName.Contains("?"))
+                fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
         }
 
         string localPath = Path.Combine(Application.persistentDataPath, fileName);
@@ -355,40 +364,18 @@ public class PokePlatManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        // Target paths
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        string target = "";
-        foreach (string path in targetPaths)
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
 
-        UnityEngine.Debug.Log("Target path: " + target);
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
 
         if (File.Exists(target))
         {
@@ -407,14 +394,21 @@ public class PokePlatManualDL : MonoBehaviour
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
 
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
@@ -533,5 +527,43 @@ public class PokePlatManualDL : MonoBehaviour
     {
         if (infoPanel != null)
             infoPanel.SetActive(false);
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
+        return "";
     }
 }

@@ -11,10 +11,10 @@ public class DRDRManualDL : MonoBehaviour
     public FileDownloader downloader;
 
     [Header("DRDR FILES")]
-    public FileDownloader.FileData drdrApworld;         // drdr.apworld
-    public FileDownloader.FileData drdrREFramework;      // dinput8.dll (single file)
-    public FileDownloader.FileData drdrAP;               // DRAP.zip -> extracted into /reframework
-    public FileDownloader.FileData drdrLuaAPClient;      // lua-apclientpp.dll (single file)
+    public FileDownloader.FileData drdrApworld;
+    public FileDownloader.FileData drdrREFramework;
+    public FileDownloader.FileData drdrAP;
+    public FileDownloader.FileData drdrLuaAPClient;
 
     [Header("GAME FOLDER NAMES")]
     public string steamGameFolderName = "DEAD RISING DELUXE REMASTER";
@@ -22,7 +22,7 @@ public class DRDRManualDL : MonoBehaviour
     [Header("FEATURE TOGGLES")]
     public Toggle installDrdrApworldToggle;
     public Toggle installDrdrFrameworkToggle;
-    public Toggle installDrdrAPToggle; // also drives lua-apclientpp.dll install
+    public Toggle installDrdrAPToggle;
 
     [Header("LAUNCH OPTIONS")]
     public Toggle secondLaunchToggle;
@@ -47,6 +47,7 @@ public class DRDRManualDL : MonoBehaviour
     private string pendingAction;
     private DRDRConfig remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
 
     // --------- FULL CLEAN: specific single files ---------
     private string[] filesToDeleteOnFullClean = new string[]
@@ -104,6 +105,7 @@ public class DRDRManualDL : MonoBehaviour
         public string drdrAP;
         public string drdrLuaAPClient;
         public string[] steamSearchPaths;
+        public string[] apSearchPaths;
     }
 
     void Start()
@@ -162,7 +164,7 @@ public class DRDRManualDL : MonoBehaviour
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+        ShowConfirmation("Are you sure you want to setup?", "Setup");
     }
 
     public void RevertAll()
@@ -212,7 +214,7 @@ public class DRDRManualDL : MonoBehaviour
 
         bool apworld = installDrdrApworldToggle == null || installDrdrApworldToggle.isOn;
         bool framework = installDrdrFrameworkToggle != null && installDrdrFrameworkToggle.isOn;
-        bool apMod = installDrdrAPToggle != null && installDrdrAPToggle.isOn; // installs DRAP.zip + lua-apclientpp.dll
+        bool apMod = installDrdrAPToggle != null && installDrdrAPToggle.isOn;
         bool needsGamePath = framework || apMod;
 
         if (needsGamePath && (string.IsNullOrEmpty(drdrPath) || !Directory.Exists(drdrPath)))
@@ -232,7 +234,34 @@ public class DRDRManualDL : MonoBehaviour
             return;
         }
 
+        if (count == 0)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
+
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+        {
+            LaunchDRDR();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -342,7 +371,7 @@ public class DRDRManualDL : MonoBehaviour
         if (installDrdrApworldToggle == null || installDrdrApworldToggle.isOn)
         {
             ShowInfo("Installing APWorld...");
-            yield return InstallDRDRApworld();
+            yield return InstallAPWorld();
         }
 
         if (installDrdrFrameworkToggle != null && installDrdrFrameworkToggle.isOn)
@@ -377,10 +406,17 @@ public class DRDRManualDL : MonoBehaviour
     }
 
     // ---------------- APWORLD (goes into Archipelago custom_worlds) ----------------
-    IEnumerator InstallDRDRApworld()
+    IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
+        {
+            UnityEngine.Debug.Log("Waiting for config to load...");
             yield return new WaitForSeconds(0.5f);
+        }
+
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + drdrApworld.url);
 
         if (string.IsNullOrEmpty(drdrApworld.url))
         {
@@ -393,11 +429,17 @@ public class DRDRManualDL : MonoBehaviour
         if (string.IsNullOrEmpty(fileName))
         {
             fileName = drdrApworld.url.Substring(drdrApworld.url.LastIndexOf('/') + 1);
+
             if (fileName.Contains("?"))
                 fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
         }
 
         string localPath = Path.Combine(Application.persistentDataPath, fileName);
+
+        UnityEngine.Debug.Log("Downloading APWorld from: " + drdrApworld.url);
+        UnityEngine.Debug.Log("Saving to: " + localPath);
 
         yield return DownloadFile(drdrApworld.url, localPath);
 
@@ -408,57 +450,60 @@ public class DRDRManualDL : MonoBehaviour
             yield break;
         }
 
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string target = "";
-        foreach (string path in targetPaths)
-        {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        if (string.IsNullOrEmpty(target))
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
+
         if (File.Exists(target))
         {
-            try { File.Delete(target); } catch { }
+            try
+            {
+                File.Delete(target);
+                UnityEngine.Debug.Log("Deleted old apworld file");
+            }
+            catch { }
         }
 
         try
         {
             File.Copy(localPath, target, true);
+
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
+
+            ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
+            {
                 File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
         }
         catch (System.Exception e)
         {
@@ -802,6 +847,44 @@ public class DRDRManualDL : MonoBehaviour
         }
 
         UnityEngine.Debug.LogWarning("Game (Steam) not found.");
+        return "";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
         return "";
     }
 }

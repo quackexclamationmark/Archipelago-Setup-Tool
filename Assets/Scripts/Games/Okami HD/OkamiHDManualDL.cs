@@ -49,6 +49,7 @@ public class OkamiHDManualDL : MonoBehaviour
     private bool pendingFullClearConfirmation = false;
     private OkamiConfig remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
 
     [System.Serializable]
     public class OkamiConfig
@@ -57,6 +58,7 @@ public class OkamiHDManualDL : MonoBehaviour
         public string okamihdWOLF;
         public string okamihdAP;
         public string[] steamSearchPaths;
+        public string[] apSearchPaths;
     }
 
     void Start()
@@ -116,7 +118,7 @@ public class OkamiHDManualDL : MonoBehaviour
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+        ShowConfirmation("Are you sure you want to setup?", "Setup");
     }
 
     public void RevertAll()
@@ -212,14 +214,16 @@ public class OkamiHDManualDL : MonoBehaviour
     {
         yield return new WaitUntil(() => configLoaded);
 
-        ShowInfo("Installing AP World...");
+        ShowInfo("Installing APWorld...");
         yield return new WaitForSeconds(1f);
 
         yield return InstallAPWorld();
 
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
-            ShowInfo("Launching Okami HD...");
             LaunchOkami();
             yield return new WaitForSeconds(2f);
         }
@@ -450,6 +454,8 @@ public class OkamiHDManualDL : MonoBehaviour
 
     IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
         {
             UnityEngine.Debug.Log("Waiting for config to load...");
@@ -468,19 +474,12 @@ public class OkamiHDManualDL : MonoBehaviour
         string fileName = okamihdApworld.fileName;
         if (string.IsNullOrEmpty(fileName))
         {
-            var url = okamihdApworld.url ?? "";
-            int idx = url.LastIndexOf('/');
-            if (idx >= 0 && idx + 1 < url.Length)
-                fileName = url.Substring(idx + 1);
-            else
-                fileName = url;
+            fileName = okamihdApworld.url.Substring(okamihdApworld.url.LastIndexOf('/') + 1);
 
-            int q = fileName.IndexOf('?');
-            if (q >= 0)
-                fileName = fileName.Substring(0, q);
+            if (fileName.Contains("?"))
+                fileName = fileName.Substring(0, fileName.IndexOf("?"));
 
-            if (string.IsNullOrEmpty(fileName))
-                fileName = "okamihd.apworld";
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
         }
 
         string localPath = Path.Combine(Application.persistentDataPath, fileName);
@@ -499,39 +498,18 @@ public class OkamiHDManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        string target = "";
-        foreach (string path in targetPaths)
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
 
-        UnityEngine.Debug.Log("Target path: " + target);
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
 
         if (File.Exists(target))
         {
@@ -550,14 +528,21 @@ public class OkamiHDManualDL : MonoBehaviour
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
 
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
@@ -1036,6 +1021,44 @@ public class OkamiHDManualDL : MonoBehaviour
         }
 
         UnityEngine.Debug.LogWarning("Game (Steam) not found.");
+        return "";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
         return "";
     }
 }

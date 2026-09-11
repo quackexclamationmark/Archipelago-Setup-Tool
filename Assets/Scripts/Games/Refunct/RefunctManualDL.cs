@@ -41,6 +41,7 @@ public class RefunctManualDL : MonoBehaviour
     private string pendingAction;
     private GameConfig remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
 
     [System.Serializable]
     public class GameConfig
@@ -48,6 +49,7 @@ public class RefunctManualDL : MonoBehaviour
         public string refunctApworld;
         public string refunctAP;
         public string[] steamSearchPaths;
+        public string[] apSearchPaths;
     }
 
     void Start()
@@ -96,12 +98,12 @@ public class RefunctManualDL : MonoBehaviour
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to install Refunct Archipelago?", "Setup");
+        ShowConfirmation("Are you sure you want to setup?", "Setup");
     }
 
     public void RevertAll()
     {
-        ShowConfirmation("Are you sure you want to revert and remove Refunct Archipelago?", "Revert");
+        ShowConfirmation("Are you sure you want to revert?", "Revert");
     }
 
     private void ShowConfirmation(string message, string action)
@@ -160,7 +162,7 @@ public class RefunctManualDL : MonoBehaviour
 
         if (apworld && count == 1)
         {
-            StartCoroutine(ApworldOnlyFlow());
+            StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
@@ -171,6 +173,27 @@ public class RefunctManualDL : MonoBehaviour
         }
 
         StartCoroutine(InstallFlow());
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     private void ExecuteRevert()
@@ -190,7 +213,6 @@ public class RefunctManualDL : MonoBehaviour
         {
             string practiceWindowsPath = Path.Combine(gamePath, "practice-windows");
 
-            // Delete practice-windows folder
             if (Directory.Exists(practiceWindowsPath))
             {
                 try
@@ -222,19 +244,6 @@ public class RefunctManualDL : MonoBehaviour
         }
     }
 
-    IEnumerator ApworldOnlyFlow()
-    {
-        gamePath = GetGamePath();
-
-        if (string.IsNullOrEmpty(gamePath))
-            yield break;
-
-        yield return InstallApworld();
-
-        if (launchGameToggle == null || launchGameToggle.isOn)
-            LaunchGame();
-    }
-
     IEnumerator APOnlyFlow()
     {
         gamePath = GetGamePath();
@@ -253,7 +262,7 @@ public class RefunctManualDL : MonoBehaviour
     IEnumerator InstallFlow()
     {
         if (installApworldToggle == null || installApworldToggle.isOn)
-            yield return InstallApworld();
+            yield return InstallAPWorld();
 
         if (installAPToggle == null || installAPToggle.isOn)
         {
@@ -382,20 +391,22 @@ public class RefunctManualDL : MonoBehaviour
         yield return new WaitForSeconds(1f);
     }
 
-    IEnumerator InstallApworld()
+    IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
         {
             UnityEngine.Debug.Log("Waiting for config to load...");
             yield return new WaitForSeconds(0.5f);
         }
 
-        UnityEngine.Debug.Log("Config loaded. Apworld URL: " + refunctApworld.url);
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + refunctApworld.url);
 
         if (string.IsNullOrEmpty(refunctApworld.url))
         {
-            ShowInfo("ERROR: Apworld URL is empty!");
-            UnityEngine.Debug.LogError("Apworld URL not set!");
+            ShowInfo("ERROR: APWorld URL is empty!");
+            UnityEngine.Debug.LogError("APWorld URL not set!");
             yield break;
         }
 
@@ -412,7 +423,7 @@ public class RefunctManualDL : MonoBehaviour
 
         string localPath = Path.Combine(Application.persistentDataPath, fileName);
 
-        UnityEngine.Debug.Log("Downloading Apworld from: " + refunctApworld.url);
+        UnityEngine.Debug.Log("Downloading APWorld from: " + refunctApworld.url);
         UnityEngine.Debug.Log("Saving to: " + localPath);
 
         yield return DownloadFile(refunctApworld.url, localPath);
@@ -420,45 +431,24 @@ public class RefunctManualDL : MonoBehaviour
         if (!File.Exists(localPath))
         {
             UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
-            ShowInfo("ERROR: Apworld download failed!");
+            ShowInfo("ERROR: APWorld download failed!");
             yield break;
         }
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        string target = "";
-        foreach (string path in targetPaths)
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
 
-        UnityEngine.Debug.Log("Target path: " + target);
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
 
         if (File.Exists(target))
         {
@@ -474,17 +464,24 @@ public class RefunctManualDL : MonoBehaviour
         {
             File.Copy(localPath, target, true);
 
-            UnityEngine.Debug.Log("Apworld file copied to: " + target);
+            UnityEngine.Debug.Log("APWorld file copied to: " + target);
 
-            ShowInfo("Apworld installed successfully!");
+            ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
-            UnityEngine.Debug.LogError("Failed to copy Apworld: " + e.Message);
-            ShowInfo("ERROR: Failed to install Apworld\n" + e.Message);
+            UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
+            ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
@@ -840,5 +837,43 @@ public class RefunctManualDL : MonoBehaviour
             return githubMatch.Groups[1].Value;
 
         return "Unknown";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
+        return "";
     }
 }

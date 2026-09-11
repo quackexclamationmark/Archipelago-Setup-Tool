@@ -55,6 +55,7 @@ public class TABSManualDL : MonoBehaviour
     private bool configLoaded = false;
     private InstalledFilesManifest currentManifest;
     private bool isEpic = false;
+    private bool lastApWorldInstallSuccess = false;
 
     [System.Serializable]
     public class GameConfig
@@ -64,6 +65,7 @@ public class TABSManualDL : MonoBehaviour
         public string tabsBepInEx;
         public string[] steamSearchPaths;
         public string[] epicSearchPaths;
+        public string[] apSearchPaths;
     }
 
     [System.Serializable]
@@ -76,7 +78,6 @@ public class TABSManualDL : MonoBehaviour
 
     void Start()
     {
-        // Platform buttons
         if (steamButton != null)
             steamButton.onClick.AddListener(OnSteamButtonClicked);
         if (epicButton != null)
@@ -124,7 +125,6 @@ public class TABSManualDL : MonoBehaviour
             cancelButton.onClick.AddListener(OnCancel);
     }
 
-    // Platform button handlers
     void OnSteamButtonClicked() { SelectSteam(); }
     void OnEpicButtonClicked() { SelectEpic(); }
 
@@ -180,7 +180,7 @@ public class TABSManualDL : MonoBehaviour
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+        ShowConfirmation("Are you sure you want to setup?", "Setup");
     }
 
     public void RevertAll()
@@ -246,7 +246,7 @@ public class TABSManualDL : MonoBehaviour
         bool apmod = installAPModToggle == null || installAPModToggle.isOn;
         bool bepinex = installBepInExToggle == null || installBepInExToggle.isOn;
 
-        bool needsGamePath = bepinex || apmod || apworld; // APWorld might not require gamePath but keep safe
+        bool needsGamePath = bepinex || apmod || apworld;
 
         if (needsGamePath && (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath)))
         {
@@ -276,14 +276,16 @@ public class TABSManualDL : MonoBehaviour
     {
         yield return new WaitUntil(() => configLoaded);
 
-        ShowInfo("Installing AP World...");
+        ShowInfo("Installing APWorld...");
         yield return new WaitForSeconds(1f);
 
-        yield return InstallTABSAPWorld();
+        yield return InstallAPWorld();
+
+        if (!lastApWorldInstallSuccess)
+            yield break;
 
         if (launchGameToggle == null || launchGameToggle.isOn)
         {
-            ShowInfo("Launching game...");
             LaunchGame();
             yield return new WaitForSeconds(2f);
         }
@@ -301,7 +303,6 @@ public class TABSManualDL : MonoBehaviour
 
         ShowInfo("Preparing backup and downloading files...");
 
-        // Only backup Newtonsoft if we're installing BepInEx or the AP mod (not for APWorld-only)
         if (installAPMod || installBepInEx)
             BackupNewtonsoft();
 
@@ -337,7 +338,6 @@ public class TABSManualDL : MonoBehaviour
 
         if (clearAP)
         {
-            // Remove TABS Archipelago folder and version files, restore Newtonsoft and remove Backup
             ShowInfo("Removing Archipelago mods...");
 
             string tabsArchipelagoPath = Path.Combine(pluginsPath, "TABS Archipelago");
@@ -384,7 +384,6 @@ public class TABSManualDL : MonoBehaviour
 
             DeleteOldVersionFiles();
 
-            // Restore Newtonsoft.Json.dll from Backup and delete Backup when empty
             RestoreNewtonsoft();
 
             ShowInfo("Full clean completed!");
@@ -439,14 +438,14 @@ public class TABSManualDL : MonoBehaviour
 
         if (installAPMod)
         {
-            ShowInfo("Installing AP Mod (TABS Archipelago)...");
+            ShowInfo("Installing AP Mod...");
             yield return InstallTABSAP();
         }
 
         if (installAPWorld)
         {
             ShowInfo("Installing APWorld...");
-            yield return InstallTABSAPWorld();
+            yield return InstallAPWorld();
         }
 
         CreateVersionFile(tabsAP.url, tabsApworld.url, tabsBepInEx.url);
@@ -455,7 +454,7 @@ public class TABSManualDL : MonoBehaviour
 
         if (launchGameToggle == null || launchGameToggle.isOn)
         {
-            ShowInfo("Launching game...");
+            ShowInfo("Launching Game...");
             yield return new WaitForSeconds(1f);
             LaunchGame();
         }
@@ -545,8 +544,10 @@ public class TABSManualDL : MonoBehaviour
         yield return new WaitForSeconds(1f);
     }
 
-    IEnumerator InstallTABSAPWorld()
+    IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
         {
             UnityEngine.Debug.Log("Waiting for config to load...");
@@ -589,39 +590,18 @@ public class TABSManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        string target = "";
-        foreach (string path in targetPaths)
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
 
-        UnityEngine.Debug.Log("Target path: " + target);
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
 
         if (File.Exists(target))
         {
@@ -639,18 +619,22 @@ public class TABSManualDL : MonoBehaviour
 
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
 
-            if (currentManifest != null)
-                currentManifest.installedFiles.Add(target);
-
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
@@ -1022,7 +1006,6 @@ public class TABSManualDL : MonoBehaviour
             catch { }
         }
 
-        // Try Epic manifests (common method)
         try
         {
             string epicBaseDir = Path.Combine(
@@ -1291,7 +1274,6 @@ public class TABSManualDL : MonoBehaviour
                 UnityEngine.Debug.LogWarning("Failed to restore Newtonsoft.Json.dll: " + e.Message);
             }
 
-            // Try to remove Backup folder if it's empty
             TryDeleteBackupIfEmpty(backupDir);
         }
         catch { }
@@ -1318,5 +1300,43 @@ public class TABSManualDL : MonoBehaviour
             }
         }
         catch { }
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
+        return "";
     }
 }

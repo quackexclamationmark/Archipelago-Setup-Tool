@@ -55,6 +55,7 @@ public class GTASAManualDL : MonoBehaviour
     private string pendingAction;
     private GTASAConfig remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
 
     [System.Serializable]
     public class GTASAConfig
@@ -64,6 +65,7 @@ public class GTASAManualDL : MonoBehaviour
         public string gtasaWidescreen;
         public string gtasaAP;
         public string[] steamSearchPaths;
+        public string[] apSearchPaths;
     }
 
     void Start()
@@ -92,7 +94,7 @@ public class GTASAManualDL : MonoBehaviour
         gtasaAP.url = remoteConfig.gtasaAP;
     }
 
-    public void RunSetup() => ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+    public void RunSetup() => ShowConfirmation("Are you sure you want to setup?", "Setup");
 
     void OnRevertButtonClicked() => ShowConfirmation("Are you sure you want to revert?", "Revert");
 
@@ -160,16 +162,13 @@ public class GTASAManualDL : MonoBehaviour
     {
         yield return new WaitUntil(() => configLoaded);
 
-        ShowInfo("Installing AP World...");
+        ShowInfo("Installing APWorld...");
         yield return new WaitForSeconds(1f);
 
         yield return InstallAPWorld();
 
-        /*if (secondLaunchToggle == null || secondLaunchToggle.isOn)
-        {
-            LaunchGTASAClient();
-            yield return new WaitForSeconds(2f);
-        }*/
+        if (!lastApWorldInstallSuccess)
+            yield break;
 
         ShowInfo("Installation complete!");
     }
@@ -216,14 +215,12 @@ public class GTASAManualDL : MonoBehaviour
         SafeDeleteFile(Path.Combine(gtasaPath, "GTASAClient.exe"));
         SafeDeleteFile(Path.Combine(gtasaPath, "vorbisFile.dll"));
 
-        // Remove scripts folder
         string scriptsPath = Path.Combine(gtasaPath, "scripts");
         if (Directory.Exists(scriptsPath))
         {
             SafeDeleteDirectory(scriptsPath);
         }
 
-        // Restore vorbisFile.dll from backup if it exists
         string backupFilePath = Path.Combine(backupPath, "vorbisFile.dll");
         if (File.Exists(backupFilePath))
         {
@@ -240,7 +237,6 @@ public class GTASAManualDL : MonoBehaviour
             }
         }
 
-        // Remove backup folder
         if (Directory.Exists(backupPath))
         {
             SafeDeleteDirectory(backupPath);
@@ -299,8 +295,15 @@ public class GTASAManualDL : MonoBehaviour
 
     IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
-            yield return null;
+        {
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + gtasaApworld.url);
 
         if (string.IsNullOrEmpty(gtasaApworld.url))
         {
@@ -313,7 +316,11 @@ public class GTASAManualDL : MonoBehaviour
         if (string.IsNullOrEmpty(fileName))
         {
             fileName = gtasaApworld.url.Substring(gtasaApworld.url.LastIndexOf('/') + 1);
-            if (fileName.Contains("?")) fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            if (fileName.Contains("?"))
+                fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
         }
 
         string localPath = Path.Combine(Application.persistentDataPath, fileName);
@@ -330,56 +337,53 @@ public class GTASAManualDL : MonoBehaviour
             yield break;
         }
 
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string target = "";
-        foreach (string path in targetPaths)
-        {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        if (string.IsNullOrEmpty(target))
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
+
         if (File.Exists(target))
         {
-            try { File.Delete(target); } catch { }
+            try
+            {
+                File.Delete(target);
+                UnityEngine.Debug.Log("Deleted old apworld file");
+            }
+            catch { }
         }
 
         try
         {
             File.Copy(localPath, target, true);
+
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
+
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
@@ -438,7 +442,6 @@ public class GTASAManualDL : MonoBehaviour
         }
     }
 
-    // Downloads, extracts and installs Widescreen Fix
     IEnumerator InstallWidescreen()
     {
         while (!configLoaded)
@@ -655,17 +658,6 @@ public class GTASAManualDL : MonoBehaviour
         }
     }
 
-    string FindFile(string root, string fileName)
-    {
-        try
-        {
-            foreach (string file in Directory.GetFiles(root, "*", SearchOption.AllDirectories))
-                if (Path.GetFileName(file) == fileName) return file;
-        }
-        catch { }
-        return "";
-    }
-
     void DeleteOldVersionFiles()
     {
         try
@@ -811,6 +803,44 @@ public class GTASAManualDL : MonoBehaviour
         }
 
         UnityEngine.Debug.LogWarning("GTA SA (Steam) not found.");
+        return "";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
         return "";
     }
 }

@@ -12,7 +12,6 @@ public class LOPManualDL : MonoBehaviour
     public FileDownloader downloader;
 
     [Header("GAME FILES")]
-    // Steam/Xbox zips and APWorld file (URLs populated from remote config)
     public FileDownloader.FileData steamFiles;
     public FileDownloader.FileData xboxFiles;
     public FileDownloader.FileData apworld;
@@ -27,7 +26,6 @@ public class LOPManualDL : MonoBehaviour
     public string xboxGameFolderName = "Lies of P";
 
     [Header("FEATURE TOGGLES")]
-    // Single toggle for installing the AP mod package (Steam or Xbox chosen by platform buttons)
     public Toggle installAPModToggle;
     public Toggle installAPWorldToggle;
 
@@ -50,9 +48,9 @@ public class LOPManualDL : MonoBehaviour
     private string pendingAction;
     private GameConfig remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
     private InstalledFilesManifest currentManifest;
 
-    // platform flag: false = Steam, true = Xbox
     private bool isXbox = false;
 
     [System.Serializable]
@@ -63,6 +61,7 @@ public class LOPManualDL : MonoBehaviour
         public string lopAPXBOX;
         public string[] steamSearchPaths;
         public string[] xboxSearchPaths;
+        public string[] apSearchPaths;
     }
 
     [System.Serializable]
@@ -74,13 +73,11 @@ public class LOPManualDL : MonoBehaviour
 
     void Start()
     {
-        // Platform buttons
         if (steamButton != null)
             steamButton.onClick.AddListener(OnSteamButtonClicked);
         if (xboxButton != null)
             xboxButton.onClick.AddListener(OnXboxButtonClicked);
 
-        // default to Steam
         SelectSteam();
 
         gamePath = GetGamePath();
@@ -126,7 +123,6 @@ public class LOPManualDL : MonoBehaviour
         apworld.url = remoteConfig.lopApworld;
     }
 
-    // PLATFORM selection handlers
     void OnSteamButtonClicked() { SelectSteam(); }
     void OnXboxButtonClicked() { SelectXbox(); }
 
@@ -158,12 +154,12 @@ public class LOPManualDL : MonoBehaviour
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to install the selected components?", "Setup");
+        ShowConfirmation("Are you sure you want to setup?", "Setup");
     }
 
     public void RevertAll()
     {
-        ShowConfirmation("Are you sure you want to revert and remove all mods and files installed by this tool?", "Revert");
+        ShowConfirmation("Are you sure you want to revert?", "Revert");
     }
 
     private void ShowConfirmation(string message, string action)
@@ -227,14 +223,12 @@ public class LOPManualDL : MonoBehaviour
             return;
         }
 
-        // If only APWorld selected -> APWorldOnlyFlow
         if (wantAPWorld && count == 1)
         {
             StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
-        // If only APMod selected -> ModsOnlyFlow
         if (wantAPMod && count == 1)
         {
             StartCoroutine(ModsOnlyFlow());
@@ -253,9 +247,11 @@ public class LOPManualDL : MonoBehaviour
 
         yield return InstallAPWorld();
 
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
         if (launchGameToggle == null || launchGameToggle.isOn)
         {
-            ShowInfo("Launching Lies of P...");
             LaunchGame();
             yield return new WaitForSeconds(2f);
         }
@@ -341,10 +337,8 @@ public class LOPManualDL : MonoBehaviour
                 }
             }
 
-            // Remove any empty directories under the game path that may have been created
             RemoveEmptyDirectories(manifest.gameInstallPath);
 
-            // Delete version files
             DeleteOldVersionFiles(manifest.gameInstallPath);
 
             ShowInfo($"Mods removed successfully!\n({successCount} files deleted)");
@@ -372,7 +366,6 @@ public class LOPManualDL : MonoBehaviour
 
         try
         {
-            // Walk directories deepest-first
             foreach (string dir in Directory.GetDirectories(rootPath, "*", SearchOption.AllDirectories).OrderByDescending(s => s.Length))
             {
                 try
@@ -400,7 +393,6 @@ public class LOPManualDL : MonoBehaviour
         currentManifest = new InstalledFilesManifest();
         currentManifest.gameInstallPath = gamePath;
 
-        // Install the selected platform's AP mod
         if (!isXbox)
             yield return InstallSteamVersion();
         else
@@ -417,7 +409,6 @@ public class LOPManualDL : MonoBehaviour
         if (installAPWorldToggle == null || installAPWorldToggle.isOn)
             yield return InstallAPWorld();
 
-        // Install platform-specific AP mod if selected
         if (installAPModToggle != null && installAPModToggle.isOn)
         {
             if (!isXbox)
@@ -426,7 +417,6 @@ public class LOPManualDL : MonoBehaviour
                 yield return InstallXboxVersion();
         }
 
-        // Use the URL we actually installed for the version file (choose based on platform)
         string usedModUrl = (installAPModToggle != null && installAPModToggle.isOn) ? (isXbox ? xboxFiles.url : steamFiles.url) : "";
 
         CreateVersionFile(usedModUrl, apworld.url);
@@ -443,7 +433,6 @@ public class LOPManualDL : MonoBehaviour
 
     IEnumerator InstallSteamVersion()
     {
-        // Wait for config to be loaded so URL is populated
         yield return new WaitUntil(() => configLoaded);
 
         if (string.IsNullOrEmpty(steamFiles.url))
@@ -464,7 +453,6 @@ public class LOPManualDL : MonoBehaviour
             yield break;
         }
 
-        // Move all files from SteamVersion into the game directory, tracking each file
         MoveDirectoryAndTrack(steamVersionFolder, gamePath);
 
         SafeDeleteDirectory(extractPath);
@@ -475,7 +463,6 @@ public class LOPManualDL : MonoBehaviour
 
     IEnumerator InstallXboxVersion()
     {
-        // Wait for config to be loaded so URL is populated
         yield return new WaitUntil(() => configLoaded);
 
         if (string.IsNullOrEmpty(xboxFiles.url))
@@ -496,7 +483,6 @@ public class LOPManualDL : MonoBehaviour
             yield break;
         }
 
-        // Move all files from XboxVersion into the game directory, tracking each file
         MoveDirectoryAndTrack(xboxVersionFolder, gamePath);
 
         SafeDeleteDirectory(extractPath);
@@ -507,6 +493,8 @@ public class LOPManualDL : MonoBehaviour
 
     IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
         {
             UnityEngine.Debug.Log("Waiting for config to load...");
@@ -549,39 +537,18 @@ public class LOPManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        string target = "";
-        foreach (string path in targetPaths)
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
 
-        UnityEngine.Debug.Log("Target path: " + target);
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
 
         if (File.Exists(target))
         {
@@ -599,18 +566,22 @@ public class LOPManualDL : MonoBehaviour
 
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
 
-            if (currentManifest != null)
-                currentManifest.installedFiles.Add(target);
-
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
@@ -1021,25 +992,60 @@ public class LOPManualDL : MonoBehaviour
         if (thunderstoreMatch.Success)
             return thunderstoreMatch.Groups[1].Value;
 
-        // Pattern for GitHub releases: /releases/download/VERSION/
         System.Text.RegularExpressions.Regex githubPattern = new System.Text.RegularExpressions.Regex(@"/releases/download/([^/]+)/");
         System.Text.RegularExpressions.Match githubMatch = githubPattern.Match(url);
 
         if (githubMatch.Success)
             return githubMatch.Groups[1].Value;
 
-        // Try to extract a filename or folder-based version token
         try
         {
             string last = url.TrimEnd('/').Split('/').Last();
             if (!string.IsNullOrEmpty(last))
             {
-                // If it's a version-looking string, return it; otherwise return filename
                 return last;
             }
         }
         catch { }
 
         return "Unknown";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
+        return "";
     }
 }

@@ -55,6 +55,7 @@ public class TCGManualDL : MonoBehaviour
     private bool pendingFullCleanConfirmation = false;
     private TcgConfig remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
 
     [System.Serializable]
     public class TcgConfig
@@ -63,6 +64,7 @@ public class TCGManualDL : MonoBehaviour
         public string tcgBepInEx;
         public string tcgApworld;
         public string[] steamSearchPaths;
+        public string[] apSearchPaths;
     }
 
     [DllImport("user32.dll")]
@@ -95,7 +97,7 @@ public class TCGManualDL : MonoBehaviour
         tcgApworld.url = remoteConfig.tcgApworld;
     }
 
-    public void RunSetup() => ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+    public void RunSetup() => ShowConfirmation("Are you sure you want to setup?", "Setup");
     public void RevertAll() => ShowConfirmation("Are you sure you want to revert?", "Revert");
 
     private void ShowConfirmation(string message, string action)
@@ -159,9 +161,11 @@ public class TCGManualDL : MonoBehaviour
 
         yield return InstallAPWorld();
 
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
-            ShowInfo("Launching TCG CGS...");
             LaunchTCG();
             yield return new WaitForSeconds(2f);
         }
@@ -293,21 +297,19 @@ public class TCGManualDL : MonoBehaviour
             MoveDirectory(extractPath, tcgPath);
             SafeDeleteDirectory(extractPath);
 
-            // handle config patching: ensure cfg exists, patch it, before continuing
             if (hideManager)
             {
                 string cfgPath = Path.Combine(tcgPath, "BepInEx", "config", "BepInEx.cfg");
                 if (!File.Exists(cfgPath))
                 {
                     ShowInfo("Launching TCG to generate BepInEx config...");
-                    LaunchTCG(true); // helper launch
-                    // WAIT FOR CONFIG EXISTENCE + STABILITY
+                    LaunchTCG(true);
+
                     yield return StartCoroutine(WaitForConfigFiles());
-                    // close helper before editing
+
                     CloseTCG();
                 }
 
-                // patch configuration (this will wait for file if needed and retry writes)
                 ShowInfo("Patching BepInEx config...");
                 yield return StartCoroutine(SetBepInExConfig(hideManager));
             }
@@ -315,17 +317,16 @@ public class TCGManualDL : MonoBehaviour
 
         if (installApworld)
         {
-            ShowInfo("Installing AP World...");
+            ShowInfo("Installing APWorld...");
             yield return InstallAPWorld();
         }
 
         if (installTcgap)
         {
-            ShowInfo("Installing TCG AP Client...");
+            ShowInfo("Installing AP Mod...");
             string extractPath = Path.Combine(Application.persistentDataPath, "TCGAPTemp");
             yield return downloader.DownloadAndExtract(tcgAP, Application.persistentDataPath, extractPath);
 
-            // Prepare sourceRoot (handle archive that creates a single top folder)
             string sourceRoot = extractPath;
             try
             {
@@ -336,7 +337,6 @@ public class TCGManualDL : MonoBehaviour
             }
             catch { }
 
-            // Move all content into plugins (merge)
             MoveDirectory(sourceRoot, pluginsPath);
             SafeDeleteDirectory(extractPath);
         }
@@ -423,8 +423,15 @@ public class TCGManualDL : MonoBehaviour
 
     IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
-            yield return null;
+        {
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + tcgApworld.url);
 
         if (string.IsNullOrEmpty(tcgApworld.url))
         {
@@ -437,7 +444,11 @@ public class TCGManualDL : MonoBehaviour
         if (string.IsNullOrEmpty(fileName))
         {
             fileName = tcgApworld.url.Substring(tcgApworld.url.LastIndexOf('/') + 1);
-            if (fileName.Contains("?")) fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            if (fileName.Contains("?"))
+                fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
         }
 
         string localPath = Path.Combine(Application.persistentDataPath, fileName);
@@ -454,56 +465,53 @@ public class TCGManualDL : MonoBehaviour
             yield break;
         }
 
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string target = "";
-        foreach (string path in targetPaths)
-        {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        if (string.IsNullOrEmpty(target))
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
+
         if (File.Exists(target))
         {
-            try { File.Delete(target); } catch { }
+            try
+            {
+                File.Delete(target);
+                UnityEngine.Debug.Log("Deleted old apworld file");
+            }
+            catch { }
         }
 
         try
         {
             File.Copy(localPath, target, true);
+
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
+
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
-        
+
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
@@ -560,15 +568,12 @@ public class TCGManualDL : MonoBehaviour
         UnityEngine.Debug.LogWarning("WaitForConfigFiles timed out waiting for BepInEx.cfg and/or LogOutput.log");
     }
 
-    // Robust config patcher: waits for file, waits for stability, retries writes if locked, replaces or appends key
     IEnumerator SetBepInExConfig(bool hideManager)
     {
         string cfgPath = Path.Combine(tcgPath, "BepInEx", "config", "BepInEx.cfg");
 
-        // wait for existence
         yield return new WaitUntil(() => File.Exists(cfgPath));
 
-        // wait for file to be stable (not being written)
         yield return StartCoroutine(WaitForFileStable(cfgPath, stableDuration: 1f, timeout: 20f));
 
         int maxAttempts = 8;
@@ -630,7 +635,6 @@ public class TCGManualDL : MonoBehaviour
             UnityEngine.Debug.LogWarning("Failed to write BepInEx.cfg after multiple attempts; file may be locked by the game.");
     }
 
-    // Waits until file is stable (not modified) for stableDuration seconds
     IEnumerator WaitForFileStable(string path, float stableDuration = 1f, float timeout = 10f)
     {
         float start = Time.time;
@@ -988,6 +992,44 @@ public class TCGManualDL : MonoBehaviour
         }
 
         UnityEngine.Debug.LogWarning("Game (Steam) not found.");
+        return "";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
         return "";
     }
 }

@@ -1,11 +1,12 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using TMPro;
+using UnityEngine;
+
+using UnityEngine.UI;
 
 public class GTAVCManualDL : MonoBehaviour
 {
@@ -55,6 +56,7 @@ public class GTAVCManualDL : MonoBehaviour
     private bool configLoaded = false;
     private bool isRockstar = false;
     private InstalledFilesManifest currentManifest;
+    private bool lastApWorldInstallSuccess = false;
 
     private const string ExeBackupFolderName = ".exeBackup";
 
@@ -84,6 +86,7 @@ public class GTAVCManualDL : MonoBehaviour
         public string gtavcExe;
         public string[] steamSearchPaths;
         public string[] rockstarSearchPaths;
+        public string[] apSearchPaths;
     }
 
     [System.Serializable]
@@ -237,22 +240,28 @@ public class GTAVCManualDL : MonoBehaviour
     {
         gamePath = GetGamePath();
 
-        bool wantApworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
-        bool wantASI = installASIToggle == null || installASIToggle.isOn;
-        bool wantWidescreen = installWidescreenToggle == null || installWidescreenToggle.isOn;
-        bool wantCleo = installCleoToggle == null || installCleoToggle.isOn;
-        bool wantExe = installExeToggle == null || installExeToggle.isOn;
+        bool Apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
+        bool ASI = installASIToggle == null || installASIToggle.isOn;
+        bool Widescreen = installWidescreenToggle == null || installWidescreenToggle.isOn;
+        bool Cleo = installCleoToggle == null || installCleoToggle.isOn;
+        bool Exe = installExeToggle == null || installExeToggle.isOn;
 
-        bool needsGamePath = wantASI || wantWidescreen || wantCleo || wantExe;
+        bool needsGamePath = Widescreen || Cleo || ASI || Exe || !Apworld;
 
-        if (needsGamePath && (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath)))
+        if (needsGamePath && string.IsNullOrEmpty(gamePath))
         {
             string platform = isRockstar ? "Rockstar" : "Steam";
-            ShowInfo("Game not found on " + platform + ". Please check your installation.");
+            ShowInfo("Game not found on " + platform + ". Please check installation.");
             return;
         }
 
-        int count = (wantApworld ? 1 : 0) + (wantASI ? 1 : 0) + (wantWidescreen ? 1 : 0) + (wantCleo ? 1 : 0) + (wantExe ? 1 : 0);
+        int count = (Apworld ? 1 : 0) + (ASI ? 1 : 0) + (Widescreen ? 1 : 0) + (Cleo ? 1 : 0) + (Exe ? 1 : 0);
+
+        if (Apworld && count == 1)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
 
         if (count == 0)
         {
@@ -260,7 +269,22 @@ public class GTAVCManualDL : MonoBehaviour
             return;
         }
 
-        StartCoroutine(SetupWithTracking(wantApworld, wantASI, wantWidescreen, wantCleo, wantExe));
+        StartCoroutine(SetupWithTracking(Apworld, ASI, Widescreen, Cleo, Exe));
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
+        ShowInfo("Installation complete!");
     }
 
     IEnumerator SetupWithTracking(bool wantApworld, bool wantASI, bool wantWidescreen, bool wantCleo, bool wantExe)
@@ -603,6 +627,8 @@ public class GTAVCManualDL : MonoBehaviour
 
     IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
         {
             UnityEngine.Debug.Log("Waiting for config to load...");
@@ -645,39 +671,18 @@ public class GTAVCManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string[] targetPaths = new string[]
-        {
-        Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        string target = "";
-        foreach (string path in targetPaths)
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
 
-        UnityEngine.Debug.Log("Target path: " + target);
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
 
         if (File.Exists(target))
         {
@@ -695,18 +700,22 @@ public class GTAVCManualDL : MonoBehaviour
 
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
 
-            if (currentManifest != null)
-                currentManifest.installedFiles.Add(target);
-
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
@@ -933,7 +942,6 @@ public class GTAVCManualDL : MonoBehaviour
 
     string GetRockstarPath()
     {
-        // Quick, common Rockstar Games install locations, tried with both known folder names.
         List<string> quickBasePaths = new List<string>
         {
             Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Rockstar Games"),
@@ -957,7 +965,6 @@ public class GTAVCManualDL : MonoBehaviour
             }
         }
 
-        // The user specifically asked to also check Documents\Rockstar Games.
         try
         {
             string documentsRockstarPath = Path.Combine(
@@ -1016,6 +1023,44 @@ public class GTAVCManualDL : MonoBehaviour
         }
 
         UnityEngine.Debug.LogWarning("Game (Rockstar) not found.");
+        return "";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
         return "";
     }
 }

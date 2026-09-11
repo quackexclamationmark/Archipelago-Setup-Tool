@@ -49,6 +49,7 @@ public class BL2ManualDL : MonoBehaviour
     private string pendingAction;
     private GameConfig remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
 
     [System.Serializable]
     public class GameConfig
@@ -58,6 +59,7 @@ public class BL2ManualDL : MonoBehaviour
         public string borderlands2AP;
         public string borderlands2Coroutines;
         public string[] steamSearchPaths;
+        public string[] apSearchPaths;
     }
 
     void Start()
@@ -215,13 +217,41 @@ public class BL2ManualDL : MonoBehaviour
         }
 
         int count = (doModManager ? 1 : 0) + (doAP ? 1 : 0) + (doCoroutines ? 1 : 0) + (doApworld ? 1 : 0);
+
         if (count == 0)
         {
             ShowInfo("Please select at least one component to install.");
             return;
         }
 
+        if (doApworld && count == 0)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
+
         StartCoroutine(InstallFlow(doModManager, doAP, doCoroutines, doApworld));
+    }
+
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
+        if (launchGameToggle == null || launchGameToggle.isOn)
+        {
+            LaunchGame();
+            yield return new WaitForSeconds(2f);
+        }
+
+        ShowInfo("Installation complete!");
     }
 
     IEnumerator InstallFlow(bool installModManager, bool installAP, bool installCoroutines, bool installApworld)
@@ -265,7 +295,7 @@ public class BL2ManualDL : MonoBehaviour
 
         if (installApworld)
         {
-            yield return InstallApworld();
+            yield return InstallAPWorld();
             yield return new WaitForSeconds(0.2f);
         }
 
@@ -412,17 +442,22 @@ public class BL2ManualDL : MonoBehaviour
         yield return new WaitForSeconds(0.2f);
     }
 
-    IEnumerator InstallApworld()
+    IEnumerator InstallAPWorld()
     {
-        while (!configLoaded)
-            yield return new WaitForSeconds(0.2f);
+        lastApWorldInstallSuccess = false;
 
-        UnityEngine.Debug.Log("Config loaded. Apworld URL: " + borderlands2Apworld.url);
+        while (!configLoaded)
+        {
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + borderlands2Apworld.url);
 
         if (string.IsNullOrEmpty(borderlands2Apworld.url))
         {
-            ShowInfo("ERROR: Apworld URL is empty!");
-            UnityEngine.Debug.LogError("Apworld URL not set!");
+            ShowInfo("ERROR: APWorld URL is empty!");
+            UnityEngine.Debug.LogError("APWorld URL not set!");
             yield break;
         }
 
@@ -430,14 +465,16 @@ public class BL2ManualDL : MonoBehaviour
         if (string.IsNullOrEmpty(fileName))
         {
             fileName = borderlands2Apworld.url.Substring(borderlands2Apworld.url.LastIndexOf('/') + 1);
+
             if (fileName.Contains("?"))
                 fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
             UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
         }
 
         string localPath = Path.Combine(Application.persistentDataPath, fileName);
 
-        UnityEngine.Debug.Log("Downloading Apworld from: " + borderlands2Apworld.url);
+        UnityEngine.Debug.Log("Downloading APWorld from: " + borderlands2Apworld.url);
         UnityEngine.Debug.Log("Saving to: " + localPath);
 
         yield return DownloadFile(borderlands2Apworld.url, localPath);
@@ -445,43 +482,24 @@ public class BL2ManualDL : MonoBehaviour
         if (!File.Exists(localPath))
         {
             UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
-            ShowInfo("ERROR: Apworld download failed!");
+            ShowInfo("ERROR: APWorld download failed!");
             yield break;
         }
 
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string target = "";
-        foreach (string path in targetPaths)
-        {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        if (string.IsNullOrEmpty(target))
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
 
-        UnityEngine.Debug.Log("Target path: " + target);
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
 
         if (File.Exists(target))
         {
@@ -497,17 +515,24 @@ public class BL2ManualDL : MonoBehaviour
         {
             File.Copy(localPath, target, true);
 
-            UnityEngine.Debug.Log("Apworld file copied to: " + target);
+            UnityEngine.Debug.Log("APWorld file copied to: " + target);
 
-            ShowInfo("Apworld installed successfully!");
+            ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
-            UnityEngine.Debug.LogError("Failed to copy Apworld: " + e.Message);
-            ShowInfo("ERROR: Failed to install Apworld\n" + e.Message);
+            UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
+            ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
@@ -522,7 +547,6 @@ public class BL2ManualDL : MonoBehaviour
         }
     }
 
-    // Entry point used by RevertAll: decide which revert flow based on toggles
     private void ExecuteRevert()
     {
         gamePath = GetGamePath();
@@ -714,7 +738,6 @@ public class BL2ManualDL : MonoBehaviour
 
     IEnumerator LoadRemoteConfig()
     {
-        // Update this URL to point to your remote config for BL2 (the user asked to use remote config similarly)
         string url = "https://raw.githubusercontent.com/quackexclamationmark/Archipelago-Setup-Tool/refs/heads/main/RemoteConfig/config.json";
 
         UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url);
@@ -961,5 +984,43 @@ public class BL2ManualDL : MonoBehaviour
         if (fileName.Contains("?"))
             fileName = fileName.Substring(0, fileName.IndexOf("?"));
         return fileName.Length > 0 ? fileName : "Unknown";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
+        return "";
     }
 }

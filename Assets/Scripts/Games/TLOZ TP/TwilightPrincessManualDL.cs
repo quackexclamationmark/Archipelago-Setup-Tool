@@ -62,6 +62,7 @@ public class TwilightPrincessManualDL : MonoBehaviour
     private string tloztpDolphinDownloadUrl = "";
     private RemoteConfig remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
 
     public bool apworldInstalled { get; private set; } = false;
     public bool apworldGciInstalled { get; private set; } = false;
@@ -87,6 +88,7 @@ public class TwilightPrincessManualDL : MonoBehaviour
         public string tloztpAP;
         public string tloztpDolphin;
         public string tloztpREL;
+        public string[] apSearchPaths;
     }
 
     private float infoDefaultFontSize = 0f;
@@ -436,19 +438,19 @@ public class TwilightPrincessManualDL : MonoBehaviour
 
         if (installApworld && !installationCancelled && zipDownloadedAndExtracted)
         {
-            ShowInfo("Installing Twilight Princess APWorld...");
-            yield return InstallApworld(extractPath);
+            ShowInfo("Installing APWorld...");
+            yield return InstallAPWorld();
         }
 
         if (installApworldGci && !installationCancelled && zipDownloadedAndExtracted)
         {
-            ShowInfo("Installing Twilight Princess APWorld GCI...");
+            ShowInfo("Installing APWorld GCI...");
             yield return InstallApworldGci(extractPath, gcUsaCardAPath);
         }
 
         if (installAp && !installationCancelled)
         {
-            ShowInfo("Installing Twilight Princess AP...");
+            ShowInfo("Installing AP Mod...");
             yield return InstallAp(gcUsaCardAPath, tempDownloadPath);
         }
 
@@ -484,99 +486,109 @@ public class TwilightPrincessManualDL : MonoBehaviour
         SafeDeleteDirectory(tempDownloadPath);
     }
 
-    IEnumerator InstallApworld(string extractPath)
+    IEnumerator InstallAPWorld()
     {
-        apworldInstalled = false;
+        lastApWorldInstallSuccess = false;
 
-        string apworldPath = Path.Combine(extractPath, "Twilight Princess.apworld");
-
-        UnityEngine.Debug.Log("Looking for APWorld at: " + apworldPath);
-
-        if (!File.Exists(apworldPath))
+        while (!configLoaded)
         {
-            UnityEngine.Debug.LogError("ERROR: Twilight Princess.apworld not found at: " + apworldPath);
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
 
-            // Try recursive search as fallback
-            string[] apworldFiles = Directory.GetFiles(extractPath, "*.apworld", System.IO.SearchOption.AllDirectories);
-            UnityEngine.Debug.Log("Recursive search found " + apworldFiles.Length + " .apworld files");
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + tloztpApworld.url);
 
-            if (apworldFiles.Length == 0)
+        if (string.IsNullOrEmpty(tloztpApworld.url))
+        {
+            ShowInfo("ERROR: APWorld URL is empty!");
+            UnityEngine.Debug.LogError("APWorld URL not set!");
+            yield break;
+        }
+
+        string fileName = tloztpApworld.fileName;
+        if (string.IsNullOrEmpty(fileName))
+        {
+            fileName = tloztpApworld.url.Substring(tloztpApworld.url.LastIndexOf('/') + 1);
+
+            if (fileName.Contains("?"))
+                fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
+        }
+
+        string localPath = Path.Combine(Application.persistentDataPath, fileName);
+
+        UnityEngine.Debug.Log("Downloading APWorld from: " + tloztpApworld.url);
+        UnityEngine.Debug.Log("Saving to: " + localPath);
+
+        yield return DownloadFile(tloztpApworld.url, localPath);
+
+        if (!File.Exists(localPath))
+        {
+            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
+            ShowInfo("ERROR: APWorld download failed!");
+            yield break;
+        }
+
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
+
+        string customWorldsDir = GetApCustomWorldsPath();
+
+        if (string.IsNullOrEmpty(customWorldsDir))
+        {
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
+            yield break;
+        }
+
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
+
+        if (File.Exists(target))
+        {
+            try
             {
-                UnityEngine.Debug.LogError("ERROR: No .apworld file found anywhere in: " + extractPath);
-                ShowInfo("ERROR: No .apworld file found in extracted ZIP!");
-                apworldInstalled = false;
-                yield break;
+                File.Delete(target);
+                UnityEngine.Debug.Log("Deleted old apworld file");
             }
-
-            apworldPath = apworldFiles[0];
-            UnityEngine.Debug.Log("Using fallback file: " + apworldPath);
+            catch { }
         }
 
         try
         {
-            string fileName = Path.GetFileName(apworldPath);
-            UnityEngine.Debug.Log("Processing APWorld: " + fileName);
+            File.Copy(localPath, target, true);
 
-            string[] targetPaths = new string[]
-            {
-                Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-                Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-                Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-            };
+            UnityEngine.Debug.Log("APWorld file copied to: " + target);
 
-            string destPath = "";
-            foreach (string path in targetPaths)
-            {
-                try
-                {
-                    string dir = Path.GetDirectoryName(path);
-                    if (!Directory.Exists(dir))
-                        Directory.CreateDirectory(dir);
-                    destPath = path;
-                    UnityEngine.Debug.Log("Using target path: " + destPath);
-                    break;
-                }
-                catch (System.Exception e)
-                {
-                    UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-                }
-            }
-
-            if (string.IsNullOrEmpty(destPath))
-            {
-                UnityEngine.Debug.LogError("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-                ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-                apworldInstalled = false;
-                yield break;
-            }
-
-            if (File.Exists(destPath))
-            {
-                try
-                {
-                    File.Delete(destPath);
-                    UnityEngine.Debug.Log("Deleted old APWorld: " + fileName);
-                }
-                catch { }
-            }
-
-            File.Copy(apworldPath, destPath, true);
-            UnityEngine.Debug.Log("APWorld copied to: " + destPath);
-            UnityEngine.Debug.Log("File size: " + new FileInfo(destPath).Length + " bytes");
-
-            apworldInstalled = true;
-            ShowInfo("Twilight Princess APWorld installed!");
+            ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
-            UnityEngine.Debug.LogError("Error copying APWorld: " + e.Message);
-            UnityEngine.Debug.LogError("Stack trace: " + e.StackTrace);
-            ShowInfo("ERROR: Failed to copy APWorld: " + e.Message);
-            apworldInstalled = false;
+            UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
+            ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
-        yield return null;
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
+        }
     }
 
     IEnumerator InstallApworldGci(string extractPath, string gcUsaCardAPath)
@@ -856,5 +868,43 @@ public class TwilightPrincessManualDL : MonoBehaviour
     void SafeDeleteDirectory(string path)
     {
         try { if (Directory.Exists(path)) Directory.Delete(path, true); } catch { }
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
+        return "";
     }
 }

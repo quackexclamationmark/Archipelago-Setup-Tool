@@ -333,7 +333,7 @@ public class HitmanWoAManualDL : MonoBehaviour
     {
         yield return new WaitUntil(() => configLoaded);
 
-        ShowInfo("Installing AP World...");
+        ShowInfo("Installing APWorld...");
         yield return new WaitForSeconds(1f);
 
         yield return InstallAPWorld();
@@ -417,7 +417,6 @@ public class HitmanWoAManualDL : MonoBehaviour
             ShowInfo("Plugin not found at:\n" + pluginPath);
         }
 
-        // Update manifest if present (remove plugin entries)
         string manifestPath = Path.Combine(Application.persistentDataPath, "InstalledFilesManifest_HitmanWoA.json");
         if (File.Exists(manifestPath))
         {
@@ -445,10 +444,8 @@ public class HitmanWoAManualDL : MonoBehaviour
 
         string peacockFolder = GetPeacockFolderPath();
 
-        // Stop any started processes
         CleanupProcesses();
 
-        // Delete Peacock folder
         if (!string.IsNullOrEmpty(peacockFolder) && Directory.Exists(peacockFolder))
         {
             try
@@ -470,7 +467,6 @@ public class HitmanWoAManualDL : MonoBehaviour
 
         currentPeacockFolderName = "";
 
-        // Remove manifest if it only contained Peacock/plugin entries (safe to remove manifest for full clean)
         string manifestPath = Path.Combine(Application.persistentDataPath, "InstalledFilesManifest_HitmanWoA.json");
         try { if (File.Exists(manifestPath)) File.Delete(manifestPath); } catch { }
 
@@ -1095,16 +1091,6 @@ public class HitmanWoAManualDL : MonoBehaviour
     // PEACOCK FOLDER RESOLUTION (dynamique, aucun nom hardcodé)
     // =========================================================
 
-    /// <summary>
-    /// Retrouve le chemin réel du dossier Peacock installé dans le dossier du jeu,
-    /// sans jamais dépendre d'un nom de dossier fixe (ex: "Peacock-v8.8.1").
-    /// Ordre de résolution :
-    ///  1. Nom déjà connu en mémoire pour cette session.
-    ///  2. Nom persisté dans le manifest d'installation.
-    ///  3. Scan du dossier du jeu à la recherche d'un sous-dossier contenant
-    ///     des fichiers caractéristiques de Peacock (PeacockPatcher.exe, Start Server.cmd).
-    /// Retourne une chaîne vide si rien n'est trouvé.
-    /// </summary>
     private string GetPeacockFolderPath()
     {
         if (string.IsNullOrEmpty(gamePath))
@@ -1118,7 +1104,6 @@ public class HitmanWoAManualDL : MonoBehaviour
                 return p;
         }
 
-        // 2. Nom persisté dans le manifest
         string manifestPath = Path.Combine(Application.persistentDataPath, "InstalledFilesManifest_HitmanWoA.json");
         if (File.Exists(manifestPath))
         {

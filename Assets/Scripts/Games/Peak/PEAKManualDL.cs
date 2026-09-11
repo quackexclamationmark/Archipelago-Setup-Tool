@@ -52,6 +52,7 @@ public class PEAKManualDL : MonoBehaviour
     private bool pendingFullCleanConfirmation = false;
     private PEAKConfig remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
 
     [System.Serializable]
     public class PEAKConfig
@@ -64,6 +65,7 @@ public class PEAKManualDL : MonoBehaviour
         public string[] steamSearchPaths;
         public string[] steamSearchPathsLinuxHome;
         public string[] steamSearchPathsLinuxExt;
+        public string[] apSearchPaths;
     }
 
     void Start()
@@ -226,9 +228,11 @@ public class PEAKManualDL : MonoBehaviour
 
         yield return InstallAPWorld();
 
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
-            ShowInfo("Launching PEAK...");
             LaunchPEAK();
             yield return new WaitForSeconds(2f);
         }
@@ -402,13 +406,15 @@ public class PEAKManualDL : MonoBehaviour
 
     IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
         {
             UnityEngine.Debug.Log("Waiting for config to load...");
             yield return new WaitForSeconds(0.5f);
         }
 
-        UnityEngine.Debug.Log("Config loaded. PEAK APWorld URL: " + peakapworld.url);
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + peakapworld.url);
 
         if (string.IsNullOrEmpty(peakapworld.url))
         {
@@ -444,37 +450,18 @@ public class PEAKManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        string target = "";
-        foreach (string path in targetPaths)
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
+
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
 
         if (File.Exists(target))
         {
@@ -493,11 +480,32 @@ public class PEAKManualDL : MonoBehaviour
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
 
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
+            yield break;
+        }
+
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
         }
     }
 
@@ -592,12 +600,10 @@ public class PEAKManualDL : MonoBehaviour
         string pluginsPath = Path.Combine(peakPath, "BepInEx", "plugins");
         Directory.CreateDirectory(pluginsPath);
 
-        // Copy peakpelago folder to plugins and rename to PEAKArchipelago
         try
         {
             string targetPath = Path.Combine(pluginsPath, "PeakArchipelago");
 
-            // Remove old PEAKArchipelago if it exists
             if (Directory.Exists(targetPath))
                 SafeDeleteDirectory(targetPath);
 
@@ -1153,6 +1159,44 @@ public class PEAKManualDL : MonoBehaviour
         }
 
         UnityEngine.Debug.LogWarning("Game (Steam, Linux) not found.");
+        return "";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
         return "";
     }
 }

@@ -66,6 +66,8 @@ public class SHARManualDL : MonoBehaviour
     private System.Collections.Generic.List<Process> launchedProcesses = new System.Collections.Generic.List<Process>();
     private Coroutine currentSetupCoroutine;
     private bool isSetupRunning = false;
+    private bool lastApWorldInstallSuccess = false;
+    private bool pendingApWorldOnlyFlow = false;
 
     private class ThreadTask
     {
@@ -80,6 +82,7 @@ public class SHARManualDL : MonoBehaviour
         public string sharAP;
         public string sharAPMod;
         public string sharModLauncher;
+        public string[] apSearchPaths;
     }
 
     void Start()
@@ -197,10 +200,7 @@ public class SHARManualDL : MonoBehaviour
             remoteConfig = JsonUtility.FromJson<RemoteConfig>(jsonText);
             if (remoteConfig != null)
             {
-                sharApworld.url = remoteConfig.sharApworld;
-                sharAP.url = remoteConfig.sharAP;
-                sharAPMod.url = remoteConfig.sharAPMod;
-                sharModLauncher.url = remoteConfig.sharModLauncher;
+                ApplySharConfig();
                 UnityEngine.Debug.Log("SHAR config loaded successfully.");
             }
             else UnityEngine.Debug.LogWarning("RemoteConfig JSON parsed to null.");
@@ -209,6 +209,15 @@ public class SHARManualDL : MonoBehaviour
         {
             UnityEngine.Debug.LogWarning("Config parsing failed (this is OK, config is optional): " + e.Message);
         }
+    }
+
+    void ApplySharConfig()
+    {
+        if (remoteConfig == null) return;
+        sharApworld.url = remoteConfig.sharApworld;
+        sharAP.url = remoteConfig.sharAP;
+        sharAPMod.url = remoteConfig.sharAPMod;
+        sharModLauncher.url = remoteConfig.sharModLauncher;
     }
 
     void SelectDirectory()
@@ -302,17 +311,6 @@ public class SHARManualDL : MonoBehaviour
         bool installRandomizerAndMod = installRandomizerAndModToggle != null && installRandomizerAndModToggle.isOn;
         bool installApworld = installApworldToggle != null && installApworldToggle.isOn;
 
-        int count =
-            (installModLauncher ? 1 : 0) +
-            (installRandomizerAndMod ? 1 : 0) +
-            (installApworld ? 1 : 0);
-
-        if (count == 0)
-        {
-            ShowInfo("Please select at least one component to install.");
-            return;
-        }
-
         bool needsGameChoice = installRandomizerAndMod || installModLauncher;
 
         if (needsGameChoice && !haveGameToggleActive && !noGameToggleActive)
@@ -329,10 +327,40 @@ public class SHARManualDL : MonoBehaviour
             return;
         }
 
+        int count =
+            (installModLauncher ? 1 : 0) +
+            (installRandomizerAndMod ? 1 : 0) +
+            (installApworld ? 1 : 0);
+
+        if (count == 0)
+        {
+            ShowInfo("Please select at least one component to install.");
+            return;
+        }
+
+        if (installApworld && count == 1)
+        {
+            pendingApWorldOnlyFlow = true;
+
+            if (confirmPanel != null)
+            {
+                if (confirmText != null)
+                    confirmText.text = "Are you sure you want to setup?";
+                confirmPanel.SetActive(true);
+            }
+            else
+            {
+                StartCoroutine(APWorldOnlyFlow());
+            }
+            return;
+        }
+
+        pendingApWorldOnlyFlow = false;
+
         if (confirmPanel != null)
         {
             if (confirmText != null)
-                confirmText.text = "Do you want to start the setup now?";
+                confirmText.text = "Are you sure you want to setup?";
             confirmPanel.SetActive(true);
         }
         else
@@ -341,15 +369,39 @@ public class SHARManualDL : MonoBehaviour
         }
     }
 
+    IEnumerator APWorldOnlyFlow()
+    {
+        yield return new WaitUntil(() => configLoaded);
+
+        ShowInfo("Installing APWorld...");
+        yield return new WaitForSeconds(1f);
+
+        yield return InstallAPWorld();
+
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
+        ShowInfo("Installation complete!");
+    }
+
     void OnConfirmOk()
     {
         if (confirmPanel != null)
             confirmPanel.SetActive(false);
-        ExecuteSetup();
-    }
 
+        if (pendingApWorldOnlyFlow)
+        {
+            pendingApWorldOnlyFlow = false;
+            StartCoroutine(APWorldOnlyFlow());
+        }
+        else
+        {
+            ExecuteSetup();
+        }
+    }
     void OnConfirmNo()
     {
+        pendingApWorldOnlyFlow = false;
         if (confirmPanel != null)
             confirmPanel.SetActive(false);
     }
@@ -433,20 +485,17 @@ public class SHARManualDL : MonoBehaviour
                 ShowInfo("You selected: Already have the game. Installing selected files...");
                 yield return new WaitForSeconds(1f);
 
-                // Installer le randomizer et mod même si on a le jeu
                 if (installRandomizerAndMod)
                 {
                     yield return InstallAPRandomizer(selectedGamePath, tempPath);
                     yield return InstallAPMod();
                 }
 
-                // Installer le mod launcher si sélectionné
                 if (installModLauncher)
                     yield return InstallModLauncher();
 
-                // Installer l'APWorld si sélectionné
                 if (installApworld)
-                    yield return InstallApworld();
+                    yield return InstallAPWorld();
             }
             else if (noGameToggleActive)
             {
@@ -463,7 +512,7 @@ public class SHARManualDL : MonoBehaviour
                 }
 
                 if (installApworld)
-                    yield return InstallApworld();
+                    yield return InstallAPWorld();
             }
 
             bool shouldLaunchGame = launchGameToggle != null && launchGameToggle.isOn;
@@ -482,7 +531,7 @@ public class SHARManualDL : MonoBehaviour
                 LaunchModLauncher();
             }
 
-            ShowInfo("Setup complete!");
+            ShowInfo("Installation complete!");
             yield return new WaitForSeconds(2f);
 
             SafeDeleteDirectory(tempPath);
@@ -494,13 +543,22 @@ public class SHARManualDL : MonoBehaviour
         }
     }
 
-    IEnumerator InstallApworld()
+    IEnumerator InstallAPWorld()
     {
-        ShowInfo("Downloading and installing APWorld...");
+        lastApWorldInstallSuccess = false;
+
+        while (!configLoaded)
+        {
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + sharApworld.url);
 
         if (string.IsNullOrEmpty(sharApworld.url))
         {
             ShowInfo("ERROR: APWorld URL not loaded!");
+            UnityEngine.Debug.LogError("APWorld URL not set!");
             yield break;
         }
 
@@ -510,63 +568,72 @@ public class SHARManualDL : MonoBehaviour
             fileName = sharApworld.url.Substring(sharApworld.url.LastIndexOf('/') + 1);
             if (fileName.Contains("?"))
                 fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
         }
 
-        string localPath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), fileName);
+        string localPath = Path.Combine(Application.persistentDataPath, fileName);
 
+        UnityEngine.Debug.Log("Downloading APWorld from: " + sharApworld.url);
+        UnityEngine.Debug.Log("Saving to: " + localPath);
+
+        ShowInfo("Downloading and installing APWorld...");
         yield return DownloadFile(sharApworld.url, localPath);
 
         if (!File.Exists(localPath))
         {
+            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
             ShowInfo("ERROR: APWorld download failed!");
             yield break;
         }
 
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string target = "";
-        foreach (string path in targetPaths)
-        {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using APWorld target path: " + target);
-                break;
-            }
-            catch { }
-        }
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        if (string.IsNullOrEmpty(target))
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            ShowInfo("ERROR: Cannot find Archipelago custom_worlds directory!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
+
         if (File.Exists(target))
         {
-            try { File.Delete(target); } catch { }
+            try
+            {
+                File.Delete(target);
+                UnityEngine.Debug.Log("Deleted old apworld file");
+            }
+            catch { }
         }
 
         try
         {
             File.Copy(localPath, target, true);
-            UnityEngine.Debug.Log("APWorld installed to: " + target);
+
+            UnityEngine.Debug.Log("APWorld file copied to: " + target);
+
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
+            UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
@@ -925,5 +992,43 @@ public class SHARManualDL : MonoBehaviour
                 Directory.Delete(path, true);
         }
         catch { }
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found via remote config search paths.");
+        return "";
     }
 }

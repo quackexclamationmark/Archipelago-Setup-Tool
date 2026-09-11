@@ -60,6 +60,7 @@ public class SSBBManualDL : MonoBehaviour
     private string ssbbMinusDownloadUrl = "";
     private RemoteConfig remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
 
     public bool ssbbapInstalled { get; private set; } = false;
     public bool dolphinInstalled { get; private set; } = false;
@@ -85,6 +86,7 @@ public class SSBBManualDL : MonoBehaviour
         public string ssbbApworld;
         public string ssbbDolphin;
         public string ssbbMinus;
+        public string[] apSearchPaths;
     }
 
     private float infoDefaultFontSize = 0f;
@@ -347,8 +349,6 @@ public class SSBBManualDL : MonoBehaviour
             return;
         }
 
-        bool apworldOnly = installSSBBAP && !installDolphin && !installMinus;
-
         if (installMinus && !IsValidRom(selectedRomPath))
         {
             ShowInfo("Select a valid ROM on the ROM tab first. You can still install the APWorld.");
@@ -602,7 +602,58 @@ public class SSBBManualDL : MonoBehaviour
     {
         installationCancelled = false;
         installationComplete = false;
+
+        bool installSSBBAP = installSSBBAPToggle != null && installSSBBAPToggle.isOn;
+        bool installDolphin = installDolphinToggle != null && installDolphinToggle.isOn;
+        bool installMinus = installMinusToggle != null && installMinusToggle.isOn;
+        bool apworldOnly = installSSBBAP && !installDolphin && !installMinus;
+
+        if (apworldOnly)
+        {
+            StartCoroutine(APWorldOnlyFlow());
+            return;
+        }
+
         StartCoroutine(InstallationFlow());
+    }
+
+    // Mirrors TCGManualDL's APWorldOnlyFlow: when the APWorld toggle is the only
+    // one checked, skip the full install pipeline (temp folders, Dolphin, Minus
+    // Launcher) and just run the APWorld install on its own.
+    IEnumerator APWorldOnlyFlow()
+    {
+        while (!configLoaded)
+        {
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        if (installButton != null) installButton.interactable = false;
+        if (cancelButton != null) cancelButton.interactable = true;
+        if (patchDolphinButton != null) patchDolphinButton.interactable = false;
+
+        ssbbapInstalled = false;
+
+        ShowInfo("Installing AP Randomizer...");
+        yield return InstallAPWorld();
+
+        if (installButton != null) installButton.interactable = true;
+        if (cancelButton != null) cancelButton.interactable = false;
+        if (patchDolphinButton != null) patchDolphinButton.interactable = true;
+
+        if (installationCancelled)
+        {
+            ShowInfo("Installation cancelled.");
+            yield break;
+        }
+
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
+        yield return new WaitForSeconds(1f);
+
+        ShowInfo(specialCompleteMessage);
+        installationComplete = true;
     }
 
     IEnumerator InstallationFlow()
@@ -634,8 +685,8 @@ public class SSBBManualDL : MonoBehaviour
 
         if (installSSBBAP && !installationCancelled)
         {
-            ShowInfo("Installing SSBB AP Randomizer...");
-            yield return InstallSSBBAP(documentsPath, tempDownloadPath);
+            ShowInfo("Installing AP Randomizer...");
+            yield return InstallAPWorld();
         }
 
         if (installDolphin && !installationCancelled)
@@ -672,16 +723,28 @@ public class SSBBManualDL : MonoBehaviour
         SafeDeleteDirectory(tempDownloadPath);
     }
 
-    IEnumerator InstallSSBBAP(string documentsPath, string tempPath)
+    // --- APWorld installation, aligned with TCGManualDL.InstallAPWorld ---
+    // Downloads the SSBB APWorld and copies it into the Archipelago custom_worlds
+    // directory found via remote-config search paths. No more hardcoded/created
+    // fallback directories: if custom_worlds isn't found, the install is cancelled
+    // with a clear error, same as the TCG installer.
+    IEnumerator InstallAPWorld()
     {
         ssbbapInstalled = false;
+        lastApWorldInstallSuccess = false;
 
         while (!configLoaded)
-            yield return null;
+        {
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + ssbbApworldDownloadUrl);
 
         if (string.IsNullOrEmpty(ssbbApworldDownloadUrl))
         {
             ShowInfo("ERROR: SSBB AP download URL not loaded!");
+            UnityEngine.Debug.LogError("APWorld URL not set!");
             yield break;
         }
 
@@ -691,11 +754,16 @@ public class SSBBManualDL : MonoBehaviour
             fileName = ssbbApworldDownloadUrl.Substring(ssbbApworldDownloadUrl.LastIndexOf('/') + 1);
             if (fileName.Contains("?"))
                 fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
         }
 
         string localPath = Path.Combine(Application.persistentDataPath, fileName);
 
-        ShowInfo("Downloading SSBB APWorld...");
+        UnityEngine.Debug.Log("Downloading APWorld from: " + ssbbApworldDownloadUrl);
+        UnityEngine.Debug.Log("Saving to: " + localPath);
+
+        ShowInfo("Installing APWorld...");
         yield return DownloadFile(ssbbApworldDownloadUrl, localPath);
 
         if (!File.Exists(localPath))
@@ -705,60 +773,68 @@ public class SSBBManualDL : MonoBehaviour
             yield break;
         }
 
-        string[] targetPaths = new string[]
-        {
-        Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string target = "";
-        foreach (string path in targetPaths)
+        string customWorldsDir = GetApCustomWorldsPath();
+
+        if (string.IsNullOrEmpty(customWorldsDir))
+        {
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
+            yield break;
+        }
+
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
+
+        if (File.Exists(target))
         {
             try
             {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
+                File.Delete(target);
+                UnityEngine.Debug.Log("Deleted old apworld file");
             }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
-            yield break;
+            catch { }
         }
 
         try
         {
-            if (File.Exists(target))
-                File.Delete(target);
-
             File.Copy(localPath, target, true);
 
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
+
             ShowInfo("APWorld installed successfully!");
             ssbbapInstalled = true;
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
             ssbbapInstalled = false;
+            DeleteTempFile(localPath);
             yield break;
         }
 
-        try { if (File.Exists(localPath)) File.Delete(localPath); } catch { }
+        DeleteTempFile(localPath);
+    }
 
-        yield return null;
+
+    void DeleteTempFile(string localPath)
+    {
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
+        }
     }
 
     IEnumerator InstallDolphin(string documentsPath, string tempPath)
@@ -941,5 +1017,43 @@ public class SSBBManualDL : MonoBehaviour
     void SafeDeleteDirectory(string path)
     {
         try { if (Directory.Exists(path)) Directory.Delete(path, true); } catch { }
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found via remote config search paths.");
+        return "";
     }
 }

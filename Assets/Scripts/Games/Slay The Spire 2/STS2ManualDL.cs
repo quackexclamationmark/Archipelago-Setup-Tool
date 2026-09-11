@@ -14,19 +14,25 @@ public class STS2ManualDL : MonoBehaviour
     [Header("STS2 FILES")]
     public FileDownloader.FileData apworld;
     public FileDownloader.FileData apmod;
+    public FileDownloader.FileData ritsulib;
 
     [Header("GAME FOLDER NAMES")]
     public string steamGameFolderName = "Slay the Spire 2";
 
+    [Header("STEAM LAUNCH")]
+    public string steamAppId = "2868840";
+
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installAPModToggle;
+    public Toggle installRitsuLibToggle;
 
     [Header("LAUNCH OPTIONS")]
     public Toggle secondLaunchToggle;
 
     [Header("REVERT OPTIONS")]
     public Toggle removeAPModsOnlyToggle;
+    public Toggle removeFullClearToggle;
 
     [Header("CONFIRMATION PANEL")]
     public GameObject confirmationPanel;
@@ -44,13 +50,16 @@ public class STS2ManualDL : MonoBehaviour
     private string pendingAction;
     private STS2Config remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
 
     [System.Serializable]
     public class STS2Config
     {
         public string sts2Apworld;
         public string sts2AP;
+        public string sts2RitsuLib;
         public string[] steamSearchPaths;
+        public string[] apSearchPaths;
     }
 
     void Start()
@@ -78,6 +87,25 @@ public class STS2ManualDL : MonoBehaviour
 
         if (removeAPModsOnlyToggle != null)
             removeAPModsOnlyToggle.isOn = true;
+
+        if (removeFullClearToggle != null)
+        {
+            removeFullClearToggle.isOn = false;
+            removeFullClearToggle.onValueChanged.AddListener(OnFullClearToggleChanged);
+        }
+    }
+
+    private void OnFullClearToggleChanged(bool isOn)
+    {
+        if (removeAPModsOnlyToggle == null)
+            return;
+
+        // "Full clear" et "clear ap mods" sont mutuellement exclusifs :
+        // quand full clear est actif, on désactive (grise) le toggle ap mods.
+        removeAPModsOnlyToggle.interactable = !isOn;
+
+        if (isOn)
+            removeAPModsOnlyToggle.isOn = false;
     }
 
     void CleanupProcesses()
@@ -92,11 +120,12 @@ public class STS2ManualDL : MonoBehaviour
 
         apworld.url = remoteConfig.sts2Apworld;
         apmod.url = remoteConfig.sts2AP;
+        ritsulib.url = remoteConfig.sts2RitsuLib;
     }
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+        ShowConfirmation("Are you sure you want to setup?", "Setup");
     }
 
     public void RevertAll()
@@ -142,7 +171,8 @@ public class STS2ManualDL : MonoBehaviour
 
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool apmod = installAPModToggle != null && installAPModToggle.isOn;
-        bool needsGamePath = apmod;
+        bool ritsulib = installRitsuLibToggle != null && installRitsuLibToggle.isOn;
+        bool needsGamePath = apmod || ritsulib;
 
         if (needsGamePath && (string.IsNullOrEmpty(sts2Path) || !Directory.Exists(sts2Path)))
         {
@@ -152,7 +182,8 @@ public class STS2ManualDL : MonoBehaviour
 
         int count =
             (apworld ? 1 : 0) +
-            (apmod ? 1 : 0);
+            (apmod ? 1 : 0) +
+            (ritsulib ? 1 : 0);
 
         if (apworld && count == 1)
         {
@@ -163,6 +194,12 @@ public class STS2ManualDL : MonoBehaviour
         if (apmod && count == 1)
         {
             StartCoroutine(APModOnlyFlow());
+            return;
+        }
+
+        if (ritsulib && count == 1)
+        {
+            StartCoroutine(RitsuLibOnlyFlow());
             return;
         }
 
@@ -178,9 +215,11 @@ public class STS2ManualDL : MonoBehaviour
 
         yield return InstallAPWorld();
 
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
-            ShowInfo("Launching Slay The Spire 2...");
             LaunchSTS2();
             yield return new WaitForSeconds(2f);
         }
@@ -197,9 +236,10 @@ public class STS2ManualDL : MonoBehaviour
 
         string modsPath = Path.Combine(sts2Path, "mods");
 
-        bool removeAP = removeAPModsOnlyToggle != null && removeAPModsOnlyToggle.isOn;
+        bool fullClear = removeFullClearToggle != null && removeFullClearToggle.isOn;
+        bool removeAP = !fullClear && removeAPModsOnlyToggle != null && removeAPModsOnlyToggle.isOn;
 
-        if (!removeAP)
+        if (!fullClear && !removeAP)
         {
             ShowInfo("Please select at least one revert option.");
             return;
@@ -209,13 +249,28 @@ public class STS2ManualDL : MonoBehaviour
 
         if (!Directory.Exists(modsPath))
         {
-            ShowInfo("AP mods already removed!");
+            ShowInfo("Mods already removed!");
+            return;
+        }
+
+        if (fullClear)
+        {
+            ShowInfo("Performing full clear...");
+
+            // Supprime tout le dossier "mods"
+            SafeDeleteDirectory(modsPath);
+
+            // Supprime les version files (root + éventuel dossier Archipelago, déjà supprimé au-dessus)
+            DeleteOldVersionFiles();
+
+            ShowInfo("Full clear completed successfully!");
             return;
         }
 
         ShowInfo("Removing AP mods...");
 
         SafeDeleteDirectory(Path.Combine(modsPath, "Archipelago"));
+        SafeDeleteDirectory(Path.Combine(modsPath, "RitsuLib"));
 
         DeleteOldVersionFiles();
 
@@ -236,6 +291,12 @@ public class STS2ManualDL : MonoBehaviour
             yield return InstallAPMod();
         }
 
+        if (installRitsuLibToggle != null && installRitsuLibToggle.isOn)
+        {
+            ShowInfo("Installing RitsuLib...");
+            yield return InstallRitsuLib();
+        }
+
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
             ShowInfo("Launching Slay the Spire 2...");
@@ -249,6 +310,8 @@ public class STS2ManualDL : MonoBehaviour
 
     IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
         {
             UnityEngine.Debug.Log("Waiting for config to load...");
@@ -291,38 +354,18 @@ public class STS2ManualDL : MonoBehaviour
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        // ✅ Cibles possibles
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        string target = "";
-        foreach (string path in targetPaths)
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
+
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
 
         if (File.Exists(target))
         {
@@ -341,14 +384,21 @@ public class STS2ManualDL : MonoBehaviour
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
 
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
@@ -437,6 +487,51 @@ public class STS2ManualDL : MonoBehaviour
         SafeDeleteDirectory(extractPath);
     }
 
+    IEnumerator InstallRitsuLib()
+    {
+        while (!configLoaded)
+            yield return null;
+
+        if (string.IsNullOrEmpty(ritsulib.url))
+        {
+            ShowInfo("ERROR: RitsuLib URL is empty!");
+            UnityEngine.Debug.LogError("RitsuLib URL not set!");
+            yield break;
+        }
+
+        string modsPath = Path.Combine(sts2Path, "mods");
+        Directory.CreateDirectory(modsPath);
+
+        string extractPath = Path.Combine(Application.persistentDataPath, "STS2RitsuLibTemp");
+
+        // Nettoyage au cas où un ancien dossier temporaire traînerait
+        SafeDeleteDirectory(extractPath);
+
+        yield return downloader.DownloadAndExtract(ritsulib, Application.persistentDataPath, extractPath);
+
+        if (!Directory.Exists(extractPath))
+        {
+            UnityEngine.Debug.LogError("RitsuLib extraction failed, folder not found: " + extractPath);
+            ShowInfo("ERROR: RitsuLib download/extraction failed!");
+            yield break;
+        }
+
+        string targetRitsuLibPath = Path.Combine(modsPath, "RitsuLib");
+
+        // Supprimer l'ancien dossier s'il existe
+        if (Directory.Exists(targetRitsuLibPath))
+            SafeDeleteDirectory(targetRitsuLibPath);
+
+        // Copie tout le contenu du zip extrait dans mods/RitsuLib
+        CopyDirectory(extractPath, targetRitsuLibPath);
+
+        UnityEngine.Debug.Log("RitsuLib installed to: " + targetRitsuLibPath);
+
+        ShowInfo("RitsuLib installed successfully!");
+
+        SafeDeleteDirectory(extractPath);
+    }
+
     IEnumerator APModOnlyFlow()
     {
         sts2Path = GetSTS2Path();
@@ -446,6 +541,22 @@ public class STS2ManualDL : MonoBehaviour
 
         ShowInfo("Installing AP Mod...");
         yield return InstallAPMod();
+
+        if (secondLaunchToggle == null || secondLaunchToggle.isOn)
+            LaunchSTS2();
+
+        ShowInfo("Installation complete!");
+    }
+
+    IEnumerator RitsuLibOnlyFlow()
+    {
+        sts2Path = GetSTS2Path();
+
+        if (string.IsNullOrEmpty(sts2Path))
+            yield break;
+
+        ShowInfo("Installing RitsuLib...");
+        yield return InstallRitsuLib();
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
             LaunchSTS2();
@@ -485,18 +596,43 @@ public class STS2ManualDL : MonoBehaviour
 
     void LaunchSTS2()
     {
-        string exePath = Path.Combine(sts2Path, "Slay the Spire 2.exe");
-
-        if (File.Exists(exePath))
-            sts2Process = Process.Start(exePath);
-        else
+        if (string.IsNullOrEmpty(steamAppId))
         {
-            ShowInfo("ERROR: Could not find Slay the Spire 2 executable!");
+            ShowInfo("ERROR: Steam App ID not set!");
+            return;
+        }
+
+        try
+        {
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = "steam://launch/" + steamAppId,
+                UseShellExecute = true
+            };
+
+            Process.Start(psi);
+            UnityEngine.Debug.Log("Launching Slay the Spire 2 via Steam protocol (AppID: " + steamAppId + ")");
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Steam protocol launch failed: " + e.Message + ". Falling back to direct exe launch.");
+
+            string exePath = Path.Combine(sts2Path, "SlayTheSpire2.exe");
+
+            if (File.Exists(exePath))
+            {
+                sts2Process = Process.Start(exePath);
+            }
+            else
+            {
+                ShowInfo("ERROR: Could not launch Slay the Spire 2!");
+            }
         }
     }
 
     void CloseSTS2()
     {
+        // Ferme le process si on l'a lancé directement (fallback exe)
         try
         {
             if (sts2Process != null && !sts2Process.HasExited)
@@ -504,6 +640,24 @@ public class STS2ManualDL : MonoBehaviour
                 sts2Process.Kill();
                 sts2Process.Dispose();
                 sts2Process = null;
+            }
+        }
+        catch { }
+
+        // Ferme aussi le process s'il a été lancé via le protocole Steam
+        // (dans ce cas on n'a pas de handle direct dessus)
+        try
+        {
+            Process[] processes = Process.GetProcessesByName("SlayTheSpire2");
+            foreach (Process proc in processes)
+            {
+                try
+                {
+                    if (!proc.HasExited)
+                        proc.Kill();
+                    proc.Dispose();
+                }
+                catch { }
             }
         }
         catch { }
@@ -747,6 +901,44 @@ public class STS2ManualDL : MonoBehaviour
         }
 
         UnityEngine.Debug.LogWarning("Game (Steam) not found.");
+        return "";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
         return "";
     }
 }

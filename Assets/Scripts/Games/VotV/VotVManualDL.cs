@@ -53,6 +53,7 @@ public class VotVManualDL : MonoBehaviour
     private GameConfig remoteConfig;
     private bool configLoaded = false;
     private InstalledFilesManifest currentManifest;
+    private bool lastApWorldInstallSuccess = false;
 
     [System.Serializable]
     public class GameConfig
@@ -60,6 +61,7 @@ public class VotVManualDL : MonoBehaviour
         public string votvUE4SS;
         public string votvAP;
         public string votvApworld;
+        public string[] apSearchPaths;
     }
 
     [System.Serializable]
@@ -111,7 +113,6 @@ public class VotVManualDL : MonoBehaviour
                 directoryPlaceholder.gameObject.SetActive(true);
         }
 
-        // Revert toggles setup
         if (fullCleanUE4SSToggle != null)
             fullCleanUE4SSToggle.isOn = false;
 
@@ -177,7 +178,6 @@ public class VotVManualDL : MonoBehaviour
         {
             string selectedPath = FileBrowser.Result[0];
 
-            // If a file is selected (votv.exe), get its directory
             if (File.Exists(selectedPath) && selectedPath.EndsWith("votv.exe", System.StringComparison.OrdinalIgnoreCase))
             {
                 selectedPath = Path.GetDirectoryName(selectedPath);
@@ -191,7 +191,7 @@ public class VotVManualDL : MonoBehaviour
     {
         if (string.IsNullOrEmpty(path))
         {
-            ShowSetupInfo("Directory path is empty!");
+            ShowInfo("Directory path is empty!");
             return;
         }
 
@@ -199,13 +199,13 @@ public class VotVManualDL : MonoBehaviour
         string votvExePath = Path.Combine(path, "votv.exe");
         if (!File.Exists(votvExePath))
         {
-            ShowSetupInfo("Invalid directory! votv.exe not found.\nPlease select the directory containing votv.exe");
+            ShowInfo("Invalid directory! votv.exe not found.\nPlease select the directory containing votv.exe");
             return;
         }
 
         if (!Directory.Exists(path))
         {
-            ShowSetupInfo("Invalid directory path!");
+            ShowInfo("Invalid directory path!");
             return;
         }
 
@@ -241,7 +241,7 @@ public class VotVManualDL : MonoBehaviour
         string votvExePath = Path.Combine(newDirectory, "votv.exe");
         if (!File.Exists(votvExePath))
         {
-            ShowSetupInfo("votv.exe not found in this directory!");
+            ShowInfo("votv.exe not found in this directory!");
             return;
         }
 
@@ -266,7 +266,7 @@ public class VotVManualDL : MonoBehaviour
 
     public void RunSetup()
     {
-        ShowSetupConfirmation("Are you sure you want to install all the files?", "Setup");
+        ShowSetupConfirmation("Are you sure you want to setup?", "Setup");
     }
 
     public void RevertAll()
@@ -318,28 +318,28 @@ public class VotVManualDL : MonoBehaviour
     {
         if (!configLoaded)
         {
-            ShowSetupInfo("Loading configuration, please wait...");
+            ShowInfo("Loading configuration, please wait...");
             StartCoroutine(WaitForConfigThenSetup());
             return;
         }
 
         if (directoryInputField == null || string.IsNullOrEmpty(directoryInputField.text))
         {
-            ShowSetupInfo("Please select a directory first!");
+            ShowInfo("Please select a directory first!");
             return;
         }
 
         string testPath = directoryInputField.text;
         if (!Directory.Exists(testPath))
         {
-            ShowSetupInfo("Selected directory does not exist:\n" + testPath);
+            ShowInfo("Selected directory does not exist:\n" + testPath);
             return;
         }
 
         string votvExePath = Path.Combine(testPath, "votv.exe");
         if (!File.Exists(votvExePath))
         {
-            ShowSetupInfo("votv.exe not found in selected directory!");
+            ShowInfo("votv.exe not found in selected directory!");
             return;
         }
 
@@ -357,7 +357,7 @@ public class VotVManualDL : MonoBehaviour
 
         if (count == 0)
         {
-            ShowSetupInfo("Please select at least one component to install.");
+            ShowInfo("Please select at least one component to install.");
             return;
         }
 
@@ -366,45 +366,43 @@ public class VotVManualDL : MonoBehaviour
 
     IEnumerator SetupWithTracking()
     {
-        ShowSetupInfo("Initializing installation tracker...");
+        ShowInfo("Initializing installation tracker...");
         yield return new WaitForSeconds(0.5f);
 
         currentManifest = new InstalledFilesManifest();
         currentManifest.gameInstallPath = gamePath;
 
-        ShowSetupInfo("Downloading and installing files...");
+        ShowInfo("Downloading and installing files...");
 
         yield return InstallFlow();
 
         SaveInstalledFilesManifest(currentManifest);
 
-        ShowSetupInfo("Installation complete!");
+        ShowInfo("Installation complete!");
         yield return new WaitForSeconds(1f);
 
-        // Reset les toggles après l'installation
         ResetInstallationToggles();
     }
 
     private void ExecuteRevert()
     {
-        // VERIF STRICTE: Vérifier que le chemin est valide AVANT de faire le revert
         if (directoryInputField == null || string.IsNullOrEmpty(directoryInputField.text))
         {
-            ShowSetupInfo("Please select a directory first!");
+            ShowInfo("Please select a directory first!");
             return;
         }
 
         string testPath = directoryInputField.text;
         if (!Directory.Exists(testPath))
         {
-            ShowSetupInfo("Selected directory does not exist!");
+            ShowInfo("Selected directory does not exist!");
             return;
         }
 
         string votvExePath = Path.Combine(testPath, "votv.exe");
         if (!File.Exists(votvExePath))
         {
-            ShowSetupInfo("votv.exe not found in selected directory!");
+            ShowInfo("votv.exe not found in selected directory!");
             return;
         }
 
@@ -420,7 +418,7 @@ public class VotVManualDL : MonoBehaviour
 
         if (!removeAP && !fullClean)
         {
-            ShowSetupInfo("Please select at least one revert option.");
+            ShowInfo("Please select at least one revert option.");
             return;
         }
 
@@ -430,7 +428,7 @@ public class VotVManualDL : MonoBehaviour
         {
             CleanupProcesses();
 
-            ShowSetupInfo("Removing AP mods...");
+            ShowInfo("Removing AP mods...");
 
             string modsPath = Path.Combine(ue4ssPath, "Mods");
             string apmodTargetPath = Path.Combine(modsPath, "votv_ap-main");
@@ -440,7 +438,7 @@ public class VotVManualDL : MonoBehaviour
             SafeDeleteDirectory(apmodTargetPath);
             DeleteOldVersionFiles();
 
-            ShowSetupInfo("AP mods removed successfully!");
+            ShowInfo("AP mods removed successfully!");
             return;
         }
 
@@ -461,7 +459,7 @@ public class VotVManualDL : MonoBehaviour
 
             CleanupProcesses();
 
-            ShowSetupInfo("Cleaning UE4SS...");
+            ShowInfo("Cleaning UE4SS...");
 
             UnityEngine.Debug.Log("Removing UE4SS at: " + ue4ssPath);
             UnityEngine.Debug.Log("Removing dwmapi.dll at: " + Path.Combine(win64Path, "dwmapi.dll"));
@@ -470,7 +468,7 @@ public class VotVManualDL : MonoBehaviour
             SafeDeleteFile(Path.Combine(win64Path, "dwmapi.dll"));
             DeleteOldVersionFiles();
 
-            ShowSetupInfo("Full clean completed!");
+            ShowInfo("Full clean completed!");
             return;
         }
 
@@ -501,19 +499,21 @@ public class VotVManualDL : MonoBehaviour
     {
         yield return new WaitUntil(() => configLoaded);
 
-        ShowSetupInfo("Installing APWorld...");
+        ShowInfo("Installing APWorld...");
         yield return new WaitForSeconds(1f);
 
         yield return InstallAPWorld();
 
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
         if (launchGameToggle == null || launchGameToggle.isOn)
         {
-            ShowSetupInfo("Launching VotV...");
             LaunchGame();
             yield return new WaitForSeconds(2f);
         }
 
-        ShowSetupInfo("Installation complete!");
+        ShowInfo("Installation complete!");
     }
 
     IEnumerator UE4SSOnlyFlow()
@@ -571,7 +571,7 @@ public class VotVManualDL : MonoBehaviour
 
         if (launchGameToggle == null || launchGameToggle.isOn)
         {
-            ShowSetupInfo("Launching game...");
+            ShowInfo("Launching game...");
             yield return new WaitForSeconds(1f);
             LaunchGame();
         }
@@ -587,7 +587,7 @@ public class VotVManualDL : MonoBehaviour
 
         if (!Directory.Exists(ue4ssSourcePath))
         {
-            ShowSetupInfo("ERROR: ue4ss folder not found in extraction!");
+            ShowInfo("ERROR: ue4ss folder not found in extraction!");
             SafeDeleteDirectory(extractPath);
             yield break;
         }
@@ -621,7 +621,7 @@ public class VotVManualDL : MonoBehaviour
 
         SafeDeleteDirectory(extractPath);
 
-        ShowSetupInfo("UE4SS installation verified successfully!");
+        ShowInfo("UE4SS installation verified successfully!");
         yield return new WaitForSeconds(1f);
     }
 
@@ -635,7 +635,7 @@ public class VotVManualDL : MonoBehaviour
 
         if (!Directory.Exists(apmodSourcePath))
         {
-            ShowSetupInfo("ERROR: votv_ap-main folder not found in extraction!");
+            ShowInfo("ERROR: votv_ap-main folder not found in extraction!");
             SafeDeleteDirectory(extractPath);
             yield break;
         }
@@ -648,12 +648,14 @@ public class VotVManualDL : MonoBehaviour
 
         SafeDeleteDirectory(extractPath);
 
-        ShowSetupInfo("APMod installation verified successfully!");
+        ShowInfo("APMod installation verified successfully!");
         yield return new WaitForSeconds(1f);
     }
 
     IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
         {
             UnityEngine.Debug.Log("Waiting for config to load...");
@@ -664,7 +666,7 @@ public class VotVManualDL : MonoBehaviour
 
         if (string.IsNullOrEmpty(apworld.url))
         {
-            ShowSetupInfo("ERROR: APWorld URL is empty!");
+            ShowInfo("ERROR: APWorld URL is empty!");
             UnityEngine.Debug.LogError("APWorld URL not set!");
             yield break;
         }
@@ -690,45 +692,24 @@ public class VotVManualDL : MonoBehaviour
         if (!File.Exists(localPath))
         {
             UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
-            ShowSetupInfo("ERROR: APWorld download failed!");
+            ShowInfo("ERROR: APWorld download failed!");
             yield break;
         }
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string[] targetPaths = new string[]
-        {
-        Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        string target = "";
-        foreach (string path in targetPaths)
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            ShowSetupInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
 
-        UnityEngine.Debug.Log("Target path: " + target);
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
 
         if (File.Exists(target))
         {
@@ -746,18 +727,22 @@ public class VotVManualDL : MonoBehaviour
 
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
 
-            if (currentManifest != null)
-                currentManifest.installedFiles.Add(target);
-
-            ShowSetupInfo("APWorld installed successfully!");
+            ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
-            ShowSetupInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
@@ -827,7 +812,7 @@ public class VotVManualDL : MonoBehaviour
     {
         if (string.IsNullOrEmpty(gamePath))
         {
-            ShowSetupInfo("Game path not found. Cannot launch.");
+            ShowInfo("Game path not found. Cannot launch.");
             UnityEngine.Debug.LogError("GamePath is empty!");
             return;
         }
@@ -849,7 +834,7 @@ public class VotVManualDL : MonoBehaviour
 
         if (string.IsNullOrEmpty(exePath))
         {
-            ShowSetupInfo("Game executable not found at:\n" + gamePath + "\\votv.exe");
+            ShowInfo("Game executable not found at:\n" + gamePath + "\\votv.exe");
             UnityEngine.Debug.LogError("Executable not found!");
             return;
         }
@@ -864,7 +849,7 @@ public class VotVManualDL : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            ShowSetupInfo("Error launching game:\n" + e.Message);
+            ShowInfo("Error launching game:\n" + e.Message);
             UnityEngine.Debug.LogError("Launch error: " + e);
         }
     }
@@ -1048,7 +1033,7 @@ public class VotVManualDL : MonoBehaviour
         return "Unknown";
     }
 
-    void ShowSetupInfo(string message)
+    void ShowInfo(string message)
     {
         if (setupInfoPanel == null || setupInfoText == null)
             return;
@@ -1108,6 +1093,44 @@ public class VotVManualDL : MonoBehaviour
             yield return new WaitForSeconds(0.1f);
 
         CloseSetupInfoPanel();
-        ShowSetupConfirmation("Are you sure you want to install all the files?", "Setup");
+        ShowSetupConfirmation("Are you sure you want to setup?", "Setup");
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
+        return "";
     }
 }

@@ -54,6 +54,7 @@ public class UGGManualDL : MonoBehaviour
     private UGGConfig remoteConfig;
     private bool configLoaded = false;
     private bool isEpic = false;
+    private bool lastApWorldInstallSuccess = false;
 
     [System.Serializable]
     public class UGGConfig
@@ -63,18 +64,17 @@ public class UGGManualDL : MonoBehaviour
         public string untitledAP;
         public string[] steamSearchPaths;
         public string[] epicSearchPaths;
+        public string[] apSearchPaths;
     }
 
     void Start()
     {
-        // Initialize platform buttons
         if (steamButton != null)
             steamButton.onClick.AddListener(OnSteamButtonClicked);
 
         if (epicButton != null)
             epicButton.onClick.AddListener(OnEpicButtonClicked);
 
-        // Select Steam by default
         SelectSteam();
 
         uggPath = GetUGGPath();
@@ -174,7 +174,7 @@ public class UGGManualDL : MonoBehaviour
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+        ShowConfirmation("Are you sure you want to setup?", "Setup");
     }
 
     public void RevertAll()
@@ -257,11 +257,13 @@ public class UGGManualDL : MonoBehaviour
         ShowInfo("Installing APWorld...");
         yield return new WaitForSeconds(1f);
 
-        yield return InstallApworld();
+        yield return InstallAPWorld();
+
+        if (!lastApWorldInstallSuccess)
+            yield break;
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
-            ShowInfo("Launching Game...");
             LaunchUGG();
             yield return new WaitForSeconds(2f);
         }
@@ -306,7 +308,6 @@ public class UGGManualDL : MonoBehaviour
             return;
         }
 
-        // Full clean
         CleanupProcesses();
 
         ShowInfo("Cleaning BepInEx...");
@@ -326,8 +327,8 @@ public class UGGManualDL : MonoBehaviour
     {
         if (installApworldToggle != null && installApworldToggle.isOn)
         {
-            ShowInfo("Installing .apworld...");
-            yield return InstallApworld();
+            ShowInfo("Installing APWorld...");
+            yield return InstallAPWorld();
         }
 
         if (installBepInExToggle != null && installBepInExToggle.isOn)
@@ -338,7 +339,7 @@ public class UGGManualDL : MonoBehaviour
 
         if (installArchipelagoToggle != null && installArchipelagoToggle.isOn)
         {
-            ShowInfo("Installing Untitled Goose Game Archipelago Mod...");
+            ShowInfo("Installing AP Mod...");
             yield return InstallUGGAP();
         }
 
@@ -346,7 +347,7 @@ public class UGGManualDL : MonoBehaviour
 
         if (secondLaunchToggle != null && secondLaunchToggle.isOn)
         {
-            ShowInfo("Launching Untitled Goose Game...");
+            ShowInfo("Launching game...");
             LaunchUGG();
         }
         else
@@ -355,73 +356,131 @@ public class UGGManualDL : MonoBehaviour
         }
     }
 
-    IEnumerator InstallApworld()
+    IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
-            yield return null;
-
-        string tempDownloadPath = Path.Combine(Application.persistentDataPath, "ApworldTemp");
-        Directory.CreateDirectory(tempDownloadPath);
-
-        yield return downloader.DownloadToFolder(untitledApworld, tempDownloadPath);
-
-        string[] apworldFiles = Directory.GetFiles(tempDownloadPath, "*.apworld");
-
-        if (apworldFiles.Length == 0)
         {
-            UnityEngine.Debug.LogWarning("untitled_goose_game.apworld not found in download");
-            SafeDeleteDirectory(tempDownloadPath);
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + untitledApworld.url);
+
+        if (string.IsNullOrEmpty(untitledApworld.url))
+        {
+            ShowInfo("ERROR: APWorld URL is empty!");
+            UnityEngine.Debug.LogError("APWorld URL not set!");
             yield break;
         }
 
-        string fileName = Path.GetFileName(apworldFiles[0]);
-
-        string[] targetPaths = new string[]
+        string fileName = untitledApworld.fileName;
+        if (string.IsNullOrEmpty(fileName))
         {
-        Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+            fileName = untitledApworld.url.Substring(untitledApworld.url.LastIndexOf('/') + 1);
 
-        string target = "";
-        foreach (string path in targetPaths)
+            if (fileName.Contains("?"))
+                fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
+        }
+
+        string localPath = Path.Combine(Application.persistentDataPath, fileName);
+
+        UnityEngine.Debug.Log("Downloading APWorld from: " + untitledApworld.url);
+        UnityEngine.Debug.Log("Saving to: " + localPath);
+
+        yield return DownloadFile(untitledApworld.url, localPath);
+
+        if (!File.Exists(localPath))
+        {
+            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
+            ShowInfo("ERROR: APWorld download failed!");
+            yield break;
+        }
+
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
+
+        string customWorldsDir = GetApCustomWorldsPath();
+
+        if (string.IsNullOrEmpty(customWorldsDir))
+        {
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
+            yield break;
+        }
+
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
+
+        if (File.Exists(target))
         {
             try
             {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
+                File.Delete(target);
+                UnityEngine.Debug.Log("Deleted old apworld file");
             }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            UnityEngine.Debug.LogError("No valid Archipelago custom_worlds directory found!");
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            SafeDeleteDirectory(tempDownloadPath);
-            yield break;
+            catch { }
         }
 
         try
         {
-            File.Copy(apworldFiles[0], target, true);
-            UnityEngine.Debug.Log("Copied .apworld to Archipelago custom_worlds: " + target);
+            File.Copy(localPath, target, true);
+
+            UnityEngine.Debug.Log("APWorld file copied to: " + target);
+
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
-            UnityEngine.Debug.LogError("Failed to copy .apworld: " + e.Message);
+            UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
+            yield break;
         }
 
-        SafeDeleteDirectory(tempDownloadPath);
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
+        }
+    }
+
+    IEnumerator DownloadFile(string url, string savePath)
+    {
+        UnityEngine.Debug.Log("Starting download from: " + url);
+
+        using (UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url))
+        {
+            request.downloadHandler = new UnityEngine.Networking.DownloadHandlerFile(savePath);
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+            {
+                UnityEngine.Debug.LogError("Download error: " + request.error);
+                UnityEngine.Debug.LogError("Response code: " + request.responseCode);
+            }
+            else
+            {
+                UnityEngine.Debug.Log("Download complete! File size: " + new System.IO.FileInfo(savePath).Length + " bytes");
+            }
+        }
     }
 
     IEnumerator InstallBepInEx()
@@ -449,19 +508,14 @@ public class UGGManualDL : MonoBehaviour
         string pluginsPath = Path.Combine(uggPath, "BepInEx", "plugins");
         Directory.CreateDirectory(pluginsPath);
 
-        // Le nom du dossier à créer dans plugins sera le même que le nom du fichier zip (sans extension)
-        // Par défaut "UGG-Archipelago"
         string modFolderName = Path.GetFileNameWithoutExtension(untitledAP.fileName);
         string modTargetPath = Path.Combine(pluginsPath, modFolderName);
 
-        // Supprimer l'ancien dossier s'il existe
         if (Directory.Exists(modTargetPath))
             SafeDeleteDirectory(modTargetPath);
 
-        // Créer le nouveau dossier
         Directory.CreateDirectory(modTargetPath);
 
-        // Copier TOUT le contenu de l'extraction vers le nouveau dossier
         CopyDirectory(extractPath, modTargetPath);
 
         UnityEngine.Debug.Log("Copied all contents to " + modTargetPath);
@@ -907,5 +961,43 @@ public class UGGManualDL : MonoBehaviour
             return githubMatch.Groups[1].Value;
 
         return "Unknown";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
+        return "";
     }
 }

@@ -204,6 +204,7 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Grand Theft Auto San Andreas", new List<string> { "Grand", "Theft", "Auto", "San", "Andreas", "GTA", "SA", "GTASA" }));
         games.Add(CreateGame("Grand Theft Auto Vice City", new List<string> { "Grand", "Theft", "Auto", "Vice", "City", "GTA", "VC", "GTAVC" }));
         games.Add(CreateGame("Hades", new List<string> { "Hades", "1", "I" }));
+        games.Add(CreateGame("Heretic", new List<string> { "Heretic", "DOOM" }));
         games.Add(CreateGame("Hi-Fi Rush", new List<string> { "HiFi", "Hi-Fi", "Hi", "Fi", "Rush" }));
         games.Add(CreateGame("HITMAN: World of Assassination", new List<string> { "Hitman", "World", "Assassination", "WoA" }));
         games.Add(CreateGame("Hollow Knight", new List<string> { "Hollow", "Knight", "HK" }));

@@ -49,6 +49,7 @@ public class ValheimManualDL : MonoBehaviour
     private string pendingAction;
     private ValheimConfig remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
 
     [System.Serializable]
     public class ValheimConfig
@@ -58,6 +59,7 @@ public class ValheimManualDL : MonoBehaviour
         public string valheimBepInEx;
         public string valheimJotunn;
         public string[] steamSearchPaths;
+        public string[] apSearchPaths;
     }
 
     void Start()
@@ -122,7 +124,7 @@ public class ValheimManualDL : MonoBehaviour
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+        ShowConfirmation("Are you sure you want to setup?", "Setup");
     }
 
     public void RevertAll()
@@ -208,9 +210,11 @@ public class ValheimManualDL : MonoBehaviour
 
         yield return InstallAPWorld();
 
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
-            ShowInfo("Launching Valheim...");
             LaunchValheim();
             yield return new WaitForSeconds(2f);
         }
@@ -254,7 +258,6 @@ public class ValheimManualDL : MonoBehaviour
             return;
         }
 
-        // Full clean
         CleanupProcesses();
 
         ShowInfo("Cleaning BepInEx...");
@@ -298,15 +301,6 @@ public class ValheimManualDL : MonoBehaviour
 
         CreateVersionFile(valheimBepInEx.url, valheimAP.url, valheimApworld.url);
 
-        ShowInfo("Launching Valheim...");
-        LaunchValheim();
-
-        yield return new WaitForSeconds(2f);
-
-        CloseValheim();
-
-        yield return new WaitForSeconds(1f);
-
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
             ShowInfo("Installation complete! Launching Valheim...");
@@ -327,7 +321,6 @@ public class ValheimManualDL : MonoBehaviour
 
         yield return downloader.DownloadAndExtract(valheimBepInEx, Application.persistentDataPath, extractPath);
 
-        // Extract all content from the .zip into the Valheim root directory
         string bepInExSourcePath = Path.Combine(extractPath, "BepInEx");
         string bepInExTargetPath = Path.Combine(valheimPath, "BepInEx");
 
@@ -339,7 +332,6 @@ public class ValheimManualDL : MonoBehaviour
             MoveDirectory(bepInExSourcePath, bepInExTargetPath);
         }
 
-        // Copy .dll and .ini files
         string[] dllFiles = Directory.GetFiles(extractPath, "*.dll");
         foreach (string dll in dllFiles)
         {
@@ -368,7 +360,6 @@ public class ValheimManualDL : MonoBehaviour
         string pluginsPath = Path.Combine(valheimPath, "BepInEx", "plugins");
         Directory.CreateDirectory(pluginsPath);
 
-        // Look for BepInEx/plugins/ValheimRandomizer folder in the archive
         string apSourcePath = Path.Combine(extractPath, "BepInEx", "plugins", "ValheimRandomizer");
 
         if (Directory.Exists(apSourcePath))
@@ -400,7 +391,6 @@ public class ValheimManualDL : MonoBehaviour
         string pluginsPath = Path.Combine(valheimPath, "BepInEx", "plugins");
         Directory.CreateDirectory(pluginsPath);
 
-        // Look for "plugins" folder in the archive, copy its content into a new "Jotunn" folder
         string jotunnSourcePath = Path.Combine(extractPath, "plugins");
 
         if (Directory.Exists(jotunnSourcePath))
@@ -423,73 +413,129 @@ public class ValheimManualDL : MonoBehaviour
 
     IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
-            yield return null;
-
-        string fileName = "valheim.apworld";
-
-        string tempDownloadPath = Path.Combine(Application.persistentDataPath, "APWorldTemp");
-        Directory.CreateDirectory(tempDownloadPath);
-
-        yield return downloader.DownloadToFolder(valheimApworld, tempDownloadPath);
-
-        string[] apWorldFiles = Directory.GetFiles(tempDownloadPath, "*.apworld");
-
-        if (apWorldFiles.Length == 0)
         {
-            UnityEngine.Debug.LogWarning("valheim.apworld not found in download");
-            SafeDeleteDirectory(tempDownloadPath);
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + valheimApworld.url);
+
+        if (string.IsNullOrEmpty(valheimApworld.url))
+        {
+            ShowInfo("ERROR: APWorld URL is empty!");
+            UnityEngine.Debug.LogError("APWorld URL not set!");
             yield break;
         }
 
-        string sourceFile = apWorldFiles[0];
-
-        string[] targetPaths = new string[]
+        string fileName = valheimApworld.fileName;
+        if (string.IsNullOrEmpty(fileName))
         {
-        Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+            fileName = valheimApworld.url.Substring(valheimApworld.url.LastIndexOf('/') + 1);
 
-        string target = "";
-        foreach (string path in targetPaths)
+            if (fileName.Contains("?"))
+                fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
+            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
+        }
+
+        string localPath = Path.Combine(Application.persistentDataPath, fileName);
+
+        UnityEngine.Debug.Log("Downloading APWorld from: " + valheimApworld.url);
+        UnityEngine.Debug.Log("Saving to: " + localPath);
+
+        yield return DownloadFile(valheimApworld.url, localPath);
+
+        if (!File.Exists(localPath))
+        {
+            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
+            ShowInfo("ERROR: APWorld download failed!");
+            yield break;
+        }
+
+        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
+
+        string customWorldsDir = GetApCustomWorldsPath();
+
+        if (string.IsNullOrEmpty(customWorldsDir))
+        {
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
+            yield break;
+        }
+
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
+
+        if (File.Exists(target))
         {
             try
             {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
+                File.Delete(target);
+                UnityEngine.Debug.Log("Deleted old apworld file");
             }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
-            SafeDeleteDirectory(tempDownloadPath);
-            yield break;
+            catch { }
         }
 
         try
         {
-            File.Copy(sourceFile, target, true);
+            File.Copy(localPath, target, true);
+
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
+
             ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
+            yield break;
         }
 
-        SafeDeleteDirectory(tempDownloadPath);
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
+        try
+        {
+            if (File.Exists(localPath))
+            {
+                File.Delete(localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+            }
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
+        }
+    }
+
+    IEnumerator DownloadFile(string url, string savePath)
+    {
+        UnityEngine.Debug.Log("Starting download from: " + url);
+
+        using (UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url))
+        {
+            request.downloadHandler = new UnityEngine.Networking.DownloadHandlerFile(savePath);
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+            {
+                UnityEngine.Debug.LogError("Download error: " + request.error);
+                UnityEngine.Debug.LogError("Response code: " + request.responseCode);
+            }
+            else
+            {
+                UnityEngine.Debug.Log("Download complete! File size: " + new System.IO.FileInfo(savePath).Length + " bytes");
+            }
+        }
     }
 
     IEnumerator LoadRemoteConfig()
@@ -843,5 +889,43 @@ public class ValheimManualDL : MonoBehaviour
             return githubMatch.Groups[1].Value;
 
         return "Unknown";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
+        return "";
     }
 }

@@ -42,12 +42,14 @@ public class UCNManualDL : MonoBehaviour
 
     private UCNConfig remoteConfig;
     private bool configLoaded = false;
+    private bool lastApWorldInstallSuccess = false;
 
     [System.Serializable]
     public class UCNConfig
     {
         public string ucnApworld;
         public string[] steamSearchPaths;
+        public string[] apSearchPaths;
     }
 
     void Start()
@@ -130,7 +132,7 @@ public class UCNManualDL : MonoBehaviour
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to start setup?", "Setup");
+        ShowConfirmation("Are you sure you want to setup?", "Setup");
     }
 
     public void RevertAll()
@@ -250,23 +252,28 @@ public class UCNManualDL : MonoBehaviour
 
         yield return InstallAPWorld();
 
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
         ShowInfo("Installation complete!");
     }
 
-    private IEnumerator InstallAPWorld()
+    IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
         while (!configLoaded)
         {
             UnityEngine.Debug.Log("Waiting for config to load...");
             yield return new WaitForSeconds(0.5f);
         }
 
-        UnityEngine.Debug.Log("Config loaded. UCN APWorld URL: " + ucnApworld.url);
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + ucnApworld.url);
 
-        if (ucnApworld == null || string.IsNullOrEmpty(ucnApworld.url))
+        if (string.IsNullOrEmpty(ucnApworld.url))
         {
-            ShowInfo("ERROR: UCN APWorld URL is empty!");
-            UnityEngine.Debug.LogError("UCN APWorld URL not set!");
+            ShowInfo("ERROR: APWorld URL is empty!");
+            UnityEngine.Debug.LogError("APWorld URL not set!");
             yield break;
         }
 
@@ -274,13 +281,16 @@ public class UCNManualDL : MonoBehaviour
         if (string.IsNullOrEmpty(fileName))
         {
             fileName = ucnApworld.url.Substring(ucnApworld.url.LastIndexOf('/') + 1);
+
             if (fileName.Contains("?"))
                 fileName = fileName.Substring(0, fileName.IndexOf("?"));
+
             UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
         }
 
-        string localPath = Path.Combine(Application.temporaryCachePath, fileName);
-        UnityEngine.Debug.Log("Downloading UCN APWorld from: " + ucnApworld.url);
+        string localPath = Path.Combine(Application.persistentDataPath, fileName);
+
+        UnityEngine.Debug.Log("Downloading APWorld from: " + ucnApworld.url);
         UnityEngine.Debug.Log("Saving to: " + localPath);
 
         yield return DownloadFile(ucnApworld.url, localPath);
@@ -288,43 +298,24 @@ public class UCNManualDL : MonoBehaviour
         if (!File.Exists(localPath))
         {
             UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
-            ShowInfo("ERROR: UCN APWorld download failed!");
+            ShowInfo("ERROR: APWorld download failed!");
             yield break;
         }
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        string target = "";
-        foreach (string path in targetPaths)
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
+
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
 
         if (File.Exists(target))
         {
@@ -333,25 +324,31 @@ public class UCNManualDL : MonoBehaviour
                 File.Delete(target);
                 UnityEngine.Debug.Log("Deleted old apworld file");
             }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Could not delete existing target apworld: " + e.Message);
-            }
+            catch { }
         }
 
         try
         {
             File.Copy(localPath, target, true);
-            UnityEngine.Debug.Log("UCN APWorld copied to: " + target);
-            ShowInfo("UCN APWorld installed successfully!");
+
+            UnityEngine.Debug.Log("APWorld file copied to: " + target);
+
+            ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
-            UnityEngine.Debug.LogError("Failed to copy UCN APWorld: " + e.Message);
-            ShowInfo("ERROR: Failed to install UCN APWorld\n" + e.Message);
+            UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
+            ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
@@ -709,6 +706,44 @@ public class UCNManualDL : MonoBehaviour
         }
 
         UnityEngine.Debug.LogWarning("Game (Steam) not found.");
+        return "";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
         return "";
     }
 }

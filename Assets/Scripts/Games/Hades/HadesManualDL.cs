@@ -48,6 +48,7 @@ public class HadesManualDL : MonoBehaviour
     private HadesConfig remoteConfig;
     private bool configLoaded = false;
     private bool isEpic = false;
+    private bool lastApWorldInstallSuccess = false;
 
     private string backupPath;
     private const string BACKUP_FOLDER = "HadesSetupToolBackup";
@@ -60,18 +61,17 @@ public class HadesManualDL : MonoBehaviour
         public string hadesImporter;
         public string[] steamSearchPaths;
         public string[] epicSearchPaths;
+        public string[] apSearchPaths;
     }
 
     void Start()
     {
-        // Initialize platform buttons
         if (steamButton != null)
             steamButton.onClick.AddListener(OnSteamButtonClicked);
 
         if (epicButton != null)
             epicButton.onClick.AddListener(OnEpicButtonClicked);
 
-        // Select Steam by default
         SelectSteam();
 
         hadesPath = GetHadesPath();
@@ -159,12 +159,12 @@ public class HadesManualDL : MonoBehaviour
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to setup Hades AP Mod", "Setup");
+        ShowConfirmation("Are you sure you want to setup?", "Setup");
     }
 
     public void RevertAll()
     {
-        ShowConfirmation("Are you sure you want to revert all changes?\nThis will restore backups and remove mod files.", "Revert");
+        ShowConfirmation("Are you sure you want to revert?", "Revert");
     }
 
     private void ShowConfirmation(string message, string action)
@@ -239,6 +239,9 @@ public class HadesManualDL : MonoBehaviour
 
         yield return InstallAPWorld();
 
+        if (!lastApWorldInstallSuccess)
+            yield break;
+
         ShowInfo("Installation complete!");
     }
 
@@ -274,12 +277,22 @@ public class HadesManualDL : MonoBehaviour
     }
 
 
-    private IEnumerator InstallAPWorld()
+    IEnumerator InstallAPWorld()
     {
+        lastApWorldInstallSuccess = false;
+
+        while (!configLoaded)
+        {
+            UnityEngine.Debug.Log("Waiting for config to load...");
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + hadesApworld.url);
+
         if (string.IsNullOrEmpty(hadesApworld.url))
         {
-            ShowInfo("ERROR: Hades APWorld URL is empty!");
-            UnityEngine.Debug.LogError("Hades APWorld URL not set!");
+            ShowInfo("ERROR: APWorld URL is empty!");
+            UnityEngine.Debug.LogError("APWorld URL not set!");
             yield break;
         }
 
@@ -296,7 +309,7 @@ public class HadesManualDL : MonoBehaviour
 
         string localPath = Path.Combine(Application.persistentDataPath, fileName);
 
-        UnityEngine.Debug.Log("Downloading Hades APWorld from: " + hadesApworld.url);
+        UnityEngine.Debug.Log("Downloading APWorld from: " + hadesApworld.url);
         UnityEngine.Debug.Log("Saving to: " + localPath);
 
         yield return DownloadFile(hadesApworld.url, localPath);
@@ -304,43 +317,24 @@ public class HadesManualDL : MonoBehaviour
         if (!File.Exists(localPath))
         {
             UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
-            ShowInfo("ERROR: Hades APWorld download failed!");
+            ShowInfo("ERROR: APWorld download failed!");
             yield break;
         }
 
         UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
 
-        string[] targetPaths = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago\custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", "custom_worlds", fileName),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", "custom_worlds", fileName),
-        };
+        string customWorldsDir = GetApCustomWorldsPath();
 
-        string target = "";
-        foreach (string path in targetPaths)
+        if (string.IsNullOrEmpty(customWorldsDir))
         {
-            try
-            {
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                target = path;
-                UnityEngine.Debug.Log("Using target path: " + target);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Cannot create directory: " + Path.GetDirectoryName(path) + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(target))
-        {
-            ShowInfo("ERROR: Cannot find a valid Archipelago custom_worlds directory!");
-            UnityEngine.Debug.LogError("No valid target directory found!");
+            ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
+            UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
+            DeleteTempFile(localPath);
             yield break;
         }
+
+        string target = Path.Combine(customWorldsDir, fileName);
+        UnityEngine.Debug.Log("Using target path: " + target);
 
         if (File.Exists(target))
         {
@@ -355,16 +349,25 @@ public class HadesManualDL : MonoBehaviour
         try
         {
             File.Copy(localPath, target, true);
-            UnityEngine.Debug.Log("Hades APWorld copied to: " + target);
-            ShowInfo("Hades APWorld installed successfully!");
+
+            UnityEngine.Debug.Log("APWorld file copied to: " + target);
+
+            ShowInfo("APWorld installed successfully!");
+            lastApWorldInstallSuccess = true;
         }
         catch (System.Exception e)
         {
-            UnityEngine.Debug.LogError("Failed to copy Hades APWorld: " + e.Message);
-            ShowInfo("ERROR: Failed to install Hades APWorld\n" + e.Message);
+            UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
+            ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
+            DeleteTempFile(localPath);
             yield break;
         }
 
+        DeleteTempFile(localPath);
+    }
+
+    void DeleteTempFile(string localPath)
+    {
         try
         {
             if (File.Exists(localPath))
@@ -940,6 +943,44 @@ public class HadesManualDL : MonoBehaviour
         }
 
         UnityEngine.Debug.LogWarning("Game (Epic) not found.");
+        return "";
+    }
+
+    string GetApCustomWorldsPath()
+    {
+        if (remoteConfig != null && remoteConfig.apSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.apSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, "custom_worlds");
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Archipelago custom_worlds (via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Archipelago custom_worlds directory not found.");
         return "";
     }
 }
