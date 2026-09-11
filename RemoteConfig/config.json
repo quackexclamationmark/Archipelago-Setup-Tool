@@ -237,9 +237,11 @@
     "demontidesAP": "https://github.com/estradiol-valerate/DemonTidesAP/releases/download/v0.0.1/DemonTidesAP.zip",
     "demontidesApworld": "https://github.com/RobertSPratley/DemonTidesAPWorld/releases/download/v0.0.1/demontides.apworld",
 
-    "doomAP": "https://github.com/Daivuk/apdoom/releases/download/1.2.0/APDOOM-1_2_0-Win32.zip",
+    "doomAP": "https://github.com/ArchipelagoDoom/APDoom/releases/download/v2.0.0/APDoom-2.0-Windows-x64.zip",
 
-    "doom2AP": "https://github.com/Daivuk/apdoom/releases/download/1.2.0/APDOOM-1_2_0-Win32.zip",
+    "doom2AP": "https://github.com/ArchipelagoDoom/APDoom/releases/download/v2.0.0/APDoom-2.0-Windows-x64.zip",
+
+    "hereticAP": "https://github.com/ArchipelagoDoom/APDoom/releases/download/v2.0.0/APDoom-2.0-Windows-x64.zip",
 
     "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.5.2/DoomEternalArchipelago-v0.5.2-windows-x86_64.zip",
     "doometernalMeathook": "https://github.com/brongo/m3337ho0o0ok/releases/download/v7.2/XINPUT1_3.dll",
