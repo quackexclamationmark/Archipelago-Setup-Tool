@@ -7,7 +7,7 @@ DOWNLOAD THE INSTALLER, NOT THE .ZIP FILE!
 Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could (idk I didn't try it) but it COULD delete everything that is next to the .exe (in the same folder) even tho it's not supposed to. Basically, you can move the folder but probably don't rename it and do not touch what's inside.
 
 # Archipelago Setup Tool
-### [Download latest version | v2.2.0](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v2.2.0)
+### [Download latest version | v2.2.1](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v2.2.1)
 ---
 
 ## Features
@@ -21,7 +21,7 @@ Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could
 
 After setting up a game, all credits can be found in the game's directory, inside the game's directory.
 
-Currently, the following games are supported (130):
+Currently, the following games are supported (131):
 
 - Clair Obscur: Expedition 33
 - Lethal Company
@@ -153,6 +153,7 @@ Currently, the following games are supported (130):
 - Valheim
 - Grand Theft Auto: Vice City
 - Saints Row 2
+- Heretic
 
 Features to add in the future:
 
