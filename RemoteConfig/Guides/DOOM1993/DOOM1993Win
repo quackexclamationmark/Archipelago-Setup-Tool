@@ -16,7 +16,7 @@
 "kill",
 "[HEADER] Connection Infos",
 "kill",
-"Once everything is set up, open 'apdoom-launcher.exe' and go to 'Connect to Game'.\n\nOn 'Select Game...' select (Core) DOOM (1993)'\n\nIn 'Slot Name', enter the name assigned to your YAML file.\n\nIn the 'Server Address' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nThe 'Server Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect to Server' and it should load the game automatically!",
+"Once everything is set up, open 'apdoom-launcher.exe' and go to 'Connect to Game'.\n\nOn 'Select Game...' select '(Core) DOOM (1993)'.\n\nIn 'Slot Name', enter the name assigned to your YAML file.\n\nIn the 'Server Address' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nThe 'Server Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect to Server' and it should load the game automatically!",
 "kill",
 "[HEADER] Revert Infos",
 "kill",
