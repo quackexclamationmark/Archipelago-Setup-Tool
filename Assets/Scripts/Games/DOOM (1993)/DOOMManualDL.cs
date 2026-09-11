@@ -170,7 +170,7 @@ public class DOOMManualDL : MonoBehaviour
     {
         if (!Directory.Exists(DoomArchipelagoPath))
         {
-            ShowInfo("DOOM Archipelago folder found.\nPlease setup again if needed.");
+            ShowInfo("DOOM & Heretic AP folder not found.\nPlease setup again if needed.");
             return;
         }
 
