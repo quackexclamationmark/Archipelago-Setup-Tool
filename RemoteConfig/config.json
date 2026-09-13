@@ -251,7 +251,7 @@
     "doometernalApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/doometernal.apworld",
     
     "dredgeAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-DREDGE.zip",
-    "dredgeApworld": "https://github.com/alextric234/ArchipelagoDredge/releases/download/dredge_0.5.1/dredge.apworld",
+    "dredgeApworld": "https://github.com/alextric234/ArchipelagoDredge/releases/download/dredge_0.5.2/dredge.apworld",
 
     "easydeliverycoBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "easydeliverycoAP": "https://github.com/Aeromaze/Archipelago/releases/download/v0.2.3/EasyDeliveryAP-0.2.3.zip",
@@ -693,8 +693,8 @@
     "vsAP": "https://github.com/SWCreeperKing/ArchipelagoSurvivors/releases/download/v0.3.5.1/ArchipelagoSurvivors.zip",
 
     "votvUE4SS": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/UE4SS_v3.0.1-1016-g6c26f038.zip",
-    "votvApworld": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.6.1/votv.apworld",
-    "votvAP": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.6.1/votv_ap-main.zip",
+    "votvApworld": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.6.2/votv.apworld",
+    "votvAP": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.6.2/votv_ap-main.zip",
     "votvDL": "https://r2.votv.dev/archive/votv/090n.7z",
     "votvFileName": "Voices Of The Void v0.9.0n",
 
