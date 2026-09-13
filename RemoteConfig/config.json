@@ -100,7 +100,7 @@
     "pokemonfrlgPopTracker": "https://github.com/vyneras/pokemon-frlg-tracker/releases/download/4.0.4/pokemon-frlg-tracker.zip",
     "pikmin2PopTracker": "https://github.com/Vinaigre1/Pikmin2-PopTracker/releases/download/v0.2.1/Pikmin2-PopTracker.zip",
     "okamihdPopTracker": "https://github.com/Ragmoa/Okami-HD-AP-Tracker/archive/refs/heads/main.zip",
-    "celesteowPopTracker": "https://github.com/Zeeveez/CelesteOpenWorldPoptracker/archive/refs/tags/v2.1.1.zip",
+    "celesteowPopTracker": "https://github.com/Zeeveez/CelesteOpenWorldPoptracker/archive/refs/tags/v2.1.2.zip",
     "huniepopPopTracker": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V2.3.1/Hunie.Pop.PopTracker.V2.3.0.zip",
     "huniepop2PopTracker": "https://github.com/DotsofdarknessArchipelago/HuniePop2Archipelago/releases/download/v3.1.0/Hunie.Pop.2.Archipelago.PopTracker.V3.1.0.-.HOTFIX.zip",
     "pokeparkwiiPopTracker": "https://github.com/Mekurushi/pokepark_ap_poptracker/releases/download/1.2.4/pokepark_ap_poptracker.zip",
@@ -445,8 +445,8 @@
     "pvzgotyAP": "https://github.com/vicr123/PvZ-Stable-Decompile-AP/releases/download/v1.9%2C2/PlantsVsZombies-GOTY-AP-x64.zip",
     "pvzgotyApworld": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.9.1/pvzr.apworld",
     
-    "pvzreplantedAP": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.9.1/replanted_archipelago_v1.9.1.zip",
-    "pvzreplantedApworld": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.9.1/pvzr.apworld",
+    "pvzreplantedAP": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.10.0/replanted_archipelago_v1.10.0.zip",
+    "pvzreplantedApworld": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.10.0/pvzr.apworld",
     "pvzreplantedMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
 
     "pokemonbwApworld": "https://github.com/BlastSlimey/PokemonBWAP/releases/download/0.3.37/pokemon_bw.apworld",
@@ -693,8 +693,8 @@
     "vsAP": "https://github.com/SWCreeperKing/ArchipelagoSurvivors/releases/download/v0.3.5.1/ArchipelagoSurvivors.zip",
 
     "votvUE4SS": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/UE4SS_v3.0.1-1016-g6c26f038.zip",
-    "votvApworld": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.6.0/votv.apworld",
-    "votvAP": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.6.0/votv_ap-main.zip",
+    "votvApworld": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.6.1/votv.apworld",
+    "votvAP": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.6.1/votv_ap-main.zip",
     "votvDL": "https://r2.votv.dev/archive/votv/090n.7z",
     "votvFileName": "Voices Of The Void v0.9.0n",
 
