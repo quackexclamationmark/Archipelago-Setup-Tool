@@ -125,6 +125,7 @@
     "cyberpunk2077PopTracker": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/0.7.1/cyberpunk2077_poptracker_.0.7.0.zip",
     "inscryptionPopTracker": "https://github.com/empathy-mp3/Archipelago_Inscryption/releases/download/v1.5.4/InscryptionTracker_v2.0.zip",
     "hereticPopTracker": "https://github.com/Forsaken-angel/heretic-ap-tracker/archive/refs/tags/v0.0.1.5.zip",
+    "fnafworldPopTracker": "https://github.com/quackexclamationTesting/Preloaded-Archipelago-Setup-Tool-Mods/releases/download/FNAFWorld/FNaF-World-AP-Poptracker.zip",
     
 
     "adofaiPathName": "A Dance of Fire and Ice",
@@ -263,6 +264,9 @@
     "fezHAT": "https://github.com/FEZModding/HAT/releases/download/v1.2.1/HAT.zip",
     "fezAP": "https://github.com/nhyldmar/fez-ap/releases/download/v0.6.1/FezAP.zip",
     "fezApworld": "https://github.com/nhyldmar/fez-ap/releases/download/v0.6.1/fez.apworld",
+
+    "fnafworldExe": "https://github.com/quackexclamationTesting/Preloaded-Archipelago-Setup-Tool-Mods/releases/download/FNAFWorld/fnaf-world.exe",
+    "fnafworldApworld": "https://github.com/EviVirus/Archipelago-FNaFW/releases/download/FNaFW-v1.2.1/fnafw.apworld",
 
     "ffpsApworld": "https://github.com/EviVirus/Archipelago-FFPS/releases/download/v1.0.0-pre1/ffps.apworld",
 
