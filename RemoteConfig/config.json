@@ -206,7 +206,7 @@
     "contentwarningBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "contentwarningMycelium": "https://github.com/RugbugRedfern/Mycelium-Networking-For-Content-Warning/releases/download/v1.0.14/MyceliumNetworkingForCW-Debug.dll",
 
-    "cupheadAP": "https://github.com/JKLeckr/CupheadArchipelagoMod/releases/download/alpha04a/CupheadArchipelago-alpha04a_win64.zip",
+    "cupheadAP": "https://github.com/JKLeckr/CupheadArchipelagoMod/releases/download/alpha04a.1/CupheadArchipelago-alpha04a.1_win64.zip",
     "cupheadApworld": "https://github.com/JKLeckr/Archipelago-cuphead/releases/download/alpha03k/cuphead.apworld",
     "cupheadBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
@@ -234,6 +234,9 @@
     "drdrAP": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.0/DRAP_1.1.0.zip",
     "drdrREFramework": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/dinput8.dll",
     "drdrLuaAPClient": "https://github.com/TheRealSolidusSnake/RE3R_AP_Client/raw/refs/heads/main/lua-apclientpp.dll",
+
+    "deltaruneAP": "https://github.com/Tenebrosful/DeltaruneAP-mod/releases/download/2.2.1-2/archipelago-2_2_1-2_bsdiff.zip",
+    "deltaruneApworld": "https://github.com/theemeraldsword85/DELTARUNEAP/releases/download/v2.2.1/deltarune.apworld",
 
     "demontidesMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
     "demontidesAP": "https://github.com/estradiol-valerate/DemonTidesAP/releases/download/v0.0.1/DemonTidesAP.zip",
