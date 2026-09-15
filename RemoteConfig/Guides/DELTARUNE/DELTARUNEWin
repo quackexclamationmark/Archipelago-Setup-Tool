@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• DELTARUNE_PATCH folder\n• deltarune.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, deltarune.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. Then, the folder used to patch DELTARUNE for Archipelago ('DELTARUNE_PATCH') will be installed inside the Archipelago directory.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"DELTARUNE is not a core Archipelago game, it needs a custom world file. When 'deltarune.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once you have used the setup, a new 'DELTARUNE Client' will be created inside the Archipelago Launcher and open this client.\n\nOn the client, in the bottom input field, type '/auto_patch steaminstall'.\nIf the command fails, try again with '/auto_patch DELTARUNEPATH' and replace DELTARUNEPATH by your DELTARUNE Steam directory. Once the command is done, a new patched 'DELTARUNE' will be created inside the Archipelago directory.\n\nOn the client again, in the top input field this time, type your multiworld's server address and press 'Connect' (see the 'HOSTING' tab if you want infos about generating a multiworld). When it asks you to enter your slot name, type the name attached to your YAML file. Finally, you can go back to the tool, go to the DELTARUNE setup tab and press the controller icon.",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will delete the 'DELTARUNE' and the 'DELTARUNE_PATCH' folders from the Archipelago directory.",
+"clear"
+
+]
