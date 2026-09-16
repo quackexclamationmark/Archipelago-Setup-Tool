@@ -276,7 +276,7 @@
 
     "ffpsApworld": "https://github.com/EviVirus/Archipelago-FFPS/releases/download/v1.0.0-pre1/ffps.apworld",
 
-    "funiraccoonAP": "https://github.com/Jeffdev-Archipelago-Implementations/FuniRaccoonAP/releases/download/1.7.0/FuniRaccoonAP.zip",
+    "funiraccoonAP": "https://github.com/Jeffdev-Archipelago-Implementations/FuniRaccoonAP/releases/download/1.7.2/FuniRaccoonAP.zip",
     "funiraccoonApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-Funi/releases/download/1.7.1/funi_raccoon.apworld",
 
     "garfieldkartAP": "https://github.com/robotzurg/GarfieldKartAPMod/releases/download/1.0.1/GarfieldKartAPMod.zip",
@@ -578,8 +578,8 @@
     "slimerancherApworld": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.2.1/slime_rancher.apworld",
     "slimerancherMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.1/MelonLoader.x64.zip",
 
-    "slimerancher2AP": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.14.1/SlimeRancher2-AP.zip",
-    "slimerancher2Apworld": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.14.1/slime_rancher_2.apworld",
+    "slimerancher2AP": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.14.2/SlimeRancher2-AP.zip",
+    "slimerancher2Apworld": "https://github.com/Rhelys/SlimeRancher2-AP/releases/download/v0.14.2/slime_rancher_2.apworld",
     "slimerancher2BepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
     "slimerancher2Interop": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/interop.zip",
 
