@@ -1,0 +1,28 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• Celeste64 Archipelago folder (Archipelago modded copy of the game)",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, the Archipelago modded copy of the game (Celeste64 Archipelago) will be installed inside the 'Documents' directory.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Celeste 64 is an Archipelago core game, meaning it does not require a custom world file (.apworld).\nBecause of this, aside from installing the mods, all you need to do is create your YAML file using the 'Options Creator' in the AP Launcher and send it to the person hosting the AP multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is setup, go to the 'Celeste64 Archipelago' folder in your 'Documents' directory (you can find it directly by clicking the folder icon on the setup tab) and open 'AP.json'.\n\nIn the 'Url' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'SlotName', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host didn't set one, simply leave it blank.\n\nFinally, go back to the 'Celeste64 Archipelago' folder and launch 'Celeste64.exe' and you can start playing!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will simply delete 'Celeste64 Archipelago'.",
+"kill",
+"[HEADER] PopTracker Infos",
+"kill",
+"Some games have a PopTracker integration for Archipelago which allows you to track all possible Locations, Items, Upgrades, Zones, Hints and more depending on the game.\n\nFor the setup there are 3 different cases:\n\n\t• If the selected directory does not contain a PopTracker folder (or any similarly named folder), a new 'poptracker' folder will be created and the pack will be downloaded to poptracker\\packs.\n\n\t• If the selected directory already contains a folder with 'PopTracker' in its name, the installer will look for a poptracker.exe file. If one is found, the pack will be downloaded to its packs folder. If no poptracker.exe is found, the folder will be renamed to 'poptracker' and any missing files or folders will be created.\n\n\t• If the selected directory is already a PopTracker folder (for example: C:\\Users\\magni\\Documents\\poptracker), its contents will be validated. If everything is present, the pack will simply be downloaded to poptracker\\packs. Otherwise, the folder will be repaired before the pack is installed.",
+"clear"
+
+]
