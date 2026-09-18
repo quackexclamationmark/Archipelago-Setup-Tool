@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• IsaacSaveInstaller (optional)\n• tboir.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, tboir.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. Then, if you enabled the isaac save installer toggle, 'isaac-save-installer.exe' can be found inside the 'IsaacSaveInstaller' folder that can be found in the Windows Documents directory.\nAt the end of the setup, the Archipelago Mod Workshop page will open automatically, just click 'Subscribe' to download it.",
+"kill",
+"[HEADER] IsaacSaveInstaller Infos",
+"kill",
+"You will need a 100% save, if you don't have one already, you can launch 'isaac-save-installer.exe' inside the 'IsaacSaveInstaller' folder that can be found in the Windows Documents directory to download one.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"TBOIR is not a core Archipelago game, it needs a custom world file. When 'tboir.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, (re)open the Archipelago Launcher and open the 'Isaac Client'.\nLaunch the game through Steam or the tool after subscribing to the Archipelago Mod on the Workshop. After launching the game, load the 100% save and start a new run with any character (if you don't have a 100% save you can check out the IsaacSaveInstaller Infos above).\n\nNow, connect to the 'Isaac Client' as you would with any other client. It should ask you to select the save slot that you are using (1, 2 or 3).\n\nAfter doing all that, you should be good to start playing!",
+"clear"
+
+]
