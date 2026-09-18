@@ -367,7 +367,7 @@
     "mthApworld": "https://github.com/FyreDay/Archipelago-MinaTheHollower/releases/download/v1.1.0/mina_the_hollower.apworld",
     "mthAP": "https://github.com/Axertin/mth-apclient/releases/download/v1.2.1/mth-apclient-v1.2.1-windows.zip",
 
-    "minecraftApworld": "https://github.com/qixils/NeoForgeAP/releases/download/v2.2.0/minecraft.apworld",
+    "minecraftApworld": "https://github.com/qixils/NeoForgeAP/releases/download/v2.2.1/minecraft.apworld",
 
     "neonwhiteMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.6.1/MelonLoader.x64.zip",
     "neonwhiteAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/NWArchipelago.dll",
@@ -476,8 +476,8 @@
     "pokeparkwiiApworld": "https://github.com/Mekurushi/Archipelago_Pokepark/releases/download/1.2.7/pokepark.apworld",
     "pokeparkwiiDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
-    "portal2AP": "https://github.com/GlassToadstool/Portal2ArchipelagoMod/releases/download/0.8.1/Portal2Archipelago.zip",
-    "portal2Apworld": "https://github.com/GlassToadstool/Portal2ArchipelagoMod/releases/download/0.8.1/portal2.apworld",
+    "portal2AP": "https://github.com/GlassToadstool/Portal2ArchipelagoMod/releases/download/0.8.2/Portal2Archipelago.zip",
+    "portal2Apworld": "https://github.com/GlassToadstool/Portal2ArchipelagoMod/releases/download/0.8.2/portal2.apworld",
 
     "powerwashAP": "https://github.com/SWCreeperKing/PowerwashSimAP/releases/download/v0.5.14/SW_CreeperKing.ArchipelagoMod.zip",
     "powerwashBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v6.0.0-pre.1/BepInEx_UnityIL2CPP_x64_6.0.0-pre.1.zip",
@@ -697,7 +697,7 @@
     "valheimApworld": "https://github.com/xyzzy44/ValheimArchipelagoRandomizer/releases/download/0.2.5/valheim.apworld",
     "valheimAP": "https://github.com/xyzzy44/ValheimArchipelagoRandomizer/releases/download/0.2.5/ValheimRandomizer-0.2.5.zip",
     "valheimBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
-    "valheimJotunn": "https://thunderstore.io/package/download/ValheimModding/Jotunn/2.30.0/",
+    "valheimJotunn": "https://thunderstore.io/package/download/ValheimModding/Jotunn/2.30.1/",
 
     "vsApworld": "https://github.com/SWCreeperKing/ArchipelagoSurvivors/releases/download/v0.3.5.1/vampire_survivors.apworld",
     "vsMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.2/MelonLoader.x64.zip",
