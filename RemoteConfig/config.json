@@ -169,7 +169,7 @@
 
     "blueprinceBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/755/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.755%2B3fab71a.zip",
     "blueprinceAP": "https://github.com/Yascob99/BluePrinceArchipelago/releases/download/Alpha-0.1.4/BluePrinceArchipelago-0.1.4.zip",
-    "blueprinceApworld": "https://github.com/BatmenzDW/Archipelago/releases/download/v0.1.0/blueprince.apworld",
+    "blueprinceApworld": "https://github.com/BatmenzDW/Archipelago/releases/download/v0.1.1/blueprince.apworld",
 
     "bombrushBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "bombrushAP": "https://github.com/TRPG0/BRC-Archipelago/releases/download/1.0.6/BRC-Archipelago.1.0.6.zip",
@@ -227,7 +227,7 @@
     "cyberpunk2077TweakXL": "https://github.com/psiberx/cp2077-tweak-xl/releases/download/v1.11.4/TweakXL-1.11.4.zip",
     "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.27.3/ArchiveXL-1.27.3.zip",
     "cyberpunk2077CET": "https://github.com/maximegmd/CyberEngineTweaks/releases/download/v1.37.1/cet_1.37.1.zip",
-    "cyberpunk2077Codeware": "https://github.com/psiberx/cp2077-codeware/releases/download/v1.20.4/Codeware-1.20.4.zip",
+    "cyberpunk2077Codeware": "https://github.com/psiberx/cp2077-codeware/releases/download/v1.20.5/Codeware-1.20.5.zip",
     "cyberpunk2077RED4ext": "https://github.com/wopss/RED4ext/releases/download/v1.30.0/red4ext-1.30.0.zip",
     "cyberpunk2077Phone": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/PhoneExtensionFramework.zip",
 
@@ -267,7 +267,7 @@
     "doometernalApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/doometernal.apworld",
     
     "dredgeAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-DREDGE.zip",
-    "dredgeApworld": "https://github.com/alextric234/ArchipelagoDredge/releases/download/dredge_0.5.2/dredge.apworld",
+    "dredgeApworld": "https://github.com/alextric234/ArchipelagoDredge/releases/download/dredge_0.6.0/dredge.apworld",
 
     "easydeliverycoBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "easydeliverycoAP": "https://github.com/Aeromaze/Archipelago/releases/download/v0.2.3/EasyDeliveryAP-0.2.3.zip",
@@ -400,9 +400,9 @@
     "noitaAP": "https://github.com/DaftBrit/NoitaArchipelago/releases/download/1.5.0/archipelago.zip",
 
     "novalandsMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
-    "novalandsAP": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.1.1/NovaLandsArchipelago.dll",
-    "novalandsMultiClient": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.1.1/Archipelago.MultiClient.Net.dll",
-    "novalandsApworld": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.1.1/novalands.apworld",
+    "novalandsAP": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.2.0/NovaLandsArchipelago.dll",
+    "novalandsMultiClient": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.2.0/Archipelago.MultiClient.Net.dll",
+    "novalandsApworld": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.2.0/novalands.apworld",
 
     "okamihdWOLF": "https://github.com/Axertin/wolf/releases/download/wolf-v0.3.0-beta.3/wolf-runtime-v0.3.0-beta.3.zip",
     "okamihdApworld": "https://github.com/Ragmoa/Archipelago/releases/download/0.5.3/okamihd.apworld",
@@ -458,7 +458,7 @@
     "plagueincAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Plaguepelago.zip",
     "plagueincMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
 
-    "pvzgotyAP": "https://github.com/vicr123/PvZ-Stable-Decompile-AP/releases/download/v1.9%2C2/PlantsVsZombies-GOTY-AP-x64.zip",
+    "pvzgotyAP": "https://github.com/vicr123/PvZ-Stable-Decompile-AP/releases/download/v1.10.0/PlantsVsZombies-GOTY-AP-x64.zip",
     "pvzgotyApworld": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.9.1/pvzr.apworld",
     
     "pvzreplantedAP": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.10.1/replanted_archipelago_v1.10.1.zip",
@@ -689,8 +689,8 @@
     "ultrakillPluginConfigurator": "https://thunderstore.io/package/download/EternalsTeam/PluginConfigurator/1.10.2/",
 
     "uncannycatCoolerMods": "https://github.com/JustSomeJello/Cooler-Mods/releases/download/v2.1.1/CoolerMods_2.1.1.zip",
-    "uncannycatAP": "https://github.com/Jeffdev-Archipelago-Implementations/UncannyCatAP/releases/download/1.0.5/UncannyCatAP_1.0.5.zip",
-    "uncannycatApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-UCG/releases/download/1.0.5/ucg.apworld",
+    "uncannycatAP": "https://github.com/Jeffdev-Archipelago-Implementations/UncannyCatAP/releases/download/1.1.1/UncannyCatAP_1.1.1.zip",
+    "uncannycatApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-UCG/releases/download/1.1.1/ucg.apworld",
     "uncannycatDL": "https://github.com/quackexclamationTesting/Preloaded-Archipelago-Setup-Tool-Mods/releases/download/UCG/uncanny-cat-golf-win64.zip",
 
     "undertaleyellowApworld": "https://github.com/Pugie38/Undertale-Yellow-AP/releases/download/v0.2.2/undertale_yellow.apworld",
