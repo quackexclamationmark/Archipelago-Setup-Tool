@@ -16,7 +16,7 @@
 "kill",
 "[HEADER] Connection Infos",
 "kill",
-"Once everything is set up, a new console window (separated from the actual game) should open when launching the game.\n\nOnce in the main menu, go to the console window (the one that launches with the game) '/connect archipelago.gg:XXXXX [slotname]'\n\nXXXXX is the room’s port. You can find this number on the website after creating a new room.\n\n'[slotname]' is the name assigned to your yaml file.\n\nFinally, you should see a text saying that you're connected and you can now go back to your game and start a new save!\n\n/!\\ MAKE SURE THAT YOU ARE OFFLINE ON DARK SOULS 2 BEFORE STARTING /!\\",
+"Once everything is set up, a new console window (separated from the actual game) should open when launching the game.\n\nOnce in the main menu, go to the console window (the one that launches with the game) '/connect archipelago.gg:XXXXX [slotname]'\n\nXXXXX is the room’s port. You can find this number on the website after creating a new room.\n\n'[slotname]' is the name assigned to your yaml file.\n\nFinally, you should see a text saying that you're connected and you can now go back to your game and start a new save!",
 "kill",
 "[HEADER] Revert Infos",
 "kill",
