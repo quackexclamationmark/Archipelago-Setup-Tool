@@ -334,6 +334,12 @@
     "inscryptionApworld": "https://github.com/empathy-mp3/Archipelago_Inscryption/releases/download/v1.5.4/inscryption_beta.apworld",
     "inscryptionBepInEx": "https://thunderstore.io/package/download/BepInEx/BepInExPack_Inscryption/5.4.2305/",
 
+    "itbAP": "https://github.com/quackexclamationTesting/Preloaded-Archipelago-Setup-Tool-Mods/releases/download/IntoTheBreach/randomizer.zip",
+    "itbAPLib": "https://github.com/quackexclamationTesting/Preloaded-Archipelago-Setup-Tool-Mods/releases/download/IntoTheBreach/apworld_lib.zip",
+    "itbApworld": "https://github.com/Ishigh1/ITB-randomizer-for-AP/releases/download/v0.15.18/into_the_breach.apworld",
+    "itbMemedit": "https://github.com/itb-community/memedit/archive/refs/tags/v1.2.1.zip",
+    "itbModLoader": "https://github.com/itb-community/ITB-ModLoader/releases/download/v2.9.5/ITB-ModLoader-2.9.5.zip",
+
     "kspAP": "https://github.com/nickdavies/KSP1-Archipelago-client/releases/download/v0.9.3/KSPArchipelago.zip",
     "kspApworld": "https://github.com/nickdavies/Archipelago/releases/download/v0.9.1/ksp1.apworld",
 
