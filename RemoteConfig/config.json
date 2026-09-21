@@ -169,7 +169,7 @@
 
     "blueprinceBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/755/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.755%2B3fab71a.zip",
     "blueprinceAP": "https://github.com/Yascob99/BluePrinceArchipelago/releases/download/Alpha-0.1.4/BluePrinceArchipelago-0.1.4.zip",
-    "blueprinceApworld": "https://github.com/BatmenzDW/Archipelago/releases/download/v0.1.1/blueprince.apworld",
+    "blueprinceApworld": "https://github.com/BatmenzDW/Archipelago/releases/download/v0.1.2/blueprince.apworld",
 
     "bombrushBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "bombrushAP": "https://github.com/TRPG0/BRC-Archipelago/releases/download/1.0.6/BRC-Archipelago.1.0.6.zip",
@@ -241,7 +241,7 @@
 
     "deadcellsApworld": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.1.8/dead_cells.apworld",
     "deadcellsAP": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.1.8/mods.zip",
-    "deadcellsCoreModding": "https://github.com/dead-cells-core-modding/core/releases/download/v35.13.5/win-x64.zip",
+    "deadcellsCoreModding": "https://github.com/dead-cells-core-modding/core/releases/download/v35.13.6/win-x64.zip",
 
     "drdrApworld": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.0/drdr.apworld",
     "drdrAP": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.0/DRAP_1.1.0.zip",
@@ -261,7 +261,7 @@
 
     "hereticAP": "https://github.com/ArchipelagoDoom/APDoom/releases/download/v2.0.0/APDoom-2.0-Windows-x64.zip",
 
-    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.5.2/DoomEternalArchipelago-v0.5.2-windows-x86_64.zip",
+    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.5.3/DoomEternalArchipelago-v0.5.3-windows-x86_64.zip",
     "doometernalMeathook": "https://github.com/brongo/m3337ho0o0ok/releases/download/v7.2/XINPUT1_3.dll",
     "doometernalModInjector": "https://gamebanana.com/dl/1765017",
     "doometernalApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/doometernal.apworld",
@@ -476,7 +476,7 @@
     "pokemonfrlgBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
     "pokemonfrlgApworld": "https://github.com/vyneras/Archipelago/releases/download/1.1.3/pokemon_frlg.apworld",
 
-    "pokemonplatinumApworld": "https://github.com/ljtpetersen/platinum_archipelago/releases/download/v0.2.0/pokemon_platinum.apworld",
+    "pokemonplatinumApworld": "https://github.com/ljtpetersen/platinum_archipelago/releases/download/v0.2.1/pokemon_platinum.apworld",
     "pokemonplatinumBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
     "pokemonsnapApworld": "https://github.com/nielrenned/PokemonSnap_Archipelago/releases/download/v0.7.0/pokemon_snap.apworld",
@@ -571,9 +571,9 @@
     "scritchyApworld": "https://github.com/ksteve35/ScritchyScratchyAP/releases/download/v0.1.2-hotfix.2/scritchy_scratchy.apworld",
     "scritchyAP": "https://github.com/ksteve35/ScritchyScratchyAP/releases/download/v0.1.2-hotfix.2/ScritchyScratchyAP-v0.1.2-hotfix.2.zip",
 
-    "sharAPMod": "https://github.com/nmize1/AP-SHARRandomizer/releases/download/v0.5.3-b/SHARAP.lmlm",
-    "sharAP": "https://github.com/nmize1/AP-SHARRandomizer/releases/download/v0.5.3-b/SHARRandomizer.zip",
-    "sharApworld": "https://github.com/nmize1/Archipelago/releases/download/v0.5.4b/simpsonshitnrun.apworld",
+    "sharAPMod": "https://github.com/nmize1/AP-SHARRandomizer/releases/download/v0.5.4-b/SHARAP.lmlm",
+    "sharAP": "https://github.com/nmize1/AP-SHARRandomizer/releases/download/v0.5.4-b/SHARRandomizer.zip",
+    "sharApworld": "https://github.com/nmize1/Archipelago/releases/download/v0.5.5-b/simpsonshitnrun.apworld",
     "sharModLauncher": "https://modbakery.donutteam.com/project-branch-version-files/download/6/46/529/580",
 
     "skulApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-Skul/releases/download/1.0.2/skul.apworld",
