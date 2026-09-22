@@ -369,8 +369,8 @@
     "mkddApworld": "https://github.com/aXu-AP/archipelago-double-dash/releases/download/v1.0.1/mario_kart_double_dash.apworld",
     "mkddDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
-    "mkwiiApworld": "https://github.com/toent/Archipelago-MKWii/releases/download/v0.2.3/mkwii.apworld",
-    "mkwiiAP": "https://github.com/toent/Archipelago-MKWii/releases/download/v0.2.3/mkwii_client_win_v0.2.3.zip",
+    "mkwiiApworld": "https://github.com/toent/Archipelago-MKWii/releases/download/pre0.2.4/mkwii.apworld",
+    "mkwiiAP": "https://github.com/toent/Archipelago-MKWii/releases/download/pre0.2.4/mkwii_client_win_pre0.2.4.zip",
     "mkwiiDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "metalhellApworld": "https://github.com/DanielSchaack/ArchipelagoMetalHellsinger/releases/download/1.1.3/metal_hellsinger.apworld",
@@ -505,7 +505,7 @@
 
     "raftAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-RMLL-Raft.zip",
 
-    "refunctAP": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.7.0/practice-windows.zip",
+    "refunctAP": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.7.0a/practice-windows.zip",
     "refunctApworld": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.7.0/refunct.apworld",
 
     "repoPathName": "REPO",
