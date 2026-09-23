@@ -303,6 +303,7 @@
     "gtavcWidescreen": "https://github.com/ThirteenAG/WidescreenFixesPack/releases/download/gtavc/GTAVC.WidescreenFix.zip",
     "gtavcCleo": "https://github.com/cleolibrary/III.VC.CLEO/releases/download/v2.2.0/VC.CLEO-v2.2.0.zip",
     "gtavcExe": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/gta-vc.exe",
+    "gtavcSetup": "https://github.com/Kryen112/GTA-Vice-City-AP/releases/download/2.1.0/GTA-Vice-City-AP-Setup.exe",
 
     "hadesImporter": "https://github.com/NaixGames/PolycosmosInstaller/releases/download/0.3/Installer.exe",
     "hadesApworld": "https://github.com/NaixGames/Polycosmos/releases/download/0.16.3/hades.apworld",
@@ -369,8 +370,8 @@
     "mkddApworld": "https://github.com/aXu-AP/archipelago-double-dash/releases/download/v1.0.1/mario_kart_double_dash.apworld",
     "mkddDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
-    "mkwiiApworld": "https://github.com/toent/Archipelago-MKWii/releases/download/pre0.2.4/mkwii.apworld",
-    "mkwiiAP": "https://github.com/toent/Archipelago-MKWii/releases/download/pre0.2.4/mkwii_client_win_pre0.2.4.zip",
+    "mkwiiApworld": "https://github.com/toent/Archipelago-MKWii/releases/download/v0.3.0/mkwii.apworld",
+    "mkwiiAP": "https://github.com/toent/Archipelago-MKWii/releases/download/v0.3.0/mkwii_client_win_v0.3.0.zip",
     "mkwiiDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "metalhellApworld": "https://github.com/DanielSchaack/ArchipelagoMetalHellsinger/releases/download/1.1.3/metal_hellsinger.apworld",
