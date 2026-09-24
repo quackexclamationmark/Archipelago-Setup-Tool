@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• ITB ModLoader\n• randomizer folder (Archipelago Mod)\n• memedit folder\n• into_the_breach.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, into_the_breach.apworld will be installed and moved into the 'custom_worlds' folder and the required APWorld dependencies will be downloaded in the 'lib' folder inside the Archipelago Launcher directory. The Mod Loader will then be installed into the game's core folder. The AP Mod and memedit folders will be installed inside the 'mods' folder.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Into the Breach is not a core Archipelago game, it needs a custom world file. When 'into_the_breach.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up you should see an Archipelago window in the main menu. Before connecting, go to 'Mod Content' > 'Configure Mods' and enable 'Mod Loader Extensions' and 'Randomizer'. Now go back to the AP connection window.\n\nIn the first field (Adress), enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn the second field (Slot name), enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect', change your profile to a fresh new one and then you can start playing!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will delete the Mod Loader, memedit lib and the Archipelago randomizer.",
+"clear"
+
+]
