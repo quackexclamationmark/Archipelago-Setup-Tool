@@ -2,7 +2,9 @@
     "apSearchPaths": [
         "ProgramData\\Archipelago",
         "Archipelago",
-        "Archipelago\\Archipelago"
+        "Archipelago\\Archipelago",
+        "!Games\\Archipelago\\Archipelago\\custom_worlds",
+        "Storage\\Games\\Archipelago\\Archipelago\\custom_worlds"
     ],
     
     "steamSearchPaths": [
@@ -17,7 +19,8 @@
         "Program Files\\steamapps\\common",
         "Programs\\steamapps\\common",
         "Games\\steamapps\\common",
-        "SteamLibrarySSD\\steamapps\\common"
+        "SteamLibrarySSD\\steamapps\\common",
+        "!Games\\Launcher\\Steam\\Steam\\steamapps\\common"
     ],
 
     "steamSearchPathsLinuxHome": [
