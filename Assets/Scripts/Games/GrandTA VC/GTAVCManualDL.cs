@@ -14,10 +14,9 @@ public class GTAVCManualDL : MonoBehaviour
 
     [Header("GAME FILES")]
     public FileDownloader.FileData gtavcApworld;
-    public FileDownloader.FileData gtavcASI;
     public FileDownloader.FileData gtavcWidescreen;
-    public FileDownloader.FileData gtavcCleo;
     public FileDownloader.FileData gtavcExe;
+    public FileDownloader.FileData gtavcSetup;
 
     [Header("PLATFORM SELECTION")]
     public Button steamButton;
@@ -34,10 +33,9 @@ public class GTAVCManualDL : MonoBehaviour
 
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
-    public Toggle installASIToggle;
     public Toggle installWidescreenToggle;
-    public Toggle installCleoToggle;
     public Toggle installExeToggle;
+    public Toggle installSetupToggle;
 
     [Header("CONFIRMATION PANEL")]
     public GameObject confirmationPanel;
@@ -59,6 +57,8 @@ public class GTAVCManualDL : MonoBehaviour
     private bool lastApWorldInstallSuccess = false;
 
     private const string ExeBackupFolderName = ".exeBackup";
+    private const string SetupExeFileName = "GTA-Vice-City-AP-Setup.exe";
+    private const long PatchedExeSizeKB = 3017;
 
     private static readonly string[] RevertFolders = new string[]
     {
@@ -80,10 +80,9 @@ public class GTAVCManualDL : MonoBehaviour
     public class GameConfig
     {
         public string gtavcApworld;
-        public string gtavcASI;
         public string gtavcWidescreen;
-        public string gtavcCleo;
         public string gtavcExe;
+        public string gtavcSetup;
         public string[] steamSearchPaths;
         public string[] rockstarSearchPaths;
         public string[] apSearchPaths;
@@ -118,17 +117,14 @@ public class GTAVCManualDL : MonoBehaviour
         if (installAPWorldToggle != null)
             installAPWorldToggle.isOn = true;
 
-        if (installASIToggle != null)
-            installASIToggle.isOn = true;
-
         if (installWidescreenToggle != null)
             installWidescreenToggle.isOn = true;
 
-        if (installCleoToggle != null)
-            installCleoToggle.isOn = true;
-
         if (installExeToggle != null)
             installExeToggle.isOn = true;
+
+        if (installSetupToggle != null)
+            installSetupToggle.isOn = true;
 
         if (confirmationPanel != null)
             confirmationPanel.SetActive(false);
@@ -139,10 +135,6 @@ public class GTAVCManualDL : MonoBehaviour
         if (cancelButton != null)
             cancelButton.onClick.AddListener(OnCancel);
     }
-
-    // =========================================================
-    // PLATFORM SELECTION
-    // =========================================================
 
     void OnSteamButtonClicked()
     {
@@ -180,18 +172,15 @@ public class GTAVCManualDL : MonoBehaviour
         }
     }
 
-    // =========================================================
-
     void ApplyGameConfig()
     {
         if (remoteConfig == null)
             return;
 
         gtavcApworld.url = remoteConfig.gtavcApworld;
-        gtavcASI.url = remoteConfig.gtavcASI;
         gtavcWidescreen.url = remoteConfig.gtavcWidescreen;
-        gtavcCleo.url = remoteConfig.gtavcCleo;
         gtavcExe.url = remoteConfig.gtavcExe;
+        gtavcSetup.url = remoteConfig.gtavcSetup;
     }
 
     public void RunSetup()
@@ -241,21 +230,11 @@ public class GTAVCManualDL : MonoBehaviour
         gamePath = GetGamePath();
 
         bool Apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
-        bool ASI = installASIToggle == null || installASIToggle.isOn;
         bool Widescreen = installWidescreenToggle == null || installWidescreenToggle.isOn;
-        bool Cleo = installCleoToggle == null || installCleoToggle.isOn;
         bool Exe = installExeToggle == null || installExeToggle.isOn;
+        bool Setup = installSetupToggle == null || installSetupToggle.isOn;
 
-        bool needsGamePath = Widescreen || Cleo || ASI || Exe || !Apworld;
-
-        if (needsGamePath && string.IsNullOrEmpty(gamePath))
-        {
-            string platform = isRockstar ? "Rockstar" : "Steam";
-            ShowInfo("Game not found on " + platform + ". Please check installation.");
-            return;
-        }
-
-        int count = (Apworld ? 1 : 0) + (ASI ? 1 : 0) + (Widescreen ? 1 : 0) + (Cleo ? 1 : 0) + (Exe ? 1 : 0);
+        int count = (Apworld ? 1 : 0) + (Widescreen ? 1 : 0) + (Exe ? 1 : 0) + (Setup ? 1 : 0);
 
         if (Apworld && count == 1)
         {
@@ -269,7 +248,14 @@ public class GTAVCManualDL : MonoBehaviour
             return;
         }
 
-        StartCoroutine(SetupWithTracking(Apworld, ASI, Widescreen, Cleo, Exe));
+        if (string.IsNullOrEmpty(gamePath))
+        {
+            string platform = isRockstar ? "Rockstar" : "Steam";
+            ShowInfo("Game not found on " + platform + ". Please check installation.");
+            return;
+        }
+
+        StartCoroutine(SetupWithTracking(Apworld, Widescreen, Exe, Setup));
     }
 
     IEnumerator APWorldOnlyFlow()
@@ -287,7 +273,7 @@ public class GTAVCManualDL : MonoBehaviour
         ShowInfo("Installation complete!");
     }
 
-    IEnumerator SetupWithTracking(bool wantApworld, bool wantASI, bool wantWidescreen, bool wantCleo, bool wantExe)
+    IEnumerator SetupWithTracking(bool wantApworld, bool wantWidescreen, bool wantExe, bool wantSetup)
     {
         ShowInfo("Initializing installation tracker...");
         yield return new WaitForSeconds(0.5f);
@@ -303,28 +289,22 @@ public class GTAVCManualDL : MonoBehaviour
             yield return InstallAPWorld();
         }
 
-        if (wantASI)
-        {
-            ShowInfo("Installing ASI loader...");
-            yield return InstallZipToGameDir(gtavcASI, "ASI");
-        }
-
         if (wantWidescreen)
         {
             ShowInfo("Installing widescreen fix...");
             yield return InstallZipToGameDir(gtavcWidescreen, "Widescreen");
         }
 
-        if (wantCleo)
-        {
-            ShowInfo("Installing CLEO...");
-            yield return InstallZipToGameDir(gtavcCleo, "CLEO");
-        }
-
         if (wantExe)
         {
             ShowInfo("Installing patched executable...");
             yield return InstallExeWithBackup(gtavcExe, "Exe");
+        }
+
+        if (wantSetup)
+        {
+            ShowInfo("Installing Setup...");
+            yield return InstallSetupExe(gtavcSetup);
         }
 
         SaveInstalledFilesManifest(currentManifest);
@@ -391,8 +371,6 @@ public class GTAVCManualDL : MonoBehaviour
                 }
             }
 
-            // Explicitly remove the known folders/files dropped by the ASI/Widescreen/CLEO
-            // installs, regardless of whether the manifest tracked them individually.
             foreach (string folderName in RevertFolders)
             {
                 try
@@ -431,7 +409,6 @@ public class GTAVCManualDL : MonoBehaviour
                 }
             }
 
-            // Restore the original exe from .exeBackup, then clean up the backup folder.
             string backupDir = Path.Combine(manifest.gameInstallPath, ExeBackupFolderName);
             if (manifest.backedUpFiles != null)
             {
@@ -442,14 +419,17 @@ public class GTAVCManualDL : MonoBehaviour
                         string backupPath = Path.Combine(backupDir, backedUpFileName);
                         string restorePath = Path.Combine(manifest.gameInstallPath, backedUpFileName);
 
-                        if (File.Exists(backupPath))
+                        if (!File.Exists(backupPath))
                         {
-                            if (File.Exists(restorePath))
-                                File.Delete(restorePath);
-
-                            File.Move(backupPath, restorePath);
-                            UnityEngine.Debug.Log("Restored original exe from backup: " + restorePath);
+                            UnityEngine.Debug.LogWarning("No backup found to restore for: " + backedUpFileName);
+                            continue;
                         }
+
+                        if (File.Exists(restorePath))
+                            File.Delete(restorePath);
+
+                        File.Move(backupPath, restorePath);
+                        UnityEngine.Debug.Log("Restored original exe from backup: " + restorePath);
                     }
                     catch (System.Exception e)
                     {
@@ -471,14 +451,6 @@ public class GTAVCManualDL : MonoBehaviour
             ShowInfo("Error during revert:\n" + e.Message);
             UnityEngine.Debug.LogError("Revert error: " + e);
         }
-        finally
-        {
-            try
-            {
-                File.Delete(manifestPath);
-            }
-            catch { }
-        }
     }
 
     void RemoveEmptyDirectories(string path)
@@ -499,9 +471,6 @@ public class GTAVCManualDL : MonoBehaviour
         catch { }
     }
 
-    // Downloads a zip via the remote config URL, extracts it, and moves ALL of its
-    // contents directly into the game install directory, tracking every moved file
-    // in the current manifest so it can be reverted later.
     IEnumerator InstallZipToGameDir(FileDownloader.FileData fileData, string componentName)
     {
         if (fileData == null || string.IsNullOrEmpty(fileData.url))
@@ -527,9 +496,6 @@ public class GTAVCManualDL : MonoBehaviour
         UnityEngine.Debug.Log(componentName + " installed successfully!");
     }
 
-    // Downloads a single .exe file. Before placing it in the game directory, any
-    // existing file with the same name in the game directory is moved into a
-    // ".exeBackup" subfolder so it can be restored later on revert.
     IEnumerator InstallExeWithBackup(FileDownloader.FileData fileData, string componentName)
     {
         if (fileData == null || string.IsNullOrEmpty(fileData.url))
@@ -553,6 +519,23 @@ public class GTAVCManualDL : MonoBehaviour
                 fileName = fileName.Substring(0, fileName.IndexOf("?"));
         }
 
+        string targetPath = Path.Combine(gamePath, fileName);
+
+        if (File.Exists(targetPath) && GetFileSizeKB(targetPath) == PatchedExeSizeKB)
+        {
+            UnityEngine.Debug.Log(componentName + " already installed (" + PatchedExeSizeKB + " KB), skipping.");
+            yield break;
+        }
+
+        string backupDir = Path.Combine(gamePath, ExeBackupFolderName);
+        string backupPath = Path.Combine(backupDir, fileName);
+
+        if (File.Exists(backupPath))
+        {
+            UnityEngine.Debug.Log(componentName + " backup already exists at " + backupPath + ", skipping install.");
+            yield break;
+        }
+
         string tempPath = Path.Combine(Application.persistentDataPath, fileName);
 
         UnityEngine.Debug.Log("Downloading " + componentName + " from: " + fileData.url);
@@ -566,20 +549,11 @@ public class GTAVCManualDL : MonoBehaviour
             yield break;
         }
 
-        string targetPath = Path.Combine(gamePath, fileName);
-
-        // Back up whatever exe is currently sitting there, if any.
         if (File.Exists(targetPath))
         {
             try
             {
-                string backupDir = Path.Combine(gamePath, ExeBackupFolderName);
                 Directory.CreateDirectory(backupDir);
-
-                string backupPath = Path.Combine(backupDir, fileName);
-
-                if (File.Exists(backupPath))
-                    File.Delete(backupPath);
 
                 File.Move(targetPath, backupPath);
 
@@ -602,9 +576,6 @@ public class GTAVCManualDL : MonoBehaviour
 
             UnityEngine.Debug.Log(componentName + " copied to: " + targetPath);
 
-            if (currentManifest != null)
-                currentManifest.installedFiles.Add(targetPath);
-
             ShowInfo(componentName + " installed successfully!");
         }
         catch (System.Exception e)
@@ -622,6 +593,107 @@ public class GTAVCManualDL : MonoBehaviour
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogWarning("Could not delete temporary " + componentName + " file: " + e.Message);
+        }
+    }
+
+    IEnumerator InstallSetupExe(FileDownloader.FileData fileData)
+    {
+        if (fileData == null || string.IsNullOrEmpty(fileData.url))
+        {
+            UnityEngine.Debug.LogWarning("Setup URL is empty, skipping.");
+            yield break;
+        }
+
+        if (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath))
+        {
+            ShowInfo("ERROR: Game directory not found, cannot install Setup!");
+            yield break;
+        }
+
+        string tempPath = Path.Combine(Application.persistentDataPath, SetupExeFileName);
+
+        UnityEngine.Debug.Log("Downloading Setup from: " + fileData.url);
+
+        yield return DownloadFile(fileData.url, tempPath);
+
+        if (!File.Exists(tempPath))
+        {
+            UnityEngine.Debug.LogError("Setup download failed: file not found at " + tempPath);
+            ShowInfo("ERROR: Setup download failed!");
+            yield break;
+        }
+
+        string targetPath = Path.Combine(gamePath, SetupExeFileName);
+
+        try
+        {
+            File.Copy(tempPath, targetPath, true);
+
+            UnityEngine.Debug.Log("Setup copied to: " + targetPath);
+
+            if (currentManifest != null)
+                currentManifest.installedFiles.Add(targetPath);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to copy Setup: " + e.Message);
+            ShowInfo("ERROR: Failed to install Setup\n" + e.Message);
+            yield break;
+        }
+
+        try
+        {
+            if (File.Exists(tempPath))
+                File.Delete(tempPath);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Could not delete temporary Setup file: " + e.Message);
+        }
+
+        try
+        {
+            UnityEngine.Debug.Log("Launching Setup: " + targetPath);
+            Process.Start(targetPath);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to launch Setup: " + e.Message);
+            ShowInfo("ERROR: Failed to launch Setup\n" + e.Message);
+        }
+    }
+
+    public void LaunchGTAVC()
+    {
+        try
+        {
+            string exePath = Path.Combine(gamePath, "gta-vc.exe");
+
+            if (File.Exists(exePath))
+            {
+                ProcessStartInfo startInfo = new ProcessStartInfo(exePath);
+                startInfo.WorkingDirectory = gamePath;
+                startInfo.UseShellExecute = true;
+                startInfo.Verb = "runas";
+
+                Process.Start(startInfo);
+                UnityEngine.Debug.Log("Into the Breach launched (admin): " + exePath);
+            }
+            else
+            {
+                UnityEngine.Debug.LogError("Breach.exe not found at: " + exePath);
+                ShowInfo("ERROR: Breach.exe not found!");
+            }
+        }
+        catch (System.ComponentModel.Win32Exception e)
+        {
+            UnityEngine.Debug.LogWarning("Launch cancelled or elevation denied: " + e.Message);
+            ShowInfo("Launch cancelled (admin approval was declined).");
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to launch Into the Breach: " + e.Message);
+            ShowInfo("ERROR: Failed to launch Into the Breach!");
         }
     }
 
@@ -874,9 +946,17 @@ public class GTAVCManualDL : MonoBehaviour
             infoPanel.SetActive(false);
     }
 
-    // =========================================================
-    // GAME PATH DETECTION
-    // =========================================================
+    long GetFileSizeKB(string path)
+    {
+        try
+        {
+            return new FileInfo(path).Length / 1024;
+        }
+        catch
+        {
+            return -1;
+        }
+    }
 
     string GetGamePath()
     {

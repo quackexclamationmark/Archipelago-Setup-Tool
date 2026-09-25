@@ -119,7 +119,7 @@ public class CloverPitManualDL : MonoBehaviour
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to setup all the files?", "Setup");
+        ShowConfirmation("Are you sure you want to setup?", "Setup");
     }
 
     public void RevertAll()
@@ -280,13 +280,13 @@ public class CloverPitManualDL : MonoBehaviour
 
         if (installArchipelagoToggle != null && installArchipelagoToggle.isOn)
         {
-            ShowInfo("Installing CloverPit Archipelago Mod...");
+            ShowInfo("Installing Archipelago Mod...");
             yield return InstallCloverPitAP();
         }
 
         if (installAPWorldToggle != null && installAPWorldToggle.isOn)
         {
-            ShowInfo("Installing cloverpit.apworld...");
+            ShowInfo("Installing APWorld...");
             yield return InstallAPWorld();
         }
 

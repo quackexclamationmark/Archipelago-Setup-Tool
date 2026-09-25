@@ -1,5 +1,6 @@
 /*using UnityEditor.Rendering.LookDev;*/
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class GamePanelManager : MonoBehaviour
 {
@@ -134,6 +135,16 @@ public class GamePanelManager : MonoBehaviour
     public GameObject gtavcPanel;
     public GameObject saintsrow2Panel;
     public GameObject hereticPanel;
+    public GameObject novalandsPanel;
+    public GameObject ffpsPanel;
+    public GameObject fnafwPanel;
+    public GameObject tboiPanel;
+    public GameObject deltarunePanel;
+    public GameObject ucgPanel;
+    public GameObject celeste64Panel;
+    public GameObject blueprincePanel;
+    public GameObject whiteknucklePanel;
+    public GameObject itbPanel;
 
     void Start()
     {
@@ -539,6 +550,36 @@ public class GamePanelManager : MonoBehaviour
             case "Heretic":
                 hereticPanel.SetActive(true);
                 break;
+            case "NovaLands":
+                novalandsPanel.SetActive(true);
+                break;
+            case "FreddyFazbearsPizzeriaSimulator":
+                ffpsPanel.SetActive(true);
+                break;
+            case "FNAFWorld":
+                fnafwPanel.SetActive(true);
+                break;
+            case "TheBindingOfIsaacRepentance":
+                tboiPanel.SetActive(true);
+                break;
+            case "DELTARUNE":
+                deltarunePanel.SetActive(true);
+                break;
+            case "UncannyCatGolf":
+                ucgPanel.SetActive(true);
+                break;
+            case "Celeste64":
+                celeste64Panel.SetActive(true);
+                break;
+            case "BluePrince":
+                blueprincePanel.SetActive(true);
+                break;
+            case "WhiteKnuckle":
+                whiteknucklePanel.SetActive(true);
+                break;
+            case "IntoTheBreach":
+                itbPanel.SetActive(true);
+                break;
         }
     }
 
@@ -675,5 +716,15 @@ public class GamePanelManager : MonoBehaviour
         if (gtavcPanel != null) gtavcPanel.SetActive(false);
         if (saintsrow2Panel != null) saintsrow2Panel.SetActive(false);
         if (hereticPanel != null) hereticPanel.SetActive(false);
+        if (novalandsPanel != null) novalandsPanel.SetActive(false);
+        if (ffpsPanel != null) ffpsPanel.SetActive(false);
+        if (fnafwPanel != null) fnafwPanel.SetActive(false);
+        if (tboiPanel != null) tboiPanel.SetActive(false);
+        if (deltarunePanel != null) deltarunePanel.SetActive(false);
+        if (ucgPanel != null) ucgPanel.SetActive(false);
+        if (celeste64Panel != null) celeste64Panel.SetActive(false);
+        if (blueprincePanel != null) blueprincePanel.SetActive(false);
+        if (whiteknucklePanel != null) whiteknucklePanel.SetActive(false);
+        if (itbPanel != null) itbPanel.SetActive(false);
     }
 }

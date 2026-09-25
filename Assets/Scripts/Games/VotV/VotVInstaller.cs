@@ -37,7 +37,7 @@ public class VotVInstaller : MonoBehaviour
     private VotVConfig remoteConfig;
     private bool configLoaded = false;
     private string votvDownloadUrl;
-    private string votvFileName; // Nouvelle variable pour le nom du fichier
+    private string votvFileName;
 
     [System.Serializable]
     public class VotVConfig
