@@ -3,8 +3,8 @@
         "ProgramData\\Archipelago",
         "Archipelago",
         "Archipelago\\Archipelago",
-        "!Games\\Archipelago\\Archipelago\\custom_worlds",
-        "Storage\\Games\\Archipelago\\Archipelago\\custom_worlds"
+        "!Games\\Archipelago\\Archipelago",
+        "Storage\\Games\\Archipelago\\Archipelago"
     ],
     
     "steamSearchPaths": [
