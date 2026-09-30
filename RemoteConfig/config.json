@@ -5,7 +5,8 @@
         "Archipelago\\Archipelago",
         "!Games\\Archipelago\\Archipelago",
         "Storage\\Games\\Archipelago\\Archipelago",
-        "archipelago\\Archipelago"
+        "archipelago\\Archipelago",
+        "achipelago\\Archipelago"
     ],
     
     "steamSearchPaths": [
