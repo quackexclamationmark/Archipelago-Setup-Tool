@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• BepInEx (+ doorstop_config.ini, run_bepinex.sh & winhttp.dll)\n• CotL Archipelago folder (Archipelago Mod)\n• cult_of_the_lamb.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, cult_of_the_lamb.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. BepInEx will then be downloaded into the CotL core files, along with the AP Mod, which will be placed in 'Cult of the Lamb\\BepInEx\\plugins'.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"CotL is not a core Archipelago game, it needs a custom world file. When 'cult_of_the_lamb.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, start a new run on a fresh new save. Press the pause menu and click the 'Archipelago' button.\n\nIn the 'Server' field, enter 'archipelago.gg'.\n\nIn the 'Port' field, enter the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Slot', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect to Archipelago' and you can start playing!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"You have 2 revert options, both can't be enabled at the same time.\n\nIf you use the 'Clear AP Mods' option it will only delete the mods that are required for CotL Archipelago.\n\nIf you use the 'Full Clear BepInEx' option it will delete everything related to BepInEx and mods. If other mods are detected an additionnal confirmation will appear.",
+"clear"
+
+]
