@@ -2,6 +2,7 @@
     "apSearchPaths": [
         "ProgramData\\Archipelago",
         "Archipelago",
+        "archipelago",
         "Archipelago\\Archipelago",
         "!Games\\Archipelago\\Archipelago",
         "Storage\\Games\\Archipelago\\Archipelago",
