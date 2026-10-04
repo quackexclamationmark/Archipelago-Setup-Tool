@@ -145,7 +145,7 @@
     "adofaiPathName": "A Dance of Fire and Ice",
     "adofaiBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "adofaiAP": "https://github.com/ClaudeChibout/ADOFAI_AP-Mod/releases/download/v1.0.8-pre/ADOFAI_AP-Mod.zip",
-    "adofaiApworld": "https://github.com/ClaudeChibout/Archipelago-ADOFAI/releases/download/v1.2.1/adofai.apworld",
+    "adofaiApworld": "https://github.com/ClaudeChibout/Archipelago-ADOFAI/releases/download/v1.3.0/adofai.apworld",
 
     "ashorthikePathName": "A Short Hike",
     "ashorthikeBepInEx": "https://github.com/BrandenEK/AShortHike.ModdingTools/raw/main/win32.zip",
@@ -226,8 +226,8 @@
     "contentwarningBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "contentwarningMycelium": "https://github.com/RugbugRedfern/Mycelium-Networking-For-Content-Warning/releases/download/v1.0.14/MyceliumNetworkingForCW-Debug.dll",
 
-    "cotlApworld": "https://github.com/IanCichy/CultOfTheLamb_Archipelago/releases/download/v0.9.0-beta.1/cult_of_the_lamb.apworld",
-    "cotlAP": "https://github.com/IanCichy/CultOfTheLamb_Archipelago/releases/download/v0.9.0-beta.1/Archipelago_CultOfTheLamb-0.9.0.zip",
+    "cotlApworld": "https://github.com/IanCichy/CultOfTheLamb_Archipelago/releases/download/v0.9.1/cult_of_the_lamb.apworld",
+    "cotlAP": "https://github.com/IanCichy/CultOfTheLamb_Archipelago/releases/download/v0.9.1/Archipelago_CultOfTheLamb-0.9.1.zip",
     "cotlBepInEx": "https://thunderstore.io/package/download/BepInEx/BepInExPack_CultOfTheLamb/5.4.2101/",
 
     "cupheadAP": "https://github.com/JKLeckr/CupheadArchipelagoMod/releases/download/alpha04a.3/CupheadArchipelago-alpha04a.3_win64.zip",
@@ -411,8 +411,8 @@
     "nsmbwApworld": "https://github.com/Miiroun/Archipelago-NewSuperMarioBrosWii/releases/download/v0.3.5/nsmbw.apworld",
     "nsmbwDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
-    "ninesolsAP": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.6.3/Ixrec-ArchipelagoRandomizer-0.6.3.zip",
-    "ninesolsApworld": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.6.3/nine_sols.apworld",
+    "ninesolsAP": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.6.4/Ixrec-ArchipelagoRandomizer-0.6.4.zip",
+    "ninesolsApworld": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.6.4/nine_sols.apworld",
     "ninesolsAPI": "https://thunderstore.io/package/download/ninesolsmodding/NineSolsAPI/1.3.1/",
     "ninesolsBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "ninesolsBepInExConfiguration": "https://thunderstore.io/package/download/ninesolsmodding/BepinExConfigurationManager/18.3.1/",
@@ -490,7 +490,7 @@
     "pokemonbwBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
     "pokemoncrystalBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
-    "pokemoncrystalApworld": "https://github.com/gerbiljames/Archipelago-Crystal/releases/download/6.0.0/pokemon_crystal.apworld",
+    "pokemoncrystalApworld": "https://github.com/gerbiljames/Archipelago-Crystal/releases/download/6.0.2/pokemon_crystal.apworld",
 
     "pokemonemeraldBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
@@ -575,8 +575,8 @@
     "roguelegacy2AP": "https://github.com/zaphim12/RL2Archipelago/releases/download/v1.1.3/RL2Archipelago.zip",
     "roguelegacy2Apworld": "https://github.com/zaphim12/RL2Archipelago/releases/download/v1.1.3/rogue_legacy_2.apworld",
 
-    "saints2Apworld": "https://github.com/hoXyy/SaintsRow2Archipelago/releases/download/0.3.0/saints_row_2.apworld",
-    "saints2AP": "https://github.com/hoXyy/SaintsRow2Archipelago/releases/download/0.3.0/SR2Archipelago.zip",
+    "saints2Apworld": "https://github.com/hoXyy/SaintsRow2Archipelago/releases/download/0.3.1/saints_row_2.apworld",
+    "saints2AP": "https://github.com/hoXyy/SaintsRow2Archipelago/releases/download/0.3.1/SR2Archipelago.zip",
     "saints2ASI": "https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases/download/Win32-latest/dinput8-Win32.zip",
     "saints2Juiced": "https://github.com/kobraworksmodding/Saints-Row-2-Juiced-Patch/releases/download/v9.0.5/SR2_JUICED.zip",
     "saints2Exe": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/SR2_pc.exe",
@@ -725,8 +725,8 @@
     "untitledApworld": "https://github.com/PixelShake92/Untitled-Goose-Game-Archipelago/releases/download/Alpha_2.2/untitled_goose_game.apworld",
     "untitledBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.9/BepInEx_x64_5.4.9.0.zip",
 
-    "valheimApworld": "https://github.com/xyzzy44/ValheimArchipelagoRandomizer/releases/download/0.2.5/valheim.apworld",
-    "valheimAP": "https://github.com/xyzzy44/ValheimArchipelagoRandomizer/releases/download/0.2.5/ValheimRandomizer-0.2.5.zip",
+    "valheimApworld": "https://github.com/xyzzy44/ValheimArchipelagoRandomizer/releases/download/0.2.6/valheim.apworld",
+    "valheimAP": "https://github.com/xyzzy44/ValheimArchipelagoRandomizer/releases/download/0.2.6/ValheimRandomizer-0.2.6.zip",
     "valheimBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "valheimJotunn": "https://thunderstore.io/package/download/ValheimModding/Jotunn/2.30.2/",
 
