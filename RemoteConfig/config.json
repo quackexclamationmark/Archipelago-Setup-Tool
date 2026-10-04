@@ -71,7 +71,8 @@
         "Rockstar Games",
         "Games\\Rockstar Games"
     ],
-    
+
+    "aplauncherDL": "https://github.com/ArchipelagoMW/Archipelago/releases/download/0.6.8/Setup.Archipelago.0.6.8.exe",
     "r2modmanDL": "https://thunderstore.io/c/lethal-company/p/ebkr/r2modman/",
 
     "poptrackerDL": "https://github.com/black-sliver/PopTracker/releases/download/v0.35.4/poptracker_0-35-4_win64.zip",
