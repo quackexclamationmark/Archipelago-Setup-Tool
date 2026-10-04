@@ -147,8 +147,8 @@
 
     "adofaiPathName": "A Dance of Fire and Ice",
     "adofaiBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
-    "adofaiAP": "https://github.com/ClaudeChibout/ADOFAI_AP-Mod/releases/download/v1.0.8-pre/ADOFAI_AP-Mod.zip",
-    "adofaiApworld": "https://github.com/ClaudeChibout/Archipelago-ADOFAI/releases/download/v1.3.0/adofai.apworld",
+    "adofaiAP": "https://github.com/ClaudeChibout/ADOFAI_AP-Mod/releases/download/v1.0.9/ADOFAI_AP-Mod.zip",
+    "adofaiApworld": "https://github.com/ClaudeChibout/Archipelago-ADOFAI/releases/download/v1.3.1/adofai.apworld",
 
     "ashorthikePathName": "A Short Hike",
     "ashorthikeBepInEx": "https://github.com/BrandenEK/AShortHike.ModdingTools/raw/main/win32.zip",
@@ -738,7 +738,7 @@
     "vsAP": "https://github.com/SWCreeperKing/ArchipelagoSurvivors/releases/download/v0.3.5.1/ArchipelagoSurvivors.zip",
 
     "votvUE4SS": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/UE4SS_v3.0.1-1016-g6c26f038.zip",
-    "votvApworld": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.6.2/votv.apworld",
+    "votvApworld": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.7.0/votv.apworld",
     "votvAP": "https://github.com/Nathan-R-Og/Archipelago/releases/download/votv-v0.6.2/votv_ap-main.zip",
     "votvDL": "https://r2.votv.dev/archive/votv/090n.7z",
     "votvFileName": "Voices Of The Void v0.9.0n",
