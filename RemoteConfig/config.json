@@ -14,6 +14,7 @@
         "SteamLibrary\\steamapps\\common",
         "Steam\\steamapps\\common",
         "Games\\Steam\\steamapps\\common",
+        "Games\\steam\\Steam\\steamapps\\common",
         "Program Files (x86)\\Steam\\steamapps\\common",
         "Program Files\\Steam\\steamapps\\common",
         "steamapps\\common",
@@ -23,6 +24,7 @@
         "Programs\\steamapps\\common",
         "Games\\steamapps\\common",
         "SteamLibrarySSD\\steamapps\\common",
+        "steam\\Steam\\steamapps\\common",
         "!Games\\Launcher\\Steam\\Steam\\steamapps\\common"
     ],
 
