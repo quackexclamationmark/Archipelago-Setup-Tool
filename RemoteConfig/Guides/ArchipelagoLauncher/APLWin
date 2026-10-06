@@ -8,7 +8,7 @@
 "kill",
 "When you click 'DOWNLOAD' on the setup tab, 'Setup.Archipelago.x.x.x.exe' (AP Launcher installer) will be downloaded inside your Downloads directory and it will automatically launched.",
 "kill",
-"[HEADER] Installation Infos",
+"[HEADER] Manual Setup Infos",
 "kill",
 "When 'Setup.Archipelago.x.x.x.exe' is launched, simply follow the installation instructions given and after downloading it, do not move the Archipelago directory from where it was installed (default directory) so that it's easier for the tool to find it when you're downloading an APWorld.",
 "clear"
