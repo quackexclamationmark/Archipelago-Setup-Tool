@@ -1,0 +1,20 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• me3_installer.exe\n• Elden Ring AP folder\n• eldenring.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, eldenring.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. Then, 'me3_installer.exe' (mod loader) will be installed inside your Windows 'Downloads' directory and will be automatically launched. Finally, the AP Mod folder will then be downloaded inside your Windows Documents directory.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Elden Ring is not a core Archipelago game, it needs a custom world file. When 'eldenring.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Make sure you setup me3 through the 'me3_installer.exe' (will launch at the end of the setup).\nOnce everything is set up, a new Archipelago window should appear in the top-right corner of the main menu. Click the 'Connection' or 'Change connection' button.\n\nIn the 'Server' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Slot', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect' and then you can start playing!",
+"clear"
+
+]
