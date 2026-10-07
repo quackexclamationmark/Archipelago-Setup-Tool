@@ -14,7 +14,7 @@
 "kill",
 "[HEADER] Connection Infos",
 "kill",
-"Make sure you setup me3 through the 'me3_installer.exe' (will launch at the end of the setup).\nOnce everything is set up, a new Archipelago window should appear in the top-right corner of the main menu. Click the 'Connection' or 'Change connection' button.\n\nIn the 'Server' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Slot', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect' and then you can start playing!",
+"Make sure you setup me3 through the 'me3_installer.exe' (will launch at the end of the setup).\nOnce everything is set up, go back to my tool's Elden Ring setup tab and click the controller icona. Now, a new Archipelago window should appear in the top-right corner of the main menu. Click the 'Connection' or 'Change connection' button.\n\nIn the 'Server' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Slot', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect' and then you can start playing!",
 "clear"
 
 ]
