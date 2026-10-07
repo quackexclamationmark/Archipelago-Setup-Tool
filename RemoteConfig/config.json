@@ -379,8 +379,8 @@
     "lethalcompanyMonoDetourBep5": "https://thunderstore.io/package/download/MonoDetour/MonoDetour_BepInEx_5/0.7.16/",
     "lethalcompanyMonoDetour": "https://thunderstore.io/package/download/MonoDetour/MonoDetour/0.7.16/",
     
-    "librarianAP": "https://github.com/Str8UpWHITE64/Librarian-AP/releases/download/2.0.3/Librarian-AP_v2.0.3.zip",
-    "librarianApworld": "https://github.com/Str8UpWHITE64/Librarian-AP/releases/download/2.0.3/librarian.apworld",
+    "librarianAP": "https://github.com/Str8UpWHITE64/Librarian-AP/releases/download/3.0.0/Librarian-AP_v3.0.0.zip",
+    "librarianApworld": "https://github.com/Str8UpWHITE64/Librarian-AP/releases/download/3.0.0/librarian.apworld",
 
     "lopApworld": "https://github.com/Xtruh/LiesOfAP/releases/download/0.1.7/liesofp.apworld",
     "lopAPSteam": "https://github.com/Xtruh/LiesOfAP/releases/download/0.1.7/SteamVersion.zip",
@@ -718,8 +718,8 @@
     "ultrakillPluginConfigurator": "https://thunderstore.io/package/download/EternalsTeam/PluginConfigurator/1.10.2/",
 
     "uncannycatCoolerMods": "https://github.com/JustSomeJello/Cooler-Mods/releases/download/v2.1.1/CoolerMods_2.1.1.zip",
-    "uncannycatAP": "https://github.com/Jeffdev-Archipelago-Implementations/UncannyCatAP/releases/download/1.4.0/UncannyCatAP_1.4.0.zip",
-    "uncannycatApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-UCG/releases/download/1.4.0/ucg.apworld",
+    "uncannycatAP": "https://github.com/Jeffdev-Archipelago-Implementations/UncannyCatAP/releases/download/1.4.1/UncannyCatAP_1.4.1.zip",
+    "uncannycatApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-UCG/releases/download/1.4.1/ucg.apworld",
     "uncannycatDL": "https://github.com/quackexclamationTesting/Preloaded-Archipelago-Setup-Tool-Mods/releases/download/UCG/uncanny-cat-golf-win64.zip",
 
     "undertaleyellowApworld": "https://github.com/Pugie38/Undertale-Yellow-AP/releases/download/v0.3.0/undertale_yellow.apworld",
