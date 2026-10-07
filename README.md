@@ -7,7 +7,7 @@ DOWNLOAD THE INSTALLER, NOT THE .ZIP FILE!
 Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could (idk I didn't try it) but it COULD delete everything that is next to the .exe (in the same folder) even tho it's not supposed to. Basically, you can move the folder but probably don't rename it and do not touch what's inside.
 
 # Archipelago Setup Tool
-### [Download latest version | v2.2.2](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v2.2.2)
+### [Download latest version | v2.2.3](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v2.2.3)
 ---
 
 ## Features
@@ -16,154 +16,156 @@ Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could
 - Download APWorlds from any supported non-core game even without having the game!
 - One click setup for PopTracker. Downloads the app + packs.
 - 'Hosting' section, kinda like a small wiki where you can see informations on required/useful resources and step by step guides on hosting your AP sessions!
+- 'Tools' section to download various QoL Archipelago tools that could be useful!
 
 ---
 
 After setting up a game, all credits can be found in the game's directory, inside the game's directory.
 
-Currently, the following games are supported (141):
+Currently, the following games are supported (142):
 
-- Clair Obscur: Expedition 33
-- Lethal Company
-- PowerWash Simulator
-- R.E.P.O.
-- Slay The Spire 2
-- Subnautica
-- Content Warning
-- Bloons TD 6
-- Peaks Of Yore
-- Voices Of The Void
-- PEAK
-- Balatro
-- Nine Sols
-- Cuphead
-- Outer Wilds
-- Risk Of Rain 2
-- Librarian Tidy Up the Arcane Library
-- Bomb Rush Cyberfunk
-- Portal 2
-- Minecraft
-- Clustertruck
-- Hollow Knight
-- Slime Rancher
-- Slime Rancher 2
-- CloverPit
-- Resident Evil 7: Biohazard
-- Schedule I
-- Hades
-- ULTRAKILL
-- Untitled Goose Game
-- Hi-Fi Rush
-- Stardew Valley
-- TUNIC
-- Another Crab's Treasure
-- Ori and the Blind Forest
-- Ori and the Will of the Wisps
-- Rift of the Necrodancer
-- DREDGE
-- DARK SOULS III
-- Choo-Choo Charles
-- Overcooked! 2
-- HITMAN: World of Assassination
 - A Dance of Fire and Ice
-- TCG Card Shop Simulator
-- DOOM (1993)
-- DOOM II
-- Noita
-- DARK SOULS II (INCLUDES SCHOLAR OF THE FIRST SIN)
-- Raft
-- Super Mario 64
-- Neon White
-- The Witness
-- Pikuniku
-- Garfield Kart - Furious Racing
-- Unfair Flips
-- Skul: The Hero Slayer
-- Funi Raccoon Game
-- Fez
-- The Legend of Zelda: The Wind Waker
-- The Legend of Zelda: Twilight Princess
 - A Short Hike
-- Pokémon Emerald
-- The Simpsons Hit & Run
-- Call of Duty: Black Ops III
-- Plants Vs. Zombies GOTY
-- Plants Vs. Zombies Replanted
-- Rogue Legacy 2
-- Refunct
-- Spelunky 2
-- Easy Delivery Co.
-- Pokémon FireRed and LeafGreen
-- Super Smash Bros. Brawl - The Subspace Emissary
-- Pikmin 2
-- Mario Kart Wii
-- Okami HD
-- DOOM Eternal
-- Celeste (Open World)
-- SULFUR
-- Oxygen Not Included
-- Kerbal Space Program
-- I Am Your Beast
-- Scritchy Scratchy
-- The Legend Of Zelda: The Minish Cap
-- Luigi's Mansion
-- Paper Mario: The Thousand Years Door
+- Another Crab's Treasure
+- Balatro
 - Bendy And The Ink Machine
-- Pokémon Crystal
-- PokéPark Wii
+- Bloons TD 6
+- Blue Prince
+- Bomb Rush Cyberfunk
+- Borderlands 2
+- Bugsnax
+- Call of Duty: Black Ops III
+- Casualties: Unknown Demo
+- Celeste (Open World)
+- Celeste 64
+- Choo-Choo Charles
+- Clair Obscur: Expedition 33
+- CloverPit
+- Clustertruck
+- Content Warning
+- Cult of the Lamb
+- Cuphead
+- Cyberpunk 2077
+- DARK SOULS II (INCLUDES SCHOLAR OF THE FIRST SIN)
+- DARK SOULS III
+- Dead Cells
+- Dead Rising Deluxe Remaster
+- DELTARUNE
+- Demon Tides
+- DOOM (1993)
+- DOOM Eternal
+- DOOM II
+- DREDGE
+- Easy Delivery Co.
+- ENDER MAGNOLIA: Bloom in the Mist
+- Fez
+- Five Nights At Freddy's Ultimate Custom Night
+- FNaF World
+- Freddy Fazbear's Pizzeria Simulator
+- Funi Raccoon Game
+- Garfield Kart - Furious Racing
+- Grand Theft Auto: San Andreas
+- Grand Theft Auto: Vice City
+- Hades
+- Heretic
+- Hi-Fi Rush
+- HITMAN: World of Assassination
+- Hollow Knight
+- Hollow Knight: Silksong
 - HuniePop
 - HuniePop 2
-- Grand Theft Auto: San Andreas
-- TOEM: A Photo Adventure
-- Placid Plastic Duck Simulator
-- Five Nights At Freddy's Ultimate Custom Night
-- Pokémon Platinum
-- Psychonauts
-- Sonic Adventure DX
-- New Super Mario Bros. Wii
-- Pokémon Snap
-- The WereCleaner
-- Dead Rising Deluxe Remaster
-- Undertale Yellow
-- SUPERHOT
-- Hollow Knight: Silksong
-- Sayonara Wild Hearts
-- Super Meat Boy
-- The Henry Stickmin Collection
-- Casualties: Unknown Demo
-- ENDER MAGNOLIA: Bloom in the Mist
-- Metroid Fusion
-- Mario Kart: Double Dash!!
-- Bugsnax
-- Supermarket Simulator
-- Borderlands 2
-- Pokémon Black & White
-- Totally Accurate Battle Simulator
-- Lies of P
-- Persona 5 Royal
-- Vampire Survivors
-- Metal: Hellsinger
-- Yellow Taxi Goes Vroom
-- Demon Tides
-- Mina the Hollower
-- Dead Cells
-- Cyberpunk 2077
+- I Am Your Beast
 - Inscryption
-- Plague Inc: Evolved
-- Valheim
-- Grand Theft Auto: Vice City
-- Saints Row 2
-- Heretic
-- Nova Lands
-- Freddy Fazbear's Pizzeria Simulator
-- FNaF World
-- The Binding of Isaac: Repentance
-- DELTARUNE
-- Uncanny Cat Golf
-- Celeste 64
-- Blue Prince
-- White Knuckle
 - Into the Breach
+- Kerbal Space Program
+- Lethal Company
+- Librarian Tidy Up the Arcane Library
+- Lies of P
+- Luigi's Mansion
+- Mario Kart: Double Dash!!
+- Mario Kart Wii
+- Metal: Hellsinger
+- Metroid Fusion
+- Mina the Hollower
+- Minecraft
+- Neon White
+- New Super Mario Bros. Wii
+- Nine Sols
+- Noita
+- Nova Lands
+- Okami HD
+- Ori and the Blind Forest
+- Ori and the Will of the Wisps
+- Outer Wilds
+- Overcooked! 2
+- Oxygen Not Included
+- Paper Mario: The Thousand Years Door
+- PEAK
+- Peaks Of Yore
+- Persona 5 Royal
+- Pikmin 2
+- Pikuniku
+- Placid Plastic Duck Simulator
+- Plague Inc: Evolved
+- Plants Vs. Zombies GOTY
+- Plants Vs. Zombies Replanted
+- Pokémon Black & White
+- Pokémon Crystal
+- Pokémon Emerald
+- Pokémon FireRed and LeafGreen
+- Pokémon Platinum
+- Pokémon Snap
+- PokéPark Wii
+- Portal 2
+- PowerWash Simulator
+- Psychonauts
+- R.E.P.O.
+- Raft
+- Refunct
+- Resident Evil 7: Biohazard
+- Rift of the Necrodancer
+- Risk Of Rain 2
+- Rogue Legacy 2
+- Saints Row 2
+- Sayonara Wild Hearts
+- Schedule I
+- Scritchy Scratchy
+- Skul: The Hero Slayer
+- Slay The Spire 2
+- Slime Rancher
+- Slime Rancher 2
+- Sonic Adventure DX
+- Spelunky 2
+- Stardew Valley
+- Subnautica
+- SULFUR
+- Super Mario 64
+- Super Meat Boy
+- Super Smash Bros. Brawl - The Subspace Emissary
+- SUPERHOT
+- Supermarket Simulator
+- TCG Card Shop Simulator
+- The Binding of Isaac: Repentance
+- The Henry Stickmin Collection
+- The Legend Of Zelda: The Minish Cap
+- The Legend of Zelda: The Wind Waker
+- The Legend of Zelda: Twilight Princess
+- The Simpsons Hit & Run
+- The WereCleaner
+- The Witness
+- TOEM: A Photo Adventure
+- Totally Accurate Battle Simulator
+- TUNIC
+- ULTRAKILL
+- Uncanny Cat Golf
+- Undertale Yellow
+- Unfair Flips
+- Untitled Goose Game
+- Valheim
+- Vampire Survivors
+- Voices Of The Void
+- White Knuckle
+- Yellow Taxi Goes Vroom
 
 Features to add in the future:
 
@@ -173,12 +175,12 @@ I don't own all the games so some game path can be wrong and lead to a "Path not
 
 ## Required Tools
 
-* Latest version of [Archipelago Launcher](https://github.com/ArchipelagoMW/Archipelago/releases/download/0.6.7/Setup.Archipelago.0.6.7.exe)
+* Latest version of [Archipelago Launcher](https://github.com/ArchipelagoMW/Archipelago/releases/download/0.6.8/Setup.Archipelago.0.6.8.exe) | *YOU CAN DOWNLOAD ITS LATEST VERSION THROUGH THE 'TOOLS' SECTION ON THE TOOL!*
 
 ## Special Thanks
 
 [UnitySimpleFileBrowser](https://github.com/yasirkula/UnitySimpleFileBrowser) | by **yasirkula**
 
-My friends *AquaBolt, Unlucky_Lynx, RealMim, TheInfectedDuckii, Mikkel* for testing some of my setups!
+My friends *AquaBolt, Unlucky_Lynx, RealMim, TheInfectedDuckii, Mikkel, Joats* for testing some of my setups!
 
 Every other people who are kindly testing, reporting bugs, suggesting etc...
