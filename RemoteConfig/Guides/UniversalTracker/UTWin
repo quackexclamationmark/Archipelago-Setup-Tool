@@ -1,0 +1,16 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• tracker.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'DOWNLOAD' on the setup tab, 'tracker.apworld' will be installed inside your 'Archipelago\\custom_worlds' directory.",
+"kill",
+"[HEADER] Usage Infos",
+"kill",
+"To use it, (re)open the Archipelago Launcher and you should be able to find a new 'Universal Tracker' client, open it and connect to it as you would normally do with any other text client. When connected, go to the 3rd tab and you should be able to see your AP infos.",
+"clear"
+
+]
