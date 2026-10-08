@@ -278,10 +278,10 @@
 
     "hereticAP": "https://github.com/ArchipelagoDoom/APDoom/releases/download/v2.0.0/APDoom-2.0-Windows-x64.zip",
 
-    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.6.1/DoomEternalArchipelago-v0.6.1-windows-x86_64.zip",
+    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.6.2/DoomEternalArchipelago-v0.6.2-windows-x86_64.zip",
     "doometernalMeathook": "https://github.com/brongo/m3337ho0o0ok/releases/download/v7.2/XINPUT1_3.dll",
     "doometernalModInjector": "https://gamebanana.com/dl/1765017",
-    "doometernalApworld": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.6.1/doometernal.apworld",
+    "doometernalApworld": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.6.2/doometernal.apworld",
     
     "dredgeAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-DREDGE.zip",
     "dredgeApworld": "https://github.com/alextric234/ArchipelagoDredge/releases/download/dredge_0.6.0/dredge.apworld",
@@ -303,7 +303,7 @@
     "fezApworld": "https://github.com/nhyldmar/fez-ap/releases/download/v0.6.1/fez.apworld",
 
     "fnafworldExe": "https://github.com/quackexclamationTesting/Preloaded-Archipelago-Setup-Tool-Mods/releases/download/FNAFWorld/fnaf-world.exe",
-    "fnafworldApworld": "https://github.com/EviVirus/Archipelago-FNaFW/releases/download/FNaFW-v1.2.2/fnafw.apworld",
+    "fnafworldApworld": "https://github.com/EviVirus/Archipelago-FNaFW/releases/download/FNaFW-v1.2.3/fnafw.apworld",
 
     "ffpsApworld": "https://github.com/EviVirus/Archipelago-FFPS/releases/download/v1.0.0-pre1/ffps.apworld",
 
