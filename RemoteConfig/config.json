@@ -299,7 +299,9 @@
     "endermagnoliaAP": "https://github.com/Trexounay/EnderMagnolia.Randomizer/releases/download/endermagnolia-v0.1.8/EnderMagnolia.Randomizer.zip",
 
     "ftlPreloaded": "https://github.com/quackexclamationTesting/Preloaded-Archipelago-Setup-Tool-Mods/releases/download/FTL/Preloaded-FTL-AP.zip",
-    "ftlApworld": "https://github.com/TheLiloji/FTLArchipelago/releases/download/v0.4.1/ftl.apworld",
+    "ftlApworld": "https://github.com/TheLiloji/FTLArchipelago/releases/download/v0.4.2-mv.1/ftl.apworld",
+    "ftlHyperspace": "https://github.com/TheLiloji/FTLArchipelago/releases/download/v0.4.2-mv.1/Hyperspace.dll",
+    "ftlAP": "https://github.com/TheLiloji/FTLArchipelago/releases/download/v0.4.2-mv.1/ArchipelagoFTL.ftl",
 
     "fezHAT": "https://github.com/FEZModding/HAT/releases/download/v1.2.1/HAT.zip",
     "fezAP": "https://github.com/nhyldmar/fez-ap/releases/download/v0.6.1/FezAP.zip",
