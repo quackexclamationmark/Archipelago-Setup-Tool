@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• Rogue.Legacy.Randomizer.1.1.0.exe (Archipelago Rando installer)\n• rogue_legacy.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, rogue_legacy.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. Rogue.Legacy.Randomizer.1.1.0.exe, (randomizer installer) will then be downloaded to the Windows Downloads directory.\n\nThe rest of the setup will have to be manually done, once the installer is installed, it will launch automatically, follow the instructions and it will download the AP randomized version of the game (please use the default installation path, it will make it easier for my tool to find it in case you wanna launch the randomizer from my tool).",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Rogue Legacy is not a core Archipelago game, it needs a custom world file. When 'rogue_legacy.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, on the game, press 'ENTER' and a new Archipelago window should appear in the main menu.\n\nIn the 'Hostname' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Slot Name', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect' and you can start playing!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will simply delete the Rogue Legacy Randomizer folder.",
+"clear"
+
+]
