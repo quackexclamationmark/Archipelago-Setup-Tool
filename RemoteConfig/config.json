@@ -418,6 +418,8 @@
 
     "minecraftApworld": "https://github.com/qixils/NeoForgeAP/releases/download/v2.2.1/minecraft.apworld",
 
+    "minecraftdungeonsApworld": "https://github.com/BarbeucTheCat/Minecraft-Dungeons-Apworld/releases/download/v0.0.2/mcdungeonsBETA_0.0.2.apworld",
+
     "neonwhiteMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.6.1/MelonLoader.x64.zip",
     "neonwhiteAP": "https://github.com/stxticOVFL/NWArchipelagoMod/releases/download/v0.1.0/NWArchipelago.dll",
     "neonwhiteAPMCN": "https://github.com/stxticOVFL/NWArchipelagoMod/releases/download/v0.1.0/Archipelago.MultiClient.Net.dll",
