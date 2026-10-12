@@ -14,7 +14,7 @@
 "kill",
 "[HEADER] Connection Infos",
 "kill",
-"Once everything is set up, the host will need to go to the room you'll be using for your Archipelago session on the Archipelago website. Once you have the room, you'll need click the 'Download Patch File' next to your name.\n\nAfter it is downloaded, open the Archipelago Launcher and click 'Open Patch'. It will ask you to select your patch file (.apwaffle), then, it will ask for your ROM file and finally, it will open the client that will be used to connect your game to Archipelago. Connect to it as you would with any other client.\n\nNow you can open the 'Snes9x' emulator and open the Archipelago patched ROM (should be located where your .apwaffle was when you used it).\n\nAfter that, you should be good to start playing!",
+"Once everything is set up, the host will need to go to the room you'll be using for your Archipelago session on the Archipelago website. Once you have the room, you'll need click the 'Download Patch File' next to your name.\n\nAfter it is downloaded, open the Archipelago Launcher and click 'Open Patch'. It will ask you to select your patch file (.apwaffle), then, it will ask for your Super Mario World (US) ROM and finally, it will open the client that will be used to connect your game to Archipelago. Connect to it as you would with any other client.\n\nNow you can open the 'Snes9x' emulator and open the Archipelago patched ROM (should be located where your .apwaffle was when you used it).\n\nAfter that, you should be good to start playing!",
 "clear"
 
 ]
