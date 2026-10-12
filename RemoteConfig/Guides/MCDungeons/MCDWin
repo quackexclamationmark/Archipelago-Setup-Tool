@@ -1,0 +1,20 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• mcdungeons.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, mcdungeons.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. It will also download a few Python dependencies.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"MC Dungeons is not a core Archipelago game, it needs a custom world file. When 'mcdungeons.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, open the game and start a new run. Once in game, (re)open the Archipelago Launcher and open the new 'Minecraft Dungeons Client'. Once the client is open, connect to it as you'd with any other client. Now you can go back to the game and start playing!",
+"clear"
+
+]
