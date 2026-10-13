@@ -1,0 +1,20 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• spire.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, spire.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. Then, you'll have to subscribe to the AP Mod manually through the Steam Workshop (the mod page will open automatically so you can subscribe easily). Also, make sure that you use the option to download the dependency mod when installing the Archipelago mod through the workshop.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"Slay the Spire is not a core Archipelago game, it needs a custom world file. When 'spire.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, press the controller icon on the tool's StS setup tab (you can also setup with the 'Start game after setup' toggle). A new Archipelago button will appear in the game's main menu.\n\nIn the 'Address' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Slot Name', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Connect' and start a new run!",
+"clear"
+
+]

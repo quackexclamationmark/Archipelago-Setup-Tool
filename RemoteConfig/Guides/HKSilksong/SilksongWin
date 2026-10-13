@@ -6,7 +6,7 @@
 "kill",
 "[HEADER] Installation Infos",
 "kill",
-"When you click 'START SETUP' in the 'SETUP' tab, silksong.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. BepInEx will be installed into the game's core folder. The AP Mod folder will be installed inside the BepInEx\\plugins directory.",
+"When you click 'START SETUP' in the 'SETUP' tab, silksong.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. BepInEx will be installed into the game's core folder. The AP Mod folder will be installed inside the BepInEx\\plugins directory.\nIf you use the Benchwarp toggle, the mod and its dependencies will be downloaded, it is completely optional and could cause problems during your Archipelago sessions.",
 "kill",
 "[HEADER] apworld / yaml Infos",
 "kill",
