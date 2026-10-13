@@ -17,6 +17,7 @@ public class UnderYellowManualDL : MonoBehaviour
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
     public Toggle installUndertaleYellowToggle;
+    public Toggle launchGameToggle;
 
     [Header("CONFIRMATION PANEL")]
     public GameObject confirmationPanel;
@@ -34,12 +35,15 @@ public class UnderYellowManualDL : MonoBehaviour
 
     private const string InstalledFoldersKey = "UndertaleYellow_InstalledFolders";
 
-    private string archipelagoPath;
+    private const string GameFolderName = "Undertale Yellow AP";
+    private const string GameExeName = "Undertale Yellow.exe";
+
     private string pendingAction;
 
     private UndertaleYellowConfig remoteConfig;
     private bool configLoaded = false;
     private bool lastApWorldInstallSuccess = false;
+    private bool lastGameInstallSuccess = false;
 
     [System.Serializable]
     public class UndertaleYellowConfig
@@ -52,8 +56,6 @@ public class UnderYellowManualDL : MonoBehaviour
 
     void Start()
     {
-        archipelagoPath = GetArchipelagoPath();
-
         if (infoPanel != null)
             infoPanel.SetActive(false);
 
@@ -62,6 +64,9 @@ public class UnderYellowManualDL : MonoBehaviour
 
         if (confirmationPanel != null)
             confirmationPanel.SetActive(false);
+
+        if (launchGameToggle != null)
+            launchGameToggle.isOn = false;
 
         if (confirmButton != null)
             confirmButton.onClick.AddListener(OnConfirm);
@@ -132,14 +137,6 @@ public class UnderYellowManualDL : MonoBehaviour
 
     public void OnLaunchButtonClicked()
     {
-        archipelagoPath = GetArchipelagoPath();
-
-        if (string.IsNullOrEmpty(archipelagoPath) || !Directory.Exists(archipelagoPath))
-        {
-            ShowInfo("Archipelago folder not found.");
-            return;
-        }
-
         ShowInfo("Launching Undertale Yellow...");
         LaunchUndertaleYellow();
     }
@@ -150,61 +147,50 @@ public class UnderYellowManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        archipelagoPath = GetArchipelagoPath();
-
-        if (string.IsNullOrEmpty(archipelagoPath))
-        {
-            ShowInfo("ERROR: Could not find or create the Archipelago folder!");
-            return;
-        }
-
         bool apworld = installAPWorldToggle == null || installAPWorldToggle.isOn;
         bool undertaleYellow = installUndertaleYellowToggle == null || installUndertaleYellowToggle.isOn;
+        bool launchGame = launchGameToggle != null && launchGameToggle.isOn;
 
-        if (!apworld && !undertaleYellow)
+        if (!apworld && !undertaleYellow && !launchGame)
         {
             ShowInfo("Please select at least one component to install.");
             return;
         }
 
-        if (apworld && !undertaleYellow)
-        {
-            StartCoroutine(APWorldOnlyFlow());
-            return;
-        }
-
-        StartCoroutine(InstallFlow(apworld, undertaleYellow));
+        StartCoroutine(InstallFlow(apworld, undertaleYellow, launchGame));
     }
 
-    IEnumerator APWorldOnlyFlow()
+    IEnumerator InstallFlow(bool apworld, bool undertaleYellow, bool launchGame)
     {
         yield return new WaitUntil(() => configLoaded);
 
-        ShowInfo("Installing APWorld...");
-        yield return new WaitForSeconds(1f);
-
-        yield return InstallAPWorld();
-
-        if (!lastApWorldInstallSuccess)
-            yield break;
-
-        ShowInfo("Installation complete!");
-    }
-
-    IEnumerator InstallFlow(bool apworld, bool undertaleYellow)
-    {
         if (apworld)
         {
             ShowInfo("Installing Undertale Yellow APWorld...");
+            yield return new WaitForSeconds(1f);
             yield return InstallAPWorld();
+
+            if (!lastApWorldInstallSuccess)
+                yield break;
         }
 
         if (undertaleYellow)
         {
             ShowInfo("Downloading Undertale Yellow...");
             yield return InstallUndertaleYellowDL();
+
+            if (!lastGameInstallSuccess)
+                yield break;
         }
+
         ShowInfo("Installation complete!");
+
+        if (launchGame)
+        {
+            yield return new WaitForSeconds(1.5f);
+            ShowInfo("Launching Undertale Yellow...");
+            LaunchUndertaleYellow();
+        }
     }
 
     IEnumerator InstallAPWorld()
@@ -312,9 +298,12 @@ public class UnderYellowManualDL : MonoBehaviour
         }
     }
 
+    // Télécharge le .zip, l'extrait, puis copie son contenu dans le dossier Documents de Windows.
     IEnumerator InstallUndertaleYellowDL()
     {
         UnityEngine.Debug.Log("START InstallUndertaleYellowDL");
+
+        lastGameInstallSuccess = false;
 
         while (!configLoaded)
             yield return null;
@@ -325,7 +314,17 @@ public class UnderYellowManualDL : MonoBehaviour
             yield break;
         }
 
+        string documentsPath = GetDocumentsPath();
+        if (string.IsNullOrEmpty(documentsPath) || !Directory.Exists(documentsPath))
+        {
+            ShowInfo("ERROR: Could not find the Documents folder!");
+            yield break;
+        }
+
         string extractPath = Path.Combine(Application.persistentDataPath, "UndertaleYellow_Extract");
+
+        // Nettoie une éventuelle extraction précédente restée sur le disque
+        SafeDeleteDirectory(extractPath);
 
         yield return downloader.DownloadAndExtract(undertaleyellowDL, Application.persistentDataPath, extractPath);
 
@@ -336,13 +335,19 @@ public class UnderYellowManualDL : MonoBehaviour
             yield break;
         }
 
-        // Remember which top-level folder(s) came out of the zip, so Revert/Launch
-        // can find them again even if the version (and therefore the folder name) changes.
+        // Mémorise les dossiers de premier niveau du zip pour pouvoir les retrouver au Revert
         string[] topLevelFolders = GetTopLevelDirNames(extractPath);
 
-        // Copy the extracted content directly into the Archipelago root folder
-        // (one level above custom_worlds), NOT into custom_worlds.
-        CopyExtractedFiles(extractPath, archipelagoPath);
+        // Copie le contenu du zip directement dans Documents
+        bool copied = CopyExtractedFiles(extractPath, documentsPath);
+
+        SafeDeleteDirectory(extractPath);
+
+        if (!copied)
+        {
+            ShowInfo("ERROR: Failed to copy Undertale Yellow files to Documents!");
+            yield break;
+        }
 
         if (topLevelFolders.Length > 0)
         {
@@ -350,13 +355,13 @@ public class UnderYellowManualDL : MonoBehaviour
             PlayerPrefs.Save();
         }
 
-        SafeDeleteDirectory(extractPath);
+        lastGameInstallSuccess = true;
 
         UnityEngine.Debug.Log("END InstallUndertaleYellowDL");
         ShowInfo("Undertale Yellow installed successfully!");
     }
 
-    void CopyExtractedFiles(string extractPath, string targetPath)
+    bool CopyExtractedFiles(string extractPath, string targetPath)
     {
         UnityEngine.Debug.Log("START CopyExtractedFiles: " + extractPath + " -> " + targetPath);
 
@@ -372,14 +377,14 @@ public class UnderYellowManualDL : MonoBehaviour
                 File.Copy(file, dest);
             }
 
-            UnityEngine.Debug.Log("All extracted files copied to Archipelago directory");
+            UnityEngine.Debug.Log("All extracted files copied to Documents");
+            return true;
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Error copying extracted files: " + e.Message);
+            return false;
         }
-
-        UnityEngine.Debug.Log("END CopyExtractedFiles");
     }
 
     string[] GetTopLevelDirNames(string path)
@@ -399,16 +404,16 @@ public class UnderYellowManualDL : MonoBehaviour
     }
 
     // ---------------------------------------------------------------
-    // REVERT (only removes the folder placed into Archipelago by the DL zip)
+    // REVERT (supprime les dossiers placés dans Documents par le zip)
     // ---------------------------------------------------------------
 
     private void ExecuteRevert()
     {
-        archipelagoPath = GetArchipelagoPath();
+        string documentsPath = GetDocumentsPath();
 
-        if (string.IsNullOrEmpty(archipelagoPath) || !Directory.Exists(archipelagoPath))
+        if (string.IsNullOrEmpty(documentsPath) || !Directory.Exists(documentsPath))
         {
-            ShowInfo("Archipelago folder not found.");
+            ShowInfo("Documents folder not found.");
             return;
         }
 
@@ -425,7 +430,7 @@ public class UnderYellowManualDL : MonoBehaviour
                 if (string.IsNullOrEmpty(folder))
                     continue;
 
-                string fullPath = Path.Combine(archipelagoPath, folder);
+                string fullPath = Path.Combine(documentsPath, folder);
                 if (Directory.Exists(fullPath))
                 {
                     SafeDeleteDirectory(fullPath);
@@ -439,22 +444,13 @@ public class UnderYellowManualDL : MonoBehaviour
 
         if (!removedSomething)
         {
-            // Fallback if we have no record (e.g. fresh app run): look for a folder
-            // whose name still looks like an Undertale Yellow install.
-            try
+            // Fallback si on n'a pas d'enregistrement : on supprime le dossier connu du jeu
+            string gameFolder = Path.Combine(documentsPath, GameFolderName);
+            if (Directory.Exists(gameFolder))
             {
-                string[] dirs = Directory.GetDirectories(archipelagoPath);
-                foreach (string dir in dirs)
-                {
-                    string name = Path.GetFileName(dir).ToLower();
-                    if (name.Contains("undertale") && name.Contains("yellow"))
-                    {
-                        SafeDeleteDirectory(dir);
-                        removedSomething = true;
-                    }
-                }
+                SafeDeleteDirectory(gameFolder);
+                removedSomething = true;
             }
-            catch { }
         }
 
         if (removedSomething)
@@ -471,16 +467,20 @@ public class UnderYellowManualDL : MonoBehaviour
     {
         try
         {
-            string exePath = FindUndertaleYellowExecutable();
+            string documentsPath = GetDocumentsPath();
+            string exePath = Path.Combine(documentsPath, GameFolderName, GameExeName);
 
-            if (!string.IsNullOrEmpty(exePath) && File.Exists(exePath))
+            if (File.Exists(exePath))
             {
-                Process.Start(exePath);
+                ProcessStartInfo startInfo = new ProcessStartInfo(exePath);
+                startInfo.WorkingDirectory = Path.GetDirectoryName(exePath);
+                startInfo.UseShellExecute = true;
+                Process.Start(startInfo);
                 UnityEngine.Debug.Log("Undertale Yellow launched: " + exePath);
             }
             else
             {
-                UnityEngine.Debug.LogError("Undertale Yellow.exe not found under: " + archipelagoPath);
+                UnityEngine.Debug.LogError("Undertale Yellow.exe not found at: " + exePath);
                 ShowInfo("Undertale Yellow.exe not found! Please make sure you setup first!");
             }
         }
@@ -489,73 +489,6 @@ public class UnderYellowManualDL : MonoBehaviour
             UnityEngine.Debug.LogError("Failed to launch Undertale Yellow: " + e.Message);
             ShowInfo("ERROR: Failed to launch Undertale Yellow!");
         }
-    }
-
-    // Locates the exe dynamically since the install folder / exe name changes with game version
-    // (e.g. "Archipelago\Undertale Yellow v-1-3-1\Undertale Yellow.exe" today, something else tomorrow).
-    string FindUndertaleYellowExecutable()
-    {
-        if (string.IsNullOrEmpty(archipelagoPath) || !Directory.Exists(archipelagoPath))
-            return "";
-
-        string stored = PlayerPrefs.GetString(InstalledFoldersKey, "");
-        if (!string.IsNullOrEmpty(stored))
-        {
-            string[] folders = stored.Split(',');
-            foreach (string folder in folders)
-            {
-                if (string.IsNullOrEmpty(folder))
-                    continue;
-
-                string exe = FindExeInFolder(Path.Combine(archipelagoPath, folder));
-                if (!string.IsNullOrEmpty(exe))
-                    return exe;
-            }
-        }
-
-        // Fallback: scan the Archipelago root for a folder that looks like Undertale Yellow
-        try
-        {
-            string[] dirs = Directory.GetDirectories(archipelagoPath);
-            foreach (string dir in dirs)
-            {
-                string name = Path.GetFileName(dir).ToLower();
-                if (name.Contains("undertale") && name.Contains("yellow"))
-                {
-                    string exe = FindExeInFolder(dir);
-                    if (!string.IsNullOrEmpty(exe))
-                        return exe;
-                }
-            }
-        }
-        catch { }
-
-        return "";
-    }
-
-    string FindExeInFolder(string folder)
-    {
-        try
-        {
-            if (!Directory.Exists(folder))
-                return "";
-
-            string[] exes = Directory.GetFiles(folder, "*.exe", SearchOption.AllDirectories);
-
-            // Prefer an exe whose name actually says "Undertale Yellow"
-            foreach (string exe in exes)
-            {
-                string name = Path.GetFileNameWithoutExtension(exe).ToLower();
-                if (name.Contains("undertale") && name.Contains("yellow"))
-                    return exe;
-            }
-
-            if (exes.Length > 0)
-                return exes[0];
-        }
-        catch { }
-
-        return "";
     }
 
     // ---------------------------------------------------------------
@@ -609,44 +542,29 @@ public class UnderYellowManualDL : MonoBehaviour
             infoPanel.SetActive(false);
     }
 
-    // Finds (or creates) the Archipelago root folder, e.g. C:\ProgramData\Archipelago
-    string GetArchipelagoPath()
+    public string GetGamePath()
     {
-        string[] candidates = new string[]
+        try
         {
-            @"C:\ProgramData\Archipelago",
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago"),
-        };
-
-        // Prefer an Archipelago folder that already exists
-        foreach (string candidate in candidates)
-        {
-            try
-            {
-                if (Directory.Exists(candidate))
-                {
-                    UnityEngine.Debug.Log("Found Archipelago folder at: " + candidate);
-                    return candidate;
-                }
-            }
-            catch { }
+            return Path.Combine(
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), GameFolderName);
         }
-
-        // Otherwise create the first one we're able to
-        foreach (string candidate in candidates)
+        catch
         {
-            try
-            {
-                Directory.CreateDirectory(candidate);
-                UnityEngine.Debug.Log("Created Archipelago folder at: " + candidate);
-                return candidate;
-            }
-            catch { }
+            return "";
         }
+    }
 
-        UnityEngine.Debug.LogWarning("Could not find or create an Archipelago folder.");
-        return "";
+    string GetDocumentsPath()
+    {
+        try
+        {
+            return System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+        }
+        catch
+        {
+            return "";
+        }
     }
 
     // ---------------------------------------------------------------

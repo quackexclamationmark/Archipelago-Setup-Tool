@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using TMPro;
 using UnityEngine;
-/*using UnityEngine.LightTransport;*/
 using UnityEngine.UI;
 
 public class FNAFWManualDL : MonoBehaviour
@@ -13,15 +12,18 @@ public class FNAFWManualDL : MonoBehaviour
 
     [Header("FNAFW FILES")]
     public FileDownloader.FileData fnafworldApworld;
-    public FileDownloader.FileData fnafworldExe;
 
     [Header("FEATURE TOGGLES")]
     public Toggle installApworldToggle;
-    public Toggle gameCopyToggle;
 
     [Header("BUTTONS")]
     public Button setupButton;
     public Button revertButton;
+
+    [Header("GAME FOLDER (MANUAL DOWNLOAD)")]
+    public TextMeshProUGUI gameFolderText;
+    public Button copyFolderPathButton;
+    public Button openFolderButton;
 
     [Header("CONFIRMATION PANEL")]
     public GameObject confirmationPanel;
@@ -40,13 +42,12 @@ public class FNAFWManualDL : MonoBehaviour
     private FNAFWConfig remoteConfig;
     private bool configLoaded = false;
     private bool lastApWorldInstallSuccess = false;
-    private bool lastExeInstallSuccess = false;
+    private string gameFolderPath = "";
 
     [System.Serializable]
     public class FNAFWConfig
     {
         public string fnafworldApworld;
-        public string fnafworldExe;
         public string[] apSearchPaths;
     }
 
@@ -69,6 +70,12 @@ public class FNAFWManualDL : MonoBehaviour
         if (infoOkButton != null)
             infoOkButton.onClick.AddListener(CloseInfoPanel);
 
+        if (copyFolderPathButton != null)
+            copyFolderPathButton.onClick.AddListener(CopyGameFolderPath);
+
+        if (openFolderButton != null)
+            openFolderButton.onClick.AddListener(OpenGameFolder);
+
         if (confirmationPanel != null)
             confirmationPanel.SetActive(false);
 
@@ -78,8 +85,95 @@ public class FNAFWManualDL : MonoBehaviour
         if (installApworldToggle != null)
             installApworldToggle.isOn = true;
 
-        if (gameCopyToggle != null)
-            gameCopyToggle.isOn = true;
+        SetupGameFolder();
+    }
+
+    // =========================================================
+    // GAME FOLDER (MANUAL DOWNLOAD)
+    // =========================================================
+
+    string[] GetGameFolderCandidates()
+    {
+        return new string[]
+        {
+            Path.Combine(@"C:\ProgramData\Archipelago", FNAFW_FOLDER_NAME),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", FNAFW_FOLDER_NAME),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", FNAFW_FOLDER_NAME),
+        };
+    }
+
+    // Creates the "FNaFW Game" folder (first location that works) and updates the text field.
+    string EnsureGameFolder()
+    {
+        foreach (string dir in GetGameFolderCandidates())
+        {
+            try
+            {
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+
+                gameFolderPath = dir;
+                return dir;
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogWarning("Could not create FNaFW Game dir: " + dir + " - " + e.Message);
+            }
+        }
+
+        gameFolderPath = "";
+        return "";
+    }
+
+    void SetupGameFolder()
+    {
+        string path = EnsureGameFolder();
+
+        if (gameFolderText != null)
+        {
+            if (string.IsNullOrEmpty(path))
+                gameFolderText.text = "Could not create the FNaFW Game folder.";
+            else
+                gameFolderText.text = path;
+        }
+
+        UnityEngine.Debug.Log("FNaFW Game folder: " + path);
+    }
+
+    public void CopyGameFolderPath()
+    {
+        string path = EnsureGameFolder();
+
+        if (string.IsNullOrEmpty(path))
+        {
+            ShowInfo("ERROR: Cannot create the FNaFW Game folder.");
+            return;
+        }
+
+        GUIUtility.systemCopyBuffer = path;
+        UnityEngine.Debug.Log("Copied to clipboard: " + path);
+        ShowInfo("Folder path copied to clipboard:\n" + path);
+    }
+
+    public void OpenGameFolder()
+    {
+        string path = EnsureGameFolder();
+
+        if (string.IsNullOrEmpty(path))
+        {
+            ShowInfo("ERROR: Cannot create the FNaFW Game folder.");
+            return;
+        }
+
+        try
+        {
+            Process.Start("explorer.exe", "\"" + path + "\"");
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to open folder: " + e.Message);
+            ShowInfo("ERROR: Could not open the folder\n" + e.Message);
+        }
     }
 
     // =========================================================
@@ -92,7 +186,6 @@ public class FNAFWManualDL : MonoBehaviour
             return;
 
         fnafworldApworld.url = remoteConfig.fnafworldApworld;
-        fnafworldExe.url = remoteConfig.fnafworldExe;
     }
 
     IEnumerator LoadRemoteConfig()
@@ -179,64 +272,14 @@ public class FNAFWManualDL : MonoBehaviour
     private IEnumerator ExecuteSetup()
     {
         bool doApworld = installApworldToggle == null || installApworldToggle.isOn;
-        bool doGameCopy = gameCopyToggle == null || gameCopyToggle.isOn;
 
-        int count =
-            (doApworld ? 1 : 0) +
-            (doGameCopy ? 1 : 0);
-
-        if (count == 0)
+        if (!doApworld)
         {
             ShowInfo("Please select at least one component to install.");
             yield break;
         }
 
-        if (doApworld && count == 1)
-        {
-            yield return APWorldOnlyFlow();
-            yield break;
-        }
-
-        if (doGameCopy && count == 1)
-        {
-            yield return ExeOnlyFlow();
-            yield break;
-        }
-
-        yield return InstallFlow();
-    }
-
-    IEnumerator InstallFlow()
-    {
-        if (gameCopyToggle == null || gameCopyToggle.isOn)
-        {
-            ShowInfo("Downloading FNaF World...");
-            yield return InstallExe();
-        }
-
-        if (installApworldToggle == null || installApworldToggle.isOn)
-        {
-            ShowInfo("Installing APWorld...");
-            yield return InstallAPWorld();
-        }
-
-        UnityEngine.Debug.Log("END: FNAFW Setup");
-        ShowInfo("Installation complete!");
-    }
-
-    IEnumerator ExeOnlyFlow()
-    {
-        yield return new WaitUntil(() => configLoaded);
-
-        ShowInfo("Downloading FNaF World...");
-        yield return new WaitForSeconds(1f);
-
-        yield return InstallExe();
-
-        if (!lastExeInstallSuccess)
-            yield break;
-
-        ShowInfo("Installation complete!");
+        yield return APWorldOnlyFlow();
     }
 
     IEnumerator APWorldOnlyFlow()
@@ -346,121 +389,6 @@ public class FNAFWManualDL : MonoBehaviour
         DeleteTempFile(localPath);
     }
 
-    IEnumerator InstallExe()
-    {
-        lastExeInstallSuccess = false;
-
-        while (!configLoaded)
-        {
-            UnityEngine.Debug.Log("Waiting for config to load...");
-            yield return new WaitForSeconds(0.5f);
-        }
-
-        UnityEngine.Debug.Log("Config loaded. FNaF World exe URL: " + fnafworldExe.url);
-
-        if (string.IsNullOrEmpty(fnafworldExe.url))
-        {
-            ShowInfo("ERROR: FNaF World download URL is empty!");
-            UnityEngine.Debug.LogError("FNaF World exe URL not set!");
-            yield break;
-        }
-
-        string fileName = fnafworldExe.fileName;
-        if (string.IsNullOrEmpty(fileName))
-        {
-            fileName = fnafworldExe.url.Substring(fnafworldExe.url.LastIndexOf('/') + 1);
-
-            if (fileName.Contains("?"))
-                fileName = fileName.Substring(0, fileName.IndexOf("?"));
-
-            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
-        }
-
-        if (string.IsNullOrEmpty(fileName))
-            fileName = "fnaf-world.exe";
-
-        string localPath = Path.Combine(Application.persistentDataPath, fileName);
-
-        UnityEngine.Debug.Log("Downloading FNaF World from: " + fnafworldExe.url);
-        UnityEngine.Debug.Log("Saving to: " + localPath);
-
-        yield return DownloadFile(fnafworldExe.url, localPath);
-
-        if (!File.Exists(localPath))
-        {
-            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
-            ShowInfo("ERROR: FNaF World download failed!");
-            yield break;
-        }
-
-        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
-
-        string[] archipelagoDirs = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago", FNAFW_FOLDER_NAME),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", FNAFW_FOLDER_NAME),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", FNAFW_FOLDER_NAME),
-        };
-
-        string targetDir = "";
-        foreach (string dir in archipelagoDirs)
-        {
-            try
-            {
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
-                targetDir = dir;
-                UnityEngine.Debug.Log("Using Archipelago target dir: " + targetDir);
-                break;
-            }
-            catch (System.Exception e)
-            {
-                UnityEngine.Debug.LogWarning("Could not create Archipelago dir: " + dir + " - " + e.Message);
-            }
-        }
-
-        if (string.IsNullOrEmpty(targetDir))
-        {
-            ShowInfo("ERROR: Cannot create Archipelago FNaFW Game directory.");
-            UnityEngine.Debug.LogError("No valid Archipelago target directory found for FNaFW exe.");
-            DeleteTempFile(localPath);
-            yield break;
-        }
-
-        string target = Path.Combine(targetDir, fileName);
-
-        try
-        {
-            if (File.Exists(target))
-            {
-                try
-                {
-                    File.SetAttributes(target, FileAttributes.Normal);
-                    File.Delete(target);
-                    UnityEngine.Debug.Log("Deleted existing target exe");
-                }
-                catch (System.Exception e)
-                {
-                    UnityEngine.Debug.LogWarning("Could not delete existing target exe: " + e.Message);
-                }
-            }
-
-            File.Copy(localPath, target, true);
-            UnityEngine.Debug.Log("Copied FNaF World exe to: " + target);
-            ShowInfo("FNaF World executable copied to Archipelago\\FNaFW Game successfully!");
-            lastExeInstallSuccess = true;
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogError("Failed to copy exe: " + e.Message);
-            ShowInfo("ERROR: Failed to copy FNaF World executable\n" + e.Message);
-            DeleteTempFile(localPath);
-            yield break;
-        }
-
-        DeleteTempFile(localPath);
-    }
-
     void DeleteTempFile(string localPath)
     {
         try
@@ -477,19 +405,16 @@ public class FNAFWManualDL : MonoBehaviour
         }
     }
 
+    // =========================================================
+    // REVERT
+    // =========================================================
+
     private IEnumerator ExecuteRevert()
     {
         ShowInfo("Removing Archipelago\\FNaFW Game folder...");
 
-        string[] archipelagoDirs = new string[]
-        {
-            Path.Combine(@"C:\ProgramData\Archipelago", FNAFW_FOLDER_NAME),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago", FNAFW_FOLDER_NAME),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago", FNAFW_FOLDER_NAME),
-        };
-
         bool foundAny = false;
-        foreach (string dir in archipelagoDirs)
+        foreach (string dir in GetGameFolderCandidates())
         {
             if (Directory.Exists(dir))
             {
@@ -507,6 +432,9 @@ public class FNAFWManualDL : MonoBehaviour
         {
             ShowInfo("Revert complete: Archipelago\\FNaFW Game removed where present.");
         }
+
+        // Re-create the empty folder so the displayed path stays valid.
+        SetupGameFolder();
 
         UnityEngine.Debug.Log("END: FNAFW Revert");
         yield return null;

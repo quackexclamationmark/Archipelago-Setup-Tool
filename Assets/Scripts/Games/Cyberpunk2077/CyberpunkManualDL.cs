@@ -22,10 +22,12 @@ public class CyberpunkManualDL : MonoBehaviour
     public FileDownloader.FileData cet;
     public FileDownloader.FileData codeware;
     public FileDownloader.FileData red4ext;
-    public FileDownloader.FileData phone;
 
     [Header("GAME FOLDER NAME")]
     public string steamGameFolderName = "Cyberpunk 2077";
+
+    [Header("MANUAL SETUP")]
+    public string phoneModUrl = "https://www.nexusmods.com/cyberpunk2077/mods/24949?tab=files";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installAPWorldToggle;
@@ -65,7 +67,6 @@ public class CyberpunkManualDL : MonoBehaviour
         public string cyberpunk2077CET;
         public string cyberpunk2077Codeware;
         public string cyberpunk2077RED4ext;
-        public string cyberpunk2077Phone;
         public string[] steamSearchPaths;
         public string[] apSearchPaths;
     }
@@ -128,17 +129,16 @@ public class CyberpunkManualDL : MonoBehaviour
         cet.url = remoteConfig.cyberpunk2077CET;
         codeware.url = remoteConfig.cyberpunk2077Codeware;
         red4ext.url = remoteConfig.cyberpunk2077RED4ext;
-        phone.url = remoteConfig.cyberpunk2077Phone;
     }
 
     public void RunSetup()
     {
-        ShowConfirmation("Are you sure you want to install all the files?", "Setup");
+        ShowConfirmation("Are you sure you want to setup?", "Setup");
     }
 
     public void RevertAll()
     {
-        ShowConfirmation("Are you sure you want to revert and remove all mods?", "Revert");
+        ShowConfirmation("Are you sure you want to revert?", "Revert");
     }
 
     private void ShowConfirmation(string message, string action)
@@ -258,7 +258,6 @@ public class CyberpunkManualDL : MonoBehaviour
             yield return InstallZipToGameDir(cet, "CET");
             yield return InstallZipToGameDir(codeware, "Codeware");
             yield return InstallZipToGameDir(red4ext, "RED4ext");
-            yield return InstallZipToGameDir(phone, "Phone");
         }
 
         SaveInstalledFilesManifest(currentManifest);
@@ -279,7 +278,18 @@ public class CyberpunkManualDL : MonoBehaviour
             yield return new WaitForSeconds(2f);
         }
 
-        ShowInfo("Installation complete!");
+        if (wantDependencies)
+        {
+            // Phone se télécharge manuellement depuis Nexus Mods
+            if (!string.IsNullOrEmpty(phoneModUrl))
+                Application.OpenURL(phoneModUrl);
+
+            ShowInfo("Installation complete! Check the Manual Setup Infos on the Infos tab to finish setup.");
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
     }
 
     private void ExecuteRevert()

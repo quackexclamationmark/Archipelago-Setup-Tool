@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.IO;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System;
 using System.Runtime.InteropServices;
@@ -18,11 +19,17 @@ public class GTASAManualDL : MonoBehaviour
     public FileDownloader.FileData gtasaWidescreen;
     public FileDownloader.FileData gtasaAP;
 
+    [Header("PLATFORM SELECTION")]
+    public Button steamButton;
+    public Button rockstarButton;
+    public TextMeshProUGUI platformStatus;
+
     [Header("GAME FOLDER NAMES")]
-    public string[] steamGameFolderNames = new string[]
+    public string steamGameFolderName = "Grand Theft Auto San Andreas";
+    public string[] rockstarGameFolderNames = new string[]
     {
-    "Grand Theft Auto San Andreas",
-    "GTA San Andreas - The Definitive Edition",
+        "Grand Theft Auto San Andreas",
+        "GTA San Andreas"
     };
 
     [Header("FEATURE TOGGLES")]
@@ -31,8 +38,8 @@ public class GTASAManualDL : MonoBehaviour
     public Toggle installGTASAWidescreenToggle;
     public Toggle installGTASAAPToggle;
 
-    /*[Header("LAUNCH OPTIONS")]
-    public Toggle secondLaunchToggle;*/
+    [Header("LAUNCH OPTIONS")]
+    public Toggle secondLaunchToggle;
 
     [Header("REVERT BUTTON")]
     public Button revertButton;
@@ -55,6 +62,7 @@ public class GTASAManualDL : MonoBehaviour
     private string pendingAction;
     private GTASAConfig remoteConfig;
     private bool configLoaded = false;
+    private bool isRockstar = false;
     private bool lastApWorldInstallSuccess = false;
 
     [System.Serializable]
@@ -65,22 +73,66 @@ public class GTASAManualDL : MonoBehaviour
         public string gtasaWidescreen;
         public string gtasaAP;
         public string[] steamSearchPaths;
+        public string[] rockstarSearchPaths;
         public string[] apSearchPaths;
     }
 
     void Start()
     {
-        gtasaPath = GetGTASAPath();
-        backupPath = Path.Combine(gtasaPath, "backup");
+        if (steamButton != null) steamButton.onClick.AddListener(OnSteamButtonClicked);
+        if (rockstarButton != null) rockstarButton.onClick.AddListener(OnRockstarButtonClicked);
+
+        SelectSteam();
+
         StartCoroutine(LoadRemoteConfig());
 
         if (infoPanel != null) infoPanel.SetActive(false);
         if (infoOkButton != null) infoOkButton.onClick.AddListener(CloseInfoPanel);
-        /*if (secondLaunchToggle != null) secondLaunchToggle.isOn = false;*/
+        if (secondLaunchToggle != null) secondLaunchToggle.isOn = false;
         if (confirmationPanel != null) confirmationPanel.SetActive(false);
         if (confirmButton != null) confirmButton.onClick.AddListener(OnConfirm);
         if (cancelButton != null) cancelButton.onClick.AddListener(OnCancel);
         if (revertButton != null) revertButton.onClick.AddListener(OnRevertButtonClicked);
+    }
+
+    // =========================================================
+    // PLATFORM SELECTION
+    // =========================================================
+
+    void OnSteamButtonClicked() => SelectSteam();
+
+    void OnRockstarButtonClicked() => SelectRockstar();
+
+    void SelectSteam()
+    {
+        isRockstar = false;
+        RefreshGamePath();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Steam - Path: " + gtasaPath);
+    }
+
+    void SelectRockstar()
+    {
+        isRockstar = true;
+        RefreshGamePath();
+        UpdatePlatformStatus();
+        UnityEngine.Debug.Log("Switched to Rockstar - Path: " + gtasaPath);
+    }
+
+    void RefreshGamePath()
+    {
+        gtasaPath = GetGTASAPath();
+        backupPath = Path.Combine(gtasaPath, "backup");
+    }
+
+    void UpdatePlatformStatus()
+    {
+        if (platformStatus != null)
+        {
+            string platform = isRockstar ? "Rockstar" : "Steam";
+            string status = string.IsNullOrEmpty(gtasaPath) ? "Not Found" : "Found";
+            platformStatus.text = $"Platform: {platform} \n {status}";
+        }
     }
 
     // =========================================================
@@ -125,8 +177,7 @@ public class GTASAManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        gtasaPath = GetGTASAPath();
-        backupPath = Path.Combine(gtasaPath, "backup");
+        RefreshGamePath();
 
         bool apworld = installGTASAApworldToggle == null || installGTASAApworldToggle.isOn;
         bool asi = installGTASAASIToggle != null && installGTASAASIToggle.isOn;
@@ -137,7 +188,8 @@ public class GTASAManualDL : MonoBehaviour
 
         if (needsGamePath && (string.IsNullOrEmpty(gtasaPath) || !Directory.Exists(gtasaPath)))
         {
-            ShowInfo("Game path not found. Please check your installation.");
+            string platform = isRockstar ? "Rockstar" : "Steam";
+            ShowInfo("Game not found on " + platform + ". Please check your installation.");
             return;
         }
 
@@ -204,15 +256,19 @@ public class GTASAManualDL : MonoBehaviour
 
     private void ExecuteRevert()
     {
-        gtasaPath = GetGTASAPath();
-        if (string.IsNullOrEmpty(gtasaPath)) return;
-        backupPath = Path.Combine(gtasaPath, "backup");
+        RefreshGamePath();
+        if (string.IsNullOrEmpty(gtasaPath))
+        {
+            string platform = isRockstar ? "Rockstar" : "Steam";
+            ShowInfo("Game not found on " + platform + ". Cannot revert.");
+            return;
+        }
 
         CleanupProcesses();
         ShowInfo("Reverting changes...");
 
-        // Remove installed files
         SafeDeleteFile(Path.Combine(gtasaPath, "GTASAClient.exe"));
+        SafeDeleteFile(Path.Combine(gtasaPath, "gta_sa_ap.exe"));
         SafeDeleteFile(Path.Combine(gtasaPath, "vorbisFile.dll"));
 
         string scriptsPath = Path.Combine(gtasaPath, "scripts");
@@ -286,11 +342,11 @@ public class GTASAManualDL : MonoBehaviour
         CreateVersionFile(gtasaApworld.url, gtasaASI.url, gtasaWidescreen.url, gtasaAP.url);
 
         ShowInfo("Installation complete!");
-        /*if (secondLaunchToggle != null && secondLaunchToggle.isOn)
+        if (secondLaunchToggle != null && secondLaunchToggle.isOn)
         {
             yield return new WaitForSeconds(2f);
-            LaunchGTASAClient(false);
-        }*/
+            LaunchGTASA();
+        }
     }
 
     IEnumerator InstallAPWorld()
@@ -389,12 +445,12 @@ public class GTASAManualDL : MonoBehaviour
             if (File.Exists(localPath))
             {
                 File.Delete(localPath);
-                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary file: " + localPath);
             }
         }
         catch (System.Exception e)
         {
-            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
+            UnityEngine.Debug.LogWarning("Could not delete temporary file: " + e.Message);
         }
     }
 
@@ -543,34 +599,49 @@ public class GTASAManualDL : MonoBehaviour
         }
     }
 
-    /*void LaunchGTASAClient(bool asHelper = false)
+    public void LaunchGTASA()
     {
-        string clientPath = Path.Combine(gtasaPath, "gta_sa.exe");
-        if (File.Exists(clientPath))
+        try
         {
-            try
-            {
-                var psi = new ProcessStartInfo()
-                {
-                    FileName = clientPath,
-                    UseShellExecute = true,
-                    WindowStyle = ProcessWindowStyle.Normal
-                };
+            string[] exeNames = { "gta_sa.exe" };
+            string exePath = null;
 
-                gtasaProcess = Process.Start(psi);
-                gtasaLaunchedAsHelper = asHelper;
-                UnityEngine.Debug.Log($"gta_sa.exe launched for {(asHelper ? "config generation (helper)" : "user/interactive launch")}.");
-            }
-            catch (Exception e)
+            foreach (string exeName in exeNames)
             {
-                UnityEngine.Debug.LogError("Launch error: " + e.Message);
+                string candidate = Path.Combine(gtasaPath, exeName);
+                if (File.Exists(candidate))
+                {
+                    exePath = candidate;
+                    break;
+                }
+            }
+
+            if (exePath != null)
+            {
+                ProcessStartInfo startInfo = new ProcessStartInfo(exePath);
+                startInfo.WorkingDirectory = gtasaPath;
+                startInfo.UseShellExecute = true;
+
+                Process.Start(startInfo);
+                UnityEngine.Debug.Log("GTA SA launched: " + exePath);
+            }
+            else
+            {
+                UnityEngine.Debug.LogError("gta_sa.exe not found in: " + gtasaPath);
+                ShowInfo("ERROR: gta_sa.exe (1.0 release executable) not found!");
             }
         }
-        else
+        catch (System.ComponentModel.Win32Exception e)
         {
-            UnityEngine.Debug.LogWarning("gta_sa.exe not found: " + clientPath);
+            UnityEngine.Debug.LogWarning("Launch cancelled or elevation denied: " + e.Message);
+            ShowInfo("Launch cancelled (admin approval was declined).");
         }
-    }*/
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to launch GTA SA: " + e.Message);
+            ShowInfo("ERROR: Failed to launch GTA SA!");
+        }
+    }
 
     void CloseGTASA(bool force = false)
     {
@@ -733,38 +804,38 @@ public class GTASAManualDL : MonoBehaviour
 
         configLoaded = true;
 
-        gtasaPath = GetGTASAPath();
-        backupPath = Path.Combine(gtasaPath, "backup");
+        RefreshGamePath();
+        UpdatePlatformStatus();
     }
+
+    // =========================================================
+    // GAME PATH DETECTION
+    // =========================================================
 
     string GetGTASAPath()
     {
-        return GetGTASASteamPath();
+        return isRockstar ? GetGTASARockstarPath() : GetGTASASteamPath();
     }
 
     string GetGTASASteamPath()
     {
-        string[] baseDirs = new string[]
+        string[] quickPaths = new string[]
         {
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common"),
-        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common"),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
-        foreach (string baseDir in baseDirs)
+        foreach (string path in quickPaths)
         {
-            foreach (string folderName in steamGameFolderNames)
+            try
             {
-                try
+                if (Directory.Exists(path))
                 {
-                    string path = Path.Combine(baseDir, folderName);
-                    if (Directory.Exists(path))
-                    {
-                        UnityEngine.Debug.Log("Found GTA SA (Steam) at: " + path);
-                        return path;
-                    }
+                    UnityEngine.Debug.Log("Found GTA SA (Steam) at: " + path);
+                    return path;
                 }
-                catch { }
             }
+            catch { }
         }
 
         if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
@@ -783,14 +854,97 @@ public class GTASAManualDL : MonoBehaviour
                         if (string.IsNullOrEmpty(relativePath))
                             continue;
 
-                        foreach (string folderName in steamGameFolderNames)
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found GTA SA (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("GTA SA (Steam) not found.");
+        return "";
+    }
+
+    string GetGTASARockstarPath()
+    {
+        List<string> quickBasePaths = new List<string>
+        {
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Rockstar Games"),
+            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Rockstar Games"),
+        };
+
+        foreach (string basePath in quickBasePaths)
+        {
+            foreach (string folderName in rockstarGameFolderNames)
+            {
+                try
+                {
+                    string path = Path.Combine(basePath, folderName);
+                    if (Directory.Exists(path))
+                    {
+                        UnityEngine.Debug.Log("Found GTA SA (Rockstar) at: " + path);
+                        return path;
+                    }
+                }
+                catch { }
+            }
+        }
+
+        try
+        {
+            string documentsRockstarPath = Path.Combine(
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments),
+                "Rockstar Games");
+
+            foreach (string folderName in rockstarGameFolderNames)
+            {
+                try
+                {
+                    string path = Path.Combine(documentsRockstarPath, folderName);
+                    if (Directory.Exists(path))
+                    {
+                        UnityEngine.Debug.Log("Found GTA SA (Rockstar, via Documents) at: " + path);
+                        return path;
+                    }
+                }
+                catch { }
+            }
+        }
+        catch { }
+
+        if (remoteConfig != null && remoteConfig.rockstarSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.rockstarSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        foreach (string folderName in rockstarGameFolderNames)
                         {
                             try
                             {
                                 string path = Path.Combine(drive.Name, relativePath, folderName);
                                 if (Directory.Exists(path))
                                 {
-                                    UnityEngine.Debug.Log("Found GTA SA (Steam, via remote config) at: " + path);
+                                    UnityEngine.Debug.Log("Found GTA SA (Rockstar, via remote config) at: " + path);
                                     return path;
                                 }
                             }
@@ -802,7 +956,7 @@ public class GTASAManualDL : MonoBehaviour
             catch { }
         }
 
-        UnityEngine.Debug.LogWarning("GTA SA (Steam) not found.");
+        UnityEngine.Debug.LogWarning("GTA SA (Rockstar) not found.");
         return "";
     }
 

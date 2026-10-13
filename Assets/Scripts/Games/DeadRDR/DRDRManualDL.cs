@@ -12,16 +12,13 @@ public class DRDRManualDL : MonoBehaviour
 
     [Header("DRDR FILES")]
     public FileDownloader.FileData drdrApworld;
-    public FileDownloader.FileData drdrREFramework;
     public FileDownloader.FileData drdrAP;
-    public FileDownloader.FileData drdrLuaAPClient;
 
     [Header("GAME FOLDER NAMES")]
     public string steamGameFolderName = "DEAD RISING DELUXE REMASTER";
 
     [Header("FEATURE TOGGLES")]
     public Toggle installDrdrApworldToggle;
-    public Toggle installDrdrFrameworkToggle;
     public Toggle installDrdrAPToggle;
 
     [Header("LAUNCH OPTIONS")]
@@ -101,9 +98,7 @@ public class DRDRManualDL : MonoBehaviour
     public class DRDRConfig
     {
         public string drdrApworld;
-        public string drdrFramework;
         public string drdrAP;
-        public string drdrLuaAPClient;
         public string[] steamSearchPaths;
         public string[] apSearchPaths;
     }
@@ -157,9 +152,7 @@ public class DRDRManualDL : MonoBehaviour
             return;
 
         drdrApworld.url = remoteConfig.drdrApworld;
-        drdrREFramework.url = remoteConfig.drdrFramework;
         drdrAP.url = remoteConfig.drdrAP;
-        drdrLuaAPClient.url = remoteConfig.drdrLuaAPClient;
     }
 
     public void RunSetup()
@@ -213,9 +206,8 @@ public class DRDRManualDL : MonoBehaviour
         drdrPath = GetDRDRPath();
 
         bool apworld = installDrdrApworldToggle == null || installDrdrApworldToggle.isOn;
-        bool framework = installDrdrFrameworkToggle != null && installDrdrFrameworkToggle.isOn;
         bool apMod = installDrdrAPToggle != null && installDrdrAPToggle.isOn;
-        bool needsGamePath = framework || apMod;
+        bool needsGamePath = apMod;
 
         if (needsGamePath && (string.IsNullOrEmpty(drdrPath) || !Directory.Exists(drdrPath)))
         {
@@ -225,18 +217,11 @@ public class DRDRManualDL : MonoBehaviour
 
         int count =
             (apworld ? 1 : 0) +
-            (framework ? 1 : 0) +
             (apMod ? 1 : 0);
 
         if (count == 0)
         {
             ShowInfo("Please select at least one component to install.");
-            return;
-        }
-
-        if (count == 0)
-        {
-            StartCoroutine(APWorldOnlyFlow());
             return;
         }
 
@@ -374,18 +359,9 @@ public class DRDRManualDL : MonoBehaviour
             yield return InstallAPWorld();
         }
 
-        if (installDrdrFrameworkToggle != null && installDrdrFrameworkToggle.isOn)
-        {
-            ShowInfo("Installing Framework (dinput8.dll)...");
-            yield return InstallDRDRFramework();
-        }
-
         if (installDrdrAPToggle != null && installDrdrAPToggle.isOn)
         {
-            ShowInfo("Installing Lua AP Client...");
-            yield return InstallLuaAPClient();
-
-            ShowInfo("Installing AP Client (REFramework mod)...");
+            ShowInfo("Installing AP package...");
             yield return InstallDRDRAP();
         }
 
@@ -511,59 +487,7 @@ public class DRDRManualDL : MonoBehaviour
         }
     }
 
-    // ---------------- FRAMEWORK: dinput8.dll, single file into game root ----------------
-    IEnumerator InstallDRDRFramework()
-    {
-        while (!configLoaded)
-            yield return null;
-
-        if (string.IsNullOrEmpty(drdrREFramework.url))
-        {
-            ShowInfo("ERROR: Framework URL is empty!");
-            yield break;
-        }
-
-        string fileName = "dinput8.dll";
-        string target = Path.Combine(drdrPath, fileName);
-
-        yield return DownloadFile(drdrREFramework.url, target);
-
-        if (!File.Exists(target))
-        {
-            ShowInfo("ERROR: dinput8.dll download failed!");
-            yield break;
-        }
-
-        UnityEngine.Debug.Log("dinput8.dll installed to: " + target);
-    }
-
-    // ---------------- LUA AP CLIENT: lua-apclientpp.dll, single file into game root ----------------
-    IEnumerator InstallLuaAPClient()
-    {
-        while (!configLoaded)
-            yield return null;
-
-        if (string.IsNullOrEmpty(drdrLuaAPClient.url))
-        {
-            ShowInfo("ERROR: Lua AP Client URL is empty!");
-            yield break;
-        }
-
-        string fileName = "lua-apclientpp.dll";
-        string target = Path.Combine(drdrPath, fileName);
-
-        yield return DownloadFile(drdrLuaAPClient.url, target);
-
-        if (!File.Exists(target))
-        {
-            ShowInfo("ERROR: lua-apclientpp.dll download failed!");
-            yield break;
-        }
-
-        UnityEngine.Debug.Log("lua-apclientpp.dll installed to: " + target);
-    }
-
-    // ---------------- AP MOD: DRAP.zip, contents go into /reframework (create if missing) ----------------
+    // ---------------- AP PACKAGE: .zip from remote config, contents go directly into the game folder ----------------
     IEnumerator InstallDRDRAP()
     {
         while (!configLoaded)
@@ -575,19 +499,30 @@ public class DRDRManualDL : MonoBehaviour
             yield break;
         }
 
+        if (string.IsNullOrEmpty(drdrPath) || !Directory.Exists(drdrPath))
+        {
+            ShowInfo("Game path not found. Please check Steam installation.");
+            yield break;
+        }
+
         string extractPath = Path.Combine(Application.persistentDataPath, "DRDRAPTemp");
+
+        // Clean any leftover from a previous run
+        SafeDeleteDirectory(extractPath);
 
         yield return downloader.DownloadAndExtract(drdrAP, Application.persistentDataPath, extractPath);
 
-        string reframeworkPath = Path.Combine(drdrPath, "reframework");
-
-        if (!Directory.Exists(reframeworkPath))
-            Directory.CreateDirectory(reframeworkPath);
+        if (!Directory.Exists(extractPath))
+        {
+            ShowInfo("ERROR: AP package download or extraction failed!");
+            yield break;
+        }
 
         try
         {
-            MoveDirectory(extractPath, reframeworkPath);
-            UnityEngine.Debug.Log("DRAP.zip contents installed to: " + reframeworkPath);
+            // Zip contents go straight into the game directory
+            MoveDirectory(extractPath, drdrPath);
+            UnityEngine.Debug.Log("AP package contents installed to: " + drdrPath);
         }
         catch (System.Exception e)
         {

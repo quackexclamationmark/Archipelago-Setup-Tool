@@ -344,7 +344,6 @@ public class RefunctManualDL : MonoBehaviour
 
             yield return downloader.DownloadAndExtract(refunctAP, Application.persistentDataPath, extractPath);
 
-            // Look for practice-windows folder inside the extraction
             string nestedPracticeWindowsPath = Path.Combine(extractPath, "practice-windows");
             string sourcePath = extractPath;
 

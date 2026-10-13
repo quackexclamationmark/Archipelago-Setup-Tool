@@ -16,7 +16,6 @@ public class Saints2ManualDL : MonoBehaviour
     public FileDownloader.FileData saints2AP;
     public FileDownloader.FileData saints2Juiced;
     public FileDownloader.FileData saints2ASI;
-    public FileDownloader.FileData saints2Exe;
 
     [Header("GAME FOLDER NAME")]
     public string steamGameFolderName = "Saints Row 2";
@@ -26,10 +25,6 @@ public class Saints2ManualDL : MonoBehaviour
     public Toggle installAPToggle;
     public Toggle installJuicedToggle;
     public Toggle installASIToggle;
-    public Toggle installExeToggle;
-
-    [Header("LAUNCH OPTIONS")]
-    public Toggle launchGameToggle;
 
     [Header("REVERT OPTIONS")]
     public Toggle fullClearToggle;
@@ -61,7 +56,6 @@ public class Saints2ManualDL : MonoBehaviour
         public string saints2AP;
         public string saints2Juiced;
         public string saints2ASI;
-        public string saints2Exe;
         public string[] steamSearchPaths;
         public string[] apSearchPaths;
     }
@@ -85,9 +79,6 @@ public class Saints2ManualDL : MonoBehaviour
         if (infoOkButton != null)
             infoOkButton.onClick.AddListener(CloseInfoPanel);
 
-        if (launchGameToggle != null)
-            launchGameToggle.isOn = false;
-
         if (installApworldToggle != null)
             installApworldToggle.isOn = true;
         if (installAPToggle != null)
@@ -96,8 +87,6 @@ public class Saints2ManualDL : MonoBehaviour
             installJuicedToggle.isOn = true;
         if (installASIToggle != null)
             installASIToggle.isOn = true;
-        if (installExeToggle != null)
-            installExeToggle.isOn = true;
 
         if (fullClearToggle != null)
             fullClearToggle.isOn = false;
@@ -132,7 +121,6 @@ public class Saints2ManualDL : MonoBehaviour
         saints2Apworld.url = remoteConfig.saints2Apworld;
         saints2Juiced.url = remoteConfig.saints2Juiced;
         saints2ASI.url = remoteConfig.saints2ASI;
-        saints2Exe.url = remoteConfig.saints2Exe;
     }
 
     public void RunSetup()
@@ -189,9 +177,8 @@ public class Saints2ManualDL : MonoBehaviour
         bool ap = installAPToggle == null || installAPToggle.isOn;
         bool juiced = installJuicedToggle == null || installJuicedToggle.isOn;
         bool asi = installASIToggle == null || installASIToggle.isOn;
-        bool exe = installExeToggle == null || installExeToggle.isOn;
 
-        bool needsGamePath = ap || juiced || asi || exe;
+        bool needsGamePath = ap || juiced || asi;
 
         if (needsGamePath && (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath)))
         {
@@ -199,7 +186,7 @@ public class Saints2ManualDL : MonoBehaviour
             return;
         }
 
-        int count = (apworld ? 1 : 0) + (ap ? 1 : 0) + (juiced ? 1 : 0) + (asi ? 1 : 0) + (exe ? 1 : 0);
+        int count = (apworld ? 1 : 0) + (ap ? 1 : 0) + (juiced ? 1 : 0) + (asi ? 1 : 0);
 
         if (count == 0)
         {
@@ -228,12 +215,6 @@ public class Saints2ManualDL : MonoBehaviour
         if (!lastApWorldInstallSuccess)
             yield break;
 
-        if (launchGameToggle == null || launchGameToggle.isOn)
-        {
-            LaunchGame();
-            yield return new WaitForSeconds(2f);
-        }
-
         ShowInfo("Installation complete!");
     }
 
@@ -261,12 +242,6 @@ public class Saints2ManualDL : MonoBehaviour
             yield return InstallJuiced();
         }
 
-        if (installExeToggle == null || installExeToggle.isOn)
-        {
-            ShowInfo("Installing patched executable...");
-            yield return InstallExe();
-        }
-
         if (installAPToggle == null || installAPToggle.isOn)
         {
             ShowInfo("Installing AP Mod...");
@@ -286,15 +261,6 @@ public class Saints2ManualDL : MonoBehaviour
         }
 
         UpdateLooseTxt();
-
-        yield return new WaitForSeconds(1f);
-
-        if (launchGameToggle == null || launchGameToggle.isOn)
-        {
-            ShowInfo("Launching game...");
-            yield return new WaitForSeconds(1f);
-            LaunchGame();
-        }
     }
 
     // =========================================================
@@ -305,49 +271,6 @@ public class Saints2ManualDL : MonoBehaviour
     {
         BackupFile("DFEngine.dll");
         yield return InstallZipContentsToGamePath(saints2Juiced, "Saints2JuicedTemp", "Saints2 Juiced");
-    }
-
-    IEnumerator InstallExe()
-    {
-        BackupFile("SR2_pc.exe");
-
-        string localPath = Path.Combine(Application.persistentDataPath, "sr2_patched_download.exe");
-
-        yield return DownloadFile(saints2Exe.url, localPath);
-
-        if (!File.Exists(localPath))
-        {
-            ShowInfo("ERROR: Executable download failed!");
-            yield break;
-        }
-
-        string target = Path.Combine(gamePath, "SR2_pc.exe");
-
-        try
-        {
-            if (File.Exists(target))
-                File.Delete(target);
-
-            File.Copy(localPath, target, true);
-
-            if (currentManifest != null)
-                currentManifest.installedFiles.Add(target);
-
-            ShowInfo("Patched executable installed successfully!");
-        }
-        catch (System.Exception e)
-        {
-            UnityEngine.Debug.LogError("Failed to copy executable: " + e.Message);
-            ShowInfo("ERROR: Failed to install executable\n" + e.Message);
-            yield break;
-        }
-
-        try
-        {
-            if (File.Exists(localPath))
-                File.Delete(localPath);
-        }
-        catch { }
     }
 
     IEnumerator InstallAP()

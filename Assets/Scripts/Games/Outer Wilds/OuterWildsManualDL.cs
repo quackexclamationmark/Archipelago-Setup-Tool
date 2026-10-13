@@ -743,42 +743,32 @@ public class OuterWildsManualDL : MonoBehaviour
         outerWildsPath = GetOuterWildsPath();
     }
 
-    void LaunchOuterWilds()
+    public void LaunchOuterWilds()
     {
-        string owmlLauncherPath = Path.Combine(owmlPath, "OWML.Launcher.exe");
-        string outerWildsExePath = Path.Combine(outerWildsPath, "OuterWilds.exe");
-
-        if (File.Exists(owmlLauncherPath))
+        try
         {
-            UnityEngine.Debug.Log("Launching OWML.Launcher.exe");
-            Process.Start(owmlLauncherPath);
-            StartCoroutine(CheckAndLaunchOuterWilds(outerWildsExePath));
-        }
-        else if (File.Exists(outerWildsExePath))
-        {
-            UnityEngine.Debug.Log("OWML.Launcher.exe not found, launching OuterWilds.exe directly");
-            outerWildsProcess = Process.Start(outerWildsExePath);
-        }
-    }
+            string owmlDir = Path.Combine(outerWildsPath, "OWML");
+            string owmlLauncherPath = Path.Combine(owmlDir, "OWML.Launcher.exe");
 
-    IEnumerator CheckAndLaunchOuterWilds(string exePath)
-    {
-        yield return new WaitForSeconds(5f);
-
-        Process[] processes = Process.GetProcessesByName("OuterWilds");
-
-        if (processes.Length == 0)
-        {
-            if (File.Exists(exePath))
+            if (File.Exists(owmlLauncherPath))
             {
-                UnityEngine.Debug.Log("OuterWilds.exe not running, launching it now");
-                outerWildsProcess = Process.Start(exePath);
+                ProcessStartInfo startInfo = new ProcessStartInfo(owmlLauncherPath);
+                startInfo.WorkingDirectory = owmlDir;
+                startInfo.UseShellExecute = true;
+
+                Process.Start(startInfo);
+                UnityEngine.Debug.Log("OWML.Launcher.exe launched: " + owmlLauncherPath);
+            }
+            else
+            {
+                UnityEngine.Debug.LogError("OWML.Launcher.exe not found at: " + owmlLauncherPath);
+                ShowInfo("ERROR: OWML.Launcher.exe not found!");
             }
         }
-        else
+        catch (System.Exception e)
         {
-            UnityEngine.Debug.Log("OuterWilds.exe already running");
-            outerWildsProcess = processes[0];
+            UnityEngine.Debug.LogError("Failed to launch OWML.Launcher.exe: " + e.Message);
+            ShowInfo("ERROR: Failed to launch OWML.Launcher.exe!");
         }
     }
 

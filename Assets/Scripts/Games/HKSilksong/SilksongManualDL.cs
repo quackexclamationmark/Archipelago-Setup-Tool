@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.IO;
+using System.Linq;
 using System.Collections;
 using System.Diagnostics;
 
@@ -13,6 +14,19 @@ public class SilksongManualDL : MonoBehaviour
     public FileDownloader.FileData hksilksongApworld;
     public FileDownloader.FileData hksilksongAP;
     public FileDownloader.FileData hksilksongBepInEx;
+    public FileDownloader.FileData hksilksongBench;
+
+    [Header("BENCHWARP DEPENDENCIES (installed with the Bench toggle)")]
+    public FileDownloader.FileData hksilksongAssetHelper;
+    public FileDownloader.FileData hksilksongMonoDetourBep5;
+    public FileDownloader.FileData hksilksongMonoDetour;
+    public FileDownloader.FileData hksilksongI18N;
+    public FileDownloader.FileData hksilksongDataManager;
+    public FileDownloader.FileData hksilksongFsmUtil;
+    public FileDownloader.FileData hksilksongModMenu;
+    public FileDownloader.FileData hksilksongUnityHelper;
+    public FileDownloader.FileData hksilksongWavLib;
+    public FileDownloader.FileData hksilksongPrepatcher;
 
     [Header("GAME FOLDER NAMES")]
     public string steamGameFolderName = "Hollow Knight Silksong";
@@ -22,6 +36,7 @@ public class SilksongManualDL : MonoBehaviour
     public Toggle installApworldToggle;
     public Toggle installAPToggle;
     public Toggle installBepInExToggle;
+    public Toggle installBenchToggle;
 
     [Header("LAUNCH OPTIONS")]
     public Toggle launchAfterSetupToggle;
@@ -50,6 +65,19 @@ public class SilksongManualDL : MonoBehaviour
     private bool lastApWorldInstallSuccess = false;
 
     private const string AP_FOLDER_PREFIX = "SilksongRandomizer";
+    private const string BENCH_FOLDER_NAME = "Benchwarp";
+
+    // Folders created in BepInEx\plugins by the Bench toggle (besides Benchwarp itself)
+    private static readonly string[] BENCH_EXTRA_PLUGIN_FOLDERS = new string[]
+    {
+        "AssetHelper",
+        "I18N",
+        "DataManager",
+        "FsmUtil",
+        "ModMenu",
+        "UnityHelper",
+        "WavLib"
+    };
 
     [System.Serializable]
     public class SilksongConfig
@@ -57,8 +85,21 @@ public class SilksongManualDL : MonoBehaviour
         public string hksilksongApworld;
         public string hksilksongBepInEx;
         public string hksilksongAP;
+        public string hksilksongBench;
+        public string hksilksongBenchDep;
+        public string hksilksongAssetHelper;
+        public string hksilksongMonoDetourBep5;
+        public string hksilksongMonoDetour;
+        public string hksilksongI18N;
+        public string hksilksongDataManager;
+        public string hksilksongFsmUtil;
+        public string hksilksongModMenu;
+        public string hksilksongUnityHelper;
+        public string hksilksongWavLib;
+        public string hksilksongPrepatcher;
         public string[] steamSearchPaths;
         public string[] apSearchPaths;
+
     }
 
     void Start()
@@ -90,6 +131,9 @@ public class SilksongManualDL : MonoBehaviour
         if (fullCleanBepInExToggle != null)
             fullCleanBepInExToggle.isOn = false;
 
+        if (installBenchToggle != null)
+            installBenchToggle.isOn = false;
+
         if (fullCleanBepInExToggle != null)
             fullCleanBepInExToggle.onValueChanged.AddListener(OnFullCleanChanged);
     }
@@ -107,6 +151,18 @@ public class SilksongManualDL : MonoBehaviour
         hksilksongAP.url = remoteConfig.hksilksongAP;
         hksilksongBepInEx.url = remoteConfig.hksilksongBepInEx;
         hksilksongApworld.url = remoteConfig.hksilksongApworld;
+        hksilksongBench.url = remoteConfig.hksilksongBench;
+
+        hksilksongAssetHelper.url = remoteConfig.hksilksongAssetHelper;
+        hksilksongMonoDetourBep5.url = remoteConfig.hksilksongMonoDetourBep5;
+        hksilksongMonoDetour.url = remoteConfig.hksilksongMonoDetour;
+        hksilksongI18N.url = remoteConfig.hksilksongI18N;
+        hksilksongDataManager.url = remoteConfig.hksilksongDataManager;
+        hksilksongFsmUtil.url = remoteConfig.hksilksongFsmUtil;
+        hksilksongModMenu.url = remoteConfig.hksilksongModMenu;
+        hksilksongUnityHelper.url = remoteConfig.hksilksongUnityHelper;
+        hksilksongWavLib.url = remoteConfig.hksilksongWavLib;
+        hksilksongPrepatcher.url = remoteConfig.hksilksongPrepatcher;
     }
 
     public void RunSetup()
@@ -163,8 +219,9 @@ public class SilksongManualDL : MonoBehaviour
         bool apworld = installApworldToggle == null || installApworldToggle.isOn;
         bool bep = installBepInExToggle != null && installBepInExToggle.isOn;
         bool ap = installAPToggle == null || installAPToggle.isOn;
+        bool bench = installBenchToggle != null && installBenchToggle.isOn;
 
-        bool needsGamePath = bep || ap;
+        bool needsGamePath = bep || ap || bench;
 
         if (needsGamePath && (string.IsNullOrEmpty(gamePath) || !Directory.Exists(gamePath)))
         {
@@ -175,11 +232,13 @@ public class SilksongManualDL : MonoBehaviour
         int count =
             (apworld ? 1 : 0) +
             (bep ? 1 : 0) +
-            (ap ? 1 : 0);
+            (ap ? 1 : 0) +
+            (bench ? 1 : 0);
 
         if (apworld && count == 1) { StartCoroutine(APWorldOnlyFlow()); return; }
         if (bep && count == 1) { StartCoroutine(BepInExOnlyFlow()); return; }
         if (ap && count == 1) { StartCoroutine(APOnlyFlow()); return; }
+        if (bench && count == 1) { StartCoroutine(BenchOnlyFlow()); return; }
 
         if (count == 0)
         {
@@ -283,6 +342,13 @@ public class SilksongManualDL : MonoBehaviour
         ShowInfo("Full clean completed!");
     }
 
+    bool IsAPManagedFolder(string name)
+    {
+        return name.StartsWith(AP_FOLDER_PREFIX)
+            || name == BENCH_FOLDER_NAME
+            || BENCH_EXTRA_PLUGIN_FOLDERS.Contains(name);
+    }
+
     void RemoveAPModsFolder(string pluginsPath)
     {
         if (!Directory.Exists(pluginsPath))
@@ -292,7 +358,7 @@ public class SilksongManualDL : MonoBehaviour
         {
             string name = Path.GetFileName(dir);
 
-            if (name.StartsWith(AP_FOLDER_PREFIX))
+            if (IsAPManagedFolder(name))
                 SafeDeleteDirectory(dir);
         }
     }
@@ -319,7 +385,7 @@ public class SilksongManualDL : MonoBehaviour
         {
             string name = Path.GetFileName(dir);
 
-            if (name.StartsWith(AP_FOLDER_PREFIX))
+            if (IsAPManagedFolder(name))
                 continue;
 
             return true;
@@ -348,7 +414,13 @@ public class SilksongManualDL : MonoBehaviour
             yield return InstallAP();
         }
 
-        CreateVersionFile(hksilksongAP.url, hksilksongBepInEx.url, hksilksongApworld.url);
+        if (installBenchToggle != null && installBenchToggle.isOn)
+        {
+            ShowInfo("Installing Benchwarp...");
+            yield return InstallBench();
+        }
+
+        CreateVersionFile(hksilksongAP.url, hksilksongBepInEx.url, hksilksongApworld.url, hksilksongBench.url);
 
         if (launchAfterSetupToggle == null || launchAfterSetupToggle.isOn)
         {
@@ -503,6 +575,244 @@ public class SilksongManualDL : MonoBehaviour
         SafeDeleteDirectory(extractPath);
     }
 
+    IEnumerator InstallBench()
+    {
+        while (!configLoaded)
+            yield return null;
+
+        if (string.IsNullOrEmpty(hksilksongBench.url))
+        {
+            ShowInfo("ERROR: Benchwarp URL is empty!");
+            UnityEngine.Debug.LogError("Benchwarp URL not set!");
+            yield break;
+        }
+
+        string extractPath = Path.Combine(Application.persistentDataPath, "SilksongBenchTemp");
+
+        SafeDeleteDirectory(extractPath);
+
+        yield return downloader.DownloadAndExtract(hksilksongBench, Application.persistentDataPath, extractPath);
+
+        // Look for the "plugins" subfolder inside the extracted zip (shallowest match first)
+        string sourcePluginsDir = null;
+
+        if (Directory.Exists(extractPath))
+        {
+            sourcePluginsDir = Directory
+                .GetDirectories(extractPath, "plugins", SearchOption.AllDirectories)
+                .OrderBy(d => d.Length)
+                .FirstOrDefault();
+        }
+
+        if (string.IsNullOrEmpty(sourcePluginsDir))
+        {
+            UnityEngine.Debug.LogError("No 'plugins' folder found inside the Benchwarp zip.");
+            ShowInfo("ERROR: 'plugins' folder not found in the Benchwarp archive!");
+            SafeDeleteDirectory(extractPath);
+            yield break;
+        }
+
+        string benchTarget = Path.Combine(gamePath, "BepInEx", "plugins", BENCH_FOLDER_NAME);
+
+        // Remove any previous install so old files don't linger
+        SafeDeleteDirectory(benchTarget);
+        Directory.CreateDirectory(benchTarget);
+
+        MoveDirectory(sourcePluginsDir, benchTarget);
+
+        SafeDeleteDirectory(extractPath);
+
+        UnityEngine.Debug.Log("Benchwarp installed to: " + benchTarget);
+
+        // ---- Additional Benchwarp dependencies ----
+        yield return InstallBenchExtras();
+    }
+
+    // =====================================================================
+    //  BENCHWARP EXTRA DEPENDENCIES
+    // =====================================================================
+
+    IEnumerator InstallBenchExtras()
+    {
+        string bepInExPath = Path.Combine(gamePath, "BepInEx");
+        string pluginsPath = Path.Combine(bepInExPath, "plugins");
+        Directory.CreateDirectory(pluginsPath);
+
+        // AssetHelper: everything inside the zip's subfolder -> BepInEx\plugins\AssetHelper
+        yield return DownloadAndPlace(hksilksongAssetHelper, "SilksongAssetHelperTemp", "AssetHelper", extract =>
+        {
+            string sub = Directory.GetDirectories(extract).OrderBy(d => d.Length).FirstOrDefault();
+            string source = string.IsNullOrEmpty(sub) ? extract : sub;
+
+            string target = Path.Combine(pluginsPath, "AssetHelper");
+            SafeDeleteDirectory(target);
+            Directory.CreateDirectory(target);
+            MoveDirectory(source, target);
+        });
+
+        // MonoDetour BepInEx 5: "core" + "patchers" -> BepInEx
+        yield return DownloadAndPlace(hksilksongMonoDetourBep5, "SilksongMonoDetourBep5Temp", "MonoDetour (BepInEx 5)", extract =>
+        {
+            MoveNamedDirectory(extract, "core", Path.Combine(bepInExPath, "core"));
+            MoveNamedDirectory(extract, "patchers", Path.Combine(bepInExPath, "patchers"));
+        });
+
+        // MonoDetour: "core" -> BepInEx
+        yield return DownloadAndPlace(hksilksongMonoDetour, "SilksongMonoDetourTemp", "MonoDetour", extract =>
+        {
+            MoveNamedDirectory(extract, "core", Path.Combine(bepInExPath, "core"));
+        });
+
+        // I18N: dll/pdb/xml -> BepInEx\plugins\I18N
+        yield return DownloadAndPlace(hksilksongI18N, "SilksongI18NTemp", "I18N", extract =>
+        {
+            CopyNamedFiles(extract,
+                new[] { "Silksong.I18N.dll", "Silksong.I18N.pdb", "Silksong.I18N.xml" },
+                Path.Combine(pluginsPath, "I18N"));
+        });
+
+        // DataManager: dll/pdb/xml + "languages" folder -> BepInEx\plugins\DataManager
+        yield return DownloadAndPlace(hksilksongDataManager, "SilksongDataManagerTemp", "DataManager", extract =>
+        {
+            string target = Path.Combine(pluginsPath, "DataManager");
+
+            CopyNamedFiles(extract,
+                new[] { "Silksong.DataManager.dll", "Silksong.DataManager.pdb", "Silksong.DataManager.xml" },
+                target);
+
+            MoveNamedDirectory(extract, "languages", Path.Combine(target, "languages"));
+        });
+
+        // FsmUtil: dll/pdb/xml -> BepInEx\plugins\FsmUtil
+        yield return DownloadAndPlace(hksilksongFsmUtil, "SilksongFsmUtilTemp", "FsmUtil", extract =>
+        {
+            CopyNamedFiles(extract,
+                new[] { "Silksong.FsmUtil.dll", "Silksong.FsmUtil.pdb", "Silksong.FsmUtil.xml" },
+                Path.Combine(pluginsPath, "FsmUtil"));
+        });
+
+        // ModMenu: dll/pdb/xml -> BepInEx\plugins\ModMenu
+        yield return DownloadAndPlace(hksilksongModMenu, "SilksongModMenuTemp", "ModMenu", extract =>
+        {
+            CopyNamedFiles(extract,
+                new[] { "Silksong.ModMenu.dll", "Silksong.ModMenu.pdb", "Silksong.ModMenu.xml" },
+                Path.Combine(pluginsPath, "ModMenu"));
+        });
+
+        // UnityHelper: dll/pdb/xml -> BepInEx\plugins\UnityHelper
+        yield return DownloadAndPlace(hksilksongUnityHelper, "SilksongUnityHelperTemp", "UnityHelper", extract =>
+        {
+            CopyNamedFiles(extract,
+                new[] { "UnityHelper.dll", "UnityHelper.pdb", "UnityHelper.xml" },
+                Path.Combine(pluginsPath, "UnityHelper"));
+        });
+
+        // WavLib: dll/pdb/xml -> BepInEx\plugins\WavLib
+        yield return DownloadAndPlace(hksilksongWavLib, "SilksongWavLibTemp", "WavLib", extract =>
+        {
+            CopyNamedFiles(extract,
+                new[] { "WavLib.dll", "WavLib.pdb", "WavLib.xml" },
+                Path.Combine(pluginsPath, "WavLib"));
+        });
+
+        // Prepatcher: "patchers" + "plugins" -> BepInEx
+        yield return DownloadAndPlace(hksilksongPrepatcher, "SilksongPrepatcherTemp", "Prepatcher", extract =>
+        {
+            MoveNamedDirectory(extract, "patchers", Path.Combine(bepInExPath, "patchers"));
+            MoveNamedDirectory(extract, "plugins", Path.Combine(bepInExPath, "plugins"));
+        });
+    }
+
+    // Downloads + extracts a zip into a temp folder, runs the placement callback, then cleans up.
+    IEnumerator DownloadAndPlace(FileDownloader.FileData data, string tempFolderName, string label, System.Action<string> place)
+    {
+        if (data == null || string.IsNullOrEmpty(data.url))
+        {
+            UnityEngine.Debug.LogWarning(label + " URL is empty, skipping.");
+            yield break;
+        }
+
+        ShowInfo("Installing " + label + "...");
+
+        string extractPath = Path.Combine(Application.persistentDataPath, tempFolderName);
+
+        SafeDeleteDirectory(extractPath);
+
+        yield return downloader.DownloadAndExtract(data, Application.persistentDataPath, extractPath);
+
+        if (!Directory.Exists(extractPath))
+        {
+            UnityEngine.Debug.LogError(label + " extraction failed.");
+            ShowInfo("ERROR: " + label + " could not be extracted!");
+            yield break;
+        }
+
+        try
+        {
+            place(extractPath);
+            UnityEngine.Debug.Log(label + " installed.");
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to install " + label + ": " + e.Message);
+            ShowInfo("ERROR: Failed to install " + label + "\n" + e.Message);
+        }
+
+        SafeDeleteDirectory(extractPath);
+    }
+
+    // Finds a file by name anywhere inside root (shallowest match first).
+    string FindFileInDir(string root, string fileName)
+    {
+        return Directory
+            .GetFiles(root, fileName, SearchOption.AllDirectories)
+            .OrderBy(f => f.Length)
+            .FirstOrDefault();
+    }
+
+    // Finds a folder by name anywhere inside root (shallowest match first).
+    string FindDirInDir(string root, string dirName)
+    {
+        return Directory
+            .GetDirectories(root, dirName, SearchOption.AllDirectories)
+            .OrderBy(d => d.Length)
+            .FirstOrDefault();
+    }
+
+    // Copies the given files (found anywhere in root) flat into targetDir (created if needed).
+    void CopyNamedFiles(string root, string[] fileNames, string targetDir)
+    {
+        Directory.CreateDirectory(targetDir);
+
+        foreach (string fileName in fileNames)
+        {
+            string found = FindFileInDir(root, fileName);
+
+            if (string.IsNullOrEmpty(found))
+            {
+                UnityEngine.Debug.LogWarning("File not found in archive: " + fileName);
+                continue;
+            }
+
+            File.Copy(found, Path.Combine(targetDir, fileName), true);
+        }
+    }
+
+    // Moves a folder (found anywhere in root) into targetDir, merging with existing content.
+    void MoveNamedDirectory(string root, string dirName, string targetDir)
+    {
+        string found = FindDirInDir(root, dirName);
+
+        if (string.IsNullOrEmpty(found))
+        {
+            UnityEngine.Debug.LogWarning("Folder not found in archive: " + dirName);
+            return;
+        }
+
+        Directory.CreateDirectory(targetDir);
+        MoveDirectory(found, targetDir);
+    }
+
     IEnumerator InstallBepInEx()
     {
         while (!configLoaded)
@@ -545,12 +855,33 @@ public class SilksongManualDL : MonoBehaviour
         ShowInfo("Installing AP Mod...");
         yield return InstallAP();
 
-        CreateVersionFile(hksilksongAP.url, hksilksongBepInEx.url, hksilksongApworld.url);
+        CreateVersionFile(hksilksongAP.url, hksilksongBepInEx.url, hksilksongApworld.url, hksilksongBench.url);
 
         if (launchAfterSetupToggle == null || launchAfterSetupToggle.isOn)
             LaunchGame();
 
         ShowInfo("Installation complete!");
+    }
+
+    IEnumerator BenchOnlyFlow()
+    {
+        gamePath = GetGamePath();
+
+        if (string.IsNullOrEmpty(gamePath))
+            yield break;
+
+        ShowInfo("Installing Benchwarp...");
+        yield return InstallBench();
+
+        if (launchAfterSetupToggle == null || launchAfterSetupToggle.isOn)
+        {
+            ShowInfo("Launching Hollow Knight Silksong...");
+            LaunchGame();
+        }
+        else
+        {
+            ShowInfo("Installation complete!");
+        }
     }
 
     IEnumerator LoadRemoteConfig()
@@ -683,13 +1014,14 @@ public class SilksongManualDL : MonoBehaviour
         }
     }
 
-    void CreateVersionFile(string apUrl, string bepinexUrl, string apworldUrl)
+    void CreateVersionFile(string apUrl, string bepinexUrl, string apworldUrl, string benchUrl)
     {
         try
         {
             string apVersion = ExtractVersionFromUrl(apUrl, @"(?:/releases/download/|/download/[^/]+/[^/]+/)([^/]+)/?$");
             string bepinexVersion = ExtractVersionFromUrl(bepinexUrl, @"/releases/download/([^/]+)/");
             string apworldVersion = ExtractVersionFromUrl(apworldUrl, @"/([^/]+)\.apworld");
+            string benchVersion = ExtractVersionFromUrl(benchUrl, @"/releases/download/([^/]+)/");
 
             string versionFileName = AP_FOLDER_PREFIX + " Version " + apVersion + ".txt";
             string content = "Archipelago Setup Tool by quack!\n";
@@ -707,6 +1039,10 @@ public class SilksongManualDL : MonoBehaviour
             content += "=== BEPINEX ===\n";
             content += "Downloaded from: " + bepinexUrl + "\n";
             content += "Version: " + bepinexVersion + "\n";
+            content += "\n";
+            content += "=== BENCHWARP ===\n";
+            content += "Downloaded from: " + benchUrl + "\n";
+            content += "Version: " + benchVersion + "\n";
             content += "\n";
             content += "Downloaded at: " + System.DateTime.Now + "\n";
 
@@ -784,6 +1120,9 @@ public class SilksongManualDL : MonoBehaviour
 
     string ExtractVersionFromUrl(string url, string pattern)
     {
+        if (string.IsNullOrEmpty(url))
+            return "Unknown";
+
         System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(pattern);
         System.Text.RegularExpressions.Match match = regex.Match(url);
 

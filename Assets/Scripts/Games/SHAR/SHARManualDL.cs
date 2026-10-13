@@ -19,12 +19,6 @@ public class SHARManualDL : MonoBehaviour
     public FileDownloader.FileData sharAPMod;
     public FileDownloader.FileData sharModLauncher;
 
-    [Header("GAME SELECTION PANEL")]
-    public GameObject gamePanel;
-    public Toggle haveGameToggle;
-    public Toggle noGameToggle;
-    public GameObject noGamePanel;
-
     [Header("SETUP PANEL")]
     public GameObject setupPanel;
     public Button directoryButton;
@@ -62,7 +56,6 @@ public class SHARManualDL : MonoBehaviour
     private string selectedGamePath = "";
     private RemoteConfig remoteConfig;
     private bool configLoaded = false;
-    public bool haveGame = false;
     private System.Collections.Generic.List<Process> launchedProcesses = new System.Collections.Generic.List<Process>();
     private Coroutine currentSetupCoroutine;
     private bool isSetupRunning = false;
@@ -87,11 +80,6 @@ public class SHARManualDL : MonoBehaviour
 
     void Start()
     {
-        if (haveGameToggle != null)
-            haveGameToggle.onValueChanged.AddListener(OnHaveGameToggled);
-        if (noGameToggle != null)
-            noGameToggle.onValueChanged.AddListener(OnNoGameToggled);
-
         if (directoryButton != null)
             directoryButton.onClick.AddListener(SelectDirectory);
         if (directoryInputField != null)
@@ -108,23 +96,13 @@ public class SHARManualDL : MonoBehaviour
         if (cancelButton != null)
             cancelButton.onClick.AddListener(OnCancelButtonClicked);
 
-        // Force panel states - Game panel first
+        // Le setup panel est affiché directement
         if (setupPanel != null)
-            setupPanel.SetActive(false);
-        if (gamePanel != null)
-            gamePanel.SetActive(true);
-        if (noGamePanel != null)
-            noGamePanel.SetActive(false);
+            setupPanel.SetActive(true);
         if (confirmPanel != null)
             confirmPanel.SetActive(false);
         if (infoPanel != null)
             infoPanel.SetActive(false);
-
-        // Reset toggles
-        if (haveGameToggle != null)
-            haveGameToggle.isOn = false;
-        if (noGameToggle != null)
-            noGameToggle.isOn = false;
 
         // Setup toggle defaults
         if (installModLauncherToggle != null)
@@ -140,38 +118,6 @@ public class SHARManualDL : MonoBehaviour
             launchModLauncherToggle.isOn = false;
 
         StartCoroutine(LoadRemoteConfig());
-    }
-
-    void OnHaveGameToggled(bool value)
-    {
-        if (value)
-        {
-            haveGame = true;
-            if (noGameToggle != null)
-            {
-                noGameToggle.onValueChanged.RemoveListener(OnNoGameToggled);
-                noGameToggle.isOn = false;
-                noGameToggle.onValueChanged.AddListener(OnNoGameToggled);
-            }
-            if (noGamePanel != null)
-                noGamePanel.SetActive(false);
-        }
-    }
-
-    void OnNoGameToggled(bool value)
-    {
-        if (value)
-        {
-            haveGame = false;
-            if (haveGameToggle != null)
-            {
-                haveGameToggle.onValueChanged.RemoveListener(OnHaveGameToggled);
-                haveGameToggle.isOn = false;
-                haveGameToggle.onValueChanged.AddListener(OnHaveGameToggled);
-            }
-            if (noGamePanel != null)
-                noGamePanel.SetActive(true);
-        }
     }
 
     IEnumerator LoadRemoteConfig()
@@ -304,24 +250,12 @@ public class SHARManualDL : MonoBehaviour
 
     void OnSetupButtonClicked()
     {
-        bool haveGameToggleActive = haveGameToggle != null && haveGameToggle.isOn;
-        bool noGameToggleActive = noGameToggle != null && noGameToggle.isOn;
-
         bool installModLauncher = installModLauncherToggle != null && installModLauncherToggle.isOn;
         bool installRandomizerAndMod = installRandomizerAndModToggle != null && installRandomizerAndModToggle.isOn;
         bool installApworld = installApworldToggle != null && installApworldToggle.isOn;
 
-        bool needsGameChoice = installRandomizerAndMod || installModLauncher;
-
-        if (needsGameChoice && !haveGameToggleActive && !noGameToggleActive)
-        {
-            ShowInfo("Please select if you have the game or not.");
-            return;
-        }
-
-        bool needsGamePath = installRandomizerAndMod;
-
-        if (needsGamePath && string.IsNullOrEmpty(selectedGamePath))
+        // Le dossier du jeu reste obligatoire pour installer le randomizer + mod
+        if (installRandomizerAndMod && string.IsNullOrEmpty(selectedGamePath))
         {
             ShowInfo("Please select a game directory.");
             return;
@@ -338,24 +272,7 @@ public class SHARManualDL : MonoBehaviour
             return;
         }
 
-        if (installApworld && count == 1)
-        {
-            pendingApWorldOnlyFlow = true;
-
-            if (confirmPanel != null)
-            {
-                if (confirmText != null)
-                    confirmText.text = "Are you sure you want to setup?";
-                confirmPanel.SetActive(true);
-            }
-            else
-            {
-                StartCoroutine(APWorldOnlyFlow());
-            }
-            return;
-        }
-
-        pendingApWorldOnlyFlow = false;
+        pendingApWorldOnlyFlow = installApworld && count == 1;
 
         if (confirmPanel != null)
         {
@@ -365,7 +282,15 @@ public class SHARManualDL : MonoBehaviour
         }
         else
         {
-            ExecuteSetup();
+            if (pendingApWorldOnlyFlow)
+            {
+                pendingApWorldOnlyFlow = false;
+                StartCoroutine(APWorldOnlyFlow());
+            }
+            else
+            {
+                ExecuteSetup();
+            }
         }
     }
 
@@ -399,6 +324,7 @@ public class SHARManualDL : MonoBehaviour
             ExecuteSetup();
         }
     }
+
     void OnConfirmNo()
     {
         pendingApWorldOnlyFlow = false;
@@ -472,48 +398,23 @@ public class SHARManualDL : MonoBehaviour
                 Directory.CreateDirectory(tempPath);
 
             ShowInfo("Installing SHAR Archipelago files...");
-
-            bool haveGameToggleActive = haveGameToggle != null && haveGameToggle.isOn;
-            bool noGameToggleActive = noGameToggle != null && noGameToggle.isOn;
+            yield return new WaitForSeconds(1f);
 
             bool installModLauncher = installModLauncherToggle != null && installModLauncherToggle.isOn;
             bool installRandomizerAndMod = installRandomizerAndModToggle != null && installRandomizerAndModToggle.isOn;
             bool installApworld = installApworldToggle != null && installApworldToggle.isOn;
 
-            if (haveGameToggleActive)
+            if (installModLauncher)
+                yield return InstallModLauncher();
+
+            if (installRandomizerAndMod)
             {
-                ShowInfo("You selected: Already have the game. Installing selected files...");
-                yield return new WaitForSeconds(1f);
-
-                if (installRandomizerAndMod)
-                {
-                    yield return InstallAPRandomizer(selectedGamePath, tempPath);
-                    yield return InstallAPMod();
-                }
-
-                if (installModLauncher)
-                    yield return InstallModLauncher();
-
-                if (installApworld)
-                    yield return InstallAPWorld();
+                yield return InstallAPRandomizer(selectedGamePath, tempPath);
+                yield return InstallAPMod();
             }
-            else if (noGameToggleActive)
-            {
-                ShowInfo("You selected: Need to install/setup. Installing selected files...");
-                yield return new WaitForSeconds(1f);
 
-                if (installModLauncher)
-                    yield return InstallModLauncher();
-
-                if (installRandomizerAndMod)
-                {
-                    yield return InstallAPRandomizer(selectedGamePath, tempPath);
-                    yield return InstallAPMod();
-                }
-
-                if (installApworld)
-                    yield return InstallAPWorld();
-            }
+            if (installApworld)
+                yield return InstallAPWorld();
 
             bool shouldLaunchGame = launchGameToggle != null && launchGameToggle.isOn;
             if (shouldLaunchGame && installRandomizerAndMod)

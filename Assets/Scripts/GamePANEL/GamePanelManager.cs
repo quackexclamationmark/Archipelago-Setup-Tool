@@ -145,6 +145,16 @@ public class GamePanelManager : MonoBehaviour
     public GameObject blueprincePanel;
     public GameObject whiteknucklePanel;
     public GameObject itbPanel;
+    public GameObject cotlPanel;
+    public GameObject er4laricPanel;
+    public GameObject ftlPanel;
+    public GameObject rlPanel;
+    public GameObject hastePanel;
+    public GameObject stsPanel;
+    public GameObject ahitPanel;
+    public GameObject escapists2Panel;
+    public GameObject mcdungeonsPanel;
+    public GameObject spicymycenawafflesPanel;
 
     void Start()
     {
@@ -580,6 +590,36 @@ public class GamePanelManager : MonoBehaviour
             case "IntoTheBreach":
                 itbPanel.SetActive(true);
                 break;
+            case "CultOfTheLamb":
+                cotlPanel.SetActive(true);
+                break;
+            case "EldenRing4laric":
+                er4laricPanel.SetActive(true);
+                break;
+            case "FasterThanLight":
+                ftlPanel.SetActive(true);
+                break;
+            case "RogueLegacy":
+                rlPanel.SetActive(true);
+                break;
+            case "Haste":
+                hastePanel.SetActive(true);
+                break;
+            case "SlayTheSpire":
+                stsPanel.SetActive(true);
+                break;
+            case "A HatInTime":
+                ahitPanel.SetActive(true);
+                break;
+            case "TheEscapists2":
+                escapists2Panel.SetActive(true);
+                break;
+            case "MinecraftDungeons":
+                mcdungeonsPanel.SetActive(true);
+                break;
+            case "SpicyMycenaWaffles":
+                spicymycenawafflesPanel.SetActive(true);
+                break;
         }
     }
 
@@ -726,5 +766,15 @@ public class GamePanelManager : MonoBehaviour
         if (blueprincePanel != null) blueprincePanel.SetActive(false);
         if (whiteknucklePanel != null) whiteknucklePanel.SetActive(false);
         if (itbPanel != null) itbPanel.SetActive(false);
+        if (cotlPanel != null) cotlPanel.SetActive(false);
+        if (er4laricPanel != null) er4laricPanel.SetActive(false);
+        if (ftlPanel != null) ftlPanel.SetActive(false);
+        if (rlPanel != null) rlPanel.SetActive(false);
+        if (hastePanel != null) hastePanel.SetActive(false);
+        if (stsPanel != null) stsPanel.SetActive(false);
+        if (ahitPanel != null) ahitPanel.SetActive(false);
+        if (escapists2Panel != null) escapists2Panel.SetActive(false);
+        if (mcdungeonsPanel != null) mcdungeonsPanel.SetActive(false);
+        if (spicymycenawafflesPanel != null) spicymycenawafflesPanel.SetActive(false);
     }
 }

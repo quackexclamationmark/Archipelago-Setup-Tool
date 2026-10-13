@@ -385,6 +385,7 @@ public class TwilightPrincessManualDL : MonoBehaviour
         dolphinInstalled = false;
 
         // Télécharger le ZIP une seule fois et l'extraire
+        // Le ZIP contient "Twilight Princess.apworld" et "RandomizerAP.us.gci"
         string zipPath = Path.Combine(tempDownloadPath, "tpapworld.zip");
         string extractPath = Path.Combine(tempDownloadPath, "tpapworld_extracted");
         bool zipDownloadedAndExtracted = false;
@@ -439,7 +440,7 @@ public class TwilightPrincessManualDL : MonoBehaviour
         if (installApworld && !installationCancelled && zipDownloadedAndExtracted)
         {
             ShowInfo("Installing APWorld...");
-            yield return InstallAPWorld();
+            yield return InstallAPWorld(extractPath);
         }
 
         if (installApworldGci && !installationCancelled && zipDownloadedAndExtracted)
@@ -486,51 +487,23 @@ public class TwilightPrincessManualDL : MonoBehaviour
         SafeDeleteDirectory(tempDownloadPath);
     }
 
-    IEnumerator InstallAPWorld()
+    // Copie "Twilight Princess.apworld" (extrait du ZIP) dans Archipelago\custom_worlds
+    IEnumerator InstallAPWorld(string extractPath)
     {
         lastApWorldInstallSuccess = false;
+        apworldInstalled = false;
 
-        while (!configLoaded)
+        string[] apworldFiles = Directory.GetFiles(extractPath, "Twilight Princess.apworld", System.IO.SearchOption.AllDirectories);
+
+        if (apworldFiles.Length == 0)
         {
-            UnityEngine.Debug.Log("Waiting for config to load...");
-            yield return new WaitForSeconds(0.5f);
-        }
-
-        UnityEngine.Debug.Log("Config loaded. APWorld URL: " + tloztpApworld.url);
-
-        if (string.IsNullOrEmpty(tloztpApworld.url))
-        {
-            ShowInfo("ERROR: APWorld URL is empty!");
-            UnityEngine.Debug.LogError("APWorld URL not set!");
+            UnityEngine.Debug.LogError("ERROR: 'Twilight Princess.apworld' not found in extracted ZIP!");
+            ShowInfo("ERROR: 'Twilight Princess.apworld' not found in extracted ZIP!");
             yield break;
         }
 
-        string fileName = tloztpApworld.fileName;
-        if (string.IsNullOrEmpty(fileName))
-        {
-            fileName = tloztpApworld.url.Substring(tloztpApworld.url.LastIndexOf('/') + 1);
-
-            if (fileName.Contains("?"))
-                fileName = fileName.Substring(0, fileName.IndexOf("?"));
-
-            UnityEngine.Debug.Log("Extracted filename from URL: " + fileName);
-        }
-
-        string localPath = Path.Combine(Application.persistentDataPath, fileName);
-
-        UnityEngine.Debug.Log("Downloading APWorld from: " + tloztpApworld.url);
-        UnityEngine.Debug.Log("Saving to: " + localPath);
-
-        yield return DownloadFile(tloztpApworld.url, localPath);
-
-        if (!File.Exists(localPath))
-        {
-            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
-            ShowInfo("ERROR: APWorld download failed!");
-            yield break;
-        }
-
-        UnityEngine.Debug.Log("File downloaded successfully: " + localPath);
+        string sourceApworld = apworldFiles[0];
+        string fileName = Path.GetFileName(sourceApworld);
 
         string customWorldsDir = GetApCustomWorldsPath();
 
@@ -538,41 +511,34 @@ public class TwilightPrincessManualDL : MonoBehaviour
         {
             ShowInfo("Archipelago directory not found. Please report it on the Discord server.");
             UnityEngine.Debug.LogError("No existing custom_worlds folder found, installation cancelled.");
-            DeleteTempFile(localPath);
             yield break;
         }
 
         string target = Path.Combine(customWorldsDir, fileName);
         UnityEngine.Debug.Log("Using target path: " + target);
 
-        if (File.Exists(target))
-        {
-            try
-            {
-                File.Delete(target);
-                UnityEngine.Debug.Log("Deleted old apworld file");
-            }
-            catch { }
-        }
-
         try
         {
-            File.Copy(localPath, target, true);
+            if (File.Exists(target))
+            {
+                try { File.Delete(target); } catch { }
+            }
 
+            File.Copy(sourceApworld, target, true);
             UnityEngine.Debug.Log("APWorld file copied to: " + target);
 
-            ShowInfo("APWorld installed successfully!");
+            apworldInstalled = true;
             lastApWorldInstallSuccess = true;
+            ShowInfo("APWorld installed successfully!");
         }
         catch (System.Exception e)
         {
             UnityEngine.Debug.LogError("Failed to copy APWorld: " + e.Message);
             ShowInfo("ERROR: Failed to install APWorld\n" + e.Message);
-            DeleteTempFile(localPath);
             yield break;
         }
 
-        DeleteTempFile(localPath);
+        yield return null;
     }
 
     void DeleteTempFile(string localPath)
@@ -591,42 +557,34 @@ public class TwilightPrincessManualDL : MonoBehaviour
         }
     }
 
+    // Copie "RandomizerAP.us.gci" (extrait du ZIP) dans le même dossier que le REL Loader (Card A)
     IEnumerator InstallApworldGci(string extractPath, string gcUsaCardAPath)
     {
         apworldGciInstalled = false;
 
         if (!Directory.Exists(gcUsaCardAPath)) Directory.CreateDirectory(gcUsaCardAPath);
 
-        string[] gciFiles = Directory.GetFiles(extractPath, "*.gci", System.IO.SearchOption.AllDirectories);
+        string[] gciFiles = Directory.GetFiles(extractPath, "RandomizerAP.us.gci", System.IO.SearchOption.AllDirectories);
 
         if (gciFiles.Length == 0)
         {
-            UnityEngine.Debug.LogError("ERROR: No .gci file found in extracted ZIP!");
-            ShowInfo("ERROR: No .gci file found in extracted ZIP!");
-            apworldGciInstalled = false;
+            UnityEngine.Debug.LogError("ERROR: 'RandomizerAP.us.gci' not found in extracted ZIP!");
+            ShowInfo("ERROR: 'RandomizerAP.us.gci' not found in extracted ZIP!");
             yield break;
         }
 
         try
         {
-            foreach (string gciFile in gciFiles)
+            string gciFile = gciFiles[0];
+            string destPath = Path.Combine(gcUsaCardAPath, "RandomizerAP.us.gci");
+
+            if (File.Exists(destPath))
             {
-                string fileName = Path.GetFileName(gciFile);
-                string destPath = Path.Combine(gcUsaCardAPath, fileName);
-
-                // Supprimer l'ancien fichier s'il existe
-                if (File.Exists(destPath))
-                {
-                    try
-                    {
-                        File.Delete(destPath);
-                    }
-                    catch { }
-                }
-
-                File.Copy(gciFile, destPath, true);
-                UnityEngine.Debug.Log("APWorld GCI copied: " + destPath);
+                try { File.Delete(destPath); } catch { }
             }
+
+            File.Copy(gciFile, destPath, true);
+            UnityEngine.Debug.Log("APWorld GCI copied: " + destPath);
 
             apworldGciInstalled = true;
             ShowInfo("Twilight Princess APWorld GCI installed!");

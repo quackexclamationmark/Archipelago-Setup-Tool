@@ -11,13 +11,17 @@ public class RaftManualDL : MonoBehaviour
     public FileDownloader downloader;
 
     [Header("RAFT FILES")]
+    public FileDownloader.FileData raftRML;
     public FileDownloader.FileData raftAP;
+    public FileDownloader.FileData raftModUtils;
 
     [Header("GAME FOLDER NAMES")]
     public string steamGameFolderName = "Raft";
 
     [Header("FEATURE TOGGLES")]
+    public Toggle installRaftRMLToggle;      // optional (treated as ON if not assigned)
     public Toggle installRaftAPToggle;
+    public Toggle installRaftModUtilsToggle; // optional (treated as ON if not assigned)
 
     [Header("LAUNCH OPTIONS")]
     public Toggle secondLaunchToggle;
@@ -42,11 +46,14 @@ public class RaftManualDL : MonoBehaviour
     private bool pendingFullClearConfirmation = false;
     private RaftConfig remoteConfig;
     private bool configLoaded = false;
+    private bool lastDownloadOk = false;
 
     [System.Serializable]
     public class RaftConfig
     {
+        public string raftRML;
         public string raftAP;
+        public string raftModUtils;
         public string[] steamSearchPaths;
     }
 
@@ -88,7 +95,9 @@ public class RaftManualDL : MonoBehaviour
         if (remoteConfig == null)
             return;
 
+        raftRML.url = remoteConfig.raftRML;
         raftAP.url = remoteConfig.raftAP;
+        raftModUtils.url = remoteConfig.raftModUtils;
     }
 
     public void RunSetup()
@@ -138,6 +147,12 @@ public class RaftManualDL : MonoBehaviour
         pendingAction = "";
     }
 
+    private bool IsOn(Toggle toggle)
+    {
+        // A toggle that is not assigned in the inspector counts as enabled
+        return toggle == null || toggle.isOn;
+    }
+
     private void ExecuteSetup()
     {
         raftPath = GetRaftPath();
@@ -148,15 +163,17 @@ public class RaftManualDL : MonoBehaviour
             return;
         }
 
+        bool rml = IsOn(installRaftRMLToggle);
         bool raftap = installRaftAPToggle != null && installRaftAPToggle.isOn;
+        bool modutils = IsOn(installRaftModUtilsToggle);
 
-        if (!raftap)
+        if (!rml && !raftap && !modutils)
         {
             ShowInfo("Please select an option to install.");
             return;
         }
 
-        StartCoroutine(InstallFlow());
+        StartCoroutine(InstallFlow(rml, raftap, modutils));
     }
 
     private void ExecuteRevert()
@@ -265,12 +282,66 @@ public class RaftManualDL : MonoBehaviour
         return false;
     }
 
-    IEnumerator InstallFlow()
+    IEnumerator InstallFlow(bool installRML, bool installAP, bool installModUtils)
     {
-        ShowInfo("Installing Raftipelago...");
-        yield return InstallRaftAP();
+        // Wait for the remote config (download URLs)
+        while (!configLoaded)
+            yield return null;
 
-        CreateVersionFile(raftAP.url);
+        // Always make sure the "mods" folder exists in the game directory
+        string modsPath = Path.Combine(raftPath, "mods");
+
+        try
+        {
+            Directory.CreateDirectory(modsPath);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("[RaftInstall] Could not create mods folder: " + e.Message);
+            ShowInfo("ERROR: Could not create the mods folder!\n" + e.Message);
+            yield break;
+        }
+
+        // 1) RML Launcher (.exe -> game directory)
+        if (installRML)
+        {
+            ShowInfo("Installing Raft Mod Loader...");
+            yield return InstallSingleFile(
+                raftRML.url,
+                Path.Combine(raftPath, "RMLLauncher.exe"),
+                "Raft Mod Loader");
+
+            if (!lastDownloadOk)
+                yield break;
+        }
+
+        // 2) Raftipelago.rmod (-> mods)
+        if (installAP)
+        {
+            ShowInfo("Installing Raftipelago...");
+            yield return InstallSingleFile(
+                raftAP.url,
+                Path.Combine(modsPath, "Raftipelago.rmod"),
+                "Raftipelago");
+
+            if (!lastDownloadOk)
+                yield break;
+        }
+
+        // 3) ModUtils.rmod (-> mods)
+        if (installModUtils)
+        {
+            ShowInfo("Installing ModUtils...");
+            yield return InstallSingleFile(
+                raftModUtils.url,
+                Path.Combine(modsPath, "ModUtils.rmod"),
+                "ModUtils");
+
+            if (!lastDownloadOk)
+                yield break;
+        }
+
+        CreateVersionFile(installRML, installAP, installModUtils);
 
         if (secondLaunchToggle == null || secondLaunchToggle.isOn)
         {
@@ -283,111 +354,50 @@ public class RaftManualDL : MonoBehaviour
         }
     }
 
-    IEnumerator InstallRaftAP()
+    // Downloads a single file and copies it to destPath. Sets lastDownloadOk.
+    IEnumerator InstallSingleFile(string url, string destPath, string label)
     {
-        while (!configLoaded)
-        {
-            UnityEngine.Debug.Log("[InstallRaftAP] Waiting for config to load...");
-            yield return null;
-        }
+        lastDownloadOk = false;
 
-        UnityEngine.Debug.Log("[InstallRaftAP] Config loaded!");
-        UnityEngine.Debug.Log("[InstallRaftAP] raftAP URL: " + raftAP.url);
-
-        if (string.IsNullOrEmpty(raftAP.url))
+        if (string.IsNullOrEmpty(url))
         {
-            UnityEngine.Debug.LogError("[InstallRaftAP] ERROR: raftAP.url is empty!");
-            ShowInfo("ERROR: Raftipelago URL is not set!");
+            UnityEngine.Debug.LogError("[RaftInstall] ERROR: URL for " + label + " is empty!");
+            ShowInfo("ERROR: " + label + " URL is not set!");
             yield break;
         }
 
-        string tempExtractPath = Path.Combine(Application.persistentDataPath, "RaftAPTemp");
-        string zipFileName = "Preloaded-RMLL-Raft.zip";
-        string zipPath = Path.Combine(Application.persistentDataPath, zipFileName);
+        string tempPath = Path.Combine(Application.persistentDataPath, Path.GetFileName(destPath) + ".tmp");
 
-        UnityEngine.Debug.Log("[InstallRaftAP] Downloading ZIP from: " + raftAP.url);
-        UnityEngine.Debug.Log("[InstallRaftAP] Saving to: " + zipPath);
+        SafeDeleteFile(tempPath);
 
-        yield return DownloadFile(raftAP.url, zipPath);
+        UnityEngine.Debug.Log("[RaftInstall] Downloading " + label + " from: " + url);
 
-        if (!File.Exists(zipPath))
+        yield return DownloadFile(url, tempPath);
+
+        if (!File.Exists(tempPath))
         {
-            UnityEngine.Debug.LogError("[InstallRaftAP] Download failed: ZIP not found at " + zipPath);
-            ShowInfo("ERROR: Raftipelago download failed!");
+            UnityEngine.Debug.LogError("[RaftInstall] Download failed for " + label);
+            ShowInfo("ERROR: " + label + " download failed!");
             yield break;
         }
 
-        UnityEngine.Debug.Log("[InstallRaftAP] ZIP downloaded successfully");
-
-        // Extract ZIP
-        UnityEngine.Debug.Log("[InstallRaftAP] Extracting ZIP...");
-        yield return ExtractZip(zipPath, tempExtractPath);
-
-        // Look for Preloaded-Raft subdirectory
-        string preloadedPath = Path.Combine(tempExtractPath, "Preloaded-Raft");
-
-        if (!Directory.Exists(preloadedPath))
-        {
-            UnityEngine.Debug.LogError("[InstallRaftAP] Preloaded-Raft subdirectory not found!");
-            ShowInfo("ERROR: Invalid Raftipelago ZIP structure!");
-            SafeDeleteDirectory(tempExtractPath);
-            SafeDeleteFile(zipPath);
-            yield break;
-        }
-
-        UnityEngine.Debug.Log("[InstallRaftAP] Found Preloaded-Raft directory");
-
-        // Copy all contents from Preloaded-Raft directly to Raft root directory
-        UnityEngine.Debug.Log("[InstallRaftAP] Copying all files from Preloaded-Raft to Raft directory");
-        CopyDirectoryContents(preloadedPath, raftPath);
-
-        // Cleanup
-        SafeDeleteDirectory(tempExtractPath);
-        SafeDeleteFile(zipPath);
-
-        UnityEngine.Debug.Log("[InstallRaftAP] Installation complete!");
-        ShowInfo("Raftipelago installed successfully!");
-    }
-
-    void CopyDirectoryContents(string source, string target)
-    {
-        if (!Directory.Exists(source))
-            return;
-
-        if (!Directory.Exists(target))
-            Directory.CreateDirectory(target);
-
-        // Copy all files from source to target
-        foreach (string file in Directory.GetFiles(source))
-        {
-            string destFile = Path.Combine(target, Path.GetFileName(file));
-            File.Copy(file, destFile, true);
-            UnityEngine.Debug.Log("[InstallRaftAP] Copied file: " + Path.GetFileName(file));
-        }
-
-        // Recursively copy all directories
-        foreach (string dir in Directory.GetDirectories(source))
-        {
-            string dirName = Path.GetFileName(dir);
-            string targetDir = Path.Combine(target, dirName);
-            CopyDirectoryContents(dir, targetDir);
-        }
-    }
-
-    IEnumerator ExtractZip(string zipPath, string extractPath)
-    {
         try
         {
-            System.IO.Compression.ZipFile.ExtractToDirectory(zipPath, extractPath, true);
-            UnityEngine.Debug.Log("[InstallRaftAP] ZIP extracted to: " + extractPath);
+            string destDir = Path.GetDirectoryName(destPath);
+            if (!Directory.Exists(destDir))
+                Directory.CreateDirectory(destDir);
+
+            File.Copy(tempPath, destPath, true);
+            File.Delete(tempPath);
+
+            UnityEngine.Debug.Log("[RaftInstall] " + label + " installed to: " + destPath);
+            lastDownloadOk = true;
         }
         catch (System.Exception e)
         {
-            UnityEngine.Debug.LogError("[InstallRaftAP] Error extracting ZIP: " + e.Message);
-            ShowInfo("ERROR: Failed to extract Raftipelago ZIP\n" + e.Message);
+            UnityEngine.Debug.LogError("[RaftInstall] Error installing " + label + ": " + e.Message);
+            ShowInfo("ERROR: Failed to install " + label + "\n" + e.Message);
         }
-
-        yield return null;
     }
 
     IEnumerator DownloadFile(string url, string savePath)
@@ -396,7 +406,10 @@ public class RaftManualDL : MonoBehaviour
 
         using (UnityEngine.Networking.UnityWebRequest request = UnityEngine.Networking.UnityWebRequest.Get(url))
         {
-            request.downloadHandler = new UnityEngine.Networking.DownloadHandlerFile(savePath);
+            request.downloadHandler = new UnityEngine.Networking.DownloadHandlerFile(savePath)
+            {
+                removeFileOnAbort = true
+            };
 
             yield return request.SendWebRequest();
 
@@ -404,6 +417,14 @@ public class RaftManualDL : MonoBehaviour
             {
                 UnityEngine.Debug.LogError("Download error: " + request.error);
                 UnityEngine.Debug.LogError("Response code: " + request.responseCode);
+
+                // Do not keep a partial / error-page file
+                try
+                {
+                    if (File.Exists(savePath))
+                        File.Delete(savePath);
+                }
+                catch { }
             }
             else
             {
@@ -517,20 +538,40 @@ public class RaftManualDL : MonoBehaviour
         }
     }
 
-    void CreateVersionFile(string raftapUrl)
+    void CreateVersionFile(bool installRML, bool installAP, bool installModUtils)
     {
         try
         {
-            string raftapVersion = ExtractVersionFromUrl(raftapUrl, @"/releases/download/([^/]+)/");
+            // Version is read from the Raftipelago URL (…/releases/download/<version>/…)
+            string raftapVersion = ExtractVersionFromUrl(raftAP.url, @"/releases/download/([^/]+)/");
 
             string versionFileName = "Raft Archipelago Version " + raftapVersion + ".txt";
             string content = "Archipelago Setup Tool by quack!\n";
             content += "https://github.com/quackexclamationmark/Archipelago-Setup-Tool\n";
             content += "\n";
-            content += "=== RAFTIPELAGO ===\n";
-            content += "Downloaded from: " + raftapUrl + "\n";
-            content += "Version: " + raftapVersion + "\n";
-            content += "\n";
+
+            if (installRML)
+            {
+                content += "=== RAFT MOD LOADER ===\n";
+                content += "Downloaded from: " + raftRML.url + "\n";
+                content += "\n";
+            }
+
+            if (installAP)
+            {
+                content += "=== RAFTIPELAGO ===\n";
+                content += "Downloaded from: " + raftAP.url + "\n";
+                content += "Version: " + raftapVersion + "\n";
+                content += "\n";
+            }
+
+            if (installModUtils)
+            {
+                content += "=== MODUTILS ===\n";
+                content += "Downloaded from: " + raftModUtils.url + "\n";
+                content += "\n";
+            }
+
             content += "Downloaded at: " + System.DateTime.Now + "\n";
 
             DeleteOldVersionFiles();
@@ -586,6 +627,9 @@ public class RaftManualDL : MonoBehaviour
 
     string ExtractVersionFromUrl(string url, string pattern)
     {
+        if (string.IsNullOrEmpty(url))
+            return "Unknown";
+
         System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(pattern);
         System.Text.RegularExpressions.Match match = regex.Match(url);
 

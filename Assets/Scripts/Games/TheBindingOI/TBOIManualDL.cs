@@ -18,6 +18,9 @@ public class TBOIManualDL : MonoBehaviour
     public Toggle installAPWorldToggle;
     public Toggle installSaveInstallerToggle;
 
+    [Header("GAME FOLDER NAMES")]
+    public string steamGameFolderName = "The Binding of Isaac Rebirth";
+
     [Header("CONFIRMATION PANEL")]
     public GameObject confirmationPanel;
     public TextMeshProUGUI confirmationMessage;
@@ -49,13 +52,13 @@ public class TBOIManualDL : MonoBehaviour
         public string tboiApworld;
         public string tboiSaveInstaller;
         public string[] apSearchPaths;
-        public string[] gameSearchPaths;
+        public string[] steamSearchPaths;
     }
 
 
     void Start()
     {
-        archipelagoPath = GetArchipelagoPath();
+        archipelagoPath = GetApCustomWorldsPath();
 
         if (infoPanel != null)
             infoPanel.SetActive(false);
@@ -140,7 +143,7 @@ public class TBOIManualDL : MonoBehaviour
 
     private void ExecuteSetup()
     {
-        archipelagoPath = GetArchipelagoPath();
+        archipelagoPath = GetApCustomWorldsPath();
 
         if (string.IsNullOrEmpty(archipelagoPath))
         {
@@ -398,7 +401,7 @@ public class TBOIManualDL : MonoBehaviour
     {
         try
         {
-            string gameDir = GetGameDirectoryPath();
+            string gameDir = GetTBOIPath();
 
             if (string.IsNullOrEmpty(gameDir))
             {
@@ -427,54 +430,60 @@ public class TBOIManualDL : MonoBehaviour
         }
     }
 
-    // Locates the game's install folder dynamically by scanning fixed drives for
-    // common Steam library layouts, e.g. "Steam\steamapps\common\The Binding of Isaac Rebirth".
-    string GetGameDirectoryPath()
+    string GetTBOIPath()
     {
-        const string gameFolderName = "The Binding of Isaac Rebirth";
-
-        string[] defaultRelativePaths = new string[]
+        string[] quickPaths = new string[]
         {
-            Path.Combine("Program Files (x86)", "Steam", "steamapps", "common", gameFolderName),
-            Path.Combine("Program Files", "Steam", "steamapps", "common", gameFolderName),
-            Path.Combine("Steam", "steamapps", "common", gameFolderName),
-            Path.Combine("SteamLibrary", "steamapps", "common", gameFolderName),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86), "Steam", "steamapps", "common", steamGameFolderName),
+        Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles), "Steam", "steamapps", "common", steamGameFolderName),
         };
 
-        string[] relativePaths = (remoteConfig != null && remoteConfig.gameSearchPaths != null && remoteConfig.gameSearchPaths.Length > 0)
-            ? remoteConfig.gameSearchPaths
-            : defaultRelativePaths;
-
-        try
+        foreach (string path in quickPaths)
         {
-            System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
-
-            foreach (System.IO.DriveInfo drive in drives)
+            try
             {
-                if (drive.DriveType != System.IO.DriveType.Fixed)
-                    continue;
-
-                foreach (string relativePath in relativePaths)
+                if (Directory.Exists(path))
                 {
-                    if (string.IsNullOrEmpty(relativePath))
-                        continue;
-
-                    try
-                    {
-                        string path = Path.Combine(drive.Name, relativePath);
-                        if (Directory.Exists(path))
-                        {
-                            UnityEngine.Debug.Log("Found The Binding of Isaac Rebirth folder at: " + path);
-                            return path;
-                        }
-                    }
-                    catch { }
+                    UnityEngine.Debug.Log("Found Game (Steam) at: " + path);
+                    return path;
                 }
             }
+            catch { }
         }
-        catch { }
 
-        UnityEngine.Debug.LogWarning("The Binding of Isaac Rebirth folder not found.");
+        if (remoteConfig != null && remoteConfig.steamSearchPaths != null)
+        {
+            try
+            {
+                System.IO.DriveInfo[] drives = System.IO.DriveInfo.GetDrives();
+
+                foreach (System.IO.DriveInfo drive in drives)
+                {
+                    if (drive.DriveType != System.IO.DriveType.Fixed)
+                        continue;
+
+                    foreach (string relativePath in remoteConfig.steamSearchPaths)
+                    {
+                        if (string.IsNullOrEmpty(relativePath))
+                            continue;
+
+                        try
+                        {
+                            string path = Path.Combine(drive.Name, relativePath, steamGameFolderName);
+                            if (Directory.Exists(path))
+                            {
+                                UnityEngine.Debug.Log("Found Game (Steam, via remote config) at: " + path);
+                                return path;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        UnityEngine.Debug.LogWarning("Game (Steam) not found.");
         return "";
     }
 
@@ -517,43 +526,6 @@ public class TBOIManualDL : MonoBehaviour
     {
         if (infoPanel != null)
             infoPanel.SetActive(false);
-    }
-
-    string GetArchipelagoPath()
-    {
-        string[] candidates = new string[]
-        {
-            @"C:\ProgramData\Archipelago",
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Archipelago"),
-            Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "Archipelago"),
-        };
-
-        foreach (string candidate in candidates)
-        {
-            try
-            {
-                if (Directory.Exists(candidate))
-                {
-                    UnityEngine.Debug.Log("Found Archipelago folder at: " + candidate);
-                    return candidate;
-                }
-            }
-            catch { }
-        }
-
-        foreach (string candidate in candidates)
-        {
-            try
-            {
-                Directory.CreateDirectory(candidate);
-                UnityEngine.Debug.Log("Created Archipelago folder at: " + candidate);
-                return candidate;
-            }
-            catch { }
-        }
-
-        UnityEngine.Debug.LogWarning("Could not find or create an Archipelago folder.");
-        return "";
     }
 
     // ---------------------------------------------------------------

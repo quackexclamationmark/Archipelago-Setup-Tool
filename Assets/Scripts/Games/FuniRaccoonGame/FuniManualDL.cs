@@ -228,7 +228,13 @@ public class FuniManualDL : MonoBehaviour
 
         try
         {
-            string[] specificFiles = new string[] { "mod_boot.gd", "mods.pck", "override.cfg" };
+            string[] specificFiles = new string[]
+            {
+            "override.cfg",
+            "mod_boot.gd",
+            "mods.pck",
+            "modloader.pck"
+            };
 
             foreach (string f in specificFiles)
             {
@@ -248,6 +254,24 @@ public class FuniManualDL : MonoBehaviour
                 }
             }
 
+            string modsFolder = Path.Combine(gamePath, "mods");
+            if (Directory.Exists(modsFolder))
+            {
+                try
+                {
+                    foreach (string file in Directory.GetFiles(modsFolder, "*", SearchOption.AllDirectories))
+                        File.SetAttributes(file, FileAttributes.Normal);
+
+                    Directory.Delete(modsFolder, true);
+                    UnityEngine.Debug.Log("Deleted folder: " + modsFolder);
+                }
+                catch (System.Exception e)
+                {
+                    UnityEngine.Debug.LogWarning("Failed to delete mods folder: " + modsFolder + " - " + e.Message);
+                }
+            }
+
+            DeleteOldVersionFiles();
             RemoveEmptyDirectories(gamePath);
 
             ShowInfo("Revert complete!");

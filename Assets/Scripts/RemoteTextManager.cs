@@ -28,23 +28,41 @@ public class RemoteTextPopulator : MonoBehaviour
     [Header("Optional UI helpers")]
     public ScrollToTop scrollToTop;
 
-    [ContextMenu("Fetch And Populate")]
-    public void FetchAndPopulateContext() => StartCoroutine(FetchAndPopulateCoroutine());
+    private bool loaded = false;
+    private bool isLoading = false;
 
-    private IEnumerator Start()
+    [ContextMenu("Fetch And Populate")]
+    public void FetchAndPopulateContext()
     {
-        if (fetchOnStart)
+        if (!isActiveAndEnabled)
         {
-            yield return new WaitForEndOfFrame();
-            yield return StartCoroutine(FetchAndPopulateCoroutine());
+            Debug.LogWarning("[RemoteTextPopulator] Le composant est inactif, impossible de lancer la coroutine.");
+            return;
         }
+        StartCoroutine(FetchAndPopulateCoroutine());
+    }
+
+    private void OnEnable()
+    {
+        if (fetchOnStart && !loaded && !isLoading)
+            StartCoroutine(FetchAndPopulateCoroutine());
+    }
+
+    private void OnDisable()
+    {
+        isLoading = false;
     }
 
     private IEnumerator FetchAndPopulateCoroutine()
     {
+        isLoading = true;
+
+        yield return null;
+
         if (sampleGameObject == null || content == null || string.IsNullOrWhiteSpace(remoteJsonUrl))
         {
             Debug.LogError("[RemoteTextPopulator] Please assign sampleGameObject, content and remoteJsonUrl.");
+            isLoading = false;
             yield break;
         }
 
@@ -62,6 +80,7 @@ public class RemoteTextPopulator : MonoBehaviour
 #endif
             {
                 Debug.LogError($"[RemoteTextPopulator] Failed to download JSON from '{url}': {req.error}");
+                isLoading = false;
                 yield break;
             }
 
@@ -74,16 +93,48 @@ public class RemoteTextPopulator : MonoBehaviour
             catch (Exception e)
             {
                 Debug.LogError($"[RemoteTextPopulator] Failed to parse JSON array: {e.Message}");
+                isLoading = false;
                 yield break;
             }
 
             PopulateFromItems(items);
+            loaded = true;
+            isLoading = false;
 
             if (scrollToTop != null)
             {
                 scrollToTop.ScrollToTopNow();
             }
         }
+    }
+
+    private TextMeshProUGUI GetOrCreateTMP(List<TextMeshProUGUI> textObjects, int index)
+    {
+        if (index < textObjects.Count)
+        {
+            var existing = textObjects[index];
+            ApplyDefaultStyle(existing);
+            existing.text = "";
+            return existing;
+        }
+
+        GameObject go = Instantiate(sampleGameObject);
+        go.name = sampleGameObject.name + " (from remote)";
+        go.transform.SetParent(content, false);
+        go.SetActive(true);
+
+        var tmp = go.GetComponent<TextMeshProUGUI>();
+        if (tmp == null)
+        {
+            Debug.LogError("[RemoteTextPopulator] sampleGameObject must have TextMeshProUGUI component on its root.");
+            Destroy(go);
+            return null;
+        }
+
+        ApplyDefaultStyle(tmp);
+        tmp.text = "";
+        textObjects.Add(tmp);
+        return tmp;
     }
 
     private void PopulateFromItems(List<string> items)
@@ -110,10 +161,6 @@ public class RemoteTextPopulator : MonoBehaviour
             ApplyDefaultStyle(currentTMP);
             currentTMP.text = "";
         }
-        else
-        {
-            currentTMP = null;
-        }
 
         for (int i = 0; i < items.Count; i++)
         {
@@ -123,34 +170,7 @@ public class RemoteTextPopulator : MonoBehaviour
             if (string.Equals(token, "clear", StringComparison.OrdinalIgnoreCase))
             {
                 currentIndex++;
-
-                if (currentIndex < textObjects.Count)
-                {
-                    currentTMP = textObjects[currentIndex];
-                    ApplyDefaultStyle(currentTMP);
-                    currentTMP.text = "";
-                }
-                else
-                {
-                    GameObject go = Instantiate(sampleGameObject);
-                    go.name = sampleGameObject.name + " (from remote)";
-                    go.transform.SetParent(content, false);
-                    var tmp = go.GetComponent<TextMeshProUGUI>();
-                    if (tmp == null)
-                    {
-                        Debug.LogError("[RemoteTextPopulator] sampleGameObject must have TextMeshProUGUI component.");
-                        Destroy(go);
-                        currentTMP = null;
-                    }
-                    else
-                    {
-                        currentTMP = tmp;
-                        ApplyDefaultStyle(currentTMP);
-                        currentTMP.text = "";
-                        textObjects.Add(currentTMP);
-                    }
-                }
-
+                currentTMP = GetOrCreateTMP(textObjects, currentIndex);
                 continue;
             }
 
@@ -162,34 +182,7 @@ public class RemoteTextPopulator : MonoBehaviour
                 }
 
                 currentIndex++;
-
-                if (currentIndex < textObjects.Count)
-                {
-                    currentTMP = textObjects[currentIndex];
-                    ApplyDefaultStyle(currentTMP);
-                    currentTMP.text = "";
-                }
-                else
-                {
-                    GameObject go = Instantiate(sampleGameObject);
-                    go.name = sampleGameObject.name + " (from remote)";
-                    go.transform.SetParent(content, false);
-                    var tmp = go.GetComponent<TextMeshProUGUI>();
-                    if (tmp == null)
-                    {
-                        Debug.LogError("[RemoteTextPopulator] sampleGameObject must have TextMeshProUGUI component.");
-                        Destroy(go);
-                        currentTMP = null;
-                    }
-                    else
-                    {
-                        currentTMP = tmp;
-                        ApplyDefaultStyle(currentTMP);
-                        currentTMP.text = "";
-                        textObjects.Add(currentTMP);
-                    }
-                }
-
+                currentTMP = GetOrCreateTMP(textObjects, currentIndex);
                 continue;
             }
 
@@ -221,29 +214,8 @@ public class RemoteTextPopulator : MonoBehaviour
 
             if (currentTMP == null)
             {
-                if (currentIndex < textObjects.Count)
-                {
-                    currentTMP = textObjects[currentIndex];
-                    ApplyDefaultStyle(currentTMP);
-                    currentTMP.text = "";
-                }
-                else
-                {
-                    GameObject go = Instantiate(sampleGameObject);
-                    go.name = sampleGameObject.name + " (from remote)";
-                    go.transform.SetParent(content, false);
-                    var tmp = go.GetComponent<TextMeshProUGUI>();
-                    if (tmp == null)
-                    {
-                        Debug.LogError("[RemoteTextPopulator] sampleGameObject must have TextMeshProUGUI component.");
-                        Destroy(go);
-                        return;
-                    }
-                    currentTMP = tmp;
-                    ApplyDefaultStyle(currentTMP);
-                    currentTMP.text = "";
-                    textObjects.Add(currentTMP);
-                }
+                currentTMP = GetOrCreateTMP(textObjects, currentIndex);
+                if (currentTMP == null) return;
             }
 
             if (isImage1)
