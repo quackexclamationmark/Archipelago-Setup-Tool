@@ -2,11 +2,15 @@
 
 "[HEADER] Downloaded",
 "kill",
-"• Copy of the game's executable file (fnaf-world.exe)\n• fnafw.apworld",
+"• fnafw.apworld",
 "kill",
 "[HEADER] Installation Infos",
 "kill",
-"When you click 'START SETUP' in the 'SETUP' tab, fnafw.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. A copy of the game's .exe file (fnaf-world.exe) will be created inside a new 'FNaFW Game' folder in the Archipelago directory. You don't need to have the game already installed on your PC, the tool will download it for you.",
+"When you click 'START SETUP' in the 'SETUP' tab, fnafw.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory.",
+"kill",
+"[HEADER] Manual Setup Infos",
+"kill",
+"You will have to download a copy of the game's executable and put it in your Archipelago directory, inside the 'FNaFW Game' folder before moving on to the next step (you should be able to find your Archipelago\FNaFW Game folder on the game's Archipelago Setup Tool setup tab).
 "kill",
 "[HEADER] apworld / yaml Infos",
 "kill",
