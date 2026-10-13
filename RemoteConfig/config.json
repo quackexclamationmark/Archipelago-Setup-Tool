@@ -535,7 +535,9 @@
     "psychonautsApworld": "https://github.com/Akashortstack/Psychonauts-AP-Integration/releases/download/v1.0.0/psychonauts.apworld",
     "psychonautsAP": "https://github.com/Akashortstack/PsychoRando/releases/download/v2.1.0/PsychoRandoV2.1.0.zip",
 
-    "raftAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-RMLL-Raft.zip",
+    "raftAP": "https://www.raftmodding.com/mods/raftipelago/2.3.2/Raftipelago.rmod?ignoreVirusScan=true",
+    "raftModUtils": "https://www.raftmodding.com/mods/modutils/1.2.5/ModUtils.rmod?ignoreVirusScan=true",
+    "raftRML": "https://www.raftmodding.com/launcher/2.8.10/download",
 
     "refunctAP": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.8.0a/practice-windows.zip",
     "refunctApworld": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.8.0a/refunct.apworld",
