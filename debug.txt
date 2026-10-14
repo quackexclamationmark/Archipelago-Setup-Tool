@@ -1,2 +1,0 @@
-[DLL] WinMain sanity check failed. Probably running the Steam encrypted version.
-[DLL] Patched Kernel32.GetVersionExA.
