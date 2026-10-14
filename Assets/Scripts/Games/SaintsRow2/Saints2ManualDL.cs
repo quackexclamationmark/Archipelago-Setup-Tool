@@ -899,7 +899,7 @@ public class Saints2ManualDL : MonoBehaviour
     // LAUNCH / CLOSE
     // =========================================================
 
-    void LaunchGame()
+    public void LaunchGame()
     {
         string currentGamePath = GetGamePath();
 

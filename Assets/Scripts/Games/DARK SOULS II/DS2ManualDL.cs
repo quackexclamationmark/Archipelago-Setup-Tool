@@ -19,7 +19,9 @@ public class DS2ManualDL : MonoBehaviour
     public FileDownloader.FileData ds2ScholarAP;
     public FileDownloader.FileData ds2VanillaAP;
     public FileDownloader.FileData ds2LazyLoader;
-    public FileDownloader.FileData ds2Randomizer;
+
+    [Header("RANDOMIZER (manual download)")]
+    public string randomizerNexusUrl = "https://www.nexusmods.com/darksouls2/mods/1317?tab=files";
 
     [Header("GAME FOLDER NAMES")]
     public string steamGameFolderNameVanilla = "DARK SOULS II";
@@ -64,7 +66,6 @@ public class DS2ManualDL : MonoBehaviour
         public string ds2AP;
         public string ds2Apworld;
         public string ds2LazyLoader;
-        public string ds2Randomizer;
         public string[] steamSearchPaths;
         public string[] apSearchPaths;
     }
@@ -76,6 +77,7 @@ public class DS2ManualDL : MonoBehaviour
         if (infoPanel != null) infoPanel.SetActive(false);
         if (infoOkButton != null) infoOkButton.onClick.AddListener(CloseInfoPanel);
         if (secondLaunchToggle != null) secondLaunchToggle.isOn = false;
+        if (installRandomizerToggle != null) installRandomizerToggle.isOn = false;
         if (confirmationPanel != null) confirmationPanel.SetActive(false);
         if (confirmButton != null) confirmButton.onClick.AddListener(OnConfirm);
         if (cancelButton != null) cancelButton.onClick.AddListener(OnCancel);
@@ -127,7 +129,6 @@ public class DS2ManualDL : MonoBehaviour
         ds2VanillaAP.url = remoteConfig.ds2AP;
         ds2Apworld.url = remoteConfig.ds2Apworld;
         ds2LazyLoader.url = remoteConfig.ds2LazyLoader;
-        ds2Randomizer.url = remoteConfig.ds2Randomizer;
     }
 
     public void RunSetup() => ShowConfirmation("Are you sure you want to setup?", "Setup");
@@ -264,9 +265,7 @@ public class DS2ManualDL : MonoBehaviour
             ShowInfo("Installing Lazy Loader...");
             yield return InstallLazyLoader();
 
-            ShowInfo("Installing Randomizer...");
-            yield return InstallRandomizer();
-
+            OpenRandomizerPage();
             PatchModEngineIni();
         }
 
@@ -285,11 +284,14 @@ public class DS2ManualDL : MonoBehaviour
         string apUrl = isScholarVersion ? ds2ScholarAP.url : ds2VanillaAP.url;
         CreateVersionFile(apUrl, ds2Apworld.url);
 
-        ShowInfo("Installation complete!");
+        ShowInfo(installRandomizer
+            ? "Installation complete!\nCheck the Manual Setup Infos on the infos tab to complete the randomizer's installation."
+            : "Installation complete!");
+
         if (secondLaunchToggle != null && secondLaunchToggle.isOn)
         {
             yield return new WaitForSeconds(2f);
-            LaunchDS2(false);
+            LaunchDS2();
         }
     }
 
@@ -303,15 +305,13 @@ public class DS2ManualDL : MonoBehaviour
 
         yield return InstallLazyLoader();
 
-        ShowInfo("Installing Randomizer...");
-        yield return InstallRandomizer();
-
+        OpenRandomizerPage();
         PatchModEngineIni();
 
         string apUrl = isScholarVersion ? ds2ScholarAP.url : ds2VanillaAP.url;
         CreateVersionFile(apUrl, ds2Apworld.url);
 
-        ShowInfo("Randomizer installed successfully!");
+        ShowInfo("Lazy Loader installed!\nPlease download the Randomizer from the Nexus Mods page opened in your browser.");
     }
 
     IEnumerator APWorldOnlyFlow()
@@ -336,7 +336,7 @@ public class DS2ManualDL : MonoBehaviour
 
             if (!string.IsNullOrEmpty(ds2Path))
             {
-                LaunchDS2(false);
+                LaunchDS2();
                 yield return new WaitForSeconds(2f);
             }
             else
@@ -622,104 +622,23 @@ public class DS2ManualDL : MonoBehaviour
         DeleteTempFile(localPath);
     }
 
-    // Downloads the Randomizer zip, extracts it into the Game folder while renaming its
-    // dinput8.dll to randomizer.dll, then moves randomizer.dll into Game\dllMods.
-    IEnumerator InstallRandomizer()
+    // Opens the Nexus Mods files page of the Randomizer (manual download required).
+    void OpenRandomizerPage()
     {
-        while (!configLoaded)
-            yield return null;
-
-        if (string.IsNullOrEmpty(ds2Randomizer.url))
-        {
-            ShowInfo("ERROR: Randomizer URL is empty!");
-            UnityEngine.Debug.LogError("Randomizer URL not set!");
-            yield break;
-        }
-
-        string gamePath = GetDS2GamePath();
-        if (string.IsNullOrEmpty(gamePath))
-        {
-            ShowInfo("ERROR: Game folder not found, cannot install Randomizer.");
-            yield break;
-        }
-
-        string fileName = ds2Randomizer.fileName;
-        if (string.IsNullOrEmpty(fileName))
-        {
-            fileName = ds2Randomizer.url.Substring(ds2Randomizer.url.LastIndexOf('/') + 1);
-            if (fileName.Contains("?"))
-                fileName = fileName.Substring(0, fileName.IndexOf("?"));
-        }
-
-        string localPath = Path.Combine(Application.persistentDataPath, fileName);
-
-        UnityEngine.Debug.Log("Downloading Randomizer from: " + ds2Randomizer.url);
-        yield return DownloadFile(ds2Randomizer.url, localPath);
-
-        if (!File.Exists(localPath))
-        {
-            UnityEngine.Debug.LogError("Download failed: file not found at " + localPath);
-            ShowInfo("ERROR: Randomizer download failed!");
-            yield break;
-        }
-
-        var renameMap = new Dictionary<string, string>
-        {
-            { "dinput8.dll", "randomizer.dll" }
-        };
-
         try
         {
-            ExtractZip(localPath, gamePath, stripTopLevelFolder: false, renameMap: renameMap);
-            UnityEngine.Debug.Log("Randomizer extracted to: " + gamePath);
+            Application.OpenURL(randomizerNexusUrl);
+            UnityEngine.Debug.Log("Opened Randomizer Nexus page: " + randomizerNexusUrl);
         }
         catch (Exception e)
         {
-            UnityEngine.Debug.LogError("Failed to extract Randomizer: " + e.Message);
-            ShowInfo("ERROR: Failed to install Randomizer\n" + e.Message);
-            DeleteTempFile(localPath);
-            yield break;
-        }
-
-        DeleteTempFile(localPath);
-
-        string dllModsPath = Path.Combine(gamePath, "dllMods");
-        if (!Directory.Exists(dllModsPath))
-        {
-            try { Directory.CreateDirectory(dllModsPath); } catch { }
-        }
-
-        string randomizerSrc = Path.Combine(gamePath, "randomizer.dll");
-        string randomizerDst = Path.Combine(dllModsPath, "randomizer.dll");
-
-        if (File.Exists(randomizerSrc))
-        {
-            try
-            {
-                if (File.Exists(randomizerDst))
-                {
-                    File.SetAttributes(randomizerDst, FileAttributes.Normal);
-                    File.Delete(randomizerDst);
-                }
-                File.Move(randomizerSrc, randomizerDst);
-                UnityEngine.Debug.Log("randomizer.dll moved to dllMods: " + randomizerDst);
-                ShowInfo("Randomizer installed successfully!");
-            }
-            catch (Exception e)
-            {
-                UnityEngine.Debug.LogError("Failed to move randomizer.dll to dllMods: " + e.Message);
-                ShowInfo("ERROR: Failed to finish Randomizer install\n" + e.Message);
-            }
-        }
-        else
-        {
-            UnityEngine.Debug.LogWarning("randomizer.dll not found after extraction, cannot move to dllMods.");
-            ShowInfo("ERROR: randomizer.dll not found after extraction.");
+            UnityEngine.Debug.LogError("Failed to open Nexus page: " + e.Message);
+            ShowInfo("ERROR: Could not open the Nexus Mods page\n" + randomizerNexusUrl);
         }
     }
 
-    // Sets blockNetworkAccess=0 in modengine.ini (Game folder). Must run AFTER ds2Randomizer
-    // has been downloaded/extracted, since that's what brings modengine.ini onto disk.
+    // Sets blockNetworkAccess=0 in modengine.ini (Game folder). If modengine.ini is not
+    // present yet (it used to come from the Randomizer zip), the patch is simply skipped.
     void PatchModEngineIni()
     {
         try
@@ -862,7 +781,7 @@ public class DS2ManualDL : MonoBehaviour
         }
     }
 
-    void LaunchDS2(bool asHelper = false)
+   public void LaunchDS2()
     {
         string exePath = Path.Combine(GetDS2GamePath(), "DarkSoulsII.exe");
         if (File.Exists(exePath))
@@ -990,12 +909,16 @@ public class DS2ManualDL : MonoBehaviour
         return match.Success ? match.Groups[1].Value : "Unknown";
     }
 
-    // Returns the "Game" subfolder inside the detected DS2 install folder,
-    // where DarkSoulsII.exe, dinput8.dll, archipelago/ and the version file actually live.
     string GetDS2GamePath()
     {
         if (string.IsNullOrEmpty(ds2Path)) return "";
         return Path.Combine(ds2Path, "Game");
+    }
+
+    public string GetCurrentGamePath()
+    {
+        ds2Path = GetDS2Path(isScholarVersion);
+        return GetDS2GamePath();
     }
 
     string GetDS2Path(bool isScholar)
