@@ -1,3 +1,5 @@
+# **REPOSITORY CLOSED UNTIL THE NEXT UPDATE, JOIN THE [DISCORD](https://discord.gg/hxsNCmFpcH) IF YOU HAVE ANY QUESTION**
+
 # If you see a “Windows protected your PC” message, no worries—just click “More info” and then “Run anyway.” This happens because the tool installs mods automatically, which Windows can sometimes flag as suspicious.
 
 [Full Presentation Video](https://youtu.be/6AOrXW-Da3Q) (v1.0.0)
