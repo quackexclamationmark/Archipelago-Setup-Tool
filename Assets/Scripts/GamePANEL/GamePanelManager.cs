@@ -36,7 +36,6 @@ public class GamePanelManager : MonoBehaviour
     public GameObject ultrakillPanel;
     public GameObject uggPanel;
     public GameObject hifiPanel;
-    public GameObject stardewPanel;
     public GameObject tunicPanel;
     public GameObject actPanel;
     public GameObject oribfPanel;
@@ -262,9 +261,6 @@ public class GamePanelManager : MonoBehaviour
                 break;
             case "HiFiRUSH":
                 hifiPanel.SetActive(true);
-                break;
-            case "StardewValley":
-                stardewPanel.SetActive(true);
                 break;
             case "TUNIC":
                 tunicPanel.SetActive(true);
@@ -657,7 +653,6 @@ public class GamePanelManager : MonoBehaviour
         if (ultrakillPanel != null) ultrakillPanel.SetActive(false);
         if (uggPanel != null) uggPanel.SetActive(false);
         if (hifiPanel != null) hifiPanel.SetActive(false);
-        if (stardewPanel != null) stardewPanel.SetActive(false);
         if (tunicPanel != null) tunicPanel.SetActive(false);
         if (actPanel != null) actPanel.SetActive(false);
         if (oribfPanel != null) oribfPanel.SetActive(false);

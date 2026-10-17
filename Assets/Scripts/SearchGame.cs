@@ -286,7 +286,6 @@ public class SearchGame : MonoBehaviour
         games.Add(CreateGame("Slime Rancher 2", new List<string> { "Slime", "Rancher", "2", "II", "SR", "SR2", "SR 2" }));
         games.Add(CreateGame("Sonic Adventure DX", new List<string> { "Sonic", "Adventure", "DX", "SADX" }));
         games.Add(CreateGame("Spelunky 2", new List<string> { "Spelunky", "Spel", "spel2", "Spel 2", "2" }));
-        games.Add(CreateGame("Stardew Valley", new List<string> { "Stardew", "Valley", "SV" }));
         games.Add(CreateGame("Subnautica", new List<string> { "Subnautica" }));
         games.Add(CreateGame("SULFUR", new List<string> { "SULFUR" }));
         games.Add(CreateGame("Super Mario 64", new List<string> { "Super", "Mario", "64", "SM", "SM64" }));
