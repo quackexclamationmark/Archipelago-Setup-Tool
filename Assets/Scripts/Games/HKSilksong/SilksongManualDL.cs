@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Collections;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 public class SilksongManualDL : MonoBehaviour
 {
@@ -66,8 +67,8 @@ public class SilksongManualDL : MonoBehaviour
 
     private const string AP_FOLDER_PREFIX = "SilksongRandomizer";
     private const string BENCH_FOLDER_NAME = "Benchwarp";
+    private const string AP2_PUT_IN_FOLDER_NAME = "PUT IN SILKSONG FOLDER";
 
-    // Folders created in BepInEx\plugins by the Bench toggle (besides Benchwarp itself)
     private static readonly string[] BENCH_EXTRA_PLUGIN_FOLDERS = new string[]
     {
         "AssetHelper",
@@ -527,12 +528,12 @@ public class SilksongManualDL : MonoBehaviour
             if (File.Exists(localPath))
             {
                 File.Delete(localPath);
-                UnityEngine.Debug.Log("Cleaned up temporary APWorld file: " + localPath);
+                UnityEngine.Debug.Log("Cleaned up temporary file: " + localPath);
             }
         }
         catch (System.Exception e)
         {
-            UnityEngine.Debug.LogWarning("Could not delete temporary APWorld file: " + e.Message);
+            UnityEngine.Debug.LogWarning("Could not delete temporary file: " + e.Message);
         }
     }
 
@@ -563,16 +564,121 @@ public class SilksongManualDL : MonoBehaviour
         while (!configLoaded)
             yield return null;
 
-        string extractPath = Path.Combine(Application.persistentDataPath, "SilksongAPTemp");
+        if (hksilksongAP == null || string.IsNullOrEmpty(hksilksongAP.url))
+        {
+            ShowInfo("ERROR: AP mod URL is empty!");
+            UnityEngine.Debug.LogError("hksilksongAP2 URL not set!");
+            yield break;
+        }
 
-        yield return downloader.DownloadAndExtract(hksilksongAP, Application.persistentDataPath, extractPath);
+        string unrarExe = Path.Combine(Application.streamingAssetsPath, "RAR", "UnRAR.exe");
 
-        string pluginsPath = Path.Combine(gamePath, "BepInEx", "plugins");
-        Directory.CreateDirectory(pluginsPath);
+        if (!File.Exists(unrarExe))
+        {
+            ShowInfo("ERROR: UnRAR.exe not found!");
+            UnityEngine.Debug.LogError("UnRAR.exe not found at: " + unrarExe);
+            yield break;
+        }
 
-        MoveDirectory(extractPath, pluginsPath);
+        string rarPath = Path.Combine(Application.persistentDataPath, "SilksongAP2.rar");
+        string extractPath = Path.Combine(Application.persistentDataPath, "SilksongAP2Temp");
 
+        // Clean leftovers from a previous run
         SafeDeleteDirectory(extractPath);
+        DeleteTempFile(rarPath);
+
+        // 1) Download the .rar
+        yield return DownloadFile(hksilksongAP.url, rarPath);
+
+        if (!File.Exists(rarPath))
+        {
+            ShowInfo("ERROR: AP mod download failed!");
+            UnityEngine.Debug.LogError("AP2 download failed: file not found at " + rarPath);
+            yield break;
+        }
+
+        Task<bool> extractTask = ExtractRarAsync(unrarExe, rarPath, extractPath);
+        yield return new WaitUntil(() => extractTask.IsCompleted);
+
+        if (!extractTask.Result)
+        {
+            ShowInfo("ERROR: Could not extract the AP mod archive!");
+            DeleteTempFile(rarPath);
+            SafeDeleteDirectory(extractPath);
+            yield break;
+        }
+
+        string putInFolder = FindDirInDir(extractPath, AP2_PUT_IN_FOLDER_NAME);
+
+        if (string.IsNullOrEmpty(putInFolder))
+        {
+            UnityEngine.Debug.LogError("'" + AP2_PUT_IN_FOLDER_NAME + "' folder not found inside the AP mod archive.");
+            ShowInfo("ERROR: '" + AP2_PUT_IN_FOLDER_NAME + "' folder not found in the archive!");
+            DeleteTempFile(rarPath);
+            SafeDeleteDirectory(extractPath);
+            yield break;
+        }
+
+        try
+        {
+            Directory.CreateDirectory(gamePath);
+            MoveDirectory(putInFolder, gamePath);
+            UnityEngine.Debug.Log("AP mod installed into: " + gamePath);
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError("Failed to install AP mod: " + e.Message);
+            ShowInfo("ERROR: Failed to install AP mod\n" + e.Message);
+        }
+
+        DeleteTempFile(rarPath);
+        SafeDeleteDirectory(extractPath);
+    }
+
+    Task<bool> ExtractRarAsync(string unrarExe, string rarPath, string outputDir)
+    {
+        return Task.Run(() =>
+        {
+            try
+            {
+                Directory.CreateDirectory(outputDir);
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = unrarExe,
+                    Arguments = "x -y -o+ -p- \"" + rarPath + "\"",
+                    WorkingDirectory = outputDir,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                };
+
+                using (Process p = Process.Start(psi))
+                {
+                    Task<string> outTask = p.StandardOutput.ReadToEndAsync();
+                    Task<string> errTask = p.StandardError.ReadToEndAsync();
+
+                    p.WaitForExit();
+
+                    string output = outTask.Result;
+                    string error = errTask.Result;
+
+                    if (p.ExitCode != 0)
+                    {
+                        UnityEngine.Debug.LogError("UnRAR failed (code " + p.ExitCode + "): " + error + "\n" + output);
+                        return false;
+                    }
+
+                    return true;
+                }
+            }
+            catch (System.Exception e)
+            {
+                UnityEngine.Debug.LogError("UnRAR exception: " + e.Message);
+                return false;
+            }
+        });
     }
 
     IEnumerator InstallBench()
@@ -593,7 +699,6 @@ public class SilksongManualDL : MonoBehaviour
 
         yield return downloader.DownloadAndExtract(hksilksongBench, Application.persistentDataPath, extractPath);
 
-        // Look for the "plugins" subfolder inside the extracted zip (shallowest match first)
         string sourcePluginsDir = null;
 
         if (Directory.Exists(extractPath))
@@ -761,7 +866,6 @@ public class SilksongManualDL : MonoBehaviour
         SafeDeleteDirectory(extractPath);
     }
 
-    // Finds a file by name anywhere inside root (shallowest match first).
     string FindFileInDir(string root, string fileName)
     {
         return Directory
@@ -770,7 +874,6 @@ public class SilksongManualDL : MonoBehaviour
             .FirstOrDefault();
     }
 
-    // Finds a folder by name anywhere inside root (shallowest match first).
     string FindDirInDir(string root, string dirName)
     {
         return Directory
@@ -779,7 +882,6 @@ public class SilksongManualDL : MonoBehaviour
             .FirstOrDefault();
     }
 
-    // Copies the given files (found anywhere in root) flat into targetDir (created if needed).
     void CopyNamedFiles(string root, string[] fileNames, string targetDir)
     {
         Directory.CreateDirectory(targetDir);
@@ -798,7 +900,6 @@ public class SilksongManualDL : MonoBehaviour
         }
     }
 
-    // Moves a folder (found anywhere in root) into targetDir, merging with existing content.
     void MoveNamedDirectory(string root, string dirName, string targetDir)
     {
         string found = FindDirInDir(root, dirName);

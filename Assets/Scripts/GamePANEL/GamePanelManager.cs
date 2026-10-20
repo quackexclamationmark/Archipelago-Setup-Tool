@@ -145,7 +145,6 @@ public class GamePanelManager : MonoBehaviour
     public GameObject whiteknucklePanel;
     public GameObject itbPanel;
     public GameObject cotlPanel;
-    public GameObject er4laricPanel;
     public GameObject ftlPanel;
     public GameObject rlPanel;
     public GameObject hastePanel;
@@ -589,9 +588,6 @@ public class GamePanelManager : MonoBehaviour
             case "CultOfTheLamb":
                 cotlPanel.SetActive(true);
                 break;
-            case "EldenRing4laric":
-                er4laricPanel.SetActive(true);
-                break;
             case "FasterThanLight":
                 ftlPanel.SetActive(true);
                 break;
@@ -762,7 +758,6 @@ public class GamePanelManager : MonoBehaviour
         if (whiteknucklePanel != null) whiteknucklePanel.SetActive(false);
         if (itbPanel != null) itbPanel.SetActive(false);
         if (cotlPanel != null) cotlPanel.SetActive(false);
-        if (er4laricPanel != null) er4laricPanel.SetActive(false);
         if (ftlPanel != null) ftlPanel.SetActive(false);
         if (rlPanel != null) rlPanel.SetActive(false);
         if (hastePanel != null) hastePanel.SetActive(false);

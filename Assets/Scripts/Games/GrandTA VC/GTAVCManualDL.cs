@@ -56,12 +56,14 @@ public class GTAVCManualDL : MonoBehaviour
 
     private const string SetupExeFileName = "GTA-Vice-City-AP-Setup.exe";
 
+    // Dossiers du mod : on ne les supprime QUE s'ils sont vides après le revert
     private static readonly string[] RevertFolders = new string[]
     {
         "CLEO",
         "scripts"
     };
 
+    // Fichiers précis du mod à la racine du jeu
     private static readonly string[] RevertFiles = new string[]
     {
         "cleo.log",
@@ -338,6 +340,7 @@ public class GTAVCManualDL : MonoBehaviour
             int successCount = 0;
             int errorCount = 0;
 
+            // 1) Supprime uniquement les fichiers installés par l'outil
             foreach (string filePath in manifest.installedFiles)
             {
                 if (File.Exists(filePath))
@@ -355,25 +358,7 @@ public class GTAVCManualDL : MonoBehaviour
                 }
             }
 
-            foreach (string folderName in RevertFolders)
-            {
-                try
-                {
-                    string folderPath = Path.Combine(manifest.gameInstallPath, folderName);
-                    if (Directory.Exists(folderPath))
-                    {
-                        Directory.Delete(folderPath, true);
-                        successCount++;
-                        UnityEngine.Debug.Log("Deleted folder: " + folderPath);
-                    }
-                }
-                catch (System.Exception e)
-                {
-                    UnityEngine.Debug.LogWarning("Failed to delete folder: " + folderName + " - " + e.Message);
-                    errorCount++;
-                }
-            }
-
+            // 2) Supprime les fichiers connus du mod à la racine du jeu
             foreach (string revertFileName in RevertFiles)
             {
                 try
@@ -393,14 +378,14 @@ public class GTAVCManualDL : MonoBehaviour
                 }
             }
 
-            string backupDir = Path.Combine(manifest.gameInstallPath);
+            // 3) Restaure les fichiers sauvegardés (nom du backup = fichier + ".bak")
             if (manifest.backedUpFiles != null)
             {
                 foreach (string backedUpFileName in manifest.backedUpFiles)
                 {
                     try
                     {
-                        string backupPath = Path.Combine(backupDir, backedUpFileName);
+                        string backupPath = Path.Combine(manifest.gameInstallPath, backedUpFileName + ".bak");
                         string restorePath = Path.Combine(manifest.gameInstallPath, backedUpFileName);
 
                         if (!File.Exists(backupPath))
@@ -413,19 +398,48 @@ public class GTAVCManualDL : MonoBehaviour
                             File.Delete(restorePath);
 
                         File.Move(backupPath, restorePath);
-                        UnityEngine.Debug.Log("Restored original exe from backup: " + restorePath);
+                        UnityEngine.Debug.Log("Restored original file from backup: " + restorePath);
                     }
                     catch (System.Exception e)
                     {
-                        UnityEngine.Debug.LogWarning("Failed to restore backed up exe: " + e.Message);
+                        UnityEngine.Debug.LogWarning("Failed to restore backed up file: " + e.Message);
                         errorCount++;
                     }
                 }
             }
 
-            SafeDeleteDirectory(backupDir);
+            // 4) Nettoie les dossiers du mod, mais SEULEMENT s'ils sont vides
+            //    (on ne touche jamais au dossier du jeu lui-même)
+            foreach (string folderName in RevertFolders)
+            {
+                try
+                {
+                    string folderPath = Path.Combine(manifest.gameInstallPath, folderName);
 
-            RemoveEmptyDirectories(manifest.gameInstallPath);
+                    if (!Directory.Exists(folderPath))
+                        continue;
+
+                    RemoveEmptyDirectories(folderPath);
+
+                    if (Directory.GetFileSystemEntries(folderPath).Length == 0)
+                    {
+                        Directory.Delete(folderPath);
+                        UnityEngine.Debug.Log("Deleted empty folder: " + folderPath);
+                    }
+                    else
+                    {
+                        UnityEngine.Debug.Log("Folder kept (contains other files): " + folderPath);
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    UnityEngine.Debug.LogWarning("Failed to clean folder: " + folderName + " - " + e.Message);
+                    errorCount++;
+                }
+            }
+
+            // 5) L'installation est annulée : on supprime le manifest
+            try { File.Delete(manifestPath); } catch { }
 
             ShowInfo($"Mods removed successfully!\n({successCount} files deleted)");
             UnityEngine.Debug.Log($"Revert complete: {successCount} files deleted, {errorCount} errors");
@@ -784,7 +798,9 @@ public class GTAVCManualDL : MonoBehaviour
 
         foreach (string file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
         {
-            string dest = file.Replace(source, target);
+            // Chemin relatif sûr (évite le bug de string.Replace sur plusieurs occurrences)
+            string relative = Path.GetRelativePath(source, file);
+            string dest = Path.Combine(target, relative);
 
             Directory.CreateDirectory(Path.GetDirectoryName(dest));
 
