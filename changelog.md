@@ -1,3 +1,51 @@
+# v2.3.0
+
+### DOWNLOAD THE INSTALLER, NOT THE .ZIP FILE!
+
+_We're back!_
+
+# WHAT'S NEW?
+
+- 8 NEW GAMES!
+  - SMW: Spicy Mycena Waffles (Super Mario World)
+  - Faster Than Light
+  - A Hat in Time
+  - Minecraft Dungeons
+  - The Escapists 2
+  - Slay the Spire
+  - Rogue Legacy
+  - Haste
+
+- Removed the Stardew Valley setup completely.
+- Deleted a few redistributed files that were possibly infringing on copyright laws or were simply useless.
+
+# ADDED / NEW
+
+- **Removed and deleted every link redirecting to any legally ambiguous redistribution or license protected sharing of files. Instead some setups have been changed to directly download from the original sources instead of illegal distribution.**
+- Rework of Cyberpunk 2077's setup to remove the Phone Extension mod's installation because of copyright issues. The mod has to be manually downloaded now.
+- Rework of Raft's setup to ensure that it is copyright safe.
+- Changed the Minus Launcher installation for Super Smash Bros. Brawl to ensure that it is copyright safe.
+- Rework of FNaF World's setup that was distributing a copy of the game which is protected by a non-redistribution license.
+- Rework of Uncanny Cat Golf's setup that was distributing a copy of the game which is (probably) protected by a non-redistribution license.
+- Rework of Silksong's setup when downloading the Benchwarp dependencies to ensure that it is copyright safe.
+- Reworked GTA VC, GTA SA and Saints Row 2 setups to remove the installation of the .exe files that are required.
+- Slight rework of Dead Rising Deluxe Remaster to make it simpler.
+
+---
+
+Thank you to everyone who has been suggesting games and testing!!
+
+If your Archipelago folder for the APWorlds can't be found, join the server and report it to me it will be fixed in no time!
+
+Uses a working Remote Config to remotely change the downloaded URLs and the latest version!
+
+Also, here is the fork for test releases, I will say it on the tool's server when I release a new test version and ask for people to test :)
+https://github.com/quackexclamationTesting/Setup-Tool-Test-Releases
+
+Feel free to report any bug, suggest or anything basically to me on the [Discord server](https://discord.gg/hxsNCmFpcH).
+
+///
+
 ## `Oct 7, 2026, 11:47 GMT+2`
 # v2.2.3
 
