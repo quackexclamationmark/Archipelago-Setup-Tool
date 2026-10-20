@@ -129,7 +129,7 @@
     "sadxPopTracker": "https://github.com/RaceProUK/SADX-APTracker/releases/download/v1.112.11/sadx_rando_raceprouk.zip",
     "pokemonplatinumPopTracker": "https://github.com/palex00/platinum-ap-tracker/archive/refs/tags/1.2.3.zip",
     "pokemonbwPopTracker": "https://github.com/Radis7Noir/pokemon-bw-ap-tracker/releases/download/3.6.3/pokemon-bw-ap-tracker.zip",
-    "borderlands2PopTracker": "https://github.com/DDogeOneeSama/Borderlands-2-PopTracker/releases/download/0.3.4/bl2_poptracker_0_3_4.zip",
+    "borderlands2PopTracker": "https://github.com/DDogeOneeSama/Borderlands-2-PopTracker/releases/download/0.3.5/bl2_poptracker_0_3_5.zip",
     "ashorthikePopTracker": "https://github.com/chandler05/shorthike-archipelago-poptracker/releases/download/1.1.1/shorthike-archipelago-poptracker-1.1.1.zip",
     "btd6PopTracker": "https://github.com/Fairweather-Furry/btd6_fair/releases/download/v0.2.0/btd6_fair.zip",
     "pokemonsnapPopTracker": "https://github.com/lighting8282/Pokemon-Snap-AP-Pop-Tracker/releases/download/v1.3.0.2/SnapTracker-1.3.0.2.zip",
@@ -178,8 +178,8 @@
     "btd6AP": "https://github.com/Matt41321/BloonsArchipelago/releases/download/0.10.1/BloonsArchipelago.dll",
     "btd6MelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
     "btd6Apworld": "https://github.com/Matt41321/Archipelago/releases/download/v0.8.3/bloonstd6.apworld",
-    "btd6ModHelper": "https://github.com/gurrenm3/BTD-Mod-Helper/releases/download/3.6.9/Btd6ModHelper.dll",
-    "btd6Updater": "https://github.com/gurrenm3/BTD-Mod-Helper/releases/download/3.6.9/UpdaterPlugin.dll",
+    "btd6ModHelper": "https://github.com/gurrenm3/BTD-Mod-Helper/releases/download/3.6.10/Btd6ModHelper.dll",
+    "btd6Updater": "https://github.com/gurrenm3/BTD-Mod-Helper/releases/download/3.6.10/UpdaterPlugin.dll",
 
     "blueprinceBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/755/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.755%2B3fab71a.zip",
     "blueprinceAP": "https://github.com/Yascob99/BluePrinceArchipelago/releases/download/Alpha-0.1.5/BluePrinceArchipelago0.1.5.zip",
@@ -242,10 +242,10 @@
     "cyberpunk2077AP": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/0.7.3/CyberpunkArchipelagoMod_.0.7.0.zip",
     "cyberpunk2077Apworld": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/0.7.3/cyberpunk2077.apworld",
     "cyberpunk2077RedScript": "https://github.com/jac3km4/redscript/releases/download/v0.5.31/redscript-v0.5.31-windows.zip",
-    "cyberpunk2077TweakXL": "https://github.com/psiberx/cp2077-tweak-xl/releases/download/v1.11.4/TweakXL-1.11.4.zip",
-    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.27.4/ArchiveXL-1.27.4.zip",
+    "cyberpunk2077TweakXL": "https://github.com/psiberx/cp2077-tweak-xl/releases/download/v1.11.5/TweakXL-1.11.5.zip",
+    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.27.5/ArchiveXL-1.27.5.zip",
     "cyberpunk2077CET": "https://github.com/maximegmd/CyberEngineTweaks/releases/download/v1.37.1/cet_1.37.1.zip",
-    "cyberpunk2077Codeware": "https://github.com/psiberx/cp2077-codeware/releases/download/v1.20.5/Codeware-1.20.5.zip",
+    "cyberpunk2077Codeware": "https://github.com/psiberx/cp2077-codeware/releases/download/v1.20.6/Codeware-1.20.6.zip",
     "cyberpunk2077RED4ext": "https://github.com/wopss/RED4ext/releases/download/v1.30.0/red4ext-1.30.0.zip",
 
     "ds2scholarAP": "https://github.com/WildBunnie/DarkSoulsII-Archipelago/releases/download/v0.5.5-hotfix/dinput8_sotfs.dll",
@@ -258,7 +258,7 @@
 
     "deadcellsApworld": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.1.10/dead_cells.apworld",
     "deadcellsAP": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.1.10/mods.zip",
-    "deadcellsCoreModding": "https://github.com/dead-cells-core-modding/core/releases/download/v35.13.9/win-x64.zip",
+    "deadcellsCoreModding": "https://github.com/dead-cells-core-modding/core/releases/download/v35.14.1/win-x64.zip",
 
     "drdrApworld": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.1/drdr.apworld",
     "drdrAP": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.1/DRAP_1.1.1.zip",
@@ -276,10 +276,10 @@
 
     "hereticAP": "https://github.com/ArchipelagoDoom/APDoom/releases/download/v2.0.0/APDoom-2.0-Windows-x64.zip",
 
-    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.6.4/DoomEternalArchipelago-v0.6.4-windows-x86_64.zip",
+    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.6.5/DoomEternalArchipelago-v0.6.5-windows-x86_64.zip",
     "doometernalMeathook": "https://github.com/brongo/m3337ho0o0ok/releases/download/v7.2/XINPUT1_3.dll",
     "doometernalModInjector": "https://gamebanana.com/dl/1765017",
-    "doometernalApworld": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.6.4/doometernal.apworld",
+    "doometernalApworld": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.6.5/doometernal.apworld",
     
     "dredgeAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-DREDGE.zip",
     "dredgeApworld": "https://github.com/alextric234/ArchipelagoDredge/releases/download/dredge_0.6.0/dredge.apworld",
@@ -502,14 +502,14 @@
     "plagueincAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Plaguepelago.zip",
     "plagueincMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
 
-    "pvzgotyAP": "https://github.com/vicr123/PvZ-Stable-Decompile-AP/releases/download/v1.10.0/PlantsVsZombies-GOTY-AP-x64.zip",
+    "pvzgotyAP": "https://github.com/vicr123/PvZ-Stable-Decompile-AP/releases/download/v1.10.1/PlantsVsZombies-GOTY-AP-x64.zip",
     "pvzgotyApworld": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.9.1/pvzr.apworld",
     
     "pvzreplantedAP": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.10.2/replanted_archipelago_v1.10.1.zip",
     "pvzreplantedApworld": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.10.2/pvzr.apworld",
     "pvzreplantedMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
 
-    "pokemonbwApworld": "https://github.com/BlastSlimey/PokemonBWAP/releases/download/0.4.1/pokemon_bw.apworld",
+    "pokemonbwApworld": "https://github.com/BlastSlimey/PokemonBWAP/releases/download/0.4.2/pokemon_bw.apworld",
     "pokemonbwBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
     "pokemoncrystalBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
