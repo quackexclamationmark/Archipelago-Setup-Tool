@@ -343,7 +343,8 @@
 
     "hksilksongBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "hksilksongAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/SilksongRandomizer.zip",
-    "hksilksongApworld": "https://github.com/Batatvideogames/silksong-archipelago-randomizer/releases/download/v0.5.0/silksong.apworld",
+    "hksilksongAP2": "https://github.com/Batatvideogames/silksong-archipelago-randomizer/releases/download/v0.5.2/Silksong.Randomizer.0.5.2.rar",
+    "hksilksongApworld": "https://github.com/Batatvideogames/silksong-archipelago-randomizer/releases/download/v0.5.2/silksong.apworld",
     "hksilksongBench": "https://github.com/homothetyhk/Silksong.Benchwarp/releases/download/v1.2.0/homothety-Benchwarp-1.2.0.zip",
     "hksilksongAssetHelper": "https://thunderstore.io/package/download/silksong_modding/AssetHelper/1.3.2/",
     "hksilksongMonoDetourBep5": "https://thunderstore.io/package/download/MonoDetour/MonoDetour_BepInEx_5/0.7.16/",
@@ -405,8 +406,8 @@
     "mkddApworld": "https://github.com/aXu-AP/archipelago-double-dash/releases/download/v1.0.1/mario_kart_double_dash.apworld",
     "mkddDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
-    "mkwiiApworld": "https://github.com/toent/Archipelago-MKWii/releases/download/v0.3.1/mkwii.apworld",
-    "mkwiiAP": "https://github.com/toent/Archipelago-MKWii/releases/download/v0.3.1/mkwii_client_win_v0.3.1.zip",
+    "mkwiiApworld": "https://github.com/toent/Archipelago-MKWii/releases/download/v0.3.2/mkwii.apworld",
+    "mkwiiAP": "https://github.com/toent/Archipelago-MKWii/releases/download/v0.3.2/mkwii_client_win_v0.3.2.zip",
     "mkwiiDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "metalhellApworld": "https://github.com/DanielSchaack/Metal-Hellsinger-AP-Mod/releases/download/1.1.4/metal_hellsinger.apworld",
@@ -458,8 +459,8 @@
 
     "oriwispsApworld": "https://github.com/Satisha10/APwotw_release/releases/download/v0.6.5/ori_wotw.apworld",
 
-    "outerwildsAP": "https://github.com/Ixrec/OuterWildsArchipelagoRandomizer/releases/download/v1.3.1/Ixrec.ArchipelagoRandomizer.zip",
-    "outerwildsApworld": "https://github.com/Ixrec/OuterWildsArchipelagoRandomizer/releases/download/v1.3.1/outer_wilds.apworld",
+    "outerwildsAP": "https://github.com/Ixrec/OuterWildsArchipelagoRandomizer/releases/download/v1.4.0/Ixrec.ArchipelagoRandomizer.zip",
+    "outerwildsApworld": "https://github.com/Ixrec/OuterWildsArchipelagoRandomizer/releases/download/v1.4.0/outer_wilds.apworld",
     "outerwildsOWML": "https://github.com/ow-mods/owml/releases/download/2.16.3/OWML.zip",
     "outerwildsCustomShipLog": "https://github.com/dgarroDC/CustomShipLogModes/releases/download/1.2.1/dgarro.CustomShipLogModes.zip",
     "outerwildsEnableMeditation": "https://github.com/xen-42/outer-wilds-meditation/releases/download/1.0.0/xen.EnableMeditation.zip",
