@@ -1,4 +1,4 @@
-# v2.3.0
+# v2.3.0 | Legality Update
 
 ### DOWNLOAD THE INSTALLER, NOT THE .ZIP FILE!
 
@@ -16,20 +16,22 @@ _We're back!_
   - Rogue Legacy
   - Haste
 
+- **Removed and deleted every link redirecting to any legally ambiguous redistribution or license protected sharing of files. Instead some setups have been changed to directly download from the original sources instead of illegal distribution.**
 - Removed the Stardew Valley setup completely.
 - Deleted a few redistributed files that were possibly infringing on copyright laws or were simply useless.
 
 # ADDED / NEW
 
-- **Removed and deleted every link redirecting to any legally ambiguous redistribution or license protected sharing of files. Instead some setups have been changed to directly download from the original sources instead of illegal distribution.**
-- Rework of Cyberpunk 2077's setup to remove the Phone Extension mod's installation because of copyright issues. The mod has to be manually downloaded now.
+- Rework of Cyberpunk 2077's setup to remove the Phone Extension mod's installation because of copyright issues. The mod now has to be manually downloaded.
 - Rework of Raft's setup to ensure that it is copyright safe.
 - Changed the Minus Launcher installation for Super Smash Bros. Brawl to ensure that it is copyright safe.
 - Rework of FNaF World's setup that was distributing a copy of the game which is protected by a non-redistribution license.
 - Rework of Uncanny Cat Golf's setup that was distributing a copy of the game which is (probably) protected by a non-redistribution license.
 - Rework of Silksong's setup when downloading the Benchwarp dependencies to ensure that it is copyright safe.
+- Rework of Dark Souls II's setup to remove the automatic installation of the Enemy Randomizer. LazyLoader is still downloaded by the setup but the Enemy Randomizer mod has to be downloaded manually (you can find a guide for it on the infos tab of the game's setup window on the tool).
 - Reworked GTA VC, GTA SA and Saints Row 2 setups to remove the installation of the .exe files that are required.
 - Slight rework of Dead Rising Deluxe Remaster to make it simpler.
+- Removed the link to a redistributed version of the game for Simpsons Hit & Run's setup.
 
 ---
 
