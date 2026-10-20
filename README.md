@@ -1,16 +1,15 @@
-# **REPOSITORY CLOSED UNTIL THE NEXT UPDATE, JOIN THE [DISCORD](https://discord.gg/hxsNCmFpcH) IF YOU HAVE ANY QUESTION**
-
 # If you see a “Windows protected your PC” message, no worries—just click “More info” and then “Run anyway.” This happens because the tool installs mods automatically, which Windows can sometimes flag as suspicious.
 
 [Full Presentation Video](https://youtu.be/6AOrXW-Da3Q) (v1.0.0)
 
 DOWNLOAD THE INSTALLER, NOT THE .ZIP FILE!
 
+_If you are one of the owner/dev of any of the mods/tool/library that were used here and you want it to be removed, feel free to ask me on Discord (or in the 'Issues' tab)._
+
 Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could (idk I didn't try it) but it COULD delete everything that is next to the .exe (in the same folder) even tho it's not supposed to. Basically, you can move the folder but probably don't rename it and do not touch what's inside.
 
 # Archipelago Setup Tool
-### [Download latest version | v2.2.3](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v2.2.3)
----
+### [DOWNLOAD LATEST VERSION | v2.3.0](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v2.3.0)
 
 ## Features
 
@@ -22,11 +21,10 @@ Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could
 
 ---
 
-After setting up a game, all credits can be found in the game's directory, inside the game's directory.
-
-Currently, the following games are supported (142):
+### Supported games (151):
 
 - A Dance of Fire and Ice
+- A Hat in Time
 - A Short Hike
 - Another Crab's Treasure
 - Balatro
@@ -60,6 +58,7 @@ Currently, the following games are supported (142):
 - DREDGE
 - Easy Delivery Co.
 - ENDER MAGNOLIA: Bloom in the Mist
+- Faster Than Light
 - Fez
 - Five Nights At Freddy's Ultimate Custom Night
 - FNaF World
@@ -69,6 +68,7 @@ Currently, the following games are supported (142):
 - Grand Theft Auto: San Andreas
 - Grand Theft Auto: Vice City
 - Hades
+- Haste
 - Heretic
 - Hi-Fi Rush
 - HITMAN: World of Assassination
@@ -90,6 +90,7 @@ Currently, the following games are supported (142):
 - Metroid Fusion
 - Mina the Hollower
 - Minecraft
+- Minecraft Dungeons
 - Neon White
 - New Super Mario Bros. Wii
 - Nine Sols
@@ -127,18 +128,20 @@ Currently, the following games are supported (142):
 - Resident Evil 7: Biohazard
 - Rift of the Necrodancer
 - Risk Of Rain 2
+- Rogue Legacy
 - Rogue Legacy 2
 - Saints Row 2
 - Sayonara Wild Hearts
 - Schedule I
 - Scritchy Scratchy
 - Skul: The Hero Slayer
+- Slay The Spire
 - Slay The Spire 2
 - Slime Rancher
 - Slime Rancher 2
 - Sonic Adventure DX
 - Spelunky 2
-- Stardew Valley
+- SMW: Spicy Mycena Waffles (Super Mario World)
 - Subnautica
 - SULFUR
 - Super Mario 64
@@ -148,6 +151,7 @@ Currently, the following games are supported (142):
 - Supermarket Simulator
 - TCG Card Shop Simulator
 - The Binding of Isaac: Repentance
+- The Escapists 2
 - The Henry Stickmin Collection
 - The Legend Of Zelda: The Minish Cap
 - The Legend of Zelda: The Wind Waker
@@ -168,8 +172,9 @@ Currently, the following games are supported (142):
 - Voices Of The Void
 - White Knuckle
 - Yellow Taxi Goes Vroom
+---
 
-Features to add in the future:
+### Features to add in the future:
 
 * Adding support for other OS (Linux). (W.I.P!!)
 
@@ -179,9 +184,15 @@ I don't own all the games so some game path can be wrong and lead to a "Path not
 
 * Latest version of [Archipelago Launcher](https://github.com/ArchipelagoMW/Archipelago/releases/download/0.6.8/Setup.Archipelago.0.6.8.exe) | *YOU CAN DOWNLOAD ITS LATEST VERSION THROUGH THE 'TOOLS' SECTION ON THE TOOL!*
 
-## Special Thanks
+## Special Thanks / Credits
+
+_All credits can be found inside a .txt file at the end of a setup inside the game's directory._
 
 [UnitySimpleFileBrowser](https://github.com/yasirkula/UnitySimpleFileBrowser) | by **yasirkula**
+
+[7za.exe & 7z.dll](https://www.7-zip.org/download.html) for .7z format extraction | by **[Igor Pavlov (7zip)](https://en.wikipedia.org/wiki/7-Zip)**
+
+[UnRAR](https://www.rarlab.com/rar_add.htm) for .rar format extraction | by **[Eugene Roshal (RAR & WinRAR)](https://en.wikipedia.org/wiki/Eugene_Roshal)**
 
 My friends *AquaBolt, Unlucky_Lynx, RealMim, TheInfectedDuckii, Mikkel, Joats* for testing some of my setups!
 
