@@ -1,3 +1,4 @@
+## `Oct 20, 2026, 20:29 GMT+2`
 # v2.3.0 | Legality Update
 
 ### DOWNLOAD THE INSTALLER, NOT THE .ZIP FILE!
