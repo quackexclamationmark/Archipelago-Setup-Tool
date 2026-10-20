@@ -27,6 +27,7 @@ After setting up a game, all credits can be found in the game's directory, insid
 Currently, the following games are supported (142):
 
 - A Dance of Fire and Ice
+- A Hat in Time
 - A Short Hike
 - Another Crab's Treasure
 - Balatro
@@ -60,6 +61,7 @@ Currently, the following games are supported (142):
 - DREDGE
 - Easy Delivery Co.
 - ENDER MAGNOLIA: Bloom in the Mist
+- Faster Than Light
 - Fez
 - Five Nights At Freddy's Ultimate Custom Night
 - FNaF World
@@ -69,6 +71,7 @@ Currently, the following games are supported (142):
 - Grand Theft Auto: San Andreas
 - Grand Theft Auto: Vice City
 - Hades
+- Haste
 - Heretic
 - Hi-Fi Rush
 - HITMAN: World of Assassination
@@ -90,6 +93,7 @@ Currently, the following games are supported (142):
 - Metroid Fusion
 - Mina the Hollower
 - Minecraft
+- Minecraft Dungeons
 - Neon White
 - New Super Mario Bros. Wii
 - Nine Sols
@@ -127,17 +131,20 @@ Currently, the following games are supported (142):
 - Resident Evil 7: Biohazard
 - Rift of the Necrodancer
 - Risk Of Rain 2
+- Rogue Legacy
 - Rogue Legacy 2
 - Saints Row 2
 - Sayonara Wild Hearts
 - Schedule I
 - Scritchy Scratchy
 - Skul: The Hero Slayer
+- Slay The Spire
 - Slay The Spire 2
 - Slime Rancher
 - Slime Rancher 2
 - Sonic Adventure DX
 - Spelunky 2
+- SMW: Spicy Mycena Waffles (Super Mario World)
 - Stardew Valley
 - Subnautica
 - SULFUR
@@ -148,6 +155,7 @@ Currently, the following games are supported (142):
 - Supermarket Simulator
 - TCG Card Shop Simulator
 - The Binding of Isaac: Repentance
+- The Escapists 2
 - The Henry Stickmin Collection
 - The Legend Of Zelda: The Minish Cap
 - The Legend of Zelda: The Wind Waker
@@ -168,6 +176,7 @@ Currently, the following games are supported (142):
 - Voices Of The Void
 - White Knuckle
 - Yellow Taxi Goes Vroom
+---
 
 Features to add in the future:
 
