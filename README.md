@@ -22,9 +22,7 @@ Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could
 
 ---
 
-After setting up a game, all credits can be found in the game's directory, inside the game's directory.
-
-Currently, the following games are supported (142):
+### Supported games (151):
 
 - A Dance of Fire and Ice
 - A Hat in Time
@@ -145,7 +143,6 @@ Currently, the following games are supported (142):
 - Sonic Adventure DX
 - Spelunky 2
 - SMW: Spicy Mycena Waffles (Super Mario World)
-- Stardew Valley
 - Subnautica
 - SULFUR
 - Super Mario 64
@@ -178,7 +175,7 @@ Currently, the following games are supported (142):
 - Yellow Taxi Goes Vroom
 ---
 
-Features to add in the future:
+### Features to add in the future:
 
 * Adding support for other OS (Linux). (W.I.P!!)
 
