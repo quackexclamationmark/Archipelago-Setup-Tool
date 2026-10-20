@@ -4,10 +4,12 @@
 
 DOWNLOAD THE INSTALLER, NOT THE .ZIP FILE!
 
+_If you are one of the owner/dev of any of the mods/tool/library that were used here and you want it to be removed, feel free to ask me on Discord (or in the 'Issues' tab)._
+
 Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could (idk I didn't try it) but it COULD delete everything that is next to the .exe (in the same folder) even tho it's not supposed to. Basically, you can move the folder but probably don't rename it and do not touch what's inside.
 
 # Archipelago Setup Tool
-### [Download latest version | v2.2.3](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v2.2.3)
+### [Download latest version | v2.3.0](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v2.3.0)
 ---
 
 ## Features
@@ -177,9 +179,15 @@ I don't own all the games so some game path can be wrong and lead to a "Path not
 
 * Latest version of [Archipelago Launcher](https://github.com/ArchipelagoMW/Archipelago/releases/download/0.6.8/Setup.Archipelago.0.6.8.exe) | *YOU CAN DOWNLOAD ITS LATEST VERSION THROUGH THE 'TOOLS' SECTION ON THE TOOL!*
 
-## Special Thanks
+## Special Thanks / Credits
+
+_All credits can be found inside a .txt file at the end of a setup inside the game's directory._
 
 [UnitySimpleFileBrowser](https://github.com/yasirkula/UnitySimpleFileBrowser) | by **yasirkula**
+
+[7za.exe & 7z.dll](https://www.7-zip.org/download.html) for .7z format extraction | by **[Igor Pavlov (7zip)](https://en.wikipedia.org/wiki/7-Zip)**
+
+[UnRAR](https://www.rarlab.com/rar_add.htm) for .rar format extraction | by **[Eugene Roshal (RAR & WinRAR)](https://en.wikipedia.org/wiki/Eugene_Roshal)**
 
 My friends *AquaBolt, Unlucky_Lynx, RealMim, TheInfectedDuckii, Mikkel, Joats* for testing some of my setups!
 
