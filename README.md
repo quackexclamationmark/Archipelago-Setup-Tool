@@ -9,8 +9,7 @@ _If you are one of the owner/dev of any of the mods/tool/library that were used 
 Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could (idk I didn't try it) but it COULD delete everything that is next to the .exe (in the same folder) even tho it's not supposed to. Basically, you can move the folder but probably don't rename it and do not touch what's inside.
 
 # Archipelago Setup Tool
-### [Download latest version | v2.3.0](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v2.3.0)
----
+### [DOWNLOAD LATEST VERSION | v2.3.0](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/releases/tag/v2.3.0)
 
 ## Features
 
