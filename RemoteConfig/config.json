@@ -672,6 +672,9 @@
     "version": "5a6b930"
     },
 
+    "smgApworld": "https://github.com/Joethepic/Archipelago/releases/download/smg-V0.0.1/smgalaxy.apworld",
+    "smgDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
+
     "smbApworld": "https://github.com/PixelShake92/Super-Meat-Boy-AP/releases/download/Alpha_2/super_meat_boy.apworld",
     "smbAP": "https://github.com/PixelShake92/Super-Meat-Boy-AP/releases/download/Alpha_2/SMB_Archipelago_Client.exe",
 
