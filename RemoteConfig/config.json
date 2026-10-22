@@ -145,6 +145,7 @@
     "fnafworldPopTracker": "https://github.com/quackexclamationTesting/Preloaded-Archipelago-Setup-Tool-Mods/releases/download/FNAFWorld/FNaF-World-AP-Poptracker.zip",
     "celeste64PopTracker": "https://github.com/PoryGone/Celeste-64-AP-Tracker/releases/download/v1.3.1/celeste_64_randomizer_porygone.zip",
     "ahitPopTracker": "https://github.com/Mysteryem/ahit-poptracker/archive/refs/tags/v1.8.0.zip",
+    "fallguysPopTracker": "https://github.com/Xannon-rgb/Fall-Guys-PopTracker/releases/download/v1.1.1/Fall-Guys-PopTracker-v1.1.1.zip",
     
 
     "adofaiPathName": "A Dance of Fire and Ice",
@@ -295,6 +296,8 @@
 
     "endermagnoliaApworld": "https://github.com/Trexounay/EnderLilies.Archipelago/releases/download/endermagnolia-v0.1.8/endermagnolia.apworld",
     "endermagnoliaAP": "https://github.com/Trexounay/EnderMagnolia.Randomizer/releases/download/endermagnolia-v0.1.8/EnderMagnolia.Randomizer.zip",
+
+    "fallguysApworld": "https://github.com/ninpalk/FallGuysAP/releases/download/0.0.2/fall_guys.apworld",
 
     "ftlPreloaded": "https://github.com/quackexclamationTesting/Preloaded-Archipelago-Setup-Tool-Mods/releases/download/FTL/Preloaded-FTL-AP.zip",
     "ftlApworld": "https://github.com/TheLiloji/FTLArchipelago/releases/download/v0.5.0/ftl.apworld",
