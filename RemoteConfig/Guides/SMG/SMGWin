@@ -1,0 +1,20 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• Dolphin Emulator (if toggled)\n• smgalaxy.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, smgalaxy.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. If you don't already have Dolphin Emulator, you can enable its toggle and it will be downloaded in your 'Documents' directory.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"SM Galaxy is not a core Archipelago game, it needs a custom world file. When 'smgalaxy.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, the host will need to go to the room you'll be using for your Archipelago session on the Archipelago website. Once you have the room, you'll need click the 'Download Patch File' next to your name.\n\nAfter it is downloaded, open the Archipelago Launcher and open 'Open Patch' to use the patch file (.apsmg), it will ask you to select your patch file and then your SMG ROM.\n\nIt will open a Text Client where you'll need to connect but before doing so, open Dolphin and boot-up the Archipelago patched ROM (should be located in the same directory as your .apsmg file. The ROM is created after using the patch file). Once you're in the SM Galaxy main menu, go back to the 'SMG Client' and connect to it as you would normally do with any other client. Now you should be able to start playing!",
+"clear"
+
+]
