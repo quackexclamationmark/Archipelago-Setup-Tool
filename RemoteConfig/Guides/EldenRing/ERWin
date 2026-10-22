@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• ER Archipelago 'randomizer' folder\n• eldenring.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, eldenring.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. The Archipelago mod folder will be downloaded into the game's main directory. The randomizer launcher will then launch automatically.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"ELDEN RING is not a core Archipelago game, it needs a custom world file. When 'eldenring.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld. If you don't have the DLC, make sure to disable the 'DLC' toggle when creating a YAML.",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, the randomizer launcher will open automatically, click 'Refresh Archipelago data' and connect to the Archipelago multiworld.\n\nIn the 'Room URL' field, enter archipelago.gg: followed by the port. This is a 5-digit number that you can find on the website after creating a new room.\n\nIn 'Player name', enter the name assigned to your YAML file.\n\nThe 'Password' field is optional. If the host did not set one, leave it blank.\n\nFinally, click 'Load'.\n\nNow, hit 'Randomize for Archipelago' if it succeeds, click 'Launch Elden Ring'. If it fails, shoot a message on my tool's Discord server or on the Elden Ring discussion forum on the official Archipelago discord and we should be able to help you.",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will simply delete 'randomizer' inside the game's folder.",
+"clear"
+
+]
