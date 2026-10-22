@@ -454,6 +454,14 @@
     "okamihdApworld": "https://github.com/Ragmoa/Archipelago/releases/download/0.5.3/okamihd.apworld",
     "okamihdAP": "https://github.com/Axertin/okami-apclient/releases/download/v0.8.2/okami-apclient-v0.8.2.zip",
 
+    "openrct2DL": "https://github.com/OpenRCT2/OpenRCT2/releases/download/v0.5.6/OpenRCT2-v0.5.6-windows-installer-x64.exe"
+    "openrct2Apworld": "https://github.com/Crazycolbster/rollercoaster-tycoon-randomizer/releases/download/v0.1.22.1-beta/openrct2.apworld",
+    "openrct2Randomizer": "https://github.com/Crazycolbster/rollercoaster-tycoon-randomizer/releases/download/v0.1.22.1-beta/rctrando.js",
+    "openrct2APVanillaAsync": "https://github.com/Crazycolbster/rollercoaster-tycoon-randomizer/releases/download/v0.1.22.1-beta/Archipelago.Madness.Vanilla.Asynchronus.park",
+    "openrct2APVanillaSync": "https://github.com/Crazycolbster/rollercoaster-tycoon-randomizer/releases/download/v0.1.22.1-beta/Archipelago.Madness.Vanilla.Synchronous.park",
+    "openrct2APExpAsync": "https://github.com/Crazycolbster/rollercoaster-tycoon-randomizer/releases/download/v0.1.22.1-beta/Archipelago.Madness.Expansions.Asynchronus.park",
+    "openrct2APExpSync": "https://github.com/Crazycolbster/rollercoaster-tycoon-randomizer/releases/download/v0.1.22.1-beta/Archipelago.Madness.Expansions.Synchronus.park",
+
     "oriblindBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x86_5.4.23.5.zip",
     "oriblindAP": "https://github.com/c-ostic/OriBFArchipelago/releases/download/v0.4.0/OriBFArchipelago.zip",
     "oriblindApworld": "https://github.com/c-ostic/Archipelago/releases/download/v0.4.2/oribf.apworld",
