@@ -1,0 +1,24 @@
+[
+
+"[HEADER] Downloaded",
+"kill",
+"• rctrando.js (Randomizer)\n• Archipelago.Madness.Expansions.Asynchronus.park (if needed)\n• Archipelago.Madness.Expansions.Synchronus.park (if needed)\n• Archipelago.Madness.Vanilla.Asynchronus.park (if needed)\n• Archipelago.Madness.Vanilla.Synchronous.park (if toggled)\n• OpenRCT2-v0.5.6-windows-installer-x64.exe (if you wanna dl the game)\n• openrct2.apworld",
+"kill",
+"[HEADER] Installation Infos",
+"kill",
+"When you click 'START SETUP' in the 'SETUP' tab, openrct2.apworld will be installed and moved into the 'custom_worlds' folder inside the Archipelago Launcher directory. The randomizer mod file will be downloaded inside the game's plugin folder ('Documents\\OpenRCT2\\plugin'). If the game's installer toggle was enabled, it will download 'OpenRCT2-v0.5.6-windows-installer-x64.exe' to your Windows 'Downloads' directory. If any map/scenario toggle was enabled it will download them inside the game's scenario folder 'Documents\\OpenRCT2\\scenario'. If the folders don't exist, they will be created automatically.",
+"kill",
+"[HEADER] apworld / yaml Infos",
+"kill",
+"OpenRCT2 is not a core Archipelago game, it needs a custom world file. When 'openrct2.apworld' is downloaded in the Archipelago Folder (by clicking START SETUP), boot-up the Archipelago Launcher and go to 'Options Creator' to create your .yaml file and then, when you're done, send it to the person who will host the AP Multiworld. Remember to select the scenario and length you wanna play on (Sync = shorter sessions while Async = longer sessions).",
+"kill",
+"[HEADER] Connection Infos",
+"kill",
+"Once everything is set up, start a new save on the scenario that you chose on your YAML. Once you're on the map, a randomizer window should appear, simply click the 'Archipelago!' button. Now, (re)open your Archipelago Launcher and click the 'OpenRCT2 Client'. If you're on the right scenario it should let you know and then you can connect to the client. Once connected, go back to the game and hit 'Start Game!'. You should now be connected and should be able to start playing!",
+"kill",
+"[HEADER] Revert Infos",
+"kill",
+"Reverting will simply delete the randomizer file and maps if any were downloaded.",
+"clear"
+
+]
