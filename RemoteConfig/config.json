@@ -181,6 +181,7 @@
     "btd6Apworld": "https://github.com/Matt41321/Archipelago/releases/download/v0.8.3/bloonstd6.apworld",
     "btd6ModHelper": "https://github.com/gurrenm3/BTD-Mod-Helper/releases/download/3.6.10/Btd6ModHelper.dll",
     "btd6Updater": "https://github.com/gurrenm3/BTD-Mod-Helper/releases/download/3.6.10/UpdaterPlugin.dll",
+    "btd6EGComp": "https://github.com/GrahamKracker/BTD6EpicGamesModCompat/releases/download/1.2.1/BTD6EpicGamesModCompat.dll",
 
     "blueprinceBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/755/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.755%2B3fab71a.zip",
     "blueprinceAP": "https://github.com/Yascob99/BluePrinceArchipelago/releases/download/Alpha-0.1.5/BluePrinceArchipelago0.1.5.zip",
@@ -344,8 +345,8 @@
     "hollowknightAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-Lumafly-HKAP.zip",
 
     "hksilksongBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
-    "hksilksongAP": "https://github.com/Batatvideogames/silksong-archipelago-randomizer/releases/download/v0.5.2/Silksong.Randomizer.0.5.2.rar",
-    "hksilksongApworld": "https://github.com/Batatvideogames/silksong-archipelago-randomizer/releases/download/v0.5.2/silksong.apworld",
+    "hksilksongAP": "https://github.com/Batatvideogames/silksong-archipelago-randomizer/releases/download/v0.5.3/Silksong.Randomizer.0.5.3.rar",
+    "hksilksongApworld": "https://github.com/Batatvideogames/silksong-archipelago-randomizer/releases/download/v0.5.3/silksong.apworld",
     "hksilksongBench": "https://github.com/homothetyhk/Silksong.Benchwarp/releases/download/v1.2.0/homothety-Benchwarp-1.2.0.zip",
     "hksilksongAssetHelper": "https://thunderstore.io/package/download/silksong_modding/AssetHelper/1.3.2/",
     "hksilksongMonoDetourBep5": "https://thunderstore.io/package/download/MonoDetour/MonoDetour_BepInEx_5/0.7.16/",
@@ -682,7 +683,7 @@
     "version": "5a6b930"
     },
 
-    "smgApworld": "https://github.com/Joethepic/Archipelago/releases/download/smg-V0.0.1/smgalaxy.apworld",
+    "smgApworld": "https://github.com/Joethepic/Archipelago/releases/download/smg-V0.0.2/smgalaxy.apworld",
     "smgDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "smbApworld": "https://github.com/PixelShake92/Super-Meat-Boy-AP/releases/download/Alpha_2/super_meat_boy.apworld",
