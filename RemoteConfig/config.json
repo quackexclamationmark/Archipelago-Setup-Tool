@@ -148,6 +148,7 @@
     "celeste64PopTracker": "https://github.com/PoryGone/Celeste-64-AP-Tracker/releases/download/v1.3.1/celeste_64_randomizer_porygone.zip",
     "ahitPopTracker": "https://github.com/Mysteryem/ahit-poptracker/archive/refs/tags/v1.8.0.zip",
     "fallguysPopTracker": "https://github.com/Xannon-rgb/Fall-Guys-PopTracker/releases/download/v1.1.1/Fall-Guys-PopTracker-v1.1.1.zip",
+    "animalwellPopTracker": "https://github.com/SporyTike/ANIMAL-WELL-AP-Tracker/archive/refs/tags/v0.9.7.zip",
     
 
     "adofaiPathName": "A Dance of Fire and Ice",
@@ -159,6 +160,8 @@
     "ashorthikeBepInEx": "https://github.com/BrandenEK/AShortHike.ModdingTools/raw/main/win32.zip",
     "ashorthikeAP": "https://github.com/BrandenEK/AShortHike.Randomizer/releases/download/1.5.1/Randomizer.zip",
     "ashorthikeModdingAPI": "https://github.com/BrandenEK/AShortHike.ModdingAPI/releases/download/1.0.1/ModdingAPI.zip",
+
+    "animalwellApworld": "https://github.com/ScipioWright/Archipelago-SW/releases/download/0.5.4/animal_well.apworld",
 
     "actPathName": "Another Crab's Treasure",
     "actAP": "https://github.com/Automagic00/ACT-AP-Client-Plugin/releases/download/0.4.4/ACTAP.dll",
