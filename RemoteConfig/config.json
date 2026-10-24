@@ -31,7 +31,9 @@
     "steamSearchPathsLinuxHome": [
         ".steam/debian-installation/steamapps/common",
         ".steam/ubuntu12_32/steamapps/common",
-        ".steam/steam/steamapps/common"
+        ".steam/steam/steamapps/common",
+        ".local/share/Steam/steamapps/common",
+        ".var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common"
     ],
 
     "steamSearchPathsLinuxExt": [
