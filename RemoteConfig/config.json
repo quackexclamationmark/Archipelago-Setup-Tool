@@ -149,6 +149,7 @@
     "ahitPopTracker": "https://github.com/Mysteryem/ahit-poptracker/archive/refs/tags/v1.8.0.zip",
     "fallguysPopTracker": "https://github.com/Xannon-rgb/Fall-Guys-PopTracker/releases/download/v1.1.1/Fall-Guys-PopTracker-v1.1.1.zip",
     "animalwellPopTracker": "https://github.com/SporyTike/ANIMAL-WELL-AP-Tracker/archive/refs/tags/v0.9.7.zip",
+    "banjotooiePopTracker": "https://github.com/Ozone31/banjo-tooie-ap-tracker/archive/refs/tags/v0.10.9.zip",
     
 
     "adofaiPathName": "A Dance of Fire and Ice",
@@ -172,6 +173,9 @@
     "balatroApworld": "https://github.com/BurndiL/BalatroAP/releases/download/v0.1.9f/balatro.apworld",
     "balatroLovely": "https://github.com/ethangreen-dev/lovely-injector/releases/download/v0.9.0/lovely-x86_64-pc-windows-msvc.zip",
     "balatroSteamodded": "https://github.com/Steamodded/smods/archive/refs/tags/1.0.0-beta-1620a.zip",
+
+    "banjotooieApworld": "https://github.com/jjjj12212/Archipelago-BanjoTooie/releases/download/V4.13.1/banjo_tooie.apworld",
+    "banjotooieBizhawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
     "batimApworld": "https://github.com/Lorecrafter703/BendyAndTheArchipelagoMachine/releases/download/v2.0.1/batim.apworld",
     "batimAP": "https://github.com/Lorecrafter703/BendyAndTheArchipelagoMachine/releases/download/v2.0.1/Lorecrafter703-Bendy_and_the_Archipelago_Machine.zip",
