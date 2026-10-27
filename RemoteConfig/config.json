@@ -75,7 +75,7 @@
     ],
 
     "aplauncherDL": "https://github.com/ArchipelagoMW/Archipelago/releases/download/0.6.8/Setup.Archipelago.0.6.8.exe",
-    "utApworld": "https://github.com/FarisTheAncient/Archipelago/releases/download/Tracker_v0.3.6/tracker.apworld",
+    "utApworld": "https://github.com/FarisTheAncient/Archipelago/releases/download/Tracker_v0.3.8/tracker.apworld",
     "r2modmanDL": "https://thunderstore.io/c/lethal-company/p/ebkr/r2modman/",
 
     "poptrackerDL": "https://github.com/black-sliver/PopTracker/releases/download/v0.35.4/poptracker_0-35-4_win64.zip",
@@ -269,13 +269,13 @@
 
     "deadcellsApworld": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.1.10/dead_cells.apworld",
     "deadcellsAP": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.1.10/mods.zip",
-    "deadcellsCoreModding": "https://github.com/dead-cells-core-modding/core/releases/download/v35.14.1/win-x64.zip",
+    "deadcellsCoreModding": "https://github.com/dead-cells-core-modding/core/releases/download/v35.14.2/win-x64.zip",
 
     "drdrApworld": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.1/drdr.apworld",
     "drdrAP": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.1/DRAP_1.1.1.zip",
 
-    "deltaruneAP": "https://github.com/Tenebrosful/DeltaruneAP-mod/releases/download/2.2.1-2/archipelago-2_2_1-2_bsdiff.zip",
-    "deltaruneApworld": "https://github.com/theemeraldsword85/DELTARUNEAP/releases/download/v2.2.1/deltarune.apworld",
+    "deltaruneAP": "https://github.com/Tenebrosful/DeltaruneAP-mod/releases/download/v2.3.0-2/archipelago-2_3_0-2_bsdiff.zip",
+    "deltaruneApworld": "https://github.com/theemeraldsword85/DELTARUNEAP/releases/download/v2.3.0/deltarune.apworld",
 
     "demontidesMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
     "demontidesAP": "https://github.com/estradiol-valerate/DemonTidesAP/releases/download/v0.0.1/DemonTidesAP.zip",
@@ -667,8 +667,8 @@
     "sadxApworld": "https://github.com/ClassicSpeed/sadx-classic-randomizer/releases/download/v1.2.2b/sadx.apworld",
     "sadxModManager": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-SAModManager.zip",
 
-    "spelunky2AP": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.4.0/Spelunky2-Archipelago.zip",
-    "spelunky2Apworld": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.4.0/spelunky2.apworld",
+    "spelunky2AP": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.5.0/Spelunky2-Archipelago.zip",
+    "spelunky2Apworld": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.5.0/spelunky2.apworld",
     "spelunky2Playlunky": "https://github.com/spelunky-fyi/Playlunky/releases/download/nightly/playlunky_nightly_63FB520.zip",
     
     "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.3/Archipelago_193.zip",
@@ -717,8 +717,8 @@
     "tcgApworld": "https://github.com/FyreDay/Archipelago-TCGCardShopSimulator/releases/download/v1.2.0/tcg_card_shop_simulator.apworld",
     "tcgAP": "https://github.com/FyreDay/TCG-CardShop-Sim-APClient/releases/download/v1.2.0/TCG_AP_Client_v1.2.0.zip",
 
-    "tftApworld": "https://github.com/Alpaka623/tft-archipelago-releases/releases/download/v0.5.6/tft_archipelago.apworld",
-    "tftAP": "https://github.com/Alpaka623/tft-archipelago-releases/releases/download/v0.5.6/TFT-Archipelago-Setup-0.5.6.exe",
+    "tftApworld": "https://github.com/Alpaka623/tft-archipelago-releases/releases/download/v0.5.7/tft_archipelago.apworld",
+    "tftAP": "https://github.com/Alpaka623/tft-archipelago-releases/releases/download/v0.5.7/TFT-Archipelago-Setup-0.5.7.exe",
 
     "tboiApworld": "https://github.com/NaveTK/Archipelago/releases/download/v0.4.3/tboir.apworld",
     "tboiSaveInstaller": "https://github.com/Zamiell/isaac-save-installer/releases/download/1.2.1/isaac-save-installer.exe",
