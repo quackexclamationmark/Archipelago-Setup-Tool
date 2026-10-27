@@ -287,10 +287,10 @@
 
     "hereticAP": "https://github.com/ArchipelagoDoom/APDoom/releases/download/v2.0.0/APDoom-2.0-Windows-x64.zip",
 
-    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.6.7/DoomEternalArchipelago-v0.6.7-windows-x86_64.zip",
+    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.7.0/DoomEternalArchipelago-v0.7.0-windows-x86_64.zip",
     "doometernalMeathook": "https://github.com/brongo/m3337ho0o0ok/releases/download/v7.2/XINPUT1_3.dll",
     "doometernalModInjector": "https://gamebanana.com/dl/1765017",
-    "doometernalApworld": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.6.7/doometernal.apworld",
+    "doometernalApworld": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.7.0/doometernal.apworld",
     
     "dredgeAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-DREDGE.zip",
     "dredgeApworld": "https://github.com/alextric234/ArchipelagoDredge/releases/download/dredge_0.6.0/dredge.apworld",
@@ -717,8 +717,8 @@
     "tcgApworld": "https://github.com/FyreDay/Archipelago-TCGCardShopSimulator/releases/download/v1.2.0/tcg_card_shop_simulator.apworld",
     "tcgAP": "https://github.com/FyreDay/TCG-CardShop-Sim-APClient/releases/download/v1.2.0/TCG_AP_Client_v1.2.0.zip",
 
-    "tftApworld": "https://github.com/Alpaka623/tft-archipelago-releases/releases/download/v0.5.7/tft_archipelago.apworld",
-    "tftAP": "https://github.com/Alpaka623/tft-archipelago-releases/releases/download/v0.5.7/TFT-Archipelago-Setup-0.5.7.exe",
+    "tftApworld": "https://github.com/Alpaka623/tft-archipelago-releases/releases/download/v0.5.8/tft_archipelago.apworld",
+    "tftAP": "https://github.com/Alpaka623/tft-archipelago-releases/releases/download/v0.5.8/TFT-Archipelago-Setup-0.5.8.exe",
 
     "tboiApworld": "https://github.com/NaveTK/Archipelago/releases/download/v0.4.3/tboir.apworld",
     "tboiSaveInstaller": "https://github.com/Zamiell/isaac-save-installer/releases/download/1.2.1/isaac-save-installer.exe",
