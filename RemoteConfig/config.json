@@ -175,7 +175,7 @@
     "balatroSteamodded": "https://github.com/Steamodded/smods/archive/refs/tags/1.0.0-beta-1620a.zip",
 
     "banjotooieApworld": "https://github.com/jjjj12212/Archipelago-BanjoTooie/releases/download/V4.13.1/banjo_tooie.apworld",
-    "banjotooieBizhawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
+    "banjotooieBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
     "batimApworld": "https://github.com/Lorecrafter703/BendyAndTheArchipelagoMachine/releases/download/v2.0.1/batim.apworld",
     "batimAP": "https://github.com/Lorecrafter703/BendyAndTheArchipelagoMachine/releases/download/v2.0.1/Lorecrafter703-Bendy_and_the_Archipelago_Machine.zip",
@@ -254,9 +254,9 @@
     "cyberpunk2077Apworld": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/0.7.3/cyberpunk2077.apworld",
     "cyberpunk2077RedScript": "https://github.com/jac3km4/redscript/releases/download/v0.5.32/redscript-v0.5.32-windows.zip",
     "cyberpunk2077TweakXL": "https://github.com/psiberx/cp2077-tweak-xl/releases/download/v1.11.5/TweakXL-1.11.5.zip",
-    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.28.2/ArchiveXL-1.28.2.zip",
+    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.28.6/ArchiveXL-1.28.6.zip",
     "cyberpunk2077CET": "https://github.com/maximegmd/CyberEngineTweaks/releases/download/v1.38.0/cet_1_38_0.zip",
-    "cyberpunk2077Codeware": "https://github.com/psiberx/cp2077-codeware/releases/download/v1.20.6/Codeware-1.20.6.zip",
+    "cyberpunk2077Codeware": "https://github.com/psiberx/cp2077-codeware/releases/download/v1.21.2/Codeware-1.21.2.zip",
     "cyberpunk2077RED4ext": "https://github.com/wopss/RED4ext/releases/download/v1.31.0/red4ext-1.31.0.zip",
 
     "ds2scholarAP": "https://github.com/WildBunnie/DarkSoulsII-Archipelago/releases/download/v0.5.5-hotfix/dinput8_sotfs.dll",
@@ -275,7 +275,7 @@
     "drdrAP": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.1/DRAP_1.1.1.zip",
 
     "deltaruneAP": "https://github.com/Tenebrosful/DeltaruneAP-mod/releases/download/v2.3.0-3/archipelago-2_3_0-3_bsdiff.zip",
-    "deltaruneApworld": "https://github.com/theemeraldsword85/DELTARUNEAP/releases/download/v2.3.0/deltarune.apworld",
+    "deltaruneApworld": "https://github.com/theemeraldsword85/DELTARUNEAP/releases/download/v2.3.0%2Bhotfix1/deltarune.apworld",
 
     "demontidesMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
     "demontidesAP": "https://github.com/estradiol-valerate/DemonTidesAP/releases/download/v0.0.1/DemonTidesAP.zip",
@@ -287,10 +287,10 @@
 
     "hereticAP": "https://github.com/ArchipelagoDoom/APDoom/releases/download/v2.0.0/APDoom-2.0-Windows-x64.zip",
 
-    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.7.1/DoomEternalArchipelago-v0.7.1-windows-x86_64.zip",
+    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.7.2/DoomEternalArchipelago-v0.7.2.1-windows-x86_64.zip",
     "doometernalMeathook": "https://github.com/brongo/m3337ho0o0ok/releases/download/v7.2/XINPUT1_3.dll",
     "doometernalModInjector": "https://gamebanana.com/dl/1765017",
-    "doometernalApworld": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.7.1/doometernal.apworld",
+    "doometernalApworld": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.7.2/doometernal.apworld",
     
     "dredgeAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-DREDGE.zip",
     "dredgeApworld": "https://github.com/alextric234/ArchipelagoDredge/releases/download/dredge_0.6.0/dredge.apworld",
@@ -348,7 +348,7 @@
     "hifirushApworld": "https://github.com/TRPG0/HbkArchipelago/releases/download/0.3.1/hi_fi_rush.apworld",
 
     "hitmanwoaAP": "https://github.com/BenDipp/Archipelago/releases/download/0.8.2/archipelago.plugin.js",
-    "hitmanwoaPeacock": "https://github.com/thepeacockproject/Peacock/releases/download/v8.9.1/Peacock-v8.9.1.zip",
+    "hitmanwoaPeacock": "https://github.com/thepeacockproject/Peacock/releases/download/v8.10.1/Peacock-v8.10.1.zip",
     "hitmanwoaApworld": "https://github.com/BenDipp/Archipelago/releases/download/0.8.2/hitman_woa.apworld",
 
     "hollowknightAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-Lumafly-HKAP.zip",
@@ -461,7 +461,7 @@
     "novalandsApworld": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.2.0/novalands.apworld",
 
     "okamihdWOLF": "https://github.com/Axertin/wolf/releases/download/wolf-v0.3.0-beta.3/wolf-runtime-v0.3.0-beta.3.zip",
-    "okamihdApworld": "https://github.com/Ragmoa/Archipelago/releases/download/0.5.3/okamihd.apworld",
+    "okamihdApworld": "https://github.com/Ragmoa/Archipelago/releases/download/0.5.4/okamihd.apworld",
     "okamihdAP": "https://github.com/Axertin/okami-apclient/releases/download/v0.8.2/okami-apclient-v0.8.2.zip",
 
     "openrct2DL": "https://github.com/OpenRCT2/OpenRCT2/releases/download/v0.5.6/OpenRCT2-v0.5.6-windows-installer-x64.exe",
@@ -522,7 +522,7 @@
     "plagueincAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Plaguepelago.zip",
     "plagueincMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
 
-    "pvzgotyAP": "https://github.com/vicr123/PvZ-Stable-Decompile-AP/releases/download/v1.10.1/PlantsVsZombies-GOTY-AP-x64.zip",
+    "pvzgotyAP": "https://github.com/vicr123/PvZ-Stable-Decompile-AP/releases/download/v1.10.2/PlantsVsZombies-GOTY-AP-x64.zip",
     "pvzgotyApworld": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.9.1/pvzr.apworld",
     
     "pvzreplantedAP": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.10.2/replanted_archipelago_v1.10.1.zip",
@@ -579,9 +579,9 @@
     "re7Framework": "https://github.com/praydog/REFramework/releases/download/v1.5.9.1/RE7.zip",
     "re7Apworld": "https://github.com/ElGrenier/RE7_AP_World/releases/download/0.4.0/residentevil7biohazard.apworld",
 
-    "rotndAP": "https://github.com/studkid/RiftArchipelago/releases/download/v0.17.0/RiftArchipelago-0.13.0.zip",
+    "rotndAP": "https://github.com/studkid/RiftArchipelago/releases/download/v0.18.0/RiftArchipelago-0.13.0.zip",
     "rotndBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
-    "rotndApworld": "https://github.com/studkid/RiftArchipelago/releases/download/v0.17.0/rotn.apworld",
+    "rotndApworld": "https://github.com/studkid/RiftArchipelago/releases/download/v0.18.0/rotn.apworld",
 
     "ror2BepInEx": "https://thunderstore.io/package/download/bbepis/BepInExPack/5.4.2122/",
     "ror2AP": "https://thunderstore.io/package/download/Sneaki/Archipelago/1.5.5/",
