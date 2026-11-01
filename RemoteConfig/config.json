@@ -254,7 +254,7 @@
     "cyberpunk2077Apworld": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/0.7.3/cyberpunk2077.apworld",
     "cyberpunk2077RedScript": "https://github.com/jac3km4/redscript/releases/download/v0.5.32/redscript-v0.5.32-windows.zip",
     "cyberpunk2077TweakXL": "https://github.com/psiberx/cp2077-tweak-xl/releases/download/v1.11.5/TweakXL-1.11.5.zip",
-    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.28.6/ArchiveXL-1.28.6.zip",
+    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.28.7-rc.1/ArchiveXL-1.28.7.zip",
     "cyberpunk2077CET": "https://github.com/maximegmd/CyberEngineTweaks/releases/download/v1.38.0/cet_1_38_0.zip",
     "cyberpunk2077Codeware": "https://github.com/psiberx/cp2077-codeware/releases/download/v1.21.2/Codeware-1.21.2.zip",
     "cyberpunk2077RED4ext": "https://github.com/wopss/RED4ext/releases/download/v1.31.0/red4ext-1.31.0.zip",
@@ -464,7 +464,7 @@
     "okamihdApworld": "https://github.com/Ragmoa/Archipelago/releases/download/0.5.4/okamihd.apworld",
     "okamihdAP": "https://github.com/Axertin/okami-apclient/releases/download/v0.8.2/okami-apclient-v0.8.2.zip",
 
-    "openrct2DL": "https://github.com/OpenRCT2/OpenRCT2/releases/download/v0.5.6/OpenRCT2-v0.5.6-windows-installer-x64.exe",
+    "openrct2DL": "https://github.com/OpenRCT2/OpenRCT2/releases/download/v0.5.7/OpenRCT2-v0.5.7-windows-installer-x64.exe",
     "openrct2Apworld": "https://github.com/Crazycolbster/rollercoaster-tycoon-randomizer/releases/download/v0.1.22.1-beta/openrct2.apworld",
     "openrct2Randomizer": "https://github.com/Crazycolbster/rollercoaster-tycoon-randomizer/releases/download/v0.1.22.1-beta/rctrando.js",
     "openrct2APVanillaAsync": "https://github.com/Crazycolbster/rollercoaster-tycoon-randomizer/releases/download/v0.1.22.1-beta/Archipelago.Madness.Vanilla.Asynchronus.park",
@@ -522,7 +522,7 @@
     "plagueincAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Plaguepelago.zip",
     "plagueincMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
 
-    "pvzgotyAP": "https://github.com/vicr123/PvZ-Stable-Decompile-AP/releases/download/v1.10.2/PlantsVsZombies-GOTY-AP-x64.zip",
+    "pvzgotyAP": "https://github.com/vicr123/PvZ-Stable-Decompile-AP/releases/download/v1.10.3/PlantsVsZombies-GOTY-AP-x64.zip",
     "pvzgotyApworld": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.9.1/pvzr.apworld",
     
     "pvzreplantedAP": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.10.2/replanted_archipelago_v1.10.1.zip",
@@ -543,7 +543,7 @@
     "pokemonplatinumApworld": "https://github.com/ljtpetersen/platinum_archipelago/releases/download/v0.2.2/pokemon_platinum.apworld",
     "pokemonplatinumBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
-    "pokemonsnapApworld": "https://github.com/nielrenned/PokemonSnap_Archipelago/releases/download/v0.8.0/pokemon_snap.apworld",
+    "pokemonsnapApworld": "https://github.com/nielrenned/PokemonSnap_Archipelago/releases/download/v0.9.0/pokemon_snap.apworld",
     "pokemonsnapProject64": "https://www.pj64-emu.com/file/setup-project64-3-0-1-5664-2df3434/",
 
     "pokeparkwiiAP": "https://github.com/Mekurushi/pokeparkrando/releases/download/1.2.4/windows-x64.zip",
@@ -565,8 +565,8 @@
     "raftModUtils": "https://www.raftmodding.com/mods/modutils/1.2.5/ModUtils.rmod?ignoreVirusScan=true",
     "raftRML": "https://www.raftmodding.com/launcher/2.8.10/download",
 
-    "refunctAP": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.8.0c/practice-windows.zip",
-    "refunctApworld": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.8.0c/refunct.apworld",
+    "refunctAP": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.8.0d/practice-windows.zip",
+    "refunctApworld": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.8.0d/refunct.apworld",
 
     "repoPathName": "REPO",
     "repoAP": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.4/Archipelago_Randomizer_for_REPO.zip",
@@ -623,8 +623,8 @@
     "roguelegacy2AP": "https://github.com/zaphim12/RL2Archipelago/releases/download/v1.1.3/RL2Archipelago.zip",
     "roguelegacy2Apworld": "https://github.com/zaphim12/RL2Archipelago/releases/download/v1.1.3/rogue_legacy_2.apworld",
 
-    "saints2Apworld": "https://github.com/hoXyy/SaintsRow2Archipelago/releases/download/0.4.0/saints_row_2.apworld",
-    "saints2AP": "https://github.com/hoXyy/SaintsRow2Archipelago/releases/download/0.4.0/SR2Archipelago.zip",
+    "saints2Apworld": "https://github.com/hoXyy/SaintsRow2Archipelago/releases/download/0.4.2/saints_row_2.apworld",
+    "saints2AP": "https://github.com/hoXyy/SaintsRow2Archipelago/releases/download/0.4.2/SR2Archipelago.zip",
     "saints2ASI": "https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases/download/Win32-latest/dinput8-Win32.zip",
     "saints2Juiced": "https://github.com/kobraworksmodding/Saints-Row-2-Juiced-Patch/releases/download/v9.0.5/SR2_JUICED.zip",
 
@@ -702,7 +702,7 @@
     "spicymycenawafflesSNESEmu": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/snes9x-1.63-nwa-win32-x64.zip",
 
     "ssbbMinus": "https://www.dropbox.com/scl/fi/9khcbnnpah9rhubr30ydt/Minus-Launcher.elf?rlkey=3at1ptq7q6w9nfqpxovlkd1gn&e=2&dl=1",
-    "ssbbApworld": "https://github.com/kenniky/ArchipelagoSSE/releases/download/v0.3.0/ssbb_sse.apworld",
+    "ssbbApworld": "https://github.com/kenniky/ArchipelagoSSE/releases/download/v0.3.1/ssbb_sse.apworld",
     "ssbbDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "superhotMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
