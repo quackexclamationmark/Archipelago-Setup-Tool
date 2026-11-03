@@ -1,3 +1,42 @@
+## `Nov 3, 2026, 23:05 GMT+1`
+# v2.3.1
+
+### DOWNLOAD THE INSTALLER, NOT THE .ZIP FILE!
+
+# WHAT'S NEW?
+
+- 7 NEW GAMES!
+  - ELDEN RING
+  - ANIMAL WELL
+  - Super Mario Galaxy
+  - OpenRCT2
+  - Fall Guys
+  - Teamfight Tactics
+  - Banjo-Tooie
+
+# ADDED / NEW
+
+- Testing a new setup flow for games using BizHawk Emulator that automatically modifies the config file (only for Banjo-Tooie for now).
+
+# WARNING
+
+- Twilight Princess setup might be broken lmk if it doesn't work and I will rework it!
+
+---
+
+Thank you to everyone who has been suggesting games and testing!!
+
+If your Archipelago for the APWorlds can't be found, join the server and report it to me it will be fixed in no time! Same for game folders!
+
+Uses a working Remote Config to remotely change the downloaded URLs and the latest version!
+
+Also, here is the fork for test releases, I will say it on the tool's server when I release a new test version and ask for people to test :)
+https://github.com/quackexclamationTesting/Setup-Tool-Test-Releases
+
+Feel free to report any bug, suggest or anything basically to me on the [Discord server](https://discord.gg/hxsNCmFpcH).
+
+---
+
 ## `Oct 20, 2026, 20:29 GMT+2`
 # v2.3.0 | Legality Update
 
