@@ -21,13 +21,15 @@ Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could
 
 ---
 
-### Supported games (151):
+### Supported games (156):
 
 - A Dance of Fire and Ice
 - A Hat in Time
 - A Short Hike
+- ANIMAL WELL
 - Another Crab's Treasure
 - Balatro
+- Banjo-Tooie
 - Bendy And The Ink Machine
 - Bloons TD 6
 - Blue Prince
@@ -57,7 +59,9 @@ Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could
 - DOOM II
 - DREDGE
 - Easy Delivery Co.
+- ELDEN RING
 - ENDER MAGNOLIA: Bloom in the Mist
+- Fall Guys
 - Faster Than Light
 - Fez
 - Five Nights At Freddy's Ultimate Custom Night
@@ -97,6 +101,7 @@ Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could
 - Noita
 - Nova Lands
 - Okami HD
+- OpenRCT2
 - Ori and the Blind Forest
 - Ori and the Will of the Wisps
 - Outer Wilds
@@ -145,11 +150,13 @@ Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could
 - Subnautica
 - SULFUR
 - Super Mario 64
+- Super Mario Galaxy
 - Super Meat Boy
 - Super Smash Bros. Brawl - The Subspace Emissary
 - SUPERHOT
 - Supermarket Simulator
 - TCG Card Shop Simulator
+- Teamfight Tactics
 - The Binding of Isaac: Repentance
 - The Escapists 2
 - The Henry Stickmin Collection
