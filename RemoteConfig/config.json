@@ -267,8 +267,8 @@
 
     "ds3AP": "https://github.com/fswap/from-software-archipelago-clients/releases/download/ds3-v4.0.2/DS3.Archipelago.4.0.2-windows.zip",
 
-    "deadcellsApworld": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.1.10/dead_cells.apworld",
-    "deadcellsAP": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.1.10/mods.zip",
+    "deadcellsApworld": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.2.0/dead_cells.apworld",
+    "deadcellsAP": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.2.0/mods.zip",
     "deadcellsCoreModding": "https://github.com/dead-cells-core-modding/core/releases/download/v35.14.2/win-x64.zip",
 
     "drdrApworld": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.1/drdr.apworld",
@@ -287,10 +287,10 @@
 
     "hereticAP": "https://github.com/ArchipelagoDoom/APDoom/releases/download/v2.0.0/APDoom-2.0-Windows-x64.zip",
 
-    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.7.2/DoomEternalArchipelago-v0.7.2.1-windows-x86_64.zip",
+    "doometernalAP": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.7.3/DoomEternalArchipelago-v0.7.3-windows-x86_64.zip",
     "doometernalMeathook": "https://github.com/brongo/m3337ho0o0ok/releases/download/v7.2/XINPUT1_3.dll",
     "doometernalModInjector": "https://gamebanana.com/dl/1765017",
-    "doometernalApworld": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.7.2/doometernal.apworld",
+    "doometernalApworld": "https://github.com/snowzzrra/DoomEternal-AP-Mod/releases/download/0.7.3/doometernal.apworld",
     
     "dredgeAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-DREDGE.zip",
     "dredgeApworld": "https://github.com/alextric234/ArchipelagoDredge/releases/download/dredge_0.6.0/dredge.apworld",
@@ -478,8 +478,8 @@
 
     "oriwispsApworld": "https://github.com/Satisha10/APwotw_release/releases/download/v0.6.5/ori_wotw.apworld",
 
-    "outerwildsAP": "https://github.com/Ixrec/OuterWildsArchipelagoRandomizer/releases/download/v1.4.0/Ixrec.ArchipelagoRandomizer.zip",
-    "outerwildsApworld": "https://github.com/Ixrec/OuterWildsArchipelagoRandomizer/releases/download/v1.4.0/outer_wilds.apworld",
+    "outerwildsAP": "https://github.com/Ixrec/OuterWildsArchipelagoRandomizer/releases/download/v1.4.1/Ixrec.ArchipelagoRandomizer.zip",
+    "outerwildsApworld": "https://github.com/Ixrec/OuterWildsArchipelagoRandomizer/releases/download/v1.4.1/outer_wilds.apworld",
     "outerwildsOWML": "https://github.com/ow-mods/owml/releases/download/2.16.3/OWML.zip",
     "outerwildsCustomShipLog": "https://github.com/dgarroDC/CustomShipLogModes/releases/download/1.2.1/dgarro.CustomShipLogModes.zip",
     "outerwildsEnableMeditation": "https://github.com/xen-42/outer-wilds-meditation/releases/download/1.0.0/xen.EnableMeditation.zip",
@@ -569,11 +569,11 @@
     "refunctApworld": "https://github.com/spinerak/refunct-tas-archipelago/releases/download/v1.8.0d/refunct.apworld",
 
     "repoPathName": "REPO",
-    "repoAP": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.4/Archipelago_Randomizer_for_REPO.zip",
+    "repoAP": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.5/Automagic-Archipelago_Randomizer_for_REPO.zip",
     "repoMenuLib": "https://thunderstore.io/package/download/nickklmao/MenuLib/2.5.4/",
     "repoRepoLib": "https://thunderstore.io/package/download/Zehs/REPOLib/4.1.0/",
     "repoBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
-    "repoApworld": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.4/repo.apworld",
+    "repoApworld": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.5/repo.apworld",
 
     "re7AP": "https://github.com/ElGrenier/RE7_AP_Client/archive/refs/tags/0.4.2.zip",
     "re7Framework": "https://github.com/praydog/REFramework/releases/download/v1.5.9.1/RE7.zip",
@@ -650,8 +650,8 @@
 
     "stsApworld": "https://github.com/cjmang/StS-AP-World/releases/download/2.3.5/spire.apworld",
 
-    "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/2.0.0/Archipelago.zip",
-    "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/2.0.0/spire2.apworld",
+    "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/2.0.1/Archipelago.zip",
+    "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/2.0.1/spire2.apworld",
     "sts2RitsuLib": "https://github.com/BAKAOLC/STS2-RitsuLib/releases/download/v0.5.20/STS2.RitsuLib.Compat.0.107.1.0.5.20.github.zip",
 
     "slimerancherAP": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.2.1/Slimipelago.zip",
@@ -702,7 +702,7 @@
     "spicymycenawafflesSNESEmu": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/snes9x-1.63-nwa-win32-x64.zip",
 
     "ssbbMinus": "https://www.dropbox.com/scl/fi/9khcbnnpah9rhubr30ydt/Minus-Launcher.elf?rlkey=3at1ptq7q6w9nfqpxovlkd1gn&e=2&dl=1",
-    "ssbbApworld": "https://github.com/kenniky/ArchipelagoSSE/releases/download/v0.3.1/ssbb_sse.apworld",
+    "ssbbApworld": "https://github.com/kenniky/ArchipelagoSSE/releases/download/v0.3.1.1/ssbb_sse.apworld",
     "ssbbDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "superhotMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
