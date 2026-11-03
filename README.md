@@ -187,6 +187,8 @@ Also, don't rename or remove the CONTENT (.exe etc...) from its folder, it could
 
 I don't own all the games so some game path can be wrong and lead to a "Path not found" but I'm trying as hard as I can to get the right path name. If you get this error, feel free to report it to me on the [Discord server](https://discord.gg/hxsNCmFpcH)!
 
+# [AI USAGE DISCLOSURE](https://github.com/quackexclamationmark/Archipelago-Setup-Tool/blob/main/ai_disclosure.md)
+
 ## Required Tools
 
 * Latest version of [Archipelago Launcher](https://github.com/ArchipelagoMW/Archipelago/releases/download/0.6.8/Setup.Archipelago.0.6.8.exe) | *YOU CAN DOWNLOAD ITS LATEST VERSION THROUGH THE 'TOOLS' SECTION ON THE TOOL!*
