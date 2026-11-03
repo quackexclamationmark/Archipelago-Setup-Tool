@@ -18,7 +18,7 @@
 "kill",
 "[HEADER] Troubleshoot",
 "kill",
-"If the Banjo-Tooie Client says its connected to your emulator, you have connected to your slot, but Banjo-Tooie shows "BTClient Disconnected", try running the command /writesettings to force your slot data into the game.",
+"If the Banjo-Tooie Client says its connected to your emulator, you have connected to your slot, but Banjo-Tooie shows 'BTClient Disconnected', try running the command /writesettings to force your slot data into the game.",
 "kill",
 "[HEADER] PopTracker Infos",
 "kill",
