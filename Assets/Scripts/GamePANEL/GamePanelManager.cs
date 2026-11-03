@@ -153,6 +153,13 @@ public class GamePanelManager : MonoBehaviour
     public GameObject escapists2Panel;
     public GameObject mcdungeonsPanel;
     public GameObject spicymycenawafflesPanel;
+    public GameObject smgPanel;
+    public GameObject fallguysPanel;
+    public GameObject eldenringPanel;
+    public GameObject openrct2Panel;
+    public GameObject animalwellPanel;
+    public GameObject tftPanel;
+    public GameObject banjotooiePanel;
 
     void Start()
     {
@@ -612,6 +619,27 @@ public class GamePanelManager : MonoBehaviour
             case "SpicyMycenaWaffles":
                 spicymycenawafflesPanel.SetActive(true);
                 break;
+            case "SuperMarioGalaxy":
+                smgPanel.SetActive(true);
+                break;
+            case "FallGuys":
+                fallguysPanel.SetActive(true);
+                break;
+            case "EldenRing":
+                eldenringPanel.SetActive(true);
+                break;
+            case "OpenRCT2":
+                openrct2Panel.SetActive(true);
+                break;
+            case "AnimalWell":
+                animalwellPanel.SetActive(true);
+                break;
+            case "TeamfightTactics":
+                tftPanel.SetActive(true);
+                break;
+            case "BanjoTooie":
+                banjotooiePanel.SetActive(true);
+                break;
         }
     }
 
@@ -766,5 +794,12 @@ public class GamePanelManager : MonoBehaviour
         if (escapists2Panel != null) escapists2Panel.SetActive(false);
         if (mcdungeonsPanel != null) mcdungeonsPanel.SetActive(false);
         if (spicymycenawafflesPanel != null) spicymycenawafflesPanel.SetActive(false);
+        if (smgPanel != null) smgPanel.SetActive(false);
+        if (fallguysPanel != null) fallguysPanel.SetActive(false);
+        if (eldenringPanel != null) eldenringPanel.SetActive(false);
+        if (openrct2Panel != null) openrct2Panel.SetActive(false);
+        if (animalwellPanel != null) animalwellPanel.SetActive(false);
+        if (tftPanel != null) tftPanel.SetActive(false);
+        if (banjotooiePanel != null) banjotooiePanel.SetActive(false);
     }
 }

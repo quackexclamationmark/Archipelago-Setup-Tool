@@ -17,6 +17,9 @@ public class BTD6ManualDL : MonoBehaviour
     public FileDownloader.FileData modHelper;
     public FileDownloader.FileData updater;
 
+    [Header("EPIC GAMES COMPAT")]
+    public string epicCompatUrl = "https://github.com/GrahamKracker/BTD6EpicGamesModCompat/releases/download/1.2.1/BTD6EpicGamesModCompat.dll";
+
     [Header("PLATFORM SELECTION")]
     public Button steamButton;
     public Button epicButton;
@@ -71,6 +74,7 @@ public class BTD6ManualDL : MonoBehaviour
         public string btd6Apworld;
         public string btd6ModHelper;
         public string btd6Updater;
+        public string btd6EGComp;
         public string[] steamSearchPaths;
         public string[] epicSearchPaths;
         public string[] apSearchPaths;
@@ -182,6 +186,9 @@ public class BTD6ManualDL : MonoBehaviour
         apworld.url = remoteConfig.btd6Apworld;
         modHelper.url = remoteConfig.btd6ModHelper;
         updater.url = remoteConfig.btd6Updater;
+
+        if (!string.IsNullOrEmpty(remoteConfig.btd6EGComp))
+            epicCompatUrl = remoteConfig.btd6EGComp;
     }
 
     public void RunSetup()
@@ -331,6 +338,7 @@ public class BTD6ManualDL : MonoBehaviour
             SafeDeleteFile(Path.Combine(modsPath, "BloonsArchipelago.dll"));
             SafeDeleteFile(Path.Combine(modsPath, "Btd6ModHelper.dll"));
             SafeDeleteFile(Path.Combine(modsPath, "UpdaterPlugin.dll"));
+            SafeDeleteFile(Path.Combine(modsPath, "BTD6EpicGamesModCompat.dll"));
 
             DeleteOldVersionFiles();
 
@@ -358,6 +366,7 @@ public class BTD6ManualDL : MonoBehaviour
         SafeDeleteFile(Path.Combine(modsPath, "BloonsArchipelago.dll"));
         SafeDeleteFile(Path.Combine(modsPath, "Btd6ModHelper.dll"));
         SafeDeleteFile(Path.Combine(modsPath, "UpdaterPlugin.dll"));
+        SafeDeleteFile(Path.Combine(modsPath, "BTD6EpicGamesModCompat.dll"));
 
         DeleteOldVersionFiles();
 
@@ -408,7 +417,10 @@ public class BTD6ManualDL : MonoBehaviour
             if (name.StartsWith("BTD6 APMod Version") && name.EndsWith(".txt"))
                 continue;
 
-            if (name != "BloonsArchipelago.dll" && name != "Btd6ModHelper.dll" && name != "UpdaterPlugin.dll")
+            if (name != "BloonsArchipelago.dll" &&
+                name != "Btd6ModHelper.dll" &&
+                name != "UpdaterPlugin.dll" &&
+                name != "BTD6EpicGamesModCompat.dll")
                 return true;
         }
 
@@ -444,6 +456,9 @@ public class BTD6ManualDL : MonoBehaviour
             yield return InstallModHelper();
             yield return InstallUpdater();
         }
+
+        if (isEpic)
+            yield return InstallEpicCompat();
 
         CreateVersionFile(apMod.url, melonLoader.url, modHelper.url, apworld.url);
 
@@ -738,10 +753,57 @@ public class BTD6ManualDL : MonoBehaviour
         yield return null;
     }
 
+    IEnumerator InstallEpicCompat()
+    {
+        // Uniquement pour Epic Games
+        if (!isEpic)
+            yield break;
+
+        while (!configLoaded)
+            yield return null;
+
+        UnityEngine.Debug.Log("START InstallEpicCompat");
+
+        if (string.IsNullOrEmpty(epicCompatUrl))
+        {
+            UnityEngine.Debug.LogWarning("Epic compat URL is empty, skipping.");
+            yield break;
+        }
+
+        ShowInfo("Downloading Epic Games Compat...");
+
+        string modsPath = Path.Combine(btd6Path, "Mods");
+        Directory.CreateDirectory(modsPath);
+
+        string dllPath = Path.Combine(modsPath, "BTD6EpicGamesModCompat.dll");
+
+        UnityEngine.Debug.Log("Downloading from: " + epicCompatUrl);
+        UnityEngine.Debug.Log("Saving to: " + dllPath);
+
+        yield return DownloadFile(epicCompatUrl, dllPath);
+
+        if (File.Exists(dllPath))
+        {
+            UnityEngine.Debug.Log("BTD6EpicGamesModCompat.dll downloaded successfully");
+            ShowInfo("Epic Games Compat installed successfully!");
+        }
+        else
+        {
+            UnityEngine.Debug.LogError("BTD6EpicGamesModCompat.dll download failed!");
+            ShowInfo("ERROR: Epic Games Compat download failed!");
+        }
+
+        UnityEngine.Debug.Log("END InstallEpicCompat");
+        yield return null;
+    }
+
     IEnumerator MelonLoaderOnlyFlow()
     {
         ShowInfo("Installing MelonLoader...");
         yield return InstallMelonLoader();
+
+        if (isEpic)
+            yield return InstallEpicCompat();
 
         ShowInfo("MelonLoader installed successfully!");
 
@@ -757,6 +819,9 @@ public class BTD6ManualDL : MonoBehaviour
 
         ShowInfo("Installing AP Mod...");
         yield return InstallAPMod();
+
+        if (isEpic)
+            yield return InstallEpicCompat();
 
         CreateVersionFile(apMod.url, melonLoader.url, modHelper.url, apworld.url);
 
@@ -782,6 +847,9 @@ public class BTD6ManualDL : MonoBehaviour
         ShowInfo("Installing Mod Helper...");
         yield return InstallModHelper();
         yield return InstallUpdater();
+
+        if (isEpic)
+            yield return InstallEpicCompat();
 
         CreateVersionFile(apMod.url, melonLoader.url, modHelper.url, apworld.url);
 
@@ -984,6 +1052,16 @@ public class BTD6ManualDL : MonoBehaviour
             content += "Downloaded from: " + modhelperUrl + "\n";
             content += "Version: " + modhelperVersion + "\n";
             content += "\n";
+
+            if (isEpic)
+            {
+                string epicCompatVersion = ExtractVersionFromUrl(epicCompatUrl, @"/releases/download/([^/]+)/");
+                content += "=== EPIC GAMES COMPAT ===\n";
+                content += "Downloaded from: " + epicCompatUrl + "\n";
+                content += "Version: " + epicCompatVersion + "\n";
+                content += "\n";
+            }
+
             content += "Downloaded at: " + System.DateTime.Now + "\n";
 
             DeleteOldVersionFiles();
