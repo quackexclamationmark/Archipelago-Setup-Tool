@@ -141,7 +141,7 @@
     "metfusPopTracker": "https://github.com/RunInAWeek/Metroid-Fusion-AP-Tracker/releases/download/v1.0.5/Metroid.Fusion.pack.zip",
     "lopPopTracker": "https://github.com/CaFlavien/Lies-of-P-Poptracker/releases/download/v0.1.10/Lies-of-P-Poptracker-v0.1.10.zip",
     "p5rPopTracker": "https://github.com/AkagiCritMagnet/P5R-poptracker-pack-for-AP/releases/download/V0.3b/P5R.Pack.zip",
-    "cyberpunk2077PopTracker": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/0.7.4/cyberpunk2077_poptracker_.0.7.4.zip",
+    "cyberpunk2077PopTracker": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/v0.7.5/cyberpunk2077_poptracker_.0.7.5.zip",
     "inscryptionPopTracker": "https://github.com/empathy-mp3/Archipelago_Inscryption/releases/download/v1.5.4/InscryptionTracker_v2.0.zip",
     "hereticPopTracker": "https://github.com/Forsaken-angel/heretic-ap-tracker/archive/refs/tags/v0.0.1.5.zip",
     "fnafworldPopTracker": "https://github.com/quackexclamationTesting/Preloaded-Archipelago-Setup-Tool-Mods/releases/download/FNAFWorld/FNaF-World-AP-Poptracker.zip",
@@ -250,8 +250,8 @@
     "cupheadApworld": "https://github.com/JKLeckr/Archipelago-cuphead/releases/download/alpha03m/cuphead.apworld",
     "cupheadBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
-    "cyberpunk2077AP": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/0.7.4/CyberpunkArchipelagoMod_.0.7.4.zip",
-    "cyberpunk2077Apworld": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/0.7.4/cyberpunk2077.apworld",
+    "cyberpunk2077AP": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/v0.7.5/CyberpunkArchipelagoMod_.0.7.5.zip",
+    "cyberpunk2077Apworld": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/v0.7.5/cyberpunk2077.apworld",
     "cyberpunk2077RedScript": "https://github.com/jac3km4/redscript/releases/download/v0.5.32/redscript-v0.5.32-windows.zip",
     "cyberpunk2077TweakXL": "https://github.com/psiberx/cp2077-tweak-xl/releases/download/v1.11.5/TweakXL-1.11.5.zip",
     "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.28.7-rc.1/ArchiveXL-1.28.7.zip",
@@ -274,7 +274,7 @@
     "drdrApworld": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.1/drdr.apworld",
     "drdrAP": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.1/DRAP_1.1.1.zip",
 
-    "deltaruneAP": "https://github.com/Tenebrosful/DeltaruneAP-mod/releases/download/v2.3.0-4/archipelago-2_3_0-4_bsdiff.zip",
+    "deltaruneAP": "https://github.com/Tenebrosful/DeltaruneAP-mod/releases/download/v2.3.0-5/archipelago-2_3_0-5_bsdiff.zip",
     "deltaruneApworld": "https://github.com/theemeraldsword85/DELTARUNEAP/releases/download/v2.3.0%2Bhotfix1/deltarune.apworld",
 
     "demontidesMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
@@ -328,8 +328,8 @@
     "garfieldkartApworld": "https://github.com/FeluciaPS/GarfieldKartAP/releases/download/1.1.0/garfkart.apworld",
     "garfieldkartBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
-    "gtasaAP": "https://github.com/awakenbad/SanAndreasAP/releases/download/v1.0.0-beta/SanAndreasAP-v1.0.0-beta.zip",
-    "gtasaApworld": "https://github.com/awakenbad/SanAndreasAP/releases/download/v1.0.0-beta/gta_sa.apworld",
+    "gtasaAP": "https://github.com/awakenbad/SanAndreasAP/releases/download/v1.0.0/SanAndreasAP-v1.0.0.zip",
+    "gtasaApworld": "https://github.com/awakenbad/SanAndreasAP/releases/download/v1.0.0/gta_sa.apworld",
     "gtasaWidescreen": "https://github.com/ThirteenAG/WidescreenFixesPack/releases/download/gtasa/GTASA.WidescreenFix.zip",
     "gtasaASI": "https://github.com/GTAmodding/ASI-Loader/releases/download/v1.3.0/vorbisFile.dll",
 
@@ -348,7 +348,7 @@
     "hifirushApworld": "https://github.com/TRPG0/HbkArchipelago/releases/download/0.3.1/hi_fi_rush.apworld",
 
     "hitmanwoaAP": "https://github.com/BenDipp/Archipelago/releases/download/0.8.2/archipelago.plugin.js",
-    "hitmanwoaPeacock": "https://github.com/thepeacockproject/Peacock/releases/download/v8.10.1/Peacock-v8.10.1.zip",
+    "hitmanwoaPeacock": "https://github.com/thepeacockproject/Peacock/releases/download/v8.10.2/Peacock-v8.10.2.zip",
     "hitmanwoaApworld": "https://github.com/BenDipp/Archipelago/releases/download/0.8.2/hitman_woa.apworld",
 
     "hollowknightAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-Lumafly-HKAP.zip",
@@ -417,8 +417,8 @@
     "mkddApworld": "https://github.com/aXu-AP/archipelago-double-dash/releases/download/v1.0.1/mario_kart_double_dash.apworld",
     "mkddDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
-    "mkwiiApworld": "https://github.com/toent/Archipelago-MKWii/releases/download/v0.3.2/mkwii.apworld",
-    "mkwiiAP": "https://github.com/toent/Archipelago-MKWii/releases/download/v0.3.2/mkwii_client_win_v0.3.2.zip",
+    "mkwiiApworld": "https://github.com/toent/Archipelago-MKWii/releases/download/pre0.4.0/mkwii.apworld",
+    "mkwiiAP": "https://github.com/toent/Archipelago-MKWii/releases/download/pre0.4.0/mkwii_client_win_pre0.4.0.zip",
     "mkwiiDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "metalhellApworld": "https://github.com/DanielSchaack/Metal-Hellsinger-AP-Mod/releases/download/1.1.4/metal_hellsinger.apworld",
@@ -429,19 +429,19 @@
     "metfusBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
     "mthApworld": "https://github.com/FyreDay/Archipelago-MinaTheHollower/releases/download/v1.1.2/mina_the_hollower.apworld",
-    "mthAP": "https://github.com/Axertin/mth-apclient/releases/download/v1.2.1/mth-apclient-v1.2.1-windows.zip",
+    "mthAP": "https://github.com/Minapelago/client/releases/download/v1.2.2-beta.5/mth-apclient-v1.2.2-beta.5-windows.zip",
 
     "minecraftApworld": "https://github.com/qixils/NeoForgeAP/releases/download/v2.2.1/minecraft.apworld",
 
     "minecraftdungeonsApworld": "https://github.com/BarbeucTheCat/Minecraft-Dungeons-Apworld/releases/download/v0.0.2/mcdungeonsBETA_0.0.2.apworld",
 
     "neonwhiteMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.6.1/MelonLoader.x64.zip",
-    "neonwhiteAP": "https://github.com/stxticOVFL/NWArchipelagoMod/releases/download/v0.1.0/NWArchipelago.dll",
-    "neonwhiteAPMCN": "https://github.com/stxticOVFL/NWArchipelagoMod/releases/download/v0.1.0/Archipelago.MultiClient.Net.dll",
+    "neonwhiteAP": "https://github.com/stxticOVFL/NWArchipelagoMod/releases/download/v0.2.0/NWArchipelago.dll",
+    "neonwhiteAPMCN": "https://github.com/stxticOVFL/NWArchipelagoMod/releases/download/v0.2.0/Archipelago.MultiClient.Net.dll",
     "neonwhitePrefManager": "https://github.com/Bluscream/MelonPreferencesManager/releases/download/1.3.1/MelonPrefManager.Mono.dll",
     "neonwhiteUniverseLib": "https://github.com/sinai-dev/UniverseLib/releases/download/1.5.1/UniverseLib.Mono.zip",
-    "neonwhiteNeonLite": "https://github.com/Faustas156/NeonLite/releases/download/3.0.11%2B10/NeonLite.dll",
-    "neonwhiteApworld": "https://github.com/Badhamknibbs/ArchipelagoNeonWhite/releases/download/v0.1.1/neonwhite.apworld",
+    "neonwhiteNeonLite": "https://github.com/Faustas156/NeonLite/releases/download/3.0.11%2B13/NeonLite.dll",
+    "neonwhiteApworld": "https://github.com/Badhamknibbs/ArchipelagoNeonWhite/releases/download/v0.2.1/neonwhite.apworld",
 
     "nsmbwApworld": "https://github.com/Miiroun/Archipelago-NewSuperMarioBrosWii/releases/download/v0.4.2/nsmbw.apworld",
     "nsmbwDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
@@ -461,7 +461,7 @@
     "novalandsApworld": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.2.1/novalands.apworld",
 
     "okamihdWOLF": "https://github.com/Axertin/wolf/releases/download/wolf-v0.3.0-beta.3/wolf-runtime-v0.3.0-beta.3.zip",
-    "okamihdApworld": "https://github.com/Ragmoa/Archipelago/releases/download/0.5.4/okamihd.apworld",
+    "okamihdApworld": "https://github.com/Ragmoa/Archipelago/releases/download/0.5.5/okamihd.apworld",
     "okamihdAP": "https://github.com/Axertin/okami-apclient/releases/download/v0.8.2/okami-apclient-v0.8.2.zip",
 
     "openrct2DL": "https://github.com/OpenRCT2/OpenRCT2/releases/download/v0.5.7/OpenRCT2-v0.5.7-windows-installer-x64.exe",
@@ -692,7 +692,7 @@
     "version": "5a6b930"
     },
 
-    "smgApworld": "https://github.com/Joethepic/Archipelago/releases/download/smg-V0.0.2/smgalaxy.apworld",
+    "smgApworld": "https://github.com/Joethepic/Archipelago/releases/download/smg-V0.0.3/smgalaxy.apworld",
     "smgDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "smbApworld": "https://github.com/PixelShake92/Super-Meat-Boy-AP/releases/download/Alpha_2/super_meat_boy.apworld",
