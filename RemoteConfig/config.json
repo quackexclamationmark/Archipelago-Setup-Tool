@@ -194,7 +194,7 @@
 
     "blueprinceBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/755/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.755%2B3fab71a.zip",
     "blueprinceAP": "https://github.com/Yascob99/BluePrinceArchipelago/releases/download/Alpha-0.1.7/BluePrinceArchipelago.BepInEx0.1.7.zip",
-    "blueprinceApworld": "https://github.com/BatmenzDW/Archipelago/releases/download/v0.1.3/blueprince.apworld",
+    "blueprinceApworld": "https://github.com/BatmenzDW/Archipelago/releases/download/v0.1.4/blueprince.apworld",
 
     "bombrushBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "bombrushAP": "https://github.com/TRPG0/BRC-Archipelago/releases/download/1.0.6/BRC-Archipelago.1.0.6.zip",
@@ -242,8 +242,8 @@
     "contentwarningBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "contentwarningMycelium": "https://github.com/RugbugRedfern/Mycelium-Networking-For-Content-Warning/releases/download/v1.0.14/MyceliumNetworkingForCW-Debug.dll",
 
-    "cotlApworld": "https://github.com/IanCichy/CultOfTheLamb_Archipelago/releases/download/v0.9.5/cult_of_the_lamb.apworld",
-    "cotlAP": "https://github.com/IanCichy/CultOfTheLamb_Archipelago/releases/download/v0.9.5/Archipelago_CultOfTheLamb-0.9.5.zip",
+    "cotlApworld": "https://github.com/IanCichy/CultOfTheLamb_Archipelago/releases/download/v0.9.6/cult_of_the_lamb.apworld",
+    "cotlAP": "https://github.com/IanCichy/CultOfTheLamb_Archipelago/releases/download/v0.9.6/Archipelago_CultOfTheLamb-0.9.6.zip",
     "cotlBepInEx": "https://thunderstore.io/package/download/BepInEx/BepInExPack_CultOfTheLamb/5.4.2101/",
 
     "cupheadAP": "https://github.com/JKLeckr/CupheadArchipelagoMod/releases/download/alpha04a.3/CupheadArchipelago-alpha04a.3_win64.zip",
@@ -456,9 +456,9 @@
     "noitaAP": "https://github.com/DaftBrit/NoitaArchipelago/releases/download/1.5.0/archipelago.zip",
 
     "novalandsMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
-    "novalandsAP": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.2.1/NovaLandsArchipelago.dll",
-    "novalandsMultiClient": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.2.1/Archipelago.MultiClient.Net.dll",
-    "novalandsApworld": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.2.1/novalands.apworld",
+    "novalandsAP": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.2.2/NovaLandsArchipelago.dll",
+    "novalandsMultiClient": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.2.2/Archipelago.MultiClient.Net.dll",
+    "novalandsApworld": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.2.2/novalands.apworld",
 
     "okamihdWOLF": "https://github.com/Axertin/wolf/releases/download/wolf-v0.3.0-beta.3/wolf-runtime-v0.3.0-beta.3.zip",
     "okamihdApworld": "https://github.com/Ragmoa/Archipelago/releases/download/0.5.5/okamihd.apworld",
@@ -717,8 +717,8 @@
     "tcgApworld": "https://github.com/FyreDay/Archipelago-TCGCardShopSimulator/releases/download/v1.2.0/tcg_card_shop_simulator.apworld",
     "tcgAP": "https://github.com/FyreDay/TCG-CardShop-Sim-APClient/releases/download/v1.2.0/TCG_AP_Client_v1.2.0.zip",
 
-    "tftApworld": "https://github.com/Alpaka623/tft-archipelago-releases/releases/download/v0.5.9/tft_archipelago.apworld",
-    "tftAP": "https://github.com/Alpaka623/tft-archipelago-releases/releases/download/v0.5.9/TFT-Archipelago-Setup-0.5.9.exe",
+    "tftApworld": "https://github.com/Alpaka623/tft-archipelago-releases/releases/download/v0.5.10/tft_archipelago.apworld",
+    "tftAP": "https://github.com/Alpaka623/tft-archipelago-releases/releases/download/v0.5.10/TFT-Archipelago-Setup-0.5.10.exe",
 
     "tboiApworld": "https://github.com/NaveTK/Archipelago/releases/download/v0.4.3/tboir.apworld",
     "tboiSaveInstaller": "https://github.com/Zamiell/isaac-save-installer/releases/download/1.2.1/isaac-save-installer.exe",
