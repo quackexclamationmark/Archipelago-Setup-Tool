@@ -131,7 +131,7 @@
     "sadxPopTracker": "https://github.com/RaceProUK/SADX-APTracker/releases/download/v1.112.11/sadx_rando_raceprouk.zip",
     "pokemonplatinumPopTracker": "https://github.com/palex00/platinum-ap-tracker/archive/refs/tags/1.2.3.zip",
     "pokemonbwPopTracker": "https://github.com/Radis7Noir/pokemon-bw-ap-tracker/releases/download/3.6.3/pokemon-bw-ap-tracker.zip",
-    "borderlands2PopTracker": "https://github.com/DDogeOneeSama/Borderlands-2-PopTracker/releases/download/0.3.5/bl2_poptracker_0_3_5.zip",
+    "borderlands2PopTracker": "https://github.com/DDogeOneeSama/Borderlands-2-PopTracker/releases/download/0.4.0/bl2_poptracker_0_4_0.zip",
     "ashorthikePopTracker": "https://github.com/chandler05/shorthike-archipelago-poptracker/releases/download/1.1.1/shorthike-archipelago-poptracker-1.1.1.zip",
     "btd6PopTracker": "https://github.com/Fairweather-Furry/btd6_fair/releases/download/v0.2.0/btd6_fair.zip",
     "pokemonsnapPopTracker": "https://github.com/lighting8282/Pokemon-Snap-AP-Pop-Tracker/releases/download/v1.3.0.2/SnapTracker-1.3.0.2.zip",
@@ -193,7 +193,7 @@
     "btd6EGComp": "https://github.com/GrahamKracker/BTD6EpicGamesModCompat/releases/download/1.2.1/BTD6EpicGamesModCompat.dll",
 
     "blueprinceBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/755/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.755%2B3fab71a.zip",
-    "blueprinceAP": "https://github.com/Yascob99/BluePrinceArchipelago/releases/download/Alpha-0.1.7/BluePrinceArchipelago.BepInEx0.1.7.zip",
+    "blueprinceAP": "https://github.com/Yascob99/BluePrinceArchipelago/releases/download/Alpha-0.2.0/BluePrinceArchipelago.BepInEx0.2.0.zip",
     "blueprinceApworld": "https://github.com/BatmenzDW/Archipelago/releases/download/v0.1.4/blueprince.apworld",
 
     "bombrushBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
@@ -214,9 +214,9 @@
     "bugsnaxApworld": "https://github.com/robofett28/bugsnax_ap_world/releases/download/v0.1.0-alpha/bugsnax.apworld",
     "bugsnaxAP": "https://github.com/robofett28/bugsnax_ap_world/releases/download/v0.1.0-alpha/BugsnaxMod.zip",
 
-    "cudemoApworld": "https://github.com/Nichologeam/CUAP/releases/download/v0.11.0/casualtiesunknown.apworld",
+    "cudemoApworld": "https://github.com/Nichologeam/CUAP/releases/download/v0.13.0-pre2/casualtiesunknown.apworld",
     "cudemoBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
-    "cudemoAP": "https://github.com/Nichologeam/CUAP/releases/download/v0.11.0/CUAPClientModv0.11.0.zip",
+    "cudemoAP": "https://github.com/Nichologeam/CUAP/releases/download/v0.13.0-pre2/CUAPClientModv0.13.0-pre2.zip",
 
     "celesteowAP": "https://github.com/PoryGoneDev/Celeste-Archipelago-Open-World/releases/download/v1.1.3/Archipelago_Open_World.zip",
     "celesteowEverest": "https://gamebanana.com/dl/1083425",
@@ -242,22 +242,22 @@
     "contentwarningBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "contentwarningMycelium": "https://github.com/RugbugRedfern/Mycelium-Networking-For-Content-Warning/releases/download/v1.0.14/MyceliumNetworkingForCW-Debug.dll",
 
-    "cotlApworld": "https://github.com/IanCichy/CultOfTheLamb_Archipelago/releases/download/v0.9.6/cult_of_the_lamb.apworld",
-    "cotlAP": "https://github.com/IanCichy/CultOfTheLamb_Archipelago/releases/download/v0.9.6/Archipelago_CultOfTheLamb-0.9.6.zip",
+    "cotlApworld": "https://github.com/IanCichy/CultOfTheLamb_Archipelago/releases/download/v0.9.7/cult_of_the_lamb.apworld",
+    "cotlAP": "https://github.com/IanCichy/CultOfTheLamb_Archipelago/releases/download/v0.9.7/Archipelago_CultOfTheLamb-0.9.7.zip",
     "cotlBepInEx": "https://thunderstore.io/package/download/BepInEx/BepInExPack_CultOfTheLamb/5.4.2101/",
 
-    "cupheadAP": "https://github.com/JKLeckr/CupheadArchipelagoMod/releases/download/alpha04a.3/CupheadArchipelago-alpha04a.3_win64.zip",
+    "cupheadAP": "https://github.com/JKLeckr/CupheadArchipelagoMod/releases/download/alpha04b/CupheadArchipelago-alpha04b_win64.zip",
     "cupheadApworld": "https://github.com/JKLeckr/Archipelago-cuphead/releases/download/alpha03m/cuphead.apworld",
     "cupheadBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
 
     "cyberpunk2077AP": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/v0.7.5/CyberpunkArchipelagoMod_.0.7.5.zip",
     "cyberpunk2077Apworld": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/v0.7.5/cyberpunk2077.apworld",
-    "cyberpunk2077RedScript": "https://github.com/jac3km4/redscript/releases/download/v0.5.32/redscript-v0.5.32-windows.zip",
-    "cyberpunk2077TweakXL": "https://github.com/psiberx/cp2077-tweak-xl/releases/download/v1.11.5/TweakXL-1.11.5.zip",
-    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.28.7-rc.1/ArchiveXL-1.28.7.zip",
+    "cyberpunk2077RedScript": "https://github.com/jac3km4/redscript/releases/download/v1.0.0/redscript-v1.0.0-windows.zip",
+    "cyberpunk2077TweakXL": "https://github.com/psiberx/cp2077-tweak-xl/releases/download/v1.12.1-rc.1/TweakXL-1.12.1.zip",
+    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.28.7-rc.2/ArchiveXL-1.28.7.zip",
     "cyberpunk2077CET": "https://github.com/maximegmd/CyberEngineTweaks/releases/download/v1.38.0/cet_1_38_0.zip",
-    "cyberpunk2077Codeware": "https://github.com/psiberx/cp2077-codeware/releases/download/v1.21.2/Codeware-1.21.2.zip",
-    "cyberpunk2077RED4ext": "https://github.com/wopss/RED4ext/releases/download/v1.31.0/red4ext-1.31.0.zip",
+    "cyberpunk2077Codeware": "https://github.com/psiberx/cp2077-codeware/releases/download/v1.21.3-rc.1/Codeware-1.21.3.zip",
+    "cyberpunk2077RED4ext": "https://github.com/wopss/RED4ext/releases/download/v1.31.1/red4ext-1.31.1.zip",
 
     "ds2scholarAP": "https://github.com/WildBunnie/DarkSoulsII-Archipelago/releases/download/v0.5.5-hotfix/dinput8_sotfs.dll",
     "ds2AP": "https://github.com/WildBunnie/DarkSoulsII-Archipelago/releases/download/v0.5.5-hotfix/dinput8_vanilla.dll",
@@ -269,7 +269,7 @@
 
     "deadcellsApworld": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.2.0/dead_cells.apworld",
     "deadcellsAP": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.2.0/mods.zip",
-    "deadcellsCoreModding": "https://github.com/dead-cells-core-modding/core/releases/download/v35.14.2/win-x64.zip",
+    "deadcellsCoreModding": "https://github.com/dead-cells-core-modding/core/releases/download/v35.15.1/win-x64.zip",
 
     "drdrApworld": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.1/drdr.apworld",
     "drdrAP": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.1/DRAP_1.1.1.zip",
@@ -309,9 +309,9 @@
     "fallguysApworld": "https://github.com/ninpalk/FallGuysAP/releases/download/0.0.3/fall_guys.apworld",
 
     "ftlPreloaded": "https://github.com/quackexclamationTesting/Preloaded-Archipelago-Setup-Tool-Mods/releases/download/FTL/Preloaded-FTL-AP.zip",
-    "ftlApworld": "https://github.com/TheLiloji/FTLArchipelago/releases/download/v0.5.0/ftl.apworld",
-    "ftlHyperspace": "https://github.com/TheLiloji/FTLArchipelago/releases/download/v0.5.0/Hyperspace.dll",
-    "ftlAP": "https://github.com/TheLiloji/FTLArchipelago/releases/download/v0.5.0/ArchipelagoFTL.ftl",
+    "ftlApworld": "https://github.com/TheLiloji/FTLArchipelago/releases/download/v0.6.0/ftl.apworld",
+    "ftlHyperspace": "https://github.com/TheLiloji/FTLArchipelago/releases/download/v0.6.0/Hyperspace.dll",
+    "ftlAP": "https://github.com/TheLiloji/FTLArchipelago/releases/download/v0.6.0/ArchipelagoFTL.ftl",
 
     "fezHAT": "https://github.com/FEZModding/HAT/releases/download/v1.2.1/HAT.zip",
     "fezAP": "https://github.com/nhyldmar/fez-ap/releases/download/v0.6.1/FezAP.zip",
@@ -385,8 +385,8 @@
     "itbAP": "https://github.com/quackexclamationTesting/Preloaded-Archipelago-Setup-Tool-Mods/releases/download/IntoTheBreach/randomizer.zip",
     "itbAPLib": "https://github.com/quackexclamationTesting/Preloaded-Archipelago-Setup-Tool-Mods/releases/download/IntoTheBreach/apworld_lib.zip",
     "itbApworld": "https://github.com/Ishigh1/ITB-randomizer-for-AP/releases/download/v0.15.18/into_the_breach.apworld",
-    "itbMemedit": "https://github.com/itb-community/memedit/archive/refs/tags/v1.2.2.zip",
-    "itbModLoader": "https://github.com/itb-community/ITB-ModLoader/releases/download/v2.9.6/ITB-ModLoader-2.9.6.zip",
+    "itbMemedit": "https://github.com/itb-community/memedit/archive/refs/tags/v1.2.3.zip",
+    "itbModLoader": "https://github.com/itb-community/ITB-ModLoader/releases/download/v2.9.7/ITB-ModLoader-2.9.7.zip",
 
     "kspAP": "https://github.com/nickdavies/KSP1-Archipelago-client/releases/download/v0.9.4/KSPArchipelago.zip",
     "kspApworld": "https://github.com/nickdavies/Archipelago/releases/download/v0.9.1/ksp1.apworld",
@@ -417,15 +417,15 @@
     "mkddApworld": "https://github.com/aXu-AP/archipelago-double-dash/releases/download/v1.0.1/mario_kart_double_dash.apworld",
     "mkddDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
-    "mkwiiApworld": "https://github.com/toent/Archipelago-MKWii/releases/download/pre0.4.0/mkwii.apworld",
-    "mkwiiAP": "https://github.com/toent/Archipelago-MKWii/releases/download/pre0.4.0/mkwii_client_win_pre0.4.0.zip",
+    "mkwiiApworld": "https://github.com/toent/Archipelago-MKWii/releases/download/v0.4.0/mkwii.apworld",
+    "mkwiiAP": "https://github.com/toent/Archipelago-MKWii/releases/download/v0.4.0/mkwii_client_win_v0.4.0.zip",
     "mkwiiDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
     "metalhellApworld": "https://github.com/DanielSchaack/Metal-Hellsinger-AP-Mod/releases/download/1.1.4/metal_hellsinger.apworld",
     "metalhellAP": "https://github.com/DanielSchaack/Metal-Hellsinger-AP-Mod/releases/download/1.1.4/MetalHellsingerApMod.zip",
     "metalhellBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
 
-    "metfusApworld": "https://github.com/StalledStorm/ArchipelagoMine/releases/download/v1.22.4/metroidfusion.apworld",
+    "metfusApworld": "https://github.com/StalledStorm/ArchipelagoMine/releases/download/v1.22.5/metroidfusion.apworld",
     "metfusBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
     "mthApworld": "https://github.com/FyreDay/Archipelago-MinaTheHollower/releases/download/v1.1.2/mina_the_hollower.apworld",
@@ -529,11 +529,11 @@
     "pvzreplantedApworld": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.10.2/pvzr.apworld",
     "pvzreplantedMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
 
-    "pokemonbwApworld": "https://github.com/BlastSlimey/PokemonBWAP/releases/download/0.4.4/pokemon_bw.apworld",
+    "pokemonbwApworld": "https://github.com/BlastSlimey/PokemonBWAP/releases/download/0.4.5/pokemon_bw.apworld",
     "pokemonbwBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
     "pokemoncrystalBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
-    "pokemoncrystalApworld": "https://github.com/gerbiljames/Archipelago-Crystal/releases/download/6.0.5/pokemon_crystal.apworld",
+    "pokemoncrystalApworld": "https://github.com/gerbiljames/Archipelago-Crystal/releases/download/6.0.6/pokemon_crystal.apworld",
 
     "pokemonemeraldBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
@@ -667,8 +667,8 @@
     "sadxApworld": "https://github.com/ClassicSpeed/sadx-classic-randomizer/releases/download/v1.2.2b/sadx.apworld",
     "sadxModManager": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/Preloaded-SAModManager.zip",
 
-    "spelunky2AP": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.5.0/Spelunky2-Archipelago.zip",
-    "spelunky2Apworld": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.5.0/spelunky2.apworld",
+    "spelunky2AP": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.5.1/Spelunky2-Archipelago.zip",
+    "spelunky2Apworld": "https://github.com/DDR-Khat/Spelunky2-Archipelago/releases/download/0.5.1/spelunky2.apworld",
     "spelunky2Playlunky": "https://github.com/spelunky-fyi/Playlunky/releases/download/nightly/playlunky_nightly_63FB520.zip",
     
     "subnauticaAP": "https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/releases/download/1.9.3/Archipelago_193.zip",
