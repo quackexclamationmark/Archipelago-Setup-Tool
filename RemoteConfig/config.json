@@ -267,8 +267,8 @@
 
     "ds3AP": "https://github.com/fswap/from-software-archipelago-clients/releases/download/ds3-v4.0.2/DS3.Archipelago.4.0.2-windows.zip",
 
-    "deadcellsApworld": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.2.0/dead_cells.apworld",
-    "deadcellsAP": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.2.0/mods.zip",
+    "deadcellsApworld": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.2.1/dead_cells.apworld",
+    "deadcellsAP": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.2.1/mods.zip",
     "deadcellsCoreModding": "https://github.com/dead-cells-core-modding/core/releases/download/v35.15.1/win-x64.zip",
 
     "drdrApworld": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.1/drdr.apworld",
@@ -389,7 +389,7 @@
     "itbModLoader": "https://github.com/itb-community/ITB-ModLoader/releases/download/v2.9.7/ITB-ModLoader-2.9.7.zip",
 
     "kspAP": "https://github.com/nickdavies/KSP1-Archipelago-client/releases/download/v0.9.4/KSPArchipelago.zip",
-    "kspApworld": "https://github.com/nickdavies/Archipelago/releases/download/v0.9.1/ksp1.apworld",
+    "kspApworld": "https://github.com/nickdavies/Archipelago/releases/download/v0.9.2/ksp1.apworld",
 
     "lethalcompanyAP": "https://thunderstore.io/package/download/APLC/APLC/0.7.13/",
     "lethalcompanyBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
