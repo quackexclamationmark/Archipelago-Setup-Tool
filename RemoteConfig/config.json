@@ -253,10 +253,10 @@
     "cyberpunk2077AP": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/v0.7.5/CyberpunkArchipelagoMod_.0.7.5.zip",
     "cyberpunk2077Apworld": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/v0.7.5/cyberpunk2077.apworld",
     "cyberpunk2077RedScript": "https://github.com/jac3km4/redscript/releases/download/v1.0.0/redscript-v1.0.0-windows.zip",
-    "cyberpunk2077TweakXL": "https://github.com/psiberx/cp2077-tweak-xl/releases/download/v1.12.1-rc.1/TweakXL-1.12.1.zip",
-    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.28.7-rc.2/ArchiveXL-1.28.7.zip",
+    "cyberpunk2077TweakXL": "https://github.com/psiberx/cp2077-tweak-xl/releases/download/v1.12.2/TweakXL-1.12.2.zip",
+    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.28.8/ArchiveXL-1.28.8.zip",
     "cyberpunk2077CET": "https://github.com/maximegmd/CyberEngineTweaks/releases/download/v1.38.0/cet_1_38_0.zip",
-    "cyberpunk2077Codeware": "https://github.com/psiberx/cp2077-codeware/releases/download/v1.21.3-rc.1/Codeware-1.21.3.zip",
+    "cyberpunk2077Codeware": "https://github.com/psiberx/cp2077-codeware/releases/download/v1.21.4/Codeware-1.21.4.zip",
     "cyberpunk2077RED4ext": "https://github.com/wopss/RED4ext/releases/download/v1.31.1/red4ext-1.31.1.zip",
 
     "ds2scholarAP": "https://github.com/WildBunnie/DarkSoulsII-Archipelago/releases/download/v0.5.5-hotfix/dinput8_sotfs.dll",
@@ -425,7 +425,7 @@
     "metalhellAP": "https://github.com/DanielSchaack/Metal-Hellsinger-AP-Mod/releases/download/1.1.4/MetalHellsingerApMod.zip",
     "metalhellBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
 
-    "metfusApworld": "https://github.com/StalledStorm/ArchipelagoMine/releases/download/v1.22.5/metroidfusion.apworld",
+    "metfusApworld": "https://github.com/StalledStorm/ArchipelagoMine/releases/download/v1.22.6/metroidfusion.apworld",
     "metfusBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
     "mthApworld": "https://github.com/FyreDay/Archipelago-MinaTheHollower/releases/download/v1.1.2/mina_the_hollower.apworld",
@@ -446,8 +446,8 @@
     "nsmbwApworld": "https://github.com/Miiroun/Archipelago-NewSuperMarioBrosWii/releases/download/v0.4.2/nsmbw.apworld",
     "nsmbwDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
-    "ninesolsAP": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.6.4/Ixrec-ArchipelagoRandomizer-0.6.4.zip",
-    "ninesolsApworld": "https://github.com/Ixrec/NineSolsArchipelagoRandomizer/releases/download/0.6.4/nine_sols.apworld",
+    "ninesolsAP": "https://github.com/IxrecsRandomizers/NineSolsArchipelagoRandomizer/releases/download/0.6.5/Ixrec-ArchipelagoRandomizer-0.6.5.zip",
+    "ninesolsApworld": "https://github.com/IxrecsRandomizers/NineSolsArchipelagoRandomizer/releases/download/0.6.5/nine_sols.apworld",
     "ninesolsAPI": "https://thunderstore.io/package/download/ninesolsmodding/NineSolsAPI/1.3.1/",
     "ninesolsBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "ninesolsBepInExConfiguration": "https://thunderstore.io/package/download/ninesolsmodding/BepinExConfigurationManager/18.3.1/",
@@ -456,9 +456,9 @@
     "noitaAP": "https://github.com/DaftBrit/NoitaArchipelago/releases/download/1.5.0/archipelago.zip",
 
     "novalandsMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
-    "novalandsAP": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.2.2/NovaLandsArchipelago.dll",
-    "novalandsMultiClient": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.2.2/Archipelago.MultiClient.Net.dll",
-    "novalandsApworld": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.2.2/novalands.apworld",
+    "novalandsAP": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.2.3-prerelease/NovaLandsArchipelago.dll",
+    "novalandsMultiClient": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.2.3-prerelease/Archipelago.MultiClient.Net.dll",
+    "novalandsApworld": "https://github.com/Foxolotl713/NovaLandsMods/releases/download/ap0.2.3-prerelease/novalands.apworld",
 
     "okamihdWOLF": "https://github.com/Axertin/wolf/releases/download/wolf-v0.3.0-beta.3/wolf-runtime-v0.3.0-beta.3.zip",
     "okamihdApworld": "https://github.com/Ragmoa/Archipelago/releases/download/0.5.5/okamihd.apworld",
@@ -650,8 +650,8 @@
 
     "stsApworld": "https://github.com/cjmang/StS-AP-World/releases/download/2.3.5/spire.apworld",
 
-    "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/2.0.1/Archipelago.zip",
-    "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/2.0.1/spire2.apworld",
+    "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/2.1.0/Archipelago.zip",
+    "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/2.1.0/spire2.apworld",
     "sts2RitsuLib": "https://github.com/BAKAOLC/STS2-RitsuLib/releases/download/v0.5.20/STS2.RitsuLib.Compat.0.107.1.0.5.20.github.zip",
 
     "slimerancherAP": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.2.1/Slimipelago.zip",
