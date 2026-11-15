@@ -312,6 +312,11 @@
     "ftlApworld": "https://github.com/TheLiloji/FTLArchipelago/releases/download/v0.6.0/ftl.apworld",
     "ftlHyperspace": "https://github.com/TheLiloji/FTLArchipelago/releases/download/v0.6.0/Hyperspace.dll",
     "ftlAP": "https://github.com/TheLiloji/FTLArchipelago/releases/download/v0.6.0/ArchipelagoFTL.ftl",
+    "ftlmvAP": "https://github.com/TheLiloji/FTLArchipelago/releases/download/v0.6.0-mv.1/FTLArchipelago-MV.ftl",
+    "ftlmvApworld": "https://github.com/TheLiloji/FTLArchipelago/releases/download/v0.6.0-mv.1/ftl_mv.apworld",
+    "ftlmvHyperspace": "https://github.com/TheLiloji/FTLArchipelago/releases/download/v0.6.0-mv.1/Hyperspace.dll",
+    "ftlmvData": "https://github.com/FTL-Multiverse-Team/FTL-Multiverse-Releases/releases/download/v5.5.1/Multiverse.5.5.1.-.Data.zip",
+    "ftlmvAssets": "https://github.com/FTL-Multiverse-Team/FTL-Multiverse-Releases/releases/download/v5.5/Multiverse.5.5.-.Assets.Patch.above.Data.zip",
 
     "fezHAT": "https://github.com/FEZModding/HAT/releases/download/v1.2.1/HAT.zip",
     "fezAP": "https://github.com/nhyldmar/fez-ap/releases/download/v0.6.1/FezAP.zip",
