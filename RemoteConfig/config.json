@@ -254,7 +254,7 @@
     "cyberpunk2077Apworld": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/v0.7.6/cyberpunk2077.apworld",
     "cyberpunk2077RedScript": "https://github.com/jac3km4/redscript/releases/download/v1.0.1/redscript-v1.0.1-windows.zip",
     "cyberpunk2077TweakXL": "https://github.com/psiberx/cp2077-tweak-xl/releases/download/v1.12.2/TweakXL-1.12.2.zip",
-    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.28.8/ArchiveXL-1.28.8.zip",
+    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/1.28.9-rc.1/ArchiveXL-1.28.9.zip",
     "cyberpunk2077CET": "https://github.com/maximegmd/CyberEngineTweaks/releases/download/v1.38.0/cet_1_38_0.zip",
     "cyberpunk2077Codeware": "https://github.com/psiberx/cp2077-codeware/releases/download/v1.21.4/Codeware-1.21.4.zip",
     "cyberpunk2077RED4ext": "https://github.com/wopss/RED4ext/releases/download/v1.31.1/red4ext-1.31.1.zip",
@@ -581,9 +581,9 @@
     "repoBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "repoApworld": "https://github.com/Automagic00/R.E.P.O.-Archipelago-Client-Mod/releases/download/0.4.5/repo.apworld",
 
-    "re7AP": "https://github.com/ElGrenier/RE7_AP_Client/archive/refs/tags/0.4.2.zip",
+    "re7AP": "https://github.com/ElGrenier/RE7_AP_Client/archive/refs/tags/0.5.0.zip",
     "re7Framework": "https://github.com/praydog/REFramework/releases/download/v1.5.9.1/RE7.zip",
-    "re7Apworld": "https://github.com/ElGrenier/RE7_AP_World/releases/download/0.4.0/residentevil7biohazard.apworld",
+    "re7Apworld": "https://github.com/ElGrenier/RE7_AP_World/releases/download/0.5.0/residentevil7biohazard.apworld",
 
     "rotndAP": "https://github.com/studkid/RiftArchipelago/releases/download/v0.18.0/RiftArchipelago-0.13.0.zip",
     "rotndBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
