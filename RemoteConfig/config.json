@@ -120,7 +120,7 @@
     "pikmin2PopTracker": "https://github.com/Vinaigre1/Pikmin2-PopTracker/releases/download/v0.2.1/Pikmin2-PopTracker.zip",
     "okamihdPopTracker": "https://github.com/Ragmoa/Okami-HD-AP-Tracker/archive/refs/heads/main.zip",
     "celesteowPopTracker": "https://github.com/Zeeveez/CelesteOpenWorldPoptracker/archive/refs/tags/v2.1.2.zip",
-    "huniepopPopTracker": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V2.3.1/Hunie.Pop.PopTracker.V2.3.0.zip",
+    "huniepopPopTracker": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V3.0.2/Hunie.Pop.PopTracker.V2.3.0.zip",
     "huniepop2PopTracker": "https://github.com/DotsofdarknessArchipelago/HuniePop2Archipelago/releases/download/v3.1.0/Hunie.Pop.2.Archipelago.PopTracker.V3.1.0.-.HOTFIX.zip",
     "pokeparkwiiPopTracker": "https://github.com/Mekurushi/pokepark_ap_poptracker/releases/download/1.2.4/pokepark_ap_poptracker.zip",
     "pokemoncrystalPopTracker": "https://github.com/palex00/crystal-ap-tracker/archive/refs/tags/11.0.6.zip",
@@ -254,7 +254,7 @@
     "cyberpunk2077Apworld": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/v0.7.6/cyberpunk2077.apworld",
     "cyberpunk2077RedScript": "https://github.com/jac3km4/redscript/releases/download/v1.0.1/redscript-v1.0.1-windows.zip",
     "cyberpunk2077TweakXL": "https://github.com/psiberx/cp2077-tweak-xl/releases/download/v1.12.2/TweakXL-1.12.2.zip",
-    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.28.9/ArchiveXL-1.28.9.zip",
+    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.28.10-rc.1/ArchiveXL-1.28.10.zip",
     "cyberpunk2077CET": "https://github.com/maximegmd/CyberEngineTweaks/releases/download/v1.38.0/cet_1_38_0.zip",
     "cyberpunk2077Codeware": "https://github.com/psiberx/cp2077-codeware/releases/download/v1.21.5-rc.2/Codeware-1.21.5.zip",
     "cyberpunk2077RED4ext": "https://github.com/wopss/RED4ext/releases/download/v1.31.1/red4ext-1.31.1.zip",
@@ -374,8 +374,8 @@
     "hksilksongWavLib": "https://thunderstore.io/package/download/SFGrenade/WavLib/1.1.9/",
     "hksilksongPrepatcher": "https://thunderstore.io/package/download/silksong_modding/SilksongPrepatcher/1.4.0/",
 
-    "huniepopAP": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V2.3.1/Hunie.Pop.Archipelago.plugin.v2.3.1.zip",
-    "huniepopApworld": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V2.3.1/huniepop.apworld",
+    "huniepopAP": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V3.0.2/Hunie.Pop.Archipelago.plugin.v3.0.2.zip",
+    "huniepopApworld": "https://github.com/DotsofdarknessArchipelago/HuniePopArchipelago/releases/download/V3.0.2/huniepop.apworld",
 
     "huniepop2AP": "https://github.com/DotsofdarknessArchipelago/HuniePop2Archipelago/releases/download/v3.1.0/Hunie.Pop.2.Archipelago.plugin.v3.1.0.zip",
     "huniepop2Apworld": "https://github.com/DotsofdarknessArchipelago/HuniePop2Archipelago/releases/download/v3.1.0/huniepop2.apworld",
@@ -479,7 +479,7 @@
     "openrct2APExpSync": "https://github.com/Crazycolbster/rollercoaster-tycoon-randomizer/releases/download/v0.1.22.1-beta/Archipelago.Madness.Expansions.Synchronus.park",
 
     "oriblindBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x86_5.4.23.5.zip",
-    "oriblindAP": "https://github.com/c-ostic/OriBFArchipelago/releases/download/v0.4.0/OriBFArchipelago.zip",
+    "oriblindAP": "https://github.com/c-ostic/OriBFArchipelago/releases/download/v0.4.1/OriBFArchipelago.zip",
     "oriblindApworld": "https://github.com/c-ostic/Archipelago/releases/download/v0.4.2/oribf.apworld",
 
     "oriwispsApworld": "https://github.com/Satisha10/APwotw_release/releases/download/v0.6.5/ori_wotw.apworld",
@@ -535,7 +535,7 @@
     "pvzreplantedApworld": "https://github.com/dannybonz/replanted_archipelago/releases/download/v1.10.2/pvzr.apworld",
     "pvzreplantedMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.3/MelonLoader.x64.zip",
 
-    "pokemonbwApworld": "https://github.com/BlastSlimey/PokemonBWAP/releases/download/0.4.5/pokemon_bw.apworld",
+    "pokemonbwApworld": "https://github.com/BlastSlimey/PokemonBWAP/releases/download/0.4.6/pokemon_bw.apworld",
     "pokemonbwBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
 
     "pokemoncrystalBizHawk": "https://github.com/TASEmulators/BizHawk/releases/download/2.11.1/BizHawk-2.11.1-win-x64.zip",
@@ -626,8 +626,8 @@
     "roguelegacyApworld": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/rogue_legacy.apworld",
 
     "roguelegacy2BepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
-    "roguelegacy2AP": "https://github.com/zaphim12/RL2Archipelago/releases/download/v1.1.3/RL2Archipelago.zip",
-    "roguelegacy2Apworld": "https://github.com/zaphim12/RL2Archipelago/releases/download/v1.1.3/rogue_legacy_2.apworld",
+    "roguelegacy2AP": "https://github.com/zaphim12/RL2Archipelago/releases/download/v1.2.0/RL2Archipelago.zip",
+    "roguelegacy2Apworld": "https://github.com/zaphim12/RL2Archipelago/releases/download/v1.2.0/rogue_legacy_2.apworld",
 
     "saints2Apworld": "https://github.com/hoXyy/SaintsRow2Archipelago/releases/download/0.4.2/saints_row_2.apworld",
     "saints2AP": "https://github.com/hoXyy/SaintsRow2Archipelago/releases/download/0.4.2/SR2Archipelago.zip",
@@ -656,8 +656,8 @@
 
     "stsApworld": "https://github.com/cjmang/StS-AP-World/releases/download/2.3.5/spire.apworld",
 
-    "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/2.2.2/Archipelago.zip",
-    "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/2.2.2/spire2.apworld",
+    "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/2.2.3/Archipelago.zip",
+    "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/2.2.3/spire2.apworld",
     "sts2RitsuLib": "https://github.com/BAKAOLC/STS2-RitsuLib/releases/download/v0.5.20/STS2.RitsuLib.Compat.0.107.1.0.5.20.github.zip",
 
     "slimerancherAP": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.2.1/Slimipelago.zip",
