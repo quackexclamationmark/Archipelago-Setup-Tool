@@ -254,7 +254,7 @@
     "cyberpunk2077Apworld": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/v0.7.6/cyberpunk2077.apworld",
     "cyberpunk2077RedScript": "https://github.com/jac3km4/redscript/releases/download/v1.0.2/redscript-v1.0.2-windows.zip",
     "cyberpunk2077TweakXL": "https://github.com/psiberx/cp2077-tweak-xl/releases/download/v1.12.2/TweakXL-1.12.2.zip",
-    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.28.11/ArchiveXL-1.28.11.zip",
+    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.28.13/ArchiveXL-1.28.13.zip",
     "cyberpunk2077CET": "https://github.com/maximegmd/CyberEngineTweaks/releases/download/v1.38.0/cet_1_38_0.zip",
     "cyberpunk2077Codeware": "https://github.com/psiberx/cp2077-codeware/releases/download/v1.21.5-rc.2/Codeware-1.21.5.zip",
     "cyberpunk2077RED4ext": "https://github.com/wopss/RED4ext/releases/download/v1.31.1/red4ext-1.31.1.zip",
@@ -327,7 +327,7 @@
     "ffpsApworld": "https://github.com/EviVirus/Archipelago-FFPS/releases/download/v1.0.0-pre1/ffps.apworld",
 
     "funiraccoonAP": "https://github.com/Jeffdev-Archipelago-Implementations/FuniRaccoonAP/releases/download/1.8.0/FuniRaccoonAP.zip",
-    "funiraccoonApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-Funi/releases/download/1.8.1/funi_raccoon.apworld",
+    "funiraccoonApworld": "https://github.com/Jeffdev-Archipelago-Implementations/Archipelago-Funi/releases/download/1.8.2/funi_raccoon.apworld",
 
     "garfieldkartAP": "https://github.com/robotzurg/GarfieldKartAPMod/releases/download/1.1.0/GarfieldKartAPMod.zip",
     "garfieldkartApworld": "https://github.com/FeluciaPS/GarfieldKartAP/releases/download/1.1.0/garfkart.apworld",
@@ -656,8 +656,8 @@
 
     "stsApworld": "https://github.com/cjmang/StS-AP-World/releases/download/2.3.5/spire.apworld",
 
-    "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/2.2.3/Archipelago.zip",
-    "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/2.2.3/spire2.apworld",
+    "sts2AP": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/2.2.4/Archipelago.zip",
+    "sts2Apworld": "https://github.com/dlueben1/Slay-the-Spire-2-Archipelago/releases/download/2.2.4/spire2.apworld",
     "sts2RitsuLib": "https://github.com/BAKAOLC/STS2-RitsuLib/releases/download/v0.5.20/STS2.RitsuLib.Compat.0.107.1.0.5.20.github.zip",
 
     "slimerancherAP": "https://github.com/SWCreeperKing/Slimipelago/releases/download/v0.3.2.1/Slimipelago.zip",
@@ -723,8 +723,8 @@
     "tcgApworld": "https://github.com/FyreDay/Archipelago-TCGCardShopSimulator/releases/download/v1.2.0/tcg_card_shop_simulator.apworld",
     "tcgAP": "https://github.com/FyreDay/TCG-CardShop-Sim-APClient/releases/download/v1.2.0/TCG_AP_Client_v1.2.0.zip",
 
-    "tftApworld": "https://github.com/Alpaka623/tft-archipelago-releases/releases/download/v0.5.11/tft_archipelago.apworld",
-    "tftAP": "https://github.com/Alpaka623/tft-archipelago-releases/releases/download/v0.5.11/TFT-Archipelago-Setup-0.5.11.exe",
+    "tftApworld": "https://github.com/Alpaka623/tft-archipelago-releases/releases/download/v0.5.12/tft_archipelago.apworld",
+    "tftAP": "https://github.com/Alpaka623/tft-archipelago-releases/releases/download/v0.5.12/TFT-Archipelago-Setup-0.5.12.exe",
 
     "tboiApworld": "https://github.com/NaveTK/Archipelago/releases/download/v0.4.3/tboir.apworld",
     "tboiSaveInstaller": "https://github.com/Zamiell/isaac-save-installer/releases/download/1.2.1/isaac-save-installer.exe",
