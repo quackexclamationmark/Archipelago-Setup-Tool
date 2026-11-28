@@ -254,9 +254,9 @@
     "cyberpunk2077Apworld": "https://github.com/247Tossing/cyberpunk_archipelago/releases/download/v0.7.6/cyberpunk2077.apworld",
     "cyberpunk2077RedScript": "https://github.com/jac3km4/redscript/releases/download/v1.0.2/redscript-v1.0.2-windows.zip",
     "cyberpunk2077TweakXL": "https://github.com/psiberx/cp2077-tweak-xl/releases/download/v1.12.2/TweakXL-1.12.2.zip",
-    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.28.13/ArchiveXL-1.28.13.zip",
+    "cyberpunk2077ArchiveXL": "https://github.com/psiberx/cp2077-archive-xl/releases/download/v1.28.14-beta.1/ArchiveXL-1.28.14.zip",
     "cyberpunk2077CET": "https://github.com/maximegmd/CyberEngineTweaks/releases/download/v1.38.0/cet_1_38_0.zip",
-    "cyberpunk2077Codeware": "https://github.com/psiberx/cp2077-codeware/releases/download/v1.21.5-rc.2/Codeware-1.21.5.zip",
+    "cyberpunk2077Codeware": "https://github.com/psiberx/cp2077-codeware/releases/download/v1.21.6/Codeware-1.21.6.zip",
     "cyberpunk2077RED4ext": "https://github.com/wopss/RED4ext/releases/download/v1.31.1/red4ext-1.31.1.zip",
 
     "ds2scholarAP": "https://github.com/WildBunnie/DarkSoulsII-Archipelago/releases/download/v0.5.5-hotfix/dinput8_sotfs.dll",
@@ -269,7 +269,7 @@
 
     "deadcellsApworld": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.2.1/dead_cells.apworld",
     "deadcellsAP": "https://github.com/Maxlamenace572/DeadCellsArchipelago/releases/download/0.2.1/mods.zip",
-    "deadcellsCoreModding": "https://github.com/dead-cells-core-modding/core/releases/download/v35.15.1/win-x64.zip",
+    "deadcellsCoreModding": "https://github.com/dead-cells-core-modding/core/releases/download/v35.16.2/win-x64.zip",
 
     "drdrApworld": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.1/drdr.apworld",
     "drdrAP": "https://github.com/Str8UpWHITE64/DRAP/releases/download/1.1.1/DRAP_1.1.1.zip",
@@ -452,8 +452,8 @@
     "nsmbwApworld": "https://github.com/Miiroun/Archipelago-NewSuperMarioBrosWii/releases/download/v0.4.2/nsmbw.apworld",
     "nsmbwDolphin": "https://dl.dolphin-emu.org/releases/2606/dolphin-2606-x64.7z",
 
-    "ninesolsAP": "https://github.com/IxrecsRandomizers/NineSolsArchipelagoRandomizer/releases/download/0.7.1/Ixrec-ArchipelagoRandomizer-0.7.1.zip",
-    "ninesolsApworld": "https://github.com/IxrecsRandomizers/NineSolsArchipelagoRandomizer/releases/download/0.7.1/nine_sols.apworld",
+    "ninesolsAP": "https://github.com/IxrecsRandomizers/NineSolsArchipelagoRandomizer/releases/download/0.7.2/Ixrec-ArchipelagoRandomizer-0.7.2.zip",
+    "ninesolsApworld": "https://github.com/IxrecsRandomizers/NineSolsArchipelagoRandomizer/releases/download/0.7.2/nine_sols.apworld",
     "ninesolsAPI": "https://thunderstore.io/package/download/ninesolsmodding/NineSolsAPI/1.3.1/",
     "ninesolsBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
     "ninesolsBepInExConfiguration": "https://thunderstore.io/package/download/ninesolsmodding/BepinExConfigurationManager/18.3.1/",
@@ -756,8 +756,8 @@
     "thewitnessAP": "https://github.com/NewSoupVi/The-Witness-Randomizer-for-Archipelago/releases/download/9.1.1/The.Witness.Randomizer.for.Archipelago.exe",
 
     "toemBepInEx": "https://builds.bepinex.dev/projects/bepinex_be/785/BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.785%2B6abdba4.zip",
-    "toemAP": "https://github.com/bbernardoni/Archipelago.TOEM/releases/download/2.0.6/ToemArchipelagoMod.zip",
-    "toemApworld": "https://github.com/bbernardoni/Archipelago.TOEM/releases/download/2.0.6/toem.apworld",
+    "toemAP": "https://github.com/quackexclamationmark/Archipelago-Setup-Tool/raw/refs/heads/main/RemoteConfig/ToemArchipelagoMod.zip",
+    "toemApworld": "https://github.com/bbernardoni/Archipelago.TOEM/releases/download/2.2.0/toem.apworld",
 
     "tabsAP": "https://github.com/duckboycool/TABS-Archipelago/releases/download/v0.1.0/TABS_AP-0.1.0.zip",
     "tabsApworld": "https://github.com/duckboycool/TABS-Archipelago/releases/download/v0.1.0/tabs.apworld",
@@ -792,7 +792,7 @@
     "valheimApworld": "https://github.com/xyzzy44/ValheimArchipelagoRandomizer/releases/download/0.2.6/valheim.apworld",
     "valheimAP": "https://github.com/xyzzy44/ValheimArchipelagoRandomizer/releases/download/0.2.6/ValheimRandomizer-0.2.6.zip",
     "valheimBepInEx": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
-    "valheimJotunn": "https://thunderstore.io/package/download/ValheimModding/Jotunn/2.30.2/",
+    "valheimJotunn": "https://thunderstore.io/package/download/ValheimModding/Jotunn/2.30.3/",
 
     "vsApworld": "https://github.com/SWCreeperKing/ArchipelagoSurvivors/releases/download/v0.3.5.1/vampire_survivors.apworld",
     "vsMelonLoader": "https://github.com/LavaGang/MelonLoader/releases/download/v0.7.2/MelonLoader.x64.zip",
